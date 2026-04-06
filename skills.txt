@@ -1,0 +1,27 @@
+Key Claude skills and capabilities for Shopify include:
+1. Shopify Development & Theme Customization
+Theme Architecture Handling: Claude can interpret Shopify theme structures, including sections, blocks, and schema configurations.
+Liquid Code Assistance: The model can generate, debug, and refactor Liquid templates, handling complex logic and rendering issues.
+Custom Section Creation: Claude can scaffold custom Shopify sections, including variant-aware bundles, JavaScript event listeners, and schema edits.
+Shopify CLI & Workflow: Integrations with Shopify CLI allow for rapid local development. 
+Reddit
+Reddit
+ +1
+2. API & Data Skills
+ShopifyQL & Analytics: A dedicated ShopifyQL skill exists that triggers when building customer segments, report queries, or debugging analytic errors.
+Admin API Integration: Skills exist to fetch, create, or update data (products, orders, customers) via Shopify's Admin API.
+Storefront & Checkout: Knowledge of Storefront API, checkout extensibility, and Checkout UI extensions. 
+Reddit
+Reddit
+ +3
+3. Workflow & Automation Skills
+Shopify Setup (shopify-setup): Triggers upon requests to connect or set up a new Shopify project.
+Product Management (shopify-products): Automates the addition of products and related data.
+Content Generation (shopify-content): Helps create or update pages and blog posts.
+Store Audit Skill: An 8-module audit skill exists that analyzes public Shopify data for SEO, trust signals, page speed, and conversion opportunities. 
+Reddit
+Reddit
+ +1
+4. Integration with Claude Code
+Auto-Triggering: These skills are often designed to trigger automatically when relevant keywords (like "liquid," "shopify," "section") are used.
+Tool Access: Skills allow Claude to use specific tools for local file operations (Filesystem MCP) and API calls. 
