@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dyllu-medusa-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: medusa
+      POSTGRES_PASSWORD: medusa
+      POSTGRES_DB: dyllu_medusa
+    ports:
+      - "5433:5432"
+    volumes:
+      - medusa-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "medusa", "-d", "dyllu_medusa"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  medusa-postgres-data:
