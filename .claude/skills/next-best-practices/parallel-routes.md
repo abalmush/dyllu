@@ -140,9 +140,9 @@ export function Modal({ children }: { children: React.ReactNode }) {
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
     >
-      <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+      <div className="mx-4 w-full max-w-2xl rounded-lg bg-white p-6">
         <button
           onClick={() => router.back()} // Correct!
           className="absolute top-4 right-4"
