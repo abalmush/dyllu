@@ -34,7 +34,7 @@ export default async function initial_data_seed({
     ModuleRegistrationName.FULFILLMENT
   );
 
-  const countries = ["gb", "de", "dk", "se", "fr", "es", "it"];
+  const countries = ["md"];
 
   logger.info("Seeding store data...");
   const {
@@ -99,7 +99,7 @@ export default async function initial_data_seed({
     input: {
       regions: [
         {
-          name: "Europe",
+          name: "Moldova",
           currency_code: "eur",
           countries,
           payment_providers: ["pp_system_default"],
@@ -126,10 +126,10 @@ export default async function initial_data_seed({
     input: {
       locations: [
         {
-          name: "European Warehouse",
+          name: "Chisinau Warehouse",
           address: {
-            city: "Copenhagen",
-            country_code: "DK",
+            city: "Chisinau",
+            country_code: "MD",
             address_1: "",
           },
         },
@@ -156,38 +156,14 @@ export default async function initial_data_seed({
   const shippingProfile = shippingProfileResult[0];
 
   const fulfillmentSet = await fulfillmentModuleService.createFulfillmentSets({
-    name: "European Warehouse delivery",
+    name: "Chisinau Warehouse delivery",
     type: "shipping",
     service_zones: [
       {
-        name: "Europe",
+        name: "Moldova",
         geo_zones: [
           {
-            country_code: "gb",
-            type: "country",
-          },
-          {
-            country_code: "de",
-            type: "country",
-          },
-          {
-            country_code: "dk",
-            type: "country",
-          },
-          {
-            country_code: "se",
-            type: "country",
-          },
-          {
-            country_code: "fr",
-            type: "country",
-          },
-          {
-            country_code: "es",
-            type: "country",
-          },
-          {
-            country_code: "it",
+            country_code: "md",
             type: "country",
           },
         ],
