@@ -1,0 +1,43 @@
+# Everything that shouldn't ship into a Docker build context.
+
+# Deps — we install fresh inside the image
+**/node_modules
+
+# Build artifacts
+**/.next
+**/.turbo
+**/.medusa
+**/dist
+**/build
+**/coverage
+
+# Git + local tooling
+.git
+.gitignore
+.github
+.husky
+.claude
+.mcp.json
+.vscode
+.idea
+
+# Env files — env comes from the runtime (Coolify, Vercel)
+**/.env
+**/.env.local
+**/.env.*.local
+**/.env.production
+**/.env.development
+
+# Test outputs + lock caches
+**/test-results
+**/playwright-report
+**/blob-report
+**/*.tsbuildinfo
+
+# OS cruft
+.DS_Store
+
+# Non-app artifacts
+PROPOSAL.md
+API_maib_e-commerce.postman_collection.zip
+apps/backend/docker-compose.yml

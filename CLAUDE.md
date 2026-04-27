@@ -4,132 +4,193 @@
 
 ## Project Overview
 
-Shopify storefront built with Next.js (App Router), hosted on Vercel. Client proposal in `PROPOSAL.md` (reference design: ryobitools.com). Payment gateway: Moldindconbank.
+Headless e-commerce for **DYLLU** — a Moldova-based storefront built on:
+
+- **Medusa v2** (TypeScript) backend, hosted on **Hetzner + Coolify** (not yet deployed — local dev only)
+- **Next.js 16** App Router storefront, hosted on **Vercel**
+- **MAIB (Moldova Agroindbank) Checkout API** as the payment gateway — custom Medusa payment provider, implementation deferred
+
+Client proposal: `PROPOSAL.md` (reference design: `ryobitools.com`).
 
 ## Tech Stack
 
 - **Monorepo:** pnpm workspaces + Turborepo
-- Next.js 16 (App Router, TypeScript, Tailwind CSS 4, Turbopack)
-- React 19
-- Shopify Storefront API via `@shopify/storefront-api-client` _(being migrated to Medusa — see memory)_
-- `@shopify/hydrogen-react` for Shopify React components _(will be removed with Medusa migration)_
-- Zustand (persisted) for cart state
-- Vercel for hosting and deployment
-- Vitest (unit) + Playwright (e2e)
+- **Backend:** Medusa v2.14, Postgres, Redis (prod)
+- **Storefront:** Next.js 16, React 19, Tailwind CSS 3, Zustand, Medusa JS SDK
+- **Admin UI:** Medusa's bundled admin (served by the backend at `/backend`)
+- **Testing:** Vitest (unit — to be re-added post-migration), Playwright (e2e)
+- **Hosting:** Hetzner CX32 + Coolify (backend), Vercel (storefront), Cloudflare R2 (images)
 
 ## Project Structure
 
 ```
 apps/
-  storefront/               # Next.js 16 App Router app
+  backend/                    # Medusa v2 backend (@dyllu/backend)
     src/
-      app/                  # Router pages (products/, collections/, cart/)
-      components/
-        ui/                 # Shared UI primitives (dumb, Tailwind, no domain logic)
-        cart/               # Cart-related components
-        product/            # Product cards, galleries, variant selectors
-        layout/             # Header, footer, navigation, mega menu
-      lib/
-        shopify/            # Storefront API client, GraphQL queries
-        hooks/              # Custom hooks (useCart, etc.)
-        utils.ts            # Formatting, classname helpers
-      types/                # Generated Shopify types (via codegen)
-      test/                 # Vitest setup
-    e2e/                    # Playwright E2E tests
-    .env.local              # Storefront env vars
-    next.config.ts
-    tsconfig.json
-    package.json            # @dyllu/storefront
-packages/                   # Shared packages (types, utils, etc. — empty today)
-package.json                # Workspace root
-pnpm-workspace.yaml
-turbo.json
+      admin/                  # Admin customizations (bundled into the admin UI)
+      api/                    # Custom REST routes (admin + store)
+      jobs/                   # Background jobs
+      links/                  # Cross-module data links
+      migration-scripts/      # Custom migration/seed scripts
+      modules/                # Custom Medusa modules
+      subscribers/            # Event subscribers
+      workflows/              # Custom workflows
+    medusa-config.ts          # Core config (admin path: /backend)
+    docker-compose.yml        # Local Postgres on port 5433
+    Dockerfile                # Production image (Coolify)
+    DEPLOY.md                 # Deployment runbook
+    .env                      # Local dev env (gitignored)
+    .env.example              # Local dev env template
+    .env.production.example   # Production env template
+
+  storefront/                 # Next.js 16 storefront (@dyllu/storefront)
+    src/
+      app/[countryCode]/      # Region-scoped routes
+      lib/                    # Medusa SDK wrappers, utilities
+      modules/                # Feature modules (cart, checkout, products, etc.)
+      styles/                 # Global CSS
+      middleware.ts           # Region redirection (will rename to proxy.ts)
+    tailwind.config.js        # Tailwind 3 + @medusajs/ui-preset
+    check-env-variables.js    # Validates required env vars at build/start
+    next.config.ts            # outputFileTracingRoot for monorepo
+
+packages/                     # Shared packages (empty — for future sharing)
+
+turbo.json                    # Task graph
+pnpm-workspace.yaml           # Workspace config
+.npmrc                        # auto-install-peers=true (Medusa needs it)
+.dockerignore                 # For backend Docker builds
 ```
 
-## Scripts (run from repo root unless noted)
+## Scripts (run from repo root)
 
-All scripts are orchestrated via Turborepo — `pnpm <script>` fans out to the right workspace(s).
+Orchestrated by Turborepo — `pnpm <script>` fans out to the right workspace(s).
 
-- `pnpm dev` — Dev server(s) (Turbopack for storefront)
-- `pnpm build` — Production build
-- `pnpm lint` — ESLint
-- `pnpm typecheck` — `tsc --noEmit`
-- `pnpm check` — Lint + typecheck + unit tests (run before any commit/PR)
-- `pnpm format` — Prettier write (whole monorepo)
-- `pnpm test` — Vitest (run once)
-- `pnpm test:e2e` — Playwright
-- `pnpm codegen` — Generate Shopify GraphQL types
+| Command                                                          | Effect                                                                     |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `pnpm dev`                                                       | Run **all** dev servers (backend + storefront) via turbo                   |
+| `pnpm -F @dyllu/backend dev`                                     | Backend only (admin at `http://localhost:9000/backend`)                    |
+| `pnpm -F @dyllu/storefront dev`                                  | Storefront only (`http://localhost:3000`, redirects to `/dk`)              |
+| `pnpm build`                                                     | Production build for all workspaces                                        |
+| `pnpm lint` / `pnpm typecheck` / `pnpm test`                     | Fans out                                                                   |
+| `pnpm check`                                                     | Lint + typecheck + test (storefront only; backend has no check script yet) |
+| `pnpm format`                                                    | Prettier write across the monorepo                                         |
+| `pnpm -F @dyllu/backend db:migrate`                              | Run pending migrations + any seed scripts                                  |
+| `pnpm -F @dyllu/backend db:create-user -e <email> -p <password>` | Create admin user                                                          |
 
-To target a single workspace: `pnpm -F @dyllu/storefront <script>` (short form: `pnpm -F storefront ...`).
+## Local dev setup
 
-## Environment Variables
+1. **Prerequisites:** Node 20.19+, Docker (for Postgres), pnpm 10+.
+2. **Clone and install:**
+   ```bash
+   pnpm install
+   ```
+3. **Start Postgres:**
+   ```bash
+   docker compose -f apps/backend/docker-compose.yml up -d
+   ```
+   Port 5433 (NOT 5432) to avoid conflicts with other local Postgres containers.
+4. **First-time only:**
+   ```bash
+   pnpm -F @dyllu/backend db:migrate
+   pnpm -F @dyllu/backend db:create-user -e admin@dyllu.local -p supersecret
+   ```
+5. **Copy env:**
+   ```bash
+   # Backend is pre-filled for local dev — .env already exists (gitignored)
+   cp apps/storefront/.env.local.example apps/storefront/.env.local
+   ```
+   Then log into the backend admin (`http://localhost:9000/backend`) and copy
+   the Default Publishable API Key into `apps/storefront/.env.local` as
+   `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY`.
+6. **Run:**
+   ```bash
+   pnpm dev
+   ```
 
-Copy `apps/storefront/.env.local.example` to `apps/storefront/.env.local` and fill in:
+Admin URL: `http://localhost:9000/backend`. Storefront: `http://localhost:3000` → redirects to `/dk`.
 
-- `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`
-- `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN`
-- `SHOPIFY_ADMIN_ACCESS_TOKEN`
+## Environment variables
+
+See:
+
+- `apps/backend/.env.example` — local backend dev
+- `apps/backend/.env.production.example` — documented production env
+- `apps/storefront/.env.local.example` — storefront
 
 ## GitHub Account
 
 This repo uses the `abalmush` GitHub account. Before any `gh` or `git push` operation:
 
-1. Run `gh auth switch --user abalmush`
+1. `gh auth switch --user abalmush`
 2. Perform the operation
-3. Run `gh auth switch --user abalmus-celonis` to switch back
+3. `gh auth switch --user abalmus-celonis` to switch back
 
 ## Next.js 16 — Before Writing Next Code
 
-Next.js 16 has breaking changes vs. training data. **Before writing anything Next-specific** (route handlers, metadata, caching, async params, middleware, etc.), consult the relevant file in `node_modules/next/dist/docs/`. When in doubt, `Grep` that directory for the feature name.
+Next.js 16 has breaking changes vs. training data. Before writing anything Next-specific
+(route handlers, metadata, caching, async params, proxy/middleware, etc.), consult
+`node_modules/next/dist/docs/`. When in doubt, Grep that directory for the feature name.
+
+**Known Next 16 notes for this project:**
+
+- `src/middleware.ts` is deprecated; the file convention is now `src/proxy.ts`. Current middleware works (just warns); rename is on the follow-up list.
+- `eslint` key in `next.config.*` is no longer recognized (already removed).
 
 ## React Server vs Client Components
 
 - **Server Components by default** — no `"use client"` unless you need state, effects, browser APIs, or event handlers.
-- Data fetching (Shopify Storefront calls) belongs in Server Components.
+- Data fetching (Medusa calls) belongs in Server Components.
 - Keep `"use client"` boundaries narrow — push interactivity to small leaf components rather than whole pages.
 - Never import a Server Component from a Client Component.
 
-## Shopify Integration Rules _(legacy — under migration to Medusa)_
+## Medusa Integration Rules
 
-- GraphQL queries live in `apps/storefront/src/lib/shopify/queries.ts`.
-- **Run `pnpm codegen` after any change to queries** — keeps `src/types/` in sync and gives queries end-to-end type safety.
-- Prefer server-side Storefront API calls. Only the cart mutations (stateful, user-triggered) belong in a client hook.
-- Cart state: Zustand store in `apps/storefront/src/lib/hooks/use-cart.ts`, persisted via `zustand/middleware`.
+- Medusa JS SDK is instantiated in `apps/storefront/src/lib/config.ts`. All Medusa calls go through it.
+- Server-side data fetching uses `apps/storefront/src/lib/data/*` modules. Prefer these over ad-hoc `fetch()`.
+- Cart state is stored server-side on Medusa; the client uses cookies to persist the cart ID (`_medusa_cart_id`).
+- **Publishable API Key** must be set in env (`NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY`) and attached to the Sales Channel the storefront serves. The initial seed creates one automatically.
+- **Regions** drive pricing, taxes, and available payment/shipping methods. Add regions via the admin UI before going live in a new market.
 
 ## Component Conventions
 
-- **UI primitives** (`apps/storefront/src/components/ui/`) are dumb, composable, styled with Tailwind. No commerce or domain logic.
-- **Domain components** (`apps/storefront/src/components/{cart,product,layout}/`) compose primitives and can fetch commerce data (server) or consume hooks (client).
+- **UI primitives** — reuse `@medusajs/ui` before rolling your own. The starter already uses it heavily.
+- **Feature modules** live under `apps/storefront/src/modules/{cart,checkout,products,...}`. Keep domain logic there; keep primitives dumb.
 - Prefer **composition over boolean props** — see the `vercel-composition-patterns` skill.
 - Favor React 19 APIs (`use`, `useOptimistic`, `useFormStatus`) over hand-rolled equivalents.
 
 ## Testing Policy
 
-- **Unit tests** (Vitest) for utils and pure hooks — colocate as `*.test.ts(x)` next to the file.
+- **Unit tests** (Vitest) for utils and pure hooks — colocate as `*.test.ts(x)` next to the file. _(Re-adding post-migration; the Shopify-era vitest setup was removed.)_
 - **E2E tests** (Playwright) for critical user flows: browse → PDP → add to cart → checkout hand-off.
-- **Do not mock the commerce backend** in integration tests — hit a real dev store/backend. Mocks silently diverge from schema changes.
+- **Do not mock Medusa** in integration tests — hit a real dev backend. Mocks silently diverge from schema changes.
 - Run `pnpm check` before every commit. Husky + lint-staged (configured at repo root) handle formatting/linting at commit time.
 
 ## Accessibility
 
-- **Target: WCAG 2.1 AA** (per proposal).
+- **Target: WCAG 2.1 AA.**
 - Visible focus indicators on all interactive elements.
 - Semantic landmarks (`<header>`, `<nav>`, `<main>`, `<footer>`).
-- `alt` text on every image (from Shopify's `altText` field).
+- `alt` text on every image (from Medusa's image metadata).
 - Keyboard-navigable mega menu, cart drawer, and variant pickers.
 - Respect `prefers-reduced-motion` on carousels/animations.
 
 ## Performance
 
-- Use `next/image` for all Shopify product images (set `width`/`height` from the GraphQL response).
-- Use `next/font` for fonts (already wired in `layout.tsx`).
-- Cache Shopify responses via Next's `fetch` cache semantics — consult `node_modules/next/dist/docs/` for the current API.
+- Use `next/image` for all product images; set `width`/`height` from the Medusa response.
+- Cache Medusa responses via Next's `fetch` cache semantics — consult `node_modules/next/dist/docs/` for the current API.
 - Target Core Web Vitals green. Run Lighthouse before shipping any non-trivial page.
 
 ## Style
 
+- ESLint 9 flat config per workspace. Starter-era rules are downgraded to warnings until the module is refactored (see `apps/storefront/eslint.config.mjs` comment).
 - Tailwind class order is managed by `prettier-plugin-tailwindcss` — don't fight it.
 - Prettier: 2-space indent, double quotes, semicolons, trailing commas (es5), 80-col print width.
+
+## Deployment
+
+- **Backend** — see `apps/backend/DEPLOY.md`. Target: Hetzner CX32 + Coolify. Not yet provisioned; local only.
+- **Storefront** — Vercel project already linked; Root Directory = `apps/storefront`. Needs env vars set before next production deploy will work.
 
 ## Installed Skills
 
@@ -141,8 +202,3 @@ Skills in `.claude/skills/`:
 - `web-design-guidelines` — UI/UX/accessibility audit
 - `deploy-to-vercel` — Vercel deployment workflow
 - `vercel-cli-with-tokens` — Vercel CLI auth
-
-## MCP Servers
-
-- `deepwiki` — Query Shopify, Next.js, and other OSS repos' docs and code via AI.
-- `shopify-dev-mcp` — Shopify Storefront/Admin GraphQL schema introspection and docs.
