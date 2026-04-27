@@ -40,7 +40,6 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
       });
   };
 
-  // TODO: Update this to grab the actual max inventory
   const maxQtyFromInventory = 10;
   const maxQuantity = item.variant?.manage_inventory ? 10 : maxQtyFromInventory;
 
@@ -82,7 +81,6 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
               className="h-10 w-14 p-4"
               data-testid="product-select-button"
             >
-              {/* TODO: Update this with the v2 way of managing inventory */}
               {Array.from(
                 {
                   length: Math.min(maxQuantity, 10),

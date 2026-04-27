@@ -181,9 +181,57 @@ Next.js 16 has breaking changes vs. training data. Before writing anything Next-
 - Cache Medusa responses via Next's `fetch` cache semantics — consult `node_modules/next/dist/docs/` for the current API.
 - Target Core Web Vitals green. Run Lighthouse before shipping any non-trivial page.
 
-## Style
+## Critical Rules — read before writing or modifying code
 
-- ESLint 9 flat config per workspace. Starter-era rules are downgraded to warnings until the module is refactored (see `apps/storefront/eslint.config.mjs` comment).
+These rules are non-negotiable. They keep this codebase clean, small, and maintainable for years. If a rule conflicts with adopted vendor code, the rule wins on the next touch.
+
+### No comments
+
+- Default: **zero comments**. None.
+- Only exception: a **single-line** comment that captures a non-obvious WHY — a hidden constraint, a workaround for a specific upstream bug, an invariant the type system cannot express. If removing the comment wouldn't confuse a future reader, do not write it.
+- Never write comments that explain WHAT the code does — names speak for themselves.
+- Never reference tasks, fixes, callers, issue numbers, dates, authors, or "TODOs". That belongs in the commit message and the PR description, not in source.
+- Never write multi-line `/** ... */` JSDoc blocks. If a function needs documentation longer than its name, the function is doing too much — split it.
+- Preserve only: license headers (legal), `// eslint-disable-*`, `// @ts-expect-error|ignore|nocheck` (with a one-line reason), `/// <reference />`, `/* webpackChunkName */` and similar tooling directives.
+- When you touch a file with stale comments from the Medusa starter, strip them as part of your change.
+
+### TypeScript discipline
+
+- **`any` is banned.** Use `unknown` and narrow, or model the type properly.
+- **`@ts-ignore` is banned.** Use `@ts-expect-error` with a one-line reason if a real escape hatch is unavoidable.
+- `next.config.ts` currently has `typescript: { ignoreBuildErrors: true }` inherited from the starter. This is a temporary regression — every module we refactor must pass `tsc --noEmit`, and we lift the flag once the storefront is clean.
+- Prefer narrow types at module boundaries. Wide types (`Record<string, any>`, `object`) require justification.
+
+### Code structure
+
+- Server Components by default; `"use client"` only when state/effects/browser APIs/event handlers are used. Keep client islands small.
+- Domain logic lives in `src/modules/<feature>/`. Cross-cutting helpers in `src/lib/util/`. Server data fetching in `src/lib/data/`. Constants in `src/lib/constants.tsx`.
+- One responsibility per function. If a function does X _and_ Y, split it.
+- Composition over boolean prop proliferation. If a component grows three flags, refactor before adding a fourth.
+- No dead code: unused exports, params, files, dependencies — delete them.
+- No half-finished implementations. If you can't finish, don't merge.
+- No defensive validation for cases that cannot happen. Trust internal callers; validate only at system boundaries (user input, external APIs).
+
+### Naming
+
+- Identifiers describe **intent**, not type: `selectedRegion`, not `regionObj`.
+- Booleans read as predicates: `isReady`, `hasError`, `canCheckout`.
+- No abbreviations unless idiomatic (`url`, `id`, `db` are fine; `usrCfg`, `lblTxt` are not).
+- Files: `kebab-case` for routes/modules, `PascalCase` for components only when the file _is_ the component.
+
+### Reuse first
+
+Before writing a new utility, component, or hook, search:
+
+```bash
+rg --type ts <thing>
+```
+
+If something close exists, extend it. Don't fork.
+
+### Style
+
+- ESLint 9 flat config per workspace. Starter-era rules are temporarily warnings — they tighten back to errors as we refactor each module.
 - Tailwind class order is managed by `prettier-plugin-tailwindcss` — don't fight it.
 - Prettier: 2-space indent, double quotes, semicolons, trailing commas (es5), 80-col print width.
 

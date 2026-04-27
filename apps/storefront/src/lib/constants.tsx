@@ -3,7 +3,6 @@ import { CreditCard } from "@medusajs/icons";
 
 import PayPal from "@modules/common/icons/paypal";
 
-/* Map of payment provider_id to title and icon. Add new providers here. */
 export const paymentInfoMap: Record<
   string,
   { title: string; icon: React.JSX.Element }
@@ -16,9 +15,6 @@ export const paymentInfoMap: Record<
     title: "Manual Payment",
     icon: <CreditCard />,
   },
-  // MAIB (Moldova Agroindbank) Checkout — registered later when the custom
-  // Medusa payment provider is implemented. Provider id will be e.g. pp_maib_default.
-  // pp_maib_default: { title: "Card (MAIB)", icon: <CreditCard /> },
 };
 
 export const isPaypal = (providerId?: string) => {

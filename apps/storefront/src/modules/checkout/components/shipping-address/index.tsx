@@ -37,7 +37,6 @@ const ShippingAddress = ({
     [cart?.region]
   );
 
-  // check if customer has saved addresses that are in the current region
   const addressesInRegion = useMemo(
     () =>
       customer?.addresses.filter(
@@ -72,7 +71,6 @@ const ShippingAddress = ({
   };
 
   useEffect(() => {
-    // Ensure cart is not null and has a shipping_address before setting form data
     if (cart && cart.shipping_address) {
       setFormAddress(cart?.shipping_address, cart?.email);
     }
@@ -80,7 +78,7 @@ const ShippingAddress = ({
     if (cart && !cart.email && customer?.email) {
       setFormAddress(undefined, customer.email);
     }
-  }, [cart]); // Add cart as a dependency
+  }, [cart]);
 
   const handleChange = (
     e: React.ChangeEvent<
