@@ -1,4 +1,5 @@
 import { HttpTypes } from "@medusajs/types";
+import { MD_POSTAL_CODE_PATTERN, MD_POSTAL_CODE_TITLE } from "@lib/constants";
 import Input from "@modules/common/components/input";
 import React, { useState } from "react";
 import CountrySelect from "../country-select";
@@ -72,6 +73,8 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           value={formData["billing_address.postal_code"]}
           onChange={handleChange}
           required
+          pattern={MD_POSTAL_CODE_PATTERN}
+          title={MD_POSTAL_CODE_TITLE}
           data-testid="billing-postal-input"
         />
         <Input

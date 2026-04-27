@@ -4,6 +4,7 @@ import { Plus } from "@medusajs/icons";
 import { Button, Heading } from "@medusajs/ui";
 import { useEffect, useState, useActionState } from "react";
 
+import { MD_POSTAL_CODE_PATTERN, MD_POSTAL_CODE_TITLE } from "@lib/constants";
 import useToggleState from "@lib/hooks/use-toggle-state";
 import CountrySelect from "@modules/checkout/components/country-select";
 import Input from "@modules/common/components/input";
@@ -105,6 +106,8 @@ const AddAddress = ({
                   name="postal_code"
                   required
                   autoComplete="postal-code"
+                  pattern={MD_POSTAL_CODE_PATTERN}
+                  title={MD_POSTAL_CODE_TITLE}
                   data-testid="postal-code-input"
                 />
                 <Input

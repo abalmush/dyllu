@@ -1,5 +1,6 @@
 import { HttpTypes } from "@medusajs/types";
 import { Container } from "@medusajs/ui";
+import { MD_POSTAL_CODE_PATTERN, MD_POSTAL_CODE_TITLE } from "@lib/constants";
 import Checkbox from "@modules/common/components/checkbox";
 import Input from "@modules/common/components/input";
 import { mapKeys } from "lodash";
@@ -153,6 +154,8 @@ const ShippingAddress = ({
           value={formData["shipping_address.postal_code"]}
           onChange={handleChange}
           required
+          pattern={MD_POSTAL_CODE_PATTERN}
+          title={MD_POSTAL_CODE_TITLE}
           data-testid="shipping-postal-code-input"
         />
         <Input

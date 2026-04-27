@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useActionState } from "react";
 
+import { MD_POSTAL_CODE_PATTERN, MD_POSTAL_CODE_TITLE } from "@lib/constants";
 import Input from "@modules/common/components/input";
 import NativeSelect from "@modules/common/components/native-select";
 
@@ -151,6 +152,8 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
               name="postal_code"
               defaultValue={billingAddress?.postal_code || undefined}
               required
+              pattern={MD_POSTAL_CODE_PATTERN}
+              title={MD_POSTAL_CODE_TITLE}
               data-testid="billing-postcal-code-input"
             />
             <Input
