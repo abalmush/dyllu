@@ -9,11 +9,9 @@ import PaginatedProducts from "./paginated-products";
 const StoreTemplate = ({
   sortBy,
   page,
-  countryCode,
 }: {
   sortBy?: SortOptions;
   page?: string;
-  countryCode: string;
 }) => {
   const pageNumber = page ? parseInt(page) : 1;
   const sort = sortBy || "created_at";
@@ -29,11 +27,7 @@ const StoreTemplate = ({
           <h1 data-testid="store-page-title">All products</h1>
         </div>
         <Suspense fallback={<SkeletonProductGrid />}>
-          <PaginatedProducts
-            sortBy={sort}
-            page={pageNumber}
-            countryCode={countryCode}
-          />
+          <PaginatedProducts sortBy={sort} page={pageNumber} />
         </Suspense>
       </div>
     </div>

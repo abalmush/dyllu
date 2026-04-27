@@ -11,13 +11,9 @@ export const metadata: Metadata = {
   description: "View your addresses",
 };
 
-export default async function Addresses(props: {
-  params: Promise<{ countryCode: string }>;
-}) {
-  const params = await props.params;
-  const { countryCode } = params;
+export default async function Addresses() {
   const customer = await retrieveCustomer();
-  const region = await getRegion(countryCode);
+  const region = await getRegion();
 
   if (!customer || !region) {
     notFound();

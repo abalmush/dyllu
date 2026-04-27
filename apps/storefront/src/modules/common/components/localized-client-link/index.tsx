@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import React from "react";
 
 const LocalizedClientLink = ({
@@ -16,10 +15,8 @@ const LocalizedClientLink = ({
   passHref?: true;
   [x: string]: any;
 }) => {
-  const { countryCode } = useParams();
-
   return (
-    <Link href={`/${countryCode}${href}`} {...props}>
+    <Link href={href} {...props}>
       {children}
     </Link>
   );

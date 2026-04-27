@@ -2,7 +2,7 @@
 
 import { clx } from "@medusajs/ui";
 import { ArrowRightOnRectangle } from "@medusajs/icons";
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import ChevronDown from "@modules/common/icons/chevron-down";
 import User from "@modules/common/icons/user";
@@ -18,16 +18,15 @@ const AccountNav = ({
   customer: HttpTypes.StoreCustomer | null;
 }) => {
   const route = usePathname();
-  const { countryCode } = useParams() as { countryCode: string };
 
   const handleLogout = async () => {
-    await signout(countryCode);
+    await signout();
   };
 
   return (
     <div>
       <div className="small:hidden" data-testid="mobile-account-nav">
-        {route !== `/${countryCode}/account` ? (
+        {route !== "/account" ? (
           <LocalizedClientLink
             href="/account"
             className="text-small-regular flex items-center gap-x-2 py-2"
@@ -180,9 +179,7 @@ const AccountNavLink = ({
   children,
   "data-testid": dataTestId,
 }: AccountNavLinkProps) => {
-  const { countryCode }: { countryCode: string } = useParams();
-
-  const active = route.split(countryCode)[1] === href;
+  const active = route === href;
   return (
     <LocalizedClientLink
       href={href}

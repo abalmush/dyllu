@@ -5,23 +5,19 @@ import Product from "../product-preview";
 
 type RelatedProductsProps = {
   product: HttpTypes.StoreProduct;
-  countryCode: string;
 };
 
 export default async function RelatedProducts({
   product,
-  countryCode,
 }: RelatedProductsProps) {
-  const region = await getRegion(countryCode);
+  const region = await getRegion();
 
   if (!region) {
     return null;
   }
 
   const queryParams: HttpTypes.StoreProductListParams = {};
-  if (region?.id) {
-    queryParams.region_id = region.id;
-  }
+  queryParams.region_id = region.id;
   if (product.collection_id) {
     queryParams.collection_id = [product.collection_id];
   }
@@ -32,14 +28,9 @@ export default async function RelatedProducts({
   }
   queryParams.is_giftcard = false;
 
-  const products = await listProducts({
-    queryParams,
-    countryCode,
-  }).then(({ response }) => {
-    return response.products.filter(
-      (responseProduct) => responseProduct.id !== product.id
-    );
-  });
+  const products = await listProducts({ queryParams }).then(({ response }) =>
+    response.products.filter((p) => p.id !== product.id)
+  );
 
   if (!products.length) {
     return null;
@@ -57,9 +48,9 @@ export default async function RelatedProducts({
       </div>
 
       <ul className="grid grid-cols-2 gap-x-6 gap-y-8 small:grid-cols-3 medium:grid-cols-4">
-        {products.map((product) => (
-          <li key={product.id}>
-            <Product region={region} product={product} />
+        {products.map((p) => (
+          <li key={p.id}>
+            <Product region={region} product={p} />
           </li>
         ))}
       </ul>
