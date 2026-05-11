@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useActionState } from "react";
 import { PencilSquare as Edit, Trash } from "@medusajs/icons";
-import { Button, Heading, Text, clx } from "@medusajs/ui";
+import { Button, Heading, Text, clx } from "@lib/ui-compat";
 
 import { MD_POSTAL_CODE_PATTERN, MD_POSTAL_CODE_TITLE } from "@lib/constants";
 import useToggleState from "@lib/hooks/use-toggle-state";

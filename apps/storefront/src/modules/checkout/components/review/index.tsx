@@ -1,6 +1,6 @@
 "use client";
 
-import { Heading, Text, clx } from "@medusajs/ui";
+import { Heading, Text, clx } from "@lib/ui-compat";
 
 import PaymentButton from "../payment-button";
 import { useSearchParams } from "next/navigation";

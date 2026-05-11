@@ -6,7 +6,7 @@ import { calculatePriceForShippingOption } from "@lib/data/fulfillment";
 import { convertToLocale } from "@lib/util/money";
 import { CheckCircleSolid, Loader } from "@medusajs/icons";
 import { HttpTypes } from "@medusajs/types";
-import { Button, clx, Heading, Text } from "@medusajs/ui";
+import { Button, clx, Heading, Text } from "@lib/ui-compat";
 import ErrorMessage from "@modules/checkout/components/error-message";
 import Divider from "@modules/common/components/divider";
 import MedusaRadio from "@modules/common/components/radio";

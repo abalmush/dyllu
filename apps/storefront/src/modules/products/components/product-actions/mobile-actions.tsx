@@ -1,17 +1,24 @@
-import { Dialog, Transition } from "@headlessui/react";
-import { Button, clx } from "@medusajs/ui";
-import React, { Fragment, useMemo } from "react";
+"use client";
 
-import useToggleState from "@lib/hooks/use-toggle-state";
-import ChevronDown from "@modules/common/icons/chevron-down";
-import X from "@modules/common/icons/x";
-
-import { getProductPrice } from "@lib/util/get-product-price";
-import OptionSelect from "./option-select";
+import * as React from "react";
+import { ChevronUp, ShoppingBag } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
-import { isSimpleProduct } from "@lib/util/product";
 
-type MobileActionsProps = {
+import { cn } from "@lib/utils";
+import { isSimpleProduct } from "@lib/util/product";
+import { getProductPrice } from "@lib/util/get-product-price";
+import { Button } from "@/components/atoms/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/atoms/sheet";
+import { PriceBlock } from "@/components/molecules/price-block";
+
+import OptionSelect from "./option-select";
+
+type Props = {
   product: HttpTypes.StoreProduct;
   variant?: HttpTypes.StoreProductVariant;
   options: Record<string, string | undefined>;
@@ -23,7 +30,7 @@ type MobileActionsProps = {
   optionsDisabled: boolean;
 };
 
-const MobileActions: React.FC<MobileActionsProps> = ({
+export default function MobileActions({
   product,
   variant,
   options,
@@ -33,175 +40,108 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   isAdding,
   show,
   optionsDisabled,
-}) => {
-  const { state, open, close } = useToggleState();
+}: Props) {
+  const [open, setOpen] = React.useState(false);
 
-  const price = getProductPrice({
-    product: product,
+  const { variantPrice, cheapestPrice } = getProductPrice({
+    product,
     variantId: variant?.id,
   });
-
-  const selectedPrice = useMemo(() => {
-    if (!price) {
-      return null;
-    }
-    const { variantPrice, cheapestPrice } = price;
-
-    return variantPrice || cheapestPrice || null;
-  }, [price]);
-
-  const isSimple = isSimpleProduct(product);
+  const price = variantPrice || cheapestPrice;
+  const simple = isSimpleProduct(product);
+  const hasOptions = (product.variants?.length ?? 0) > 1;
 
   return (
     <>
       <div
-        className={clx("fixed inset-x-0 bottom-0 z-50 lg:hidden", {
-          "pointer-events-none": !show,
-        })}
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 shadow-[0_-12px_30px_-15px_rgba(15,23,42,0.25)] backdrop-blur transition-transform duration-300 small:hidden",
+          show ? "translate-y-0" : "translate-y-full pointer-events-none"
+        )}
+        data-testid="mobile-actions"
       >
-        <Transition
-          as={Fragment}
-          show={show}
-          enter="ease-in-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-300"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div
-            className="text-large-regular flex h-full w-full flex-col items-center justify-center gap-y-3 border-t border-gray-200 bg-white p-4"
-            data-testid="mobile-actions"
-          >
-            <div className="flex items-center gap-x-2">
-              <span data-testid="mobile-title">{product.title}</span>
-              <span>—</span>
-              {selectedPrice ? (
-                <div className="flex items-end gap-x-2 text-ui-fg-base">
-                  {selectedPrice.price_type === "sale" && (
-                    <p>
-                      <span className="text-small-regular line-through">
-                        {selectedPrice.original_price}
-                      </span>
-                    </p>
-                  )}
-                  <span
-                    className={clx({
-                      "text-ui-fg-interactive":
-                        selectedPrice.price_type === "sale",
-                    })}
-                  >
-                    {selectedPrice.calculated_price}
-                  </span>
-                </div>
-              ) : (
-                <div></div>
-              )}
-            </div>
-            <div
-              className={clx("grid w-full grid-cols-2 gap-x-4", {
-                "!grid-cols-1": isSimple,
-              })}
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p
+              className="line-clamp-1 text-xs font-medium text-muted-foreground"
+              data-testid="mobile-title"
             >
-              {!isSimple && (
-                <Button
-                  onClick={open}
-                  variant="secondary"
-                  className="w-full"
-                  data-testid="mobile-actions-button"
-                >
-                  <div className="flex w-full items-center justify-between">
-                    <span>
-                      {variant
-                        ? Object.values(options).join(" / ")
-                        : "Select Options"}
-                    </span>
-                    <ChevronDown />
-                  </div>
-                </Button>
-              )}
+              {product.title}
+            </p>
+            {price && <PriceBlock price={price} size="md" />}
+          </div>
+          {hasOptions && !simple ? (
+            <>
               <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setOpen(true)}
+                className="rounded-full"
+                data-testid="mobile-actions-button"
+              >
+                <ChevronUp className="size-4" />
+                Opțiuni
+              </Button>
+              <Button
+                size="lg"
                 onClick={handleAddToCart}
                 disabled={!inStock || !variant}
-                className="w-full"
                 isLoading={isAdding}
+                className="rounded-full"
                 data-testid="mobile-cart-button"
               >
-                {!variant
-                  ? "Select variant"
-                  : !inStock
-                    ? "Out of stock"
-                    : "Add to cart"}
+                <ShoppingBag className="size-4" />
+                {!inStock ? "Stoc epuizat" : "Adaugă"}
               </Button>
-            </div>
-          </div>
-        </Transition>
+            </>
+          ) : (
+            <Button
+              size="lg"
+              onClick={handleAddToCart}
+              disabled={!inStock || !variant}
+              isLoading={isAdding}
+              className="rounded-full"
+              data-testid="mobile-cart-button"
+            >
+              <ShoppingBag className="size-4" />
+              {!inStock ? "Stoc epuizat" : "Adaugă în coș"}
+            </Button>
+          )}
+        </div>
       </div>
-      <Transition appear show={state} as={Fragment}>
-        <Dialog as="div" className="relative z-[75]" onClose={close}>
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-gray-700 bg-opacity-75 backdrop-blur-sm" />
-          </Transition.Child>
 
-          <div className="fixed inset-x-0 bottom-0">
-            <div className="flex h-full min-h-full items-center justify-center text-center">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0"
-                enterTo="opacity-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0"
-              >
-                <Dialog.Panel
-                  className="flex h-full w-full transform flex-col gap-y-3 overflow-hidden text-left"
-                  data-testid="mobile-actions-modal"
-                >
-                  <div className="flex w-full justify-end pr-6">
-                    <button
-                      onClick={close}
-                      className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-ui-fg-base"
-                      data-testid="close-modal-button"
-                    >
-                      <X />
-                    </button>
-                  </div>
-                  <div className="bg-white px-6 py-12">
-                    {(product.variants?.length ?? 0) > 1 && (
-                      <div className="flex flex-col gap-y-6">
-                        {(product.options || []).map((option) => {
-                          return (
-                            <div key={option.id}>
-                              <OptionSelect
-                                option={option}
-                                current={options[option.id]}
-                                updateOption={updateOptions}
-                                title={option.title ?? ""}
-                                disabled={optionsDisabled}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader>
+            <SheetTitle>Alege opțiuni</SheetTitle>
+          </SheetHeader>
+          <div className="mt-4 flex flex-col gap-6">
+            {(product.options || []).map((option) => (
+              <OptionSelect
+                key={option.id}
+                option={option}
+                current={options[option.id]}
+                updateOption={updateOptions}
+                title={option.title ?? ""}
+                disabled={optionsDisabled}
+              />
+            ))}
+            <Button
+              size="lg"
+              onClick={() => {
+                handleAddToCart();
+                setOpen(false);
+              }}
+              disabled={!inStock || !variant}
+              isLoading={isAdding}
+              className="mt-2 rounded-full"
+            >
+              <ShoppingBag className="size-4" />
+              {!variant ? "Selectează varianta" : !inStock ? "Stoc epuizat" : "Adaugă în coș"}
+            </Button>
           </div>
-        </Dialog>
-      </Transition>
+        </SheetContent>
+      </Sheet>
     </>
   );
-};
-
-export default MobileActions;
+}

@@ -1,5 +1,5 @@
 import { HttpTypes } from "@medusajs/types";
-import { Container } from "@medusajs/ui";
+import { Container } from "@lib/ui-compat";
 import { MD_POSTAL_CODE_PATTERN, MD_POSTAL_CODE_TITLE } from "@lib/constants";
 import Checkbox from "@modules/common/components/checkbox";
 import Input from "@modules/common/components/input";

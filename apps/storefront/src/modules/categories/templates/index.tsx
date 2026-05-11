@@ -1,94 +1,67 @@
-import { notFound } from "next/navigation";
 import { Suspense } from "react";
-
-import InteractiveLink from "@modules/common/components/interactive-link";
-import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid";
-import RefinementList from "@modules/store/components/refinement-list";
-import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
-import PaginatedProducts from "@modules/store/templates/paginated-products";
-import LocalizedClientLink from "@modules/common/components/localized-client-link";
+import { notFound } from "next/navigation";
 import { HttpTypes } from "@medusajs/types";
 
-export default function CategoryTemplate({
-  category,
-  sortBy,
-  page,
-}: {
+import PlpShell from "@modules/store/components/plp-shell";
+import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid";
+import PaginatedProducts from "@modules/store/templates/paginated-products";
+import { type SortOptions } from "@modules/store/components/refinement-list/sort-products";
+
+type Props = {
   category: HttpTypes.StoreProductCategory;
   sortBy?: SortOptions;
   page?: string;
-}) {
+};
+
+export default function CategoryTemplate({ category, sortBy, page }: Props) {
   const pageNumber = page ? parseInt(page) : 1;
   const sort = sortBy || "created_at";
 
   if (!category) notFound();
 
-  const parents = [] as HttpTypes.StoreProductCategory[];
-
-  const getParents = (category: HttpTypes.StoreProductCategory) => {
-    if (category.parent_category) {
-      parents.push(category.parent_category);
-      getParents(category.parent_category);
+  const parents: HttpTypes.StoreProductCategory[] = [];
+  const collectParents = (c: HttpTypes.StoreProductCategory) => {
+    if (c.parent_category) {
+      parents.unshift(c.parent_category);
+      collectParents(c.parent_category);
     }
   };
+  collectParents(category);
 
-  getParents(category);
+  const crumbs = [
+    { label: "Acasă", href: "/" },
+    { label: "Magazin", href: "/store" },
+    ...parents.map((p) => ({ label: p.name, href: `/categories/${p.handle}` })),
+    { label: category.name },
+  ];
+
+  const childrenLinks = category.category_children?.map((c) => ({
+    name: c.name,
+    handle: c.handle,
+  }));
 
   return (
-    <div
-      className="content-container flex flex-col py-6 small:flex-row small:items-start"
-      data-testid="category-container"
+    <PlpShell
+      title={category.name}
+      description={category.description ?? undefined}
+      crumbs={crumbs}
+      sortBy={sort}
+      activeCategoryHandle={category.handle}
+      childrenLinks={childrenLinks}
     >
-      <RefinementList sortBy={sort} data-testid="sort-by-container" />
-      <div className="w-full">
-        <div className="text-2xl-semi mb-8 flex flex-row gap-4">
-          {parents &&
-            parents.map((parent) => (
-              <span key={parent.id} className="text-ui-fg-subtle">
-                <LocalizedClientLink
-                  className="mr-4 hover:text-black"
-                  href={`/categories/${parent.handle}`}
-                  data-testid="sort-by-link"
-                >
-                  {parent.name}
-                </LocalizedClientLink>
-                /
-              </span>
-            ))}
-          <h1 data-testid="category-page-title">{category.name}</h1>
-        </div>
-        {category.description && (
-          <div className="text-base-regular mb-8">
-            <p>{category.description}</p>
-          </div>
-        )}
-        {category.category_children && (
-          <div className="text-base-large mb-8">
-            <ul className="grid grid-cols-1 gap-2">
-              {category.category_children?.map((c) => (
-                <li key={c.id}>
-                  <InteractiveLink href={`/categories/${c.handle}`}>
-                    {c.name}
-                  </InteractiveLink>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        <Suspense
-          fallback={
-            <SkeletonProductGrid
-              numberOfProducts={category.products?.length ?? 8}
-            />
-          }
-        >
-          <PaginatedProducts
-            sortBy={sort}
-            page={pageNumber}
-            categoryId={category.id}
+      <Suspense
+        fallback={
+          <SkeletonProductGrid
+            numberOfProducts={category.products?.length ?? 8}
           />
-        </Suspense>
-      </div>
-    </div>
+        }
+      >
+        <PaginatedProducts
+          sortBy={sort}
+          page={pageNumber}
+          categoryId={category.id}
+        />
+      </Suspense>
+    </PlpShell>
   );
 }

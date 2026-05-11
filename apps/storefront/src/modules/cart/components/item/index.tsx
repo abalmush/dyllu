@@ -1,142 +1,169 @@
 "use client";
 
-import { Table, Text, clx } from "@medusajs/ui";
-import { updateLineItem } from "@lib/data/cart";
+import * as React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Loader2, Trash2 } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
-import CartItemSelect from "@modules/cart/components/cart-item-select";
-import ErrorMessage from "@modules/checkout/components/error-message";
-import DeleteButton from "@modules/common/components/delete-button";
-import LineItemOptions from "@modules/common/components/line-item-options";
-import LineItemPrice from "@modules/common/components/line-item-price";
-import LineItemUnitPrice from "@modules/common/components/line-item-unit-price";
-import LocalizedClientLink from "@modules/common/components/localized-client-link";
-import Spinner from "@modules/common/icons/spinner";
-import Thumbnail from "@modules/products/components/thumbnail";
-import { useState } from "react";
 
-type ItemProps = {
+import { cn } from "@lib/utils";
+import { deleteLineItem, updateLineItem } from "@lib/data/cart";
+import { convertToLocale } from "@lib/util/money";
+import { QuantityStepper } from "@/components/molecules/quantity-stepper";
+import ErrorMessage from "@modules/checkout/components/error-message";
+
+type Props = {
   item: HttpTypes.StoreCartLineItem;
   type?: "full" | "preview";
   currencyCode: string;
 };
 
-const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
-  const [updating, setUpdating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export default function CartItemRow({ item, type = "full", currencyCode }: Props) {
+  const [updating, setUpdating] = React.useState(false);
+  const [removing, setRemoving] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [quantity, setQuantity] = React.useState(item.quantity);
 
-  const changeQuantity = async (quantity: number) => {
-    setError(null);
-    setUpdating(true);
+  React.useEffect(() => {
+    setQuantity(item.quantity);
+  }, [item.quantity]);
 
-    await updateLineItem({
-      lineId: item.id,
-      quantity,
-    })
-      .catch((err) => {
-        setError(err.message);
-      })
-      .finally(() => {
+  const debounced = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleQty = (next: number) => {
+    setQuantity(next);
+    if (debounced.current) clearTimeout(debounced.current);
+    debounced.current = setTimeout(async () => {
+      setError(null);
+      setUpdating(true);
+      try {
+        await updateLineItem({ lineId: item.id, quantity: next });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Eroare actualizare");
+        setQuantity(item.quantity);
+      } finally {
         setUpdating(false);
-      });
+      }
+    }, 250);
   };
 
-  const maxQtyFromInventory = 10;
-  const maxQuantity = item.variant?.manage_inventory ? 10 : maxQtyFromInventory;
+  const handleRemove = async () => {
+    setRemoving(true);
+    try {
+      await deleteLineItem(item.id);
+    } finally {
+      setRemoving(false);
+    }
+  };
+
+  const total = item.total ?? 0;
+  const original = item.original_total ?? total;
+  const onSale = total < original;
+  const isPreview = type === "preview";
+  const unitPrice = item.quantity > 0 ? total / item.quantity : 0;
 
   return (
-    <Table.Row className="w-full" data-testid="product-row">
-      <Table.Cell className="w-24 p-4 !pl-0">
-        <LocalizedClientLink
-          href={`/products/${item.product_handle}`}
-          className={clx("flex", {
-            "w-16": type === "preview",
-            "w-12 small:w-24": type === "full",
-          })}
-        >
-          <Thumbnail
-            thumbnail={item.thumbnail}
-            images={item.variant?.product?.images}
-            size="square"
+    <li
+      className={cn(
+        "grid gap-4 border-b border-border py-5 last:border-b-0",
+        isPreview
+          ? "grid-cols-[64px_1fr_auto]"
+          : "grid-cols-[88px_1fr] small:grid-cols-[120px_1fr_auto]"
+      )}
+      data-testid="product-row"
+    >
+      <Link
+        href={`/products/${item.product_handle}`}
+        className={cn(
+          "relative aspect-square overflow-hidden rounded-xl bg-surface-subtle",
+          isPreview ? "size-16" : "size-[88px] small:size-[120px]"
+        )}
+      >
+        {item.thumbnail && (
+          <Image
+            src={item.thumbnail}
+            alt={item.title}
+            fill
+            sizes={isPreview ? "64px" : "120px"}
+            className="object-cover"
           />
-        </LocalizedClientLink>
-      </Table.Cell>
-
-      <Table.Cell className="text-left">
-        <Text
-          className="txt-medium-plus text-ui-fg-base"
+        )}
+      </Link>
+      <div className="flex min-w-0 flex-col gap-1.5">
+        <Link
+          href={`/products/${item.product_handle}`}
+          className="line-clamp-2 text-sm font-semibold tracking-tight text-foreground hover:text-primary small:text-base"
           data-testid="product-title"
         >
           {item.product_title}
-        </Text>
-        <LineItemOptions variant={item.variant} data-testid="product-variant" />
-      </Table.Cell>
-
-      {type === "full" && (
-        <Table.Cell>
-          <div className="flex w-28 items-center gap-2">
-            <DeleteButton id={item.id} data-testid="product-delete-button" />
-            <CartItemSelect
-              value={item.quantity}
-              onChange={(value) => changeQuantity(parseInt(value.target.value))}
-              className="h-10 w-14 p-4"
-              data-testid="product-select-button"
+        </Link>
+        {item.variant?.title && (
+          <p className="text-xs text-muted-foreground" data-testid="product-variant">
+            Variantă: {item.variant.title}
+          </p>
+        )}
+        {!isPreview && (
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <QuantityStepper
+              value={quantity}
+              onChange={handleQty}
+              max={10}
+              size="sm"
+              disabled={updating}
+            />
+            <button
+              type="button"
+              onClick={handleRemove}
+              disabled={removing}
+              data-testid="product-delete-button"
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
             >
-              {Array.from(
-                {
-                  length: Math.min(maxQuantity, 10),
-                },
-                (_, i) => (
-                  <option value={i + 1} key={i}>
-                    {i + 1}
-                  </option>
-                )
+              {removing ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Trash2 className="size-3.5" />
               )}
-
-              <option value={1} key={1}>
-                1
-              </option>
-            </CartItemSelect>
-            {updating && <Spinner />}
+              Șterge
+            </button>
+            {updating && !removing && (
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                <Loader2 className="size-3 animate-spin" />
+                actualizez
+              </span>
+            )}
           </div>
-          <ErrorMessage error={error} data-testid="product-error-message" />
-        </Table.Cell>
-      )}
-
-      {type === "full" && (
-        <Table.Cell className="hidden small:table-cell">
-          <LineItemUnitPrice
-            item={item}
-            style="tight"
-            currencyCode={currencyCode}
-          />
-        </Table.Cell>
-      )}
-
-      <Table.Cell className="!pr-0">
-        <span
-          className={clx("!pr-0", {
-            "flex h-full flex-col items-end justify-center": type === "preview",
-          })}
-        >
-          {type === "preview" && (
-            <span className="flex gap-x-1">
-              <Text className="text-ui-fg-muted">{item.quantity}x </Text>
-              <LineItemUnitPrice
-                item={item}
-                style="tight"
-                currencyCode={currencyCode}
-              />
-            </span>
+        )}
+        {error && <ErrorMessage error={error} data-testid="product-error-message" />}
+      </div>
+      <div
+        className={cn(
+          "flex flex-col items-end justify-center gap-1 text-right",
+          isPreview ? "" : "col-span-2 small:col-span-1"
+        )}
+      >
+        {isPreview ? (
+          <p className="text-xs text-muted-foreground">
+            {item.quantity}× {convertToLocale({ amount: unitPrice, currency_code: currencyCode })}
+          </p>
+        ) : null}
+        {onSale && (
+          <p
+            className="text-xs text-muted-foreground line-through"
+            data-testid="product-original-price"
+          >
+            {convertToLocale({ amount: original, currency_code: currencyCode })}
+          </p>
+        )}
+        <p
+          className={cn(
+            "text-base font-semibold tracking-tight",
+            onSale ? "text-destructive" : "text-foreground"
           )}
-          <LineItemPrice
-            item={item}
-            style="tight"
-            currencyCode={currencyCode}
-          />
-        </span>
-      </Table.Cell>
-    </Table.Row>
+          data-testid="product-price"
+        >
+          {convertToLocale({ amount: total, currency_code: currencyCode })}
+        </p>
+      </div>
+    </li>
   );
-};
-
-export default Item;
+}

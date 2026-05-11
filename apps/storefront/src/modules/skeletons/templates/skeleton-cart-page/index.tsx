@@ -1,4 +1,4 @@
-import { Table } from "@medusajs/ui";
+import { Table } from "@lib/ui-compat";
 
 import repeat from "@lib/util/repeat";
 import SkeletonCartItem from "@modules/skeletons/components/skeleton-cart-item";

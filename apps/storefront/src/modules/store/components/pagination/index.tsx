@@ -1,105 +1,94 @@
 "use client";
 
-import { clx } from "@medusajs/ui";
+import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-export function Pagination({
-  page,
-  totalPages,
-  "data-testid": dataTestid,
-}: {
+import { cn } from "@lib/utils";
+import { Button } from "@/components/atoms/button";
+
+type Props = {
   page: number;
   totalPages: number;
   "data-testid"?: string;
-}) {
+};
+
+export function Pagination({ page, totalPages, "data-testid": dataTestid }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const arrayRange = (start: number, stop: number) =>
-    Array.from({ length: stop - start + 1 }, (_, index) => start + index);
-
-  const handlePageChange = (newPage: number) => {
+  const goTo = (next: number) => {
     const params = new URLSearchParams(searchParams);
-    params.set("page", newPage.toString());
+    params.set("page", next.toString());
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const renderPageButton = (
-    p: number,
-    label: string | number,
-    isCurrent: boolean
-  ) => (
-    <button
-      key={p}
-      className={clx("txt-xlarge-plus text-ui-fg-muted", {
-        "text-ui-fg-base hover:text-ui-fg-subtle": isCurrent,
-      })}
-      disabled={isCurrent}
-      onClick={() => handlePageChange(p)}
-    >
-      {label}
-    </button>
-  );
+  const range = (start: number, end: number) =>
+    Array.from({ length: end - start + 1 }, (_, i) => start + i);
 
-  const renderEllipsis = (key: string) => (
-    <span
-      key={key}
-      className="txt-xlarge-plus cursor-default items-center text-ui-fg-muted"
-    >
-      ...
-    </span>
-  );
-
-  const renderPageButtons = () => {
-    const buttons = [];
-
-    if (totalPages <= 7) {
-      buttons.push(
-        ...arrayRange(1, totalPages).map((p) =>
-          renderPageButton(p, p, p === page)
-        )
-      );
-    } else {
-      if (page <= 4) {
-        buttons.push(
-          ...arrayRange(1, 5).map((p) => renderPageButton(p, p, p === page))
-        );
-        buttons.push(renderEllipsis("ellipsis1"));
-        buttons.push(
-          renderPageButton(totalPages, totalPages, totalPages === page)
-        );
-      } else if (page >= totalPages - 3) {
-        buttons.push(renderPageButton(1, 1, 1 === page));
-        buttons.push(renderEllipsis("ellipsis2"));
-        buttons.push(
-          ...arrayRange(totalPages - 4, totalPages).map((p) =>
-            renderPageButton(p, p, p === page)
-          )
-        );
-      } else {
-        buttons.push(renderPageButton(1, 1, 1 === page));
-        buttons.push(renderEllipsis("ellipsis3"));
-        buttons.push(
-          ...arrayRange(page - 1, page + 1).map((p) =>
-            renderPageButton(p, p, p === page)
-          )
-        );
-        buttons.push(renderEllipsis("ellipsis4"));
-        buttons.push(
-          renderPageButton(totalPages, totalPages, totalPages === page)
-        );
-      }
-    }
-
-    return buttons;
+  const buildPages = (): Array<number | "ellipsis"> => {
+    if (totalPages <= 7) return range(1, totalPages);
+    if (page <= 4) return [...range(1, 5), "ellipsis", totalPages];
+    if (page >= totalPages - 3) return [1, "ellipsis", ...range(totalPages - 4, totalPages)];
+    return [1, "ellipsis", ...range(page - 1, page + 1), "ellipsis", totalPages];
   };
 
   return (
-    <div className="mt-12 flex w-full justify-center">
-      <div className="flex items-end gap-3" data-testid={dataTestid}>
-        {renderPageButtons()}
-      </div>
-    </div>
+    <nav
+      aria-label="Paginare"
+      className="flex w-full items-center justify-center gap-1.5"
+      data-testid={dataTestid}
+    >
+      <Button
+        variant="outline"
+        size="icon"
+        className="rounded-full"
+        onClick={() => goTo(Math.max(1, page - 1))}
+        disabled={page <= 1}
+        aria-label="Pagina anterioară"
+      >
+        <ChevronLeft className="size-4" />
+      </Button>
+      {buildPages().map((p, i) => {
+        if (p === "ellipsis") {
+          return (
+            <span
+              key={`ellipsis-${i}`}
+              className="grid size-9 place-items-center text-muted-foreground"
+            >
+              <MoreHorizontal className="size-4" />
+            </span>
+          );
+        }
+        const isCurrent = p === page;
+        return (
+          <button
+            key={p}
+            type="button"
+            onClick={() => goTo(p)}
+            disabled={isCurrent}
+            aria-current={isCurrent ? "page" : undefined}
+            className={cn(
+              "grid size-9 place-items-center rounded-full text-sm font-medium tracking-tight transition-colors",
+              isCurrent
+                ? "bg-foreground text-background"
+                : "text-foreground hover:bg-muted"
+            )}
+          >
+            {p}
+          </button>
+        );
+      })}
+      <Button
+        variant="outline"
+        size="icon"
+        className="rounded-full"
+        onClick={() => goTo(Math.min(totalPages, page + 1))}
+        disabled={page >= totalPages}
+        aria-label="Pagina următoare"
+      >
+        <ChevronRight className="size-4" />
+      </Button>
+    </nav>
   );
 }

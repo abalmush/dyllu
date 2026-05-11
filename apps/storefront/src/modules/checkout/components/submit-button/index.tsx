@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@medusajs/ui";
+import { Button } from "@lib/ui-compat";
 import React from "react";
 import { useFormStatus } from "react-dom";
 

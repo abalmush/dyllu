@@ -1,4 +1,4 @@
-import { Heading } from "@medusajs/ui";
+import { Heading } from "@lib/ui-compat";
 
 import ItemsPreviewTemplate from "@modules/cart/templates/preview";
 import DiscountCode from "@modules/checkout/components/discount-code";

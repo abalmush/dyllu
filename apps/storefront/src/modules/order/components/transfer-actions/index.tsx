@@ -4,7 +4,7 @@ import {
   acceptTransferRequest,
   declineTransferRequest,
 } from "@lib/data/orders";
-import { Button, Text } from "@medusajs/ui";
+import { Button, Text } from "@lib/ui-compat";
 import { useState } from "react";
 
 type TransferStatus = "pending" | "success" | "error";

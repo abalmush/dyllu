@@ -45,7 +45,7 @@ This populates `src/types/` with types derived from the live Storefront API sche
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:4000](http://localhost:4000).
 
 ## Scripts
 

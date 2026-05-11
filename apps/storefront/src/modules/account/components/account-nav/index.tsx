@@ -1,6 +1,6 @@
 "use client";
 
-import { clx } from "@medusajs/ui";
+import { clx } from "@lib/ui-compat";
 import { ArrowRightOnRectangle } from "@medusajs/icons";
 import { usePathname } from "next/navigation";
 
@@ -34,13 +34,13 @@ const AccountNav = ({
           >
             <>
               <ChevronDown className="rotate-90 transform" />
-              <span>Account</span>
+              <span>Cont</span>
             </>
           </LocalizedClientLink>
         ) : (
           <>
             <div className="text-xl-semi mb-4 px-8">
-              Hello {customer?.first_name}
+              Salut, {customer?.first_name}
             </div>
             <div className="text-base-regular">
               <ul>
@@ -53,7 +53,7 @@ const AccountNav = ({
                     <>
                       <div className="flex items-center gap-x-2">
                         <User size={20} />
-                        <span>Profile</span>
+                        <span>Profil</span>
                       </div>
                       <ChevronDown className="-rotate-90 transform" />
                     </>
@@ -68,7 +68,7 @@ const AccountNav = ({
                     <>
                       <div className="flex items-center gap-x-2">
                         <MapPin size={20} />
-                        <span>Addresses</span>
+                        <span>Adrese</span>
                       </div>
                       <ChevronDown className="-rotate-90 transform" />
                     </>
@@ -82,7 +82,7 @@ const AccountNav = ({
                   >
                     <div className="flex items-center gap-x-2">
                       <Package size={20} />
-                      <span>Orders</span>
+                      <span>Comenzi</span>
                     </div>
                     <ChevronDown className="-rotate-90 transform" />
                   </LocalizedClientLink>
@@ -96,7 +96,7 @@ const AccountNav = ({
                   >
                     <div className="flex items-center gap-x-2">
                       <ArrowRightOnRectangle />
-                      <span>Log out</span>
+                      <span>Ieșire</span>
                     </div>
                     <ChevronDown className="-rotate-90 transform" />
                   </button>
@@ -109,7 +109,7 @@ const AccountNav = ({
       <div className="hidden small:block" data-testid="account-nav">
         <div>
           <div className="pb-4">
-            <h3 className="text-base-semi">Account</h3>
+            <h3 className="text-base-semi">Cont</h3>
           </div>
           <div className="text-base-regular">
             <ul className="mb-0 flex flex-col items-start justify-start gap-y-4">
@@ -119,7 +119,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="overview-link"
                 >
-                  Overview
+                  Sumar
                 </AccountNavLink>
               </li>
               <li>
@@ -128,7 +128,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="profile-link"
                 >
-                  Profile
+                  Profil
                 </AccountNavLink>
               </li>
               <li>
@@ -137,7 +137,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="addresses-link"
                 >
-                  Addresses
+                  Adrese
                 </AccountNavLink>
               </li>
               <li>
@@ -146,7 +146,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="orders-link"
                 >
-                  Orders
+                  Comenzi
                 </AccountNavLink>
               </li>
               <li className="text-grey-700">
@@ -155,7 +155,7 @@ const AccountNav = ({
                   onClick={handleLogout}
                   data-testid="logout-button"
                 >
-                  Log out
+                  Ieșire
                 </button>
               </li>
             </ul>

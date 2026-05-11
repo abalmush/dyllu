@@ -1,5 +1,5 @@
 import { retrieveCustomer } from "@lib/data/customer";
-import { Toaster } from "@medusajs/ui";
+import { Toaster } from "@lib/ui-compat";
 import AccountLayout from "@modules/account/templates/account-layout";
 
 export default async function AccountPageLayout({

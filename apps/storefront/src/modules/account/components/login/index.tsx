@@ -17,9 +17,9 @@ const Login = ({ setCurrentView }: Props) => {
       className="flex w-full max-w-sm flex-col items-center"
       data-testid="login-page"
     >
-      <h1 className="text-large-semi mb-6 uppercase">Welcome back</h1>
+      <h1 className="text-large-semi mb-6 uppercase">Bine ai revenit</h1>
       <p className="text-base-regular mb-8 text-center text-ui-fg-base">
-        Sign in to access an enhanced shopping experience.
+        Autentifică-te pentru a accesa experiența completă DYLLU.
       </p>
       <form className="w-full" action={formAction}>
         <div className="flex w-full flex-col gap-y-2">
@@ -27,13 +27,13 @@ const Login = ({ setCurrentView }: Props) => {
             label="Email"
             name="email"
             type="email"
-            title="Enter a valid email address."
+            title="Introdu o adresă de email validă."
             autoComplete="email"
             required
             data-testid="email-input"
           />
           <Input
-            label="Password"
+            label="Parolă"
             name="password"
             type="password"
             autoComplete="current-password"
@@ -43,17 +43,17 @@ const Login = ({ setCurrentView }: Props) => {
         </div>
         <ErrorMessage error={message} data-testid="login-error-message" />
         <SubmitButton data-testid="sign-in-button" className="mt-6 w-full">
-          Sign in
+          Autentificare
         </SubmitButton>
       </form>
       <span className="text-small-regular mt-6 text-center text-ui-fg-base">
-        Not a member?{" "}
+        Nu ai cont încă?{" "}
         <button
           onClick={() => setCurrentView(LOGIN_VIEW.REGISTER)}
           className="underline"
           data-testid="register-button"
         >
-          Join us
+          Creează unul
         </button>
         .
       </span>

@@ -1,7 +1,6 @@
-import { Container, Heading, Text } from "@medusajs/ui";
+import { Container, Text } from "@lib/ui-compat";
 
 import { paymentInfoMap } from "@lib/constants";
-import Divider from "@modules/common/components/divider";
 import { convertToLocale } from "@lib/util/money";
 import { HttpTypes } from "@medusajs/types";
 
@@ -12,47 +11,40 @@ type PaymentDetailsProps = {
 const PaymentDetails = ({ order }: PaymentDetailsProps) => {
   const payment = order.payment_collections?.[0].payments?.[0];
 
-  return (
-    <div>
-      <Heading level="h2" className="text-3xl-regular my-6 flex flex-row">
-        Payment
-      </Heading>
-      <div>
-        {payment && (
-          <div className="flex w-full items-start gap-x-1">
-            <div className="flex w-1/3 flex-col">
-              <Text className="txt-medium-plus mb-1 text-ui-fg-base">
-                Payment method
-              </Text>
-              <Text
-                className="txt-medium text-ui-fg-subtle"
-                data-testid="payment-method"
-              >
-                {paymentInfoMap[payment.provider_id].title}
-              </Text>
-            </div>
-            <div className="flex w-2/3 flex-col">
-              <Text className="txt-medium-plus mb-1 text-ui-fg-base">
-                Payment details
-              </Text>
-              <div className="txt-medium flex items-center gap-2 text-ui-fg-subtle">
-                <Container className="flex h-7 w-fit items-center bg-ui-button-neutral-hover p-2">
-                  {paymentInfoMap[payment.provider_id].icon}
-                </Container>
-                <Text data-testid="payment-amount">
-                  {convertToLocale({
-                    amount: payment.amount,
-                    currency_code: order.currency_code,
-                  })}{" "}
-                  paid at {new Date(payment.created_at ?? "").toLocaleString()}
-                </Text>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+  if (!payment) {
+    return null;
+  }
 
-      <Divider className="mt-8" />
+  return (
+    <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-8">
+      <div className="flex flex-1 flex-col">
+        <Text className="txt-medium-plus mb-1 text-ui-fg-base">
+          Metodă de plată
+        </Text>
+        <Text
+          className="txt-medium text-ui-fg-subtle"
+          data-testid="payment-method"
+        >
+          {paymentInfoMap[payment.provider_id].title}
+        </Text>
+      </div>
+      <div className="flex flex-[2] flex-col">
+        <Text className="txt-medium-plus mb-1 text-ui-fg-base">
+          Detalii plată
+        </Text>
+        <div className="txt-medium flex items-center gap-2 text-ui-fg-subtle">
+          <Container className="flex h-7 w-fit items-center bg-ui-button-neutral-hover p-2">
+            {paymentInfoMap[payment.provider_id].icon}
+          </Container>
+          <Text data-testid="payment-amount">
+            {convertToLocale({
+              amount: payment.amount,
+              currency_code: order.currency_code,
+            })}{" "}
+            achitat la {new Date(payment.created_at ?? "").toLocaleString("ro-MD")}
+          </Text>
+        </div>
+      </div>
     </div>
   );
 };

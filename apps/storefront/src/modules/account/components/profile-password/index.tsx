@@ -4,7 +4,7 @@ import React, { useEffect, useActionState } from "react";
 import Input from "@modules/common/components/input";
 import AccountInfo from "../account-info";
 import { HttpTypes } from "@medusajs/types";
-import { toast } from "@medusajs/ui";
+import { toast } from "@lib/ui-compat";
 
 type MyInformationProps = {
   customer: HttpTypes.StoreCustomer;

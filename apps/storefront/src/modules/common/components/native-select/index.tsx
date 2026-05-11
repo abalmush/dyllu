@@ -1,5 +1,5 @@
 import { ChevronUpDown } from "@medusajs/icons";
-import { clx } from "@medusajs/ui";
+import { clx } from "@lib/ui-compat";
 import {
   SelectHTMLAttributes,
   forwardRef,

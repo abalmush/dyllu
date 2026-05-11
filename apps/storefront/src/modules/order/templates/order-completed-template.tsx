@@ -1,6 +1,6 @@
-import { Heading } from "@medusajs/ui";
 import { cookies as nextCookies } from "next/headers";
 
+import { SectionHeading } from "@/components/molecules/section-heading";
 import CartTotals from "@modules/common/components/cart-totals";
 import Help from "@modules/order/components/help";
 import Items from "@modules/order/components/items";
@@ -26,24 +26,27 @@ export default async function OrderCompletedTemplate({
       <div className="content-container flex h-full w-full max-w-4xl flex-col items-center justify-center gap-y-10">
         {isOnboarding && <OnboardingCta orderId={order.id} />}
         <div
-          className="flex h-full w-full max-w-4xl flex-col gap-4 bg-white py-10"
+          className="flex h-full w-full max-w-4xl flex-col gap-8 py-10"
           data-testid="order-complete-container"
         >
-          <Heading
-            level="h1"
-            className="mb-4 flex flex-col gap-y-3 text-3xl text-ui-fg-base"
-          >
-            <span>Thank you!</span>
-            <span>Your order was placed successfully.</span>
-          </Heading>
           <OrderDetails order={order} />
-          <Heading level="h2" className="text-3xl-regular flex flex-row">
-            Summary
-          </Heading>
-          <Items order={order} />
-          <CartTotals totals={order} />
-          <ShippingDetails order={order} />
-          <PaymentDetails order={order} />
+          <section className="flex flex-col gap-6">
+            <SectionHeading
+              eyebrow="Comanda ta"
+              title="Sumar"
+              description="Articolele și costurile pentru comanda plasată."
+            />
+            <Items order={order} />
+            <CartTotals totals={order} />
+          </section>
+          <section className="flex flex-col gap-6">
+            <SectionHeading eyebrow="Livrare" title="Detalii expediere" />
+            <ShippingDetails order={order} />
+          </section>
+          <section className="flex flex-col gap-6">
+            <SectionHeading eyebrow="Plată" title="Detalii plată" />
+            <PaymentDetails order={order} />
+          </section>
           <Help />
         </div>
       </div>

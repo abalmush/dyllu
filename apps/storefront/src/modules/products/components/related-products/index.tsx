@@ -1,23 +1,22 @@
 import { listProducts } from "@lib/data/products";
 import { getRegion } from "@lib/data/regions";
 import { HttpTypes } from "@medusajs/types";
+
+import { ProductRailSection } from "@/components/organisms/product-rail-section";
 import Product from "../product-preview";
 
-type RelatedProductsProps = {
+type Props = {
   product: HttpTypes.StoreProduct;
 };
 
-export default async function RelatedProducts({
-  product,
-}: RelatedProductsProps) {
+export default async function RelatedProducts({ product }: Props) {
   const region = await getRegion();
+  if (!region) return null;
 
-  if (!region) {
-    return null;
-  }
-
-  const queryParams: HttpTypes.StoreProductListParams = {};
-  queryParams.region_id = region.id;
+  const queryParams: HttpTypes.StoreProductListParams = {
+    region_id: region.id,
+    is_giftcard: false,
+  };
   if (product.collection_id) {
     queryParams.collection_id = [product.collection_id];
   }
@@ -26,34 +25,27 @@ export default async function RelatedProducts({
       .map((t) => t.id)
       .filter(Boolean) as string[];
   }
-  queryParams.is_giftcard = false;
 
   const products = await listProducts({ queryParams }).then(({ response }) =>
     response.products.filter((p) => p.id !== product.id)
   );
 
-  if (!products.length) {
-    return null;
-  }
+  if (!products.length) return null;
 
   return (
-    <div className="product-page-constraint">
-      <div className="mb-16 flex flex-col items-center text-center">
-        <span className="text-base-regular mb-6 text-gray-600">
-          Related products
-        </span>
-        <p className="text-2xl-regular max-w-lg text-ui-fg-base">
-          You might also want to check out these products.
-        </p>
-      </div>
-
-      <ul className="grid grid-cols-2 gap-x-6 gap-y-8 small:grid-cols-3 medium:grid-cols-4">
-        {products.map((p) => (
+    <ProductRailSection
+      eyebrow="Selecție DYLLU"
+      title="Produse înrudite"
+      description="Au mai cumpărat-o profesioniștii care lucrează cu această sculă."
+      background="subtle"
+    >
+      <ul className="grid grid-cols-2 gap-4 small:grid-cols-3 medium:grid-cols-4 medium:gap-6">
+        {products.slice(0, 8).map((p) => (
           <li key={p.id}>
-            <Product region={region} product={p} />
+            <Product product={p} region={region} />
           </li>
         ))}
       </ul>
-    </div>
+    </ProductRailSection>
   );
 }

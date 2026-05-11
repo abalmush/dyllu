@@ -1,8 +1,10 @@
-import { HttpTypes } from "@medusajs/types";
-import { clx } from "@medusajs/ui";
-import React from "react";
+"use client";
 
-type OptionSelectProps = {
+import { HttpTypes } from "@medusajs/types";
+
+import { cn } from "@lib/utils";
+
+type Props = {
   option: HttpTypes.StoreProductOption;
   current: string | undefined;
   updateOption: (title: string, value: string) => void;
@@ -11,38 +13,52 @@ type OptionSelectProps = {
   "data-testid"?: string;
 };
 
-const OptionSelect: React.FC<OptionSelectProps> = ({
+export default function OptionSelect({
   option,
   current,
   updateOption,
   title,
-  "data-testid": dataTestId,
   disabled,
-}) => {
-  const filteredOptions = (option.values ?? []).map((v) => v.value);
+  "data-testid": dataTestId,
+}: Props) {
+  const values = option.values?.map((v) => v.value) ?? [];
 
   return (
-    <div className="flex flex-col gap-y-3">
-      <span className="text-sm">Select {title}</span>
+    <div className="flex flex-col gap-3">
+      <div className="flex items-baseline justify-between">
+        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          {title}
+        </span>
+        {current && (
+          <span className="text-sm font-semibold tracking-tight text-foreground">
+            {current}
+          </span>
+        )}
+      </div>
       <div
-        className="flex flex-wrap justify-between gap-2"
+        className="flex flex-wrap gap-2"
         data-testid={dataTestId}
+        role="radiogroup"
+        aria-label={title}
       >
-        {filteredOptions.map((v) => {
+        {values.map((v) => {
+          const selected = v === current;
           return (
             <button
-              onClick={() => updateOption(option.id, v)}
               key={v}
-              className={clx(
-                "text-small-regular h-10 flex-1 rounded-rounded border border-ui-border-base bg-ui-bg-subtle p-2",
-                {
-                  "border-ui-border-interactive": v === current,
-                  "transition-shadow duration-150 ease-in-out hover:shadow-elevation-card-rest":
-                    v !== current,
-                }
-              )}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => updateOption(option.id, v)}
               disabled={disabled}
               data-testid="option-button"
+              className={cn(
+                "min-w-[72px] rounded-full border px-4 py-2.5 text-sm font-medium tracking-tight transition-all duration-200",
+                "disabled:pointer-events-none disabled:opacity-40",
+                selected
+                  ? "border-foreground bg-foreground text-background shadow-sm"
+                  : "border-border bg-card text-foreground hover:border-foreground/40 hover:bg-muted"
+              )}
             >
               {v}
             </button>
@@ -51,6 +67,4 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
       </div>
     </div>
   );
-};
-
-export default OptionSelect;
+}

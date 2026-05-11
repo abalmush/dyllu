@@ -9,7 +9,7 @@ import {
   Button,
   IconButton,
   Toaster,
-} from "@medusajs/ui";
+} from "@lib/ui-compat";
 import { SubmitButton } from "@modules/checkout/components/submit-button";
 import { CheckCircleMiniSolid, XCircleSolid } from "@medusajs/icons";
 import { useEffect, useState } from "react";

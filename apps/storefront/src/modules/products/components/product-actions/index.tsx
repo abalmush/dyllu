@@ -1,19 +1,22 @@
 "use client";
 
+import * as React from "react";
+import { isEqual } from "lodash";
+import { Heart, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
+import { HttpTypes } from "@medusajs/types";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
 import { addToCart } from "@lib/data/cart";
 import { useIntersection } from "@lib/hooks/use-in-view";
-import { HttpTypes } from "@medusajs/types";
-import { Button } from "@medusajs/ui";
-import Divider from "@modules/common/components/divider";
-import OptionSelect from "@modules/products/components/product-actions/option-select";
-import { isEqual } from "lodash";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import ProductPrice from "../product-price";
-import MobileActions from "./mobile-actions";
-import { useRouter } from "next/navigation";
+import { Button } from "@/components/atoms/button";
+import { Separator } from "@/components/atoms/separator";
+import { QuantityStepper } from "@/components/molecules/quantity-stepper";
 
-type ProductActionsProps = {
+import MobileActions from "./mobile-actions";
+import OptionSelect from "./option-select";
+import ProductPrice from "../product-price";
+
+type Props = {
   product: HttpTypes.StoreProduct;
   region: HttpTypes.StoreRegion;
   disabled?: boolean;
@@ -21,170 +24,173 @@ type ProductActionsProps = {
 
 const optionsAsKeymap = (
   variantOptions: HttpTypes.StoreProductVariant["options"]
-) => {
-  return variantOptions?.reduce((acc: Record<string, string>, varopt: any) => {
-    acc[varopt.option_id] = varopt.value;
+) =>
+  variantOptions?.reduce((acc: Record<string, string>, opt: any) => {
+    acc[opt.option_id] = opt.value;
     return acc;
   }, {});
-};
 
-export default function ProductActions({
-  product,
-  disabled,
-}: ProductActionsProps) {
+export default function ProductActions({ product, disabled }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [options, setOptions] = useState<Record<string, string | undefined>>(
-    {}
-  );
-  const [isAdding, setIsAdding] = useState(false);
+  const [options, setOptions] = React.useState<Record<string, string | undefined>>({});
+  const [quantity, setQuantity] = React.useState(1);
+  const [isAdding, setIsAdding] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (product.variants?.length === 1) {
-      const variantOptions = optionsAsKeymap(product.variants[0].options);
-      setOptions(variantOptions ?? {});
+      setOptions(optionsAsKeymap(product.variants[0].options) ?? {});
     }
   }, [product.variants]);
 
-  const selectedVariant = useMemo(() => {
-    if (!product.variants || product.variants.length === 0) {
-      return;
-    }
-
-    return product.variants.find((v) => {
-      const variantOptions = optionsAsKeymap(v.options);
-      return isEqual(variantOptions, options);
-    });
+  const selectedVariant = React.useMemo(() => {
+    if (!product.variants?.length) return undefined;
+    return product.variants.find((v) =>
+      isEqual(optionsAsKeymap(v.options), options)
+    );
   }, [product.variants, options]);
 
-  const setOptionValue = (optionId: string, value: string) => {
-    setOptions((prev) => ({
-      ...prev,
-      [optionId]: value,
-    }));
-  };
+  const isValidVariant = React.useMemo(
+    () =>
+      product.variants?.some((v) =>
+        isEqual(optionsAsKeymap(v.options), options)
+      ),
+    [product.variants, options]
+  );
 
-  const isValidVariant = useMemo(() => {
-    return product.variants?.some((v) => {
-      const variantOptions = optionsAsKeymap(v.options);
-      return isEqual(variantOptions, options);
-    });
-  }, [product.variants, options]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
     const value = isValidVariant ? selectedVariant?.id : null;
-
-    if (params.get("v_id") === value) {
-      return;
-    }
-
-    if (value) {
-      params.set("v_id", value);
-    } else {
-      params.delete("v_id");
-    }
-
-    router.replace(pathname + "?" + params.toString());
+    if (params.get("v_id") === value) return;
+    if (value) params.set("v_id", value);
+    else params.delete("v_id");
+    router.replace(`${pathname}?${params.toString()}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVariant, isValidVariant]);
 
-  const inStock = useMemo(() => {
-    if (selectedVariant && !selectedVariant.manage_inventory) {
-      return true;
-    }
-
-    if (selectedVariant?.allow_backorder) {
-      return true;
-    }
-
+  const inStock = React.useMemo(() => {
+    if (selectedVariant && !selectedVariant.manage_inventory) return true;
+    if (selectedVariant?.allow_backorder) return true;
     if (
       selectedVariant?.manage_inventory &&
       (selectedVariant?.inventory_quantity || 0) > 0
     ) {
       return true;
     }
-
     return false;
   }, [selectedVariant]);
 
-  const actionsRef = useRef<HTMLDivElement>(null);
+  const setOptionValue = (id: string, value: string) =>
+    setOptions((prev) => ({ ...prev, [id]: value }));
 
+  const actionsRef = React.useRef<HTMLDivElement>(null);
   const inView = useIntersection(actionsRef, "0px");
 
   const handleAddToCart = async () => {
-    if (!selectedVariant?.id) return null;
-
+    if (!selectedVariant?.id) return;
     setIsAdding(true);
-
-    await addToCart({
-      variantId: selectedVariant.id,
-      quantity: 1,
-    });
-
-    setIsAdding(false);
+    try {
+      await addToCart({ variantId: selectedVariant.id, quantity });
+    } finally {
+      setIsAdding(false);
+    }
   };
 
+  const ctaLabel = !selectedVariant
+    ? "Selectează varianta"
+    : !inStock || !isValidVariant
+      ? "Stoc epuizat"
+      : "Adaugă în coș";
+
   return (
-    <>
-      <div className="flex flex-col gap-y-2" ref={actionsRef}>
-        <div>
-          {(product.variants?.length ?? 0) > 1 && (
-            <div className="flex flex-col gap-y-4">
-              {(product.options || []).map((option) => {
-                return (
-                  <div key={option.id}>
-                    <OptionSelect
-                      option={option}
-                      current={options[option.id]}
-                      updateOption={setOptionValue}
-                      title={option.title ?? ""}
-                      data-testid="product-options"
-                      disabled={!!disabled || isAdding}
-                    />
-                  </div>
-                );
-              })}
-              <Divider />
-            </div>
-          )}
+    <div
+      className="flex flex-col gap-6 rounded-2xl border border-border bg-card p-6 shadow-sm small:p-7"
+      ref={actionsRef}
+    >
+      <ProductPrice product={product} variant={selectedVariant} />
+
+      {(product.variants?.length ?? 0) > 1 && (
+        <div className="flex flex-col gap-5">
+          {(product.options || []).map((option) => (
+            <OptionSelect
+              key={option.id}
+              option={option}
+              current={options[option.id]}
+              updateOption={setOptionValue}
+              title={option.title ?? ""}
+              data-testid="product-options"
+              disabled={!!disabled || isAdding}
+            />
+          ))}
         </div>
+      )}
 
-        <ProductPrice product={product} variant={selectedVariant} />
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          Cantitate
+        </span>
+        <QuantityStepper value={quantity} onChange={setQuantity} max={20} />
+      </div>
 
+      <div className="flex flex-col gap-2">
         <Button
           onClick={handleAddToCart}
-          disabled={
-            !inStock ||
-            !selectedVariant ||
-            !!disabled ||
-            isAdding ||
-            !isValidVariant
-          }
-          variant="primary"
-          className="h-10 w-full"
+          disabled={!inStock || !selectedVariant || !!disabled || isAdding || !isValidVariant}
           isLoading={isAdding}
+          size="xl"
+          className="rounded-full"
           data-testid="add-product-button"
         >
-          {!selectedVariant && !options
-            ? "Select variant"
-            : !inStock || !isValidVariant
-              ? "Out of stock"
-              : "Add to cart"}
+          <ShoppingBag className="size-4" />
+          {ctaLabel}
         </Button>
-        <MobileActions
-          product={product}
-          variant={selectedVariant}
-          options={options}
-          updateOptions={setOptionValue}
-          inStock={inStock}
-          handleAddToCart={handleAddToCart}
-          isAdding={isAdding}
-          show={!inView}
-          optionsDisabled={!!disabled || isAdding}
-        />
+        <Button variant="outline" size="lg" className="rounded-full">
+          <Heart className="size-4" />
+          Adaugă la favorite
+        </Button>
       </div>
-    </>
+
+      <div className="flex items-center justify-center gap-2 rounded-full bg-success/10 px-4 py-2 text-xs font-semibold text-success">
+        <span className={`size-2 rounded-full ${inStock ? "bg-success" : "bg-destructive"}`} />
+        {inStock ? "În stoc · livrare 24–48h" : "Indisponibil"}
+      </div>
+
+      <Separator />
+
+      <ul className="flex flex-col gap-3 text-sm">
+        <li className="flex items-start gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+            <Truck className="size-4" />
+          </span>
+          <span className="text-foreground">
+            <span className="font-semibold">Livrare gratuită</span>
+            <span className="text-muted-foreground"> peste 1.000 MDL în Chișinău</span>
+          </span>
+        </li>
+        <li className="flex items-start gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+            <ShieldCheck className="size-4" />
+          </span>
+          <span className="text-foreground">
+            <span className="font-semibold">Plată securizată MAIB</span>
+            <span className="text-muted-foreground"> · 3-D Secure</span>
+          </span>
+        </li>
+      </ul>
+
+      <MobileActions
+        product={product}
+        variant={selectedVariant}
+        options={options}
+        updateOptions={setOptionValue}
+        inStock={inStock}
+        handleAddToCart={handleAddToCart}
+        isAdding={isAdding}
+        show={!inView}
+        optionsDisabled={!!disabled || isAdding}
+      />
+    </div>
   );
 }

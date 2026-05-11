@@ -1,5 +1,5 @@
 import { Disclosure } from "@headlessui/react";
-import { Badge, Button, clx } from "@medusajs/ui";
+import { Badge, Button, clx } from "@lib/ui-compat";
 import { useEffect } from "react";
 
 import useToggleState from "@lib/hooks/use-toggle-state";
@@ -126,7 +126,7 @@ const AccountInfo = ({
                 type="submit"
                 data-testid="save-button"
               >
-                Save changes
+                Salvează
               </Button>
             </div>
           </div>

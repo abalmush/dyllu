@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@medusajs/ui";
+import { Button } from "@lib/ui-compat";
 
 import OrderCard from "../order-card";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
@@ -27,14 +27,14 @@ const OrderOverview = ({ orders }: { orders: HttpTypes.StoreOrder[] }) => {
       className="flex w-full flex-col items-center gap-y-4"
       data-testid="no-orders-container"
     >
-      <h2 className="text-large-semi">Nothing to see here</h2>
+      <h2 className="text-large-semi">Încă nu ai comenzi</h2>
       <p className="text-base-regular">
-        You don&apos;t have any orders yet, let us change that {":)"}
+        Descoperă selecția DYLLU și plasează prima ta comandă.
       </p>
       <div className="mt-4">
         <LocalizedClientLink href="/" passHref>
           <Button data-testid="continue-shopping-button">
-            Continue shopping
+            Începe cumpărăturile
           </Button>
         </LocalizedClientLink>
       </div>

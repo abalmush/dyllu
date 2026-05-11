@@ -4,7 +4,7 @@ import { setAddresses } from "@lib/data/cart";
 import compareAddresses from "@lib/util/compare-addresses";
 import { CheckCircleSolid } from "@medusajs/icons";
 import { HttpTypes } from "@medusajs/types";
-import { Heading, Text, useToggleState } from "@medusajs/ui";
+import { Heading, Text, useToggleState } from "@lib/ui-compat";
 import Divider from "@modules/common/components/divider";
 import Spinner from "@modules/common/icons/spinner";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";

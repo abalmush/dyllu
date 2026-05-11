@@ -1,4 +1,4 @@
-import { Badge } from "@medusajs/ui";
+import { Badge } from "@lib/ui-compat";
 
 const PaymentTest = ({ className }: { className?: string }) => {
   return (

@@ -1,6 +1,7 @@
-import LocalizedClientLink from "@modules/common/components/localized-client-link";
-import ChevronDown from "@modules/common/icons/chevron-down";
-import MedusaCTA from "@modules/layout/components/medusa-cta";
+import Link from "next/link";
+import { ChevronDown, ShieldCheck } from "lucide-react";
+
+import { Logo } from "@/components/atoms/logo";
 
 export default function CheckoutLayout({
   children,
@@ -8,38 +9,40 @@ export default function CheckoutLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative w-full bg-white small:min-h-screen">
-      <div className="h-16 border-b bg-white">
-        <nav className="content-container flex h-full items-center justify-between">
-          <LocalizedClientLink
+    <div className="relative min-h-screen w-full bg-background">
+      <header className="border-b border-border bg-background">
+        <nav className="content-container flex h-16 items-center justify-between gap-4">
+          <Link
             href="/cart"
-            className="text-small-semi flex flex-1 basis-0 items-center gap-x-2 uppercase text-ui-fg-base"
             data-testid="back-to-cart-link"
+            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            <ChevronDown className="rotate-90" size={16} />
-            <span className="txt-compact-plus mt-px hidden text-ui-fg-subtle hover:text-ui-fg-base small:block">
-              Back to shopping cart
-            </span>
-            <span className="txt-compact-plus mt-px block text-ui-fg-subtle hover:text-ui-fg-base small:hidden">
-              Back
-            </span>
-          </LocalizedClientLink>
-          <LocalizedClientLink
+            <ChevronDown className="size-4 rotate-90" />
+            <span className="hidden small:inline">Înapoi la coș</span>
+            <span className="inline small:hidden">Înapoi</span>
+          </Link>
+          <Link
             href="/"
-            className="txt-compact-xlarge-plus uppercase text-ui-fg-subtle hover:text-ui-fg-base"
             data-testid="store-link"
+            aria-label="DYLLU homepage"
+            className="flex items-center"
           >
-            Medusa Store
-          </LocalizedClientLink>
-          <div className="flex-1 basis-0" />
+            <Logo className="h-7" />
+          </Link>
+          <div className="flex flex-1 basis-0 items-center justify-end gap-2 text-xs text-muted-foreground">
+            <ShieldCheck className="size-4 text-success" />
+            <span className="hidden small:inline">Plată securizată MAIB</span>
+          </div>
         </nav>
-      </div>
+      </header>
       <div className="relative" data-testid="checkout-container">
         {children}
       </div>
-      <div className="flex w-full items-center justify-center py-4">
-        <MedusaCTA />
-      </div>
+      <footer className="border-t border-border bg-surface-subtle">
+        <div className="content-container flex h-14 items-center justify-center text-xs text-muted-foreground">
+          © {new Date().getFullYear()} DYLLU · Plăți procesate securizat prin MAIB
+        </div>
+      </footer>
     </div>
   );
 }

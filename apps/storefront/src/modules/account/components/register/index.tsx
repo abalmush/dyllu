@@ -21,23 +21,23 @@ const Register = ({ setCurrentView }: Props) => {
       data-testid="register-page"
     >
       <h1 className="text-large-semi mb-6 uppercase">
-        Become a Medusa Store Member
+        Creează cont DYLLU
       </h1>
       <p className="text-base-regular mb-4 text-center text-ui-fg-base">
-        Create your Medusa Store Member profile, and get access to an enhanced
-        shopping experience.
+        Înregistrează-te pentru comenzi mai rapide, urmărirea livrărilor și
+        oferte personalizate.
       </p>
       <form className="flex w-full flex-col" action={formAction}>
         <div className="flex w-full flex-col gap-y-2">
           <Input
-            label="First name"
+            label="Prenume"
             name="first_name"
             required
             autoComplete="given-name"
             data-testid="first-name-input"
           />
           <Input
-            label="Last name"
+            label="Nume"
             name="last_name"
             required
             autoComplete="family-name"
@@ -52,14 +52,14 @@ const Register = ({ setCurrentView }: Props) => {
             data-testid="email-input"
           />
           <Input
-            label="Phone"
+            label="Telefon"
             name="phone"
             type="tel"
             autoComplete="tel"
             data-testid="phone-input"
           />
           <Input
-            label="Password"
+            label="Parolă"
             name="password"
             required
             type="password"
@@ -69,33 +69,33 @@ const Register = ({ setCurrentView }: Props) => {
         </div>
         <ErrorMessage error={message} data-testid="register-error" />
         <span className="text-small-regular mt-6 text-center text-ui-fg-base">
-          By creating an account, you agree to Medusa Store&apos;s{" "}
+          Prin crearea contului accepți{" "}
           <LocalizedClientLink
             href="/content/privacy-policy"
             className="underline"
           >
-            Privacy Policy
+            Politica de confidențialitate
           </LocalizedClientLink>{" "}
-          and{" "}
+          și{" "}
           <LocalizedClientLink
             href="/content/terms-of-use"
             className="underline"
           >
-            Terms of Use
+            Termenii de utilizare
           </LocalizedClientLink>
-          .
+          {" "}DYLLU.
         </span>
         <SubmitButton className="mt-6 w-full" data-testid="register-button">
-          Join
+          Creează cont
         </SubmitButton>
       </form>
       <span className="text-small-regular mt-6 text-center text-ui-fg-base">
-        Already a member?{" "}
+        Ai deja cont?{" "}
         <button
           onClick={() => setCurrentView(LOGIN_VIEW.SIGN_IN)}
           className="underline"
         >
-          Sign in
+          Autentifică-te
         </button>
         .
       </span>

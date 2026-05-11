@@ -1,4 +1,4 @@
-import { Heading } from "@medusajs/ui";
+import { Heading } from "@lib/ui-compat";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
 import React from "react";
 

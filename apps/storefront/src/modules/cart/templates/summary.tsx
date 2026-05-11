@@ -1,48 +1,60 @@
 "use client";
 
-import { Button, Heading } from "@medusajs/ui";
-
-import CartTotals from "@modules/common/components/cart-totals";
-import Divider from "@modules/common/components/divider";
-import DiscountCode from "@modules/checkout/components/discount-code";
-import LocalizedClientLink from "@modules/common/components/localized-client-link";
+import Link from "next/link";
+import { ArrowRight, Lock, Package } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 
-type SummaryProps = {
+import { Button } from "@/components/atoms/button";
+import { Separator } from "@/components/atoms/separator";
+import CartTotals from "@modules/common/components/cart-totals";
+import DiscountCode from "@modules/checkout/components/discount-code";
+
+type Props = {
   cart: HttpTypes.StoreCart & {
     promotions: HttpTypes.StorePromotion[];
   };
 };
 
 function getCheckoutStep(cart: HttpTypes.StoreCart) {
-  if (!cart?.shipping_address?.address_1 || !cart.email) {
-    return "address";
-  } else if (cart?.shipping_methods?.length === 0) {
-    return "delivery";
-  } else {
-    return "payment";
-  }
+  if (!cart?.shipping_address?.address_1 || !cart.email) return "address";
+  if (cart?.shipping_methods?.length === 0) return "delivery";
+  return "payment";
 }
 
-const Summary = ({ cart }: SummaryProps) => {
+export default function Summary({ cart }: Props) {
   const step = getCheckoutStep(cart);
 
   return (
-    <div className="flex flex-col gap-y-4">
-      <Heading level="h2" className="text-[2rem] leading-[2.75rem]">
-        Summary
-      </Heading>
-      <DiscountCode cart={cart} />
-      <Divider />
+    <aside className="rounded-2xl border border-border bg-card p-6 shadow-sm small:p-7">
+      <h2 className="font-display text-xl font-bold tracking-tight text-foreground">
+        Sumar comandă
+      </h2>
+      <div className="mt-5">
+        <DiscountCode cart={cart} />
+      </div>
+      <Separator className="my-5" />
       <CartTotals totals={cart} />
-      <LocalizedClientLink
-        href={"/checkout?step=" + step}
+      <Button
+        asChild
+        size="xl"
+        className="mt-6 w-full rounded-full"
         data-testid="checkout-button"
       >
-        <Button className="h-10 w-full">Go to checkout</Button>
-      </LocalizedClientLink>
-    </div>
+        <Link href={`/checkout?step=${step}`}>
+          Finalizează comanda
+          <ArrowRight className="size-4" />
+        </Link>
+      </Button>
+      <ul className="mt-5 flex flex-col gap-2 text-xs text-muted-foreground">
+        <li className="flex items-center gap-2">
+          <Lock className="size-3.5 text-success" />
+          Plată securizată MAIB · 3-D Secure
+        </li>
+        <li className="flex items-center gap-2">
+          <Package className="size-3.5 text-primary" />
+          Livrare în toată Moldova · 24–48h în Chișinău
+        </li>
+      </ul>
+    </aside>
   );
-};
-
-export default Summary;
+}

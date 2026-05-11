@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus } from "@medusajs/icons";
-import { Button, Heading } from "@medusajs/ui";
+import { Button, Heading } from "@lib/ui-compat";
 import { useEffect, useState, useActionState } from "react";
 
 import { MD_POSTAL_CODE_PATTERN, MD_POSTAL_CODE_TITLE } from "@lib/constants";

@@ -4,7 +4,7 @@ import { RadioGroup } from "@headlessui/react";
 import { paymentInfoMap } from "@lib/constants";
 import { initiatePaymentSession } from "@lib/data/cart";
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons";
-import { Button, Container, Heading, Text, clx } from "@medusajs/ui";
+import { Button, Container, Heading, Text, clx } from "@lib/ui-compat";
 import ErrorMessage from "@modules/checkout/components/error-message";
 import PaymentContainer from "@modules/checkout/components/payment-container";
 import Divider from "@modules/common/components/divider";

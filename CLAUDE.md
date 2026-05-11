@@ -70,7 +70,7 @@ Orchestrated by Turborepo — `pnpm <script>` fans out to the right workspace(s)
 | ---------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | `pnpm dev`                                                       | Run **all** dev servers (backend + storefront) via turbo                   |
 | `pnpm -F @dyllu/backend dev`                                     | Backend only (admin at `http://localhost:9000/backend`)                    |
-| `pnpm -F @dyllu/storefront dev`                                  | Storefront only (`http://localhost:3000`, redirects to `/dk`)              |
+| `pnpm -F @dyllu/storefront dev`                                  | Storefront only (`http://localhost:4000`)                                  |
 | `pnpm build`                                                     | Production build for all workspaces                                        |
 | `pnpm lint` / `pnpm typecheck` / `pnpm test`                     | Fans out                                                                   |
 | `pnpm check`                                                     | Lint + typecheck + test (storefront only; backend has no check script yet) |
@@ -108,7 +108,7 @@ Orchestrated by Turborepo — `pnpm <script>` fans out to the right workspace(s)
    pnpm dev
    ```
 
-Admin URL: `http://localhost:9000/backend`. Storefront: `http://localhost:3000` → redirects to `/dk`.
+Admin URL: `http://localhost:9000/backend`. Storefront: `http://localhost:4000`.
 
 ## Environment variables
 

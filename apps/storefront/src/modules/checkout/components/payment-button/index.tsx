@@ -3,7 +3,7 @@
 import { isManual } from "@lib/constants";
 import { placeOrder } from "@lib/data/cart";
 import { HttpTypes } from "@medusajs/types";
-import { Button } from "@medusajs/ui";
+import { Button } from "@lib/ui-compat";
 import React, { useState } from "react";
 import ErrorMessage from "../error-message";
 

@@ -2,8 +2,92 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 4%;
+
+    --surface: 0 0% 99%;
+    --surface-subtle: 0 0% 97%;
+    --surface-strong: 0 0% 94%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 4%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 4%;
+
+    --primary: 71 79% 53%;
+    --primary-foreground: 0 0% 4%;
+    --primary-subtle: 71 90% 95%;
+
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 71 90% 92%;
+    --accent-foreground: 71 60% 18%;
+
+    --destructive: 0 78% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 71 79% 45%;
+    --success-foreground: 0 0% 4%;
+
+    --warning: 25 95% 55%;
+    --warning-foreground: 0 0% 4%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 71 79% 53%;
+
+    --radius: 0.5rem;
+
+    --brand-50: 71 100% 96%;
+    --brand-100: 71 90% 90%;
+    --brand-200: 71 85% 82%;
+    --brand-300: 71 80% 72%;
+    --brand-400: 71 78% 62%;
+    --brand-500: 71 79% 53%;
+    --brand-600: 71 75% 44%;
+    --brand-700: 71 70% 34%;
+    --brand-800: 71 65% 26%;
+    --brand-900: 71 60% 18%;
+    --brand-950: 71 55% 11%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+    font-feature-settings: "ss01";
+  }
+
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
 @layer utilities {
-  /* Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -13,8 +97,8 @@
   }
 
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   input:focus ~ label,
@@ -35,9 +119,9 @@
   select:-webkit-autofill,
   select:-webkit-autofill:hover,
   select:-webkit-autofill:focus {
-    border: 1px solid #212121;
-    -webkit-text-fill-color: #212121;
-    -webkit-box-shadow: 0 0 0px 1000px #fff inset;
+    border: 1px solid hsl(var(--border));
+    -webkit-text-fill-color: hsl(var(--foreground));
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset;
     transition: background-color 5000s ease-in-out 0s;
   }
 
@@ -47,15 +131,33 @@
   input[type="search"]::-webkit-search-results-decoration {
     -webkit-appearance: none;
   }
+
+  .ds-grid-bg {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.6) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.6) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .ds-shimmer {
+    background-image: linear-gradient(
+      110deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted-foreground) / 0.12) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s linear infinite;
+  }
 }
 
 @layer components {
   .content-container {
-    @apply mx-auto w-full max-w-[1440px] px-6;
+    @apply mx-auto w-full max-w-[1440px] px-4 small:px-6 medium:px-10;
   }
 
   .contrast-btn {
-    @apply rounded-full border border-black px-4 py-2 transition-colors duration-200 ease-in hover:bg-black hover:text-white;
+    @apply rounded-full border border-foreground px-4 py-2 transition-colors duration-200 ease-in hover:bg-foreground hover:text-background;
   }
 
   .text-xsmall-regular {
@@ -108,5 +210,16 @@
 
   .text-3xl-semi {
     @apply text-[32px] font-semibold leading-[44px];
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
