@@ -8,6 +8,7 @@ const S3_HOSTNAME = process.env.MEDUSA_CLOUD_S3_HOSTNAME;
 const S3_PATHNAME = process.env.MEDUSA_CLOUD_S3_PATHNAME;
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   outputFileTracingRoot: path.join(__dirname, "../../"),
   reactStrictMode: true,
   logging: {
@@ -34,7 +35,9 @@ const nextConfig: NextConfig = {
         hostname: "medusa-server-testing.s3.us-east-1.amazonaws.com",
       },
       { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "ingcomoldova.md" },
       ...(S3_HOSTNAME && S3_PATHNAME
         ? [
             {
