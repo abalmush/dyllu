@@ -85,6 +85,8 @@ jobs:
 
       - name: Pull and deploy
         run: |
+          ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
+            "echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin"
           ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << 'EOF'
             cd ~/dyllu-storefront
             docker pull ghcr.io/abalmush/dyllu-storefront:latest
