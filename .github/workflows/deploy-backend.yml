@@ -103,7 +103,7 @@ jobs:
              echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin && \
              cd ~/dyllu-backend && \
              docker pull ghcr.io/abalmush/dyllu-backend:latest && \
-             docker compose up -d --force-recreate && \
+             docker compose up -d --remove-orphans && \
              docker image prune -f"
 
       - name: Run migrations
