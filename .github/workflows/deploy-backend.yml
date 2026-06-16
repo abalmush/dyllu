@@ -73,9 +73,9 @@ jobs:
 
       - name: Copy compose file
         run: |
-          ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} "mkdir -p ~/dyllu-backend"
-          scp -i ~/.ssh/nas_key -P ${{ secrets.NAS_PORT }} apps/backend/docker-compose.prod.yml \
-            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }}:~/dyllu-backend/docker-compose.yml
+          SSH="ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }}"
+          $SSH "mkdir -p ~/dyllu-backend"
+          cat apps/backend/docker-compose.prod.yml | $SSH "cat > ~/dyllu-backend/docker-compose.yml"
 
       - name: Write .env
         run: |
