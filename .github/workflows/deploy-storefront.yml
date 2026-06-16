@@ -74,15 +74,15 @@ jobs:
 
       - name: Write .env
         run: |
-          ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << EOF
-            cat > ~/dyllu-storefront/.env << 'ENVEOF'
+          cat > /tmp/dyllu-storefront.env << 'EOF'
           NODE_ENV=production
           MEDUSA_BACKEND_URL=http://dyllu-backend:9000
           NEXT_PUBLIC_MEDUSA_URL=https://medusa.inexlab.com
           NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
           REVALIDATE_SECRET=${{ secrets.MEDUSA_REVALIDATE_SECRET }}
-          ENVEOF
           EOF
+          cat /tmp/dyllu-storefront.env | ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} "cat > ~/dyllu-storefront/.env"
+          rm -f /tmp/dyllu-storefront.env
 
       - name: Pull and deploy
         run: |
