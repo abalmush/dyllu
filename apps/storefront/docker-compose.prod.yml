@@ -1,0 +1,30 @@
+services:
+  dyllu-storefront:
+    image: ghcr.io/abalmush/dyllu-storefront:latest
+    container_name: dyllu-storefront
+    restart: unless-stopped
+    env_file: .env
+    networks:
+      - proxy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+networks:
+  proxy:
+    external: true
