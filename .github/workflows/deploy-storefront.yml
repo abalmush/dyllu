@@ -12,6 +12,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ghcr.io/abalmush/dyllu-storefront
+  DOCKER_PATH: /volume1/@appstore/ContainerManager/usr/bin
 
 jobs:
   build-and-deploy:
@@ -86,24 +87,21 @@ jobs:
       - name: Pull and deploy
         run: |
           ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
-            "echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin"
-          ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << 'EOF'
-            cd ~/dyllu-storefront
-            docker pull ghcr.io/abalmush/dyllu-storefront:latest
-            docker compose up -d --force-recreate
-          EOF
+            "export PATH=\$PATH:${{ env.DOCKER_PATH }} && \
+             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin && \
+             cd ~/dyllu-storefront && \
+             docker pull ghcr.io/abalmush/dyllu-storefront:latest && \
+             docker compose up -d --force-recreate && \
+             docker image prune -f"
 
       - name: Health check
         run: |
-          ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << 'EOF'
-            for i in $(seq 1 10); do
-              if docker exec dyllu-storefront wget -qO- http://localhost:3000 >/dev/null 2>&1; then
-                echo "Storefront healthy"
-                exit 0
-              fi
-              echo "Attempt $i/10 failed, retrying in 10s..."
-              sleep 10
-            done
-            echo "Storefront failed to become healthy"
-            exit 1
-          EOF
+          ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
+            "export PATH=\$PATH:${{ env.DOCKER_PATH }} && \
+             for i in \$(seq 1 10); do \
+               if docker exec dyllu-storefront wget -qO- http://localhost:3000 >/dev/null 2>&1; then \
+                 echo 'Storefront healthy'; exit 0; \
+               fi; \
+               echo \"Attempt \$i/10 failed, retrying in 10s...\"; sleep 10; \
+             done; \
+             echo 'Storefront failed to become healthy'; exit 1"
