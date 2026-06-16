@@ -1,0 +1,125 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/backend/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/deploy-backend.yml"
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ghcr.io/abalmush/dyllu-backend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/backend/Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_CLIENT_SECRET }}
+          tags: tag:ci
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.NAS_SSH_KEY }}" > ~/.ssh/nas_key
+          chmod 600 ~/.ssh/nas_key
+          ssh-keyscan -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Provision database
+        run: |
+          ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << 'EOF'
+            docker network create postgres-net 2>/dev/null || true
+            docker network connect postgres-net context-postgres 2>/dev/null || true
+            docker exec context-postgres psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname='medusa'" | grep -q 1 || \
+              docker exec context-postgres psql -U postgres -c "CREATE DATABASE medusa"
+          EOF
+
+      - name: Copy compose file
+        run: |
+          ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} "mkdir -p ~/dyllu-backend"
+          scp -i ~/.ssh/nas_key -P ${{ secrets.NAS_PORT }} apps/backend/docker-compose.prod.yml \
+            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }}:~/dyllu-backend/docker-compose.yml
+
+      - name: Write .env
+        run: |
+          ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << EOF
+            cat > ~/dyllu-backend/.env << 'ENVEOF'
+          NODE_ENV=production
+          DATABASE_URL=postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@context-postgres:5432/medusa
+          REDIS_URL=redis://dyllu-redis:6379
+          JWT_SECRET=${{ secrets.MEDUSA_JWT_SECRET }}
+          COOKIE_SECRET=${{ secrets.MEDUSA_COOKIE_SECRET }}
+          STORE_CORS=https://dyllu.inexlab.com
+          ADMIN_CORS=https://medusa.inexlab.com
+          AUTH_CORS=https://medusa.inexlab.com,https://dyllu.inexlab.com
+          BACKEND_URL=https://medusa.inexlab.com
+          STOREFRONT_URL=https://dyllu.inexlab.com
+          REVALIDATE_SECRET=${{ secrets.MEDUSA_REVALIDATE_SECRET }}
+          ENVEOF
+          EOF
+
+      - name: Pull and deploy
+        run: |
+          ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << 'EOF'
+            cd ~/dyllu-backend
+            docker pull ghcr.io/abalmush/dyllu-backend:latest
+            docker compose up -d --force-recreate
+          EOF
+
+      - name: Run migrations
+        run: |
+          ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << 'EOF'
+            sleep 10
+            docker exec dyllu-backend node_modules/.bin/medusa db:migrate
+          EOF
+
+      - name: Health check
+        run: |
+          ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << 'EOF'
+            for i in $(seq 1 10); do
+              if docker exec dyllu-backend wget -qO- http://localhost:9000/health >/dev/null 2>&1; then
+                echo "Backend healthy"
+                exit 0
+              fi
+              echo "Attempt $i/10 failed, retrying in 10s..."
+              sleep 10
+            done
+            echo "Backend failed to become healthy"
+            exit 1
+          EOF
