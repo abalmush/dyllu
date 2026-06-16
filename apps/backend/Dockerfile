@@ -15,7 +15,7 @@ COPY apps/backend apps/backend
 RUN pnpm --filter=@dyllu/backend build
 
 WORKDIR /repo/apps/backend/.medusa/server
-RUN npm install --omit=dev --no-package-lock
+RUN npm install --omit=dev --no-package-lock --legacy-peer-deps
 
 FROM node:20-alpine AS runtime
 WORKDIR /app
