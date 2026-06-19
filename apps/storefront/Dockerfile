@@ -18,9 +18,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
-COPY --from=builder /repo/apps/storefront/public ./public
 COPY --from=builder --chown=nextjs:nodejs /repo/apps/storefront/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /repo/apps/storefront/.next/static ./.next/static
+COPY --from=builder /repo/apps/storefront/public ./apps/storefront/public
+COPY --from=builder --chown=nextjs:nodejs /repo/apps/storefront/.next/static ./apps/storefront/.next/static
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
