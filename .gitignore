@@ -53,3 +53,5 @@ next-env.d.ts
 
 tmp/
 images/
+!apps/storefront/public/images/
+!apps/storefront/public/images/**
