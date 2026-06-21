@@ -2,7 +2,7 @@
 
 ## Overview
 
-Deploy the DYLLU Medusa v2 backend and Next.js storefront to the Synology NAS at `inexlab.com`, alongside the existing services (context, trade-forge, n8n, market-data). Public access to `dyllu.inexlab.com` and `api.dyllu.inexlab.com` is provided via a Cloudflare Tunnel — no port forwarding, no router changes. Tailscale-authenticated users (team/client) access all subdomains as before. Every push to `main` triggers an automated deploy including database migrations.
+Deploy the DYLLU Medusa v2 backend and Next.js storefront to the Synology NAS at `inexlab.com`, alongside the existing services (context, trade-forge, n8n, market-data). Public access to `dyllu.inexlab.com` and `medusa.inexlab.com` is provided via a Cloudflare Tunnel — no port forwarding, no router changes. Tailscale-authenticated users (team/client) access all subdomains as before. Every push to `main` triggers an automated deploy including database migrations.
 
 ---
 
@@ -10,7 +10,7 @@ Deploy the DYLLU Medusa v2 backend and Next.js storefront to the Synology NAS at
 
 ```
 Public users
-  → dyllu.inexlab.com / api.dyllu.inexlab.com
+  → dyllu.inexlab.com / medusa.inexlab.com
     → Cloudflare Edge (TLS terminated, Cloudflare cert)
       → cloudflared container (outbound tunnel, no open ports on NAS)
         → caddy:80 (routes by Host header, Docker proxy network)
@@ -24,12 +24,12 @@ Tailscale users (team / client via node share)
 
 ## Subdomains
 
-| Subdomain               | Container                    | Visibility                 |
-| ----------------------- | ---------------------------- | -------------------------- |
-| `dyllu.inexlab.com`     | `dyllu-storefront` port 3000 | Public (Cloudflare Tunnel) |
-| `api.dyllu.inexlab.com` | `dyllu-backend` port 9000    | Public (Cloudflare Tunnel) |
+| Subdomain            | Container                    | Visibility                 |
+| -------------------- | ---------------------------- | -------------------------- |
+| `dyllu.inexlab.com`  | `dyllu-storefront` port 3000 | Public (Cloudflare Tunnel) |
+| `medusa.inexlab.com` | `dyllu-backend` port 9000    | Public (Cloudflare Tunnel) |
 
-Admin dashboard is at `api.dyllu.inexlab.com/backend` — publicly reachable but protected by Medusa's own authentication. No additional restriction needed.
+Admin dashboard is at `medusa.inexlab.com/backend` — publicly reachable but protected by Medusa's own authentication. No additional restriction needed.
 
 ---
 
@@ -121,15 +121,19 @@ Steps:
 1. Build image → push `ghcr.io/abalmush/dyllu-backend:latest` + SHA tag
 2. Tailscale connect → SSH into NAS
 3. **Provision** (all idempotent):
-   - `docker network create postgres-net || true`
-   - `docker network connect postgres-net context-postgres || true`
-   - `docker exec context-postgres psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname='medusa'" | grep -q 1 || docker exec context-postgres psql -U postgres -c "CREATE DATABASE medusa"`
+
+- `docker network create postgres-net || true`
+- `docker network connect postgres-net context-postgres || true`
+- `docker exec context-postgres psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname='medusa'" | grep -q 1 || docker exec context-postgres psql -U postgres -c "CREATE DATABASE medusa"`
+
 4. Copy `apps/backend/docker-compose.prod.yml` → `~/dyllu-backend/docker-compose.yml`
 5. Write `.env` from secrets
 6. `docker pull ghcr.io/abalmush/dyllu-backend:latest`
 7. `docker compose up -d --force-recreate`
 8. **Run migrations**: `docker exec dyllu-backend node_modules/.bin/medusa db:migrate`
-   - If this exits non-zero → workflow fails, deploy blocked. Manual fix required.
+
+- If this exits non-zero → workflow fails, deploy blocked. Manual fix required.
+
 9. Health check loop (10 retries × 5s)
 
 ### `.github/workflows/deploy-storefront.yml`
@@ -138,7 +142,7 @@ Trigger: push to `main`, paths `apps/storefront/**`, `pnpm-lock.yaml`, `.github/
 
 Steps:
 
-1. Build image with build args `NEXT_PUBLIC_MEDUSA_URL=https://api.dyllu.inexlab.com` and `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` → push to GHCR
+1. Build image with build args `NEXT_PUBLIC_MEDUSA_URL=https://medusa.inexlab.com` and `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` → push to GHCR
 2. Tailscale connect → SSH into NAS
 3. Copy `apps/storefront/docker-compose.prod.yml` → `~/dyllu-storefront/docker-compose.yml`
 4. Write `.env` from secrets
@@ -167,7 +171,7 @@ handle @dyllu {
     reverse_proxy dyllu-storefront:3000
 }
 
-@dyllu-api host api.dyllu.inexlab.com
+@dyllu-api host medusa.inexlab.com
 handle @dyllu-api {
     reverse_proxy dyllu-backend:9000
 }
@@ -228,7 +232,7 @@ After the Caddy deploy step:
 These are done once and never again:
 
 1. **Create Cloudflare Tunnel** in Cloudflare dashboard (Zero Trust → Access → Tunnels → Create tunnel) → copy the tunnel token → add as `CLOUDFLARE_TUNNEL_TOKEN` secret in nas-infra repo
-2. **Configure tunnel hostnames** in Cloudflare dashboard: `dyllu.inexlab.com` → `http://caddy:80`, `api.dyllu.inexlab.com` → `http://caddy:80`
+2. **Configure tunnel hostnames** in Cloudflare dashboard: `dyllu.inexlab.com` → `http://caddy:80`, `medusa.inexlab.com` → `http://caddy:80`
 3. **DNS CNAMEs** auto-created by Cloudflare when you configure tunnel hostnames (if `inexlab.com` is on Cloudflare — it is)
 4. **Add Tailscale OAuth credentials** to DYLLU repo secrets
 5. **After first deploy**: copy publishable API key from Medusa admin → add as `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` secret → re-deploy storefront
