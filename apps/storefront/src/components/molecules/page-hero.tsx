@@ -91,7 +91,7 @@ export function PageHero({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-2xl p-8 md:p-12",
+        "clip-corner-cut-lg relative overflow-hidden p-8 md:p-12",
         tokens.container,
         className
       )}
@@ -106,7 +106,7 @@ export function PageHero({
         {eyebrow && (
           <div
             className={cn(
-              "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider",
+              "clip-corner-cut-sm inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider",
               tokens.eyebrow
             )}
           >
@@ -133,7 +133,7 @@ export function PageHero({
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className={cn("rounded-xl p-4", tokens.statTile)}
+                className={cn("clip-corner-cut-sm p-4", tokens.statTile)}
                 data-testid={stat["data-testid"]}
               >
                 <dt

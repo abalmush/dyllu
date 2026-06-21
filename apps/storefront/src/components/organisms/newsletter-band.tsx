@@ -2,26 +2,24 @@ import * as React from "react";
 import { Mail } from "lucide-react";
 
 import { Container } from "@/components/atoms/container";
+import { Eyebrow } from "@/components/molecules/eyebrow";
 import { NewsletterForm } from "@/components/molecules/newsletter-form";
 
 export function NewsletterBand() {
   return (
     <section className="py-16 small:py-24">
       <Container>
-        <div className="relative overflow-hidden rounded-3xl bg-secondary p-8 text-secondary-foreground small:p-14">
-          <div
-            aria-hidden
-            className="absolute inset-0 ds-grid-bg opacity-20"
-          />
+        <div className="clip-corner-cut-lg relative overflow-hidden bg-secondary p-8 text-secondary-foreground small:p-14">
+          <div aria-hidden className="ds-grid-bg absolute inset-0 opacity-20" />
           <div
             aria-hidden
             className="absolute -right-24 -top-24 size-72 rounded-full bg-primary/30 blur-3xl"
           />
           <div className="relative grid items-center gap-10 small:grid-cols-2">
             <div className="space-y-4">
-              <span className="inline-flex items-center gap-2 rounded-full bg-primary/15 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
-                <Mail className="size-3.5" /> Newsletter DYLLU
-              </span>
+              <Eyebrow icon={<Mail className="size-3.5" />}>
+                Newsletter DYLLU
+              </Eyebrow>
               <h2 className="font-display text-display-sm font-extrabold tracking-tight small:text-display-md">
                 Promoții, sfaturi tehnice și
                 <span className="text-primary"> stocuri limitate</span> înainte

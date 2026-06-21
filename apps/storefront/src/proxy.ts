@@ -1,7 +1,22 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import productRedirects from "@lib/data/product-redirects.json";
+
+const productHandleRedirects = productRedirects as Record<string, string>;
+
 export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const productMatch = pathname.match(/^\/products\/([^/?#]+)\/?$/);
+  if (productMatch) {
+    const newHandle = productHandleRedirects[productMatch[1]];
+    if (newHandle) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/products/${newHandle}`;
+      return NextResponse.redirect(url, 301);
+    }
+  }
+
   if (request.cookies.get("_medusa_cache_id")) {
     return NextResponse.next();
   }

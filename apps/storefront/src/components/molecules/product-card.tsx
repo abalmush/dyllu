@@ -5,7 +5,10 @@ import { ArrowUpRight } from "lucide-react";
 
 import { cn } from "@lib/utils";
 import { Badge } from "@/components/atoms/badge";
-import { PriceBlock, type PriceShape } from "@/components/molecules/price-block";
+import {
+  PriceBlock,
+  type PriceShape,
+} from "@/components/molecules/price-block";
 
 export interface ProductCardProps {
   href: string;
@@ -19,7 +22,10 @@ export interface ProductCardProps {
   className?: string;
 }
 
-export const ProductCard = React.forwardRef<HTMLAnchorElement, ProductCardProps>(
+export const ProductCard = React.forwardRef<
+  HTMLAnchorElement,
+  ProductCardProps
+>(
   (
     {
       href,
@@ -39,7 +45,7 @@ export const ProductCard = React.forwardRef<HTMLAnchorElement, ProductCardProps>
       href={href}
       data-testid="product-wrapper"
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-foreground/20 hover:shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)]",
+        "clip-corner-cut-md group relative flex flex-col overflow-hidden bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)]",
         className
       )}
     >

@@ -24,14 +24,10 @@ const variantMap = {
 };
 
 const ctaMap = {
-  primary:
-    "bg-foreground text-background hover:bg-foreground/90",
-  dark:
-    "bg-primary text-primary-foreground hover:bg-primary/90",
-  muted:
-    "bg-foreground text-background hover:bg-foreground/90",
-  image:
-    "bg-primary text-primary-foreground hover:bg-primary/90",
+  primary: "bg-foreground text-background hover:bg-foreground/90",
+  dark: "bg-primary text-primary-foreground hover:bg-primary/90",
+  muted: "bg-foreground text-background hover:bg-foreground/90",
+  image: "bg-primary text-primary-foreground hover:bg-primary/90",
 };
 
 export function BannerCard({
@@ -49,7 +45,7 @@ export function BannerCard({
     <Link
       href={href}
       className={cn(
-        "group relative flex min-h-[260px] overflow-hidden rounded-2xl border border-transparent transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_30px_60px_-25px_rgba(15,23,42,0.4)] small:min-h-[280px]",
+        "clip-corner-cut-lg group relative flex min-h-[260px] overflow-hidden border border-transparent transition-all duration-300 hover:-translate-y-0.5 small:min-h-[280px]",
         variantMap[variant],
         className
       )}
@@ -88,7 +84,7 @@ export function BannerCard({
         </div>
         <span
           className={cn(
-            "inline-flex items-center gap-2 self-start rounded-full px-4 py-2 text-sm font-semibold transition-colors",
+            "clip-corner-cut-sm inline-flex items-center gap-2 self-start px-5 py-2.5 text-sm font-semibold transition-colors",
             ctaMap[variant]
           )}
         >

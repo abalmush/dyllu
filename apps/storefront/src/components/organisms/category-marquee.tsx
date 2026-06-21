@@ -20,7 +20,10 @@ type Item = (typeof categoriesTree)[number];
 
 export function CategoryMarquee() {
   return (
-    <section className="bg-background" aria-label="Categorii — variantă marquee">
+    <section
+      className="bg-background"
+      aria-label="Categorii — variantă marquee"
+    >
       <MarqueeMobile items={categoriesTree} />
       <MarqueeDesktop items={categoriesTree} />
     </section>
@@ -29,7 +32,7 @@ export function CategoryMarquee() {
 
 function MarqueeMobile({ items }: { items: Item[] }) {
   return (
-    <div className="medium:hidden py-12">
+    <div className="py-12 medium:hidden">
       <Container>
         <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
           Marquee
@@ -46,7 +49,7 @@ function MarqueeMobile({ items }: { items: Item[] }) {
               <Link
                 key={cat.handle}
                 href={`/categories/${cat.handle}`}
-                className="relative flex h-72 w-72 shrink-0 flex-col justify-end overflow-hidden rounded-2xl border border-border p-5"
+                className="clip-corner-cut-md relative flex h-72 w-72 shrink-0 flex-col justify-end overflow-hidden p-5"
                 style={{
                   backgroundImage: `url(${visual.image})`,
                   backgroundSize: "cover",
@@ -159,7 +162,7 @@ function MarqueeDesktop({ items }: { items: Item[] }) {
                   key={cat.handle}
                   href={`/categories/${cat.handle}`}
                   className={cn(
-                    "group relative flex h-[60vh] w-[90vw] shrink-0 flex-col justify-end overflow-hidden rounded-3xl border border-background/10 p-10",
+                    "clip-corner-cut-lg group relative flex h-[60vh] w-[90vw] shrink-0 flex-col justify-end overflow-hidden p-10",
                     "medium:w-[55vw] large:w-[45vw]"
                   )}
                   style={{

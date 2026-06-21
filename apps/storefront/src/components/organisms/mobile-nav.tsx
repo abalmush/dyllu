@@ -20,9 +20,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/atoms/sheet";
-import { categoriesTree } from "@lib/data/categories-tree";
+import { type CategoryNode } from "@lib/data/categories";
 
-export function MobileNav() {
+export interface MobileNavProps {
+  categories: CategoryNode[];
+}
+
+export function MobileNav({ categories }: MobileNavProps) {
   const [open, setOpen] = React.useState(false);
   const close = () => setOpen(false);
 
@@ -57,7 +61,7 @@ export function MobileNav() {
               <ChevronDown className="size-4 -rotate-90 text-muted-foreground" />
             </Link>
             <Accordion type="multiple" className="px-2">
-              {categoriesTree.map((category) => (
+              {categories.map((category) => (
                 <AccordionItem
                   key={category.handle}
                   value={category.handle}

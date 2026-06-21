@@ -17,9 +17,9 @@ export interface CategoryCardProps {
 
 const accentMap = {
   primary:
-    "bg-primary text-primary-foreground border-primary [&_[data-arrow]]:bg-primary-foreground [&_[data-arrow]]:text-primary",
-  neutral: "bg-card text-foreground border-border",
-  dark: "bg-secondary text-secondary-foreground border-secondary [&_[data-arrow]]:bg-primary [&_[data-arrow]]:text-primary-foreground",
+    "bg-primary text-primary-foreground [&_[data-arrow]]:bg-primary-foreground [&_[data-arrow]]:text-primary",
+  neutral: "bg-card text-foreground",
+  dark: "bg-secondary text-secondary-foreground [&_[data-arrow]]:bg-primary [&_[data-arrow]]:text-primary-foreground",
 };
 
 export const CategoryCard = React.forwardRef<
@@ -43,7 +43,7 @@ export const CategoryCard = React.forwardRef<
       ref={ref}
       href={href}
       className={cn(
-        "group relative flex h-full min-h-[260px] flex-col overflow-hidden rounded-2xl border p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_30px_70px_-40px_rgba(15,23,42,0.4)]",
+        "clip-corner-cut-md group relative flex h-full min-h-[260px] flex-col overflow-hidden p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_30px_70px_-40px_rgba(15,23,42,0.4)]",
         accentMap[accent],
         className
       )}

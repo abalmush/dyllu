@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 import { cn } from "@lib/utils";
 import { Container } from "@/components/atoms/container";
+import { Eyebrow } from "@/components/molecules/eyebrow";
 
 export interface ProductRailSectionProps {
   eyebrow?: string;
@@ -37,12 +38,8 @@ export function ProductRailSection({
       <Container>
         <div className="flex flex-col items-start justify-between gap-6 small:flex-row small:items-end">
           <div>
-            {eyebrow && (
-              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-                {eyebrow}
-              </span>
-            )}
-            <h2 className="mt-2 font-display text-2xl font-extrabold tracking-tight text-foreground small:text-display-sm">
+            {eyebrow && <Eyebrow variant="dark">{eyebrow}</Eyebrow>}
+            <h2 className="mt-3 font-display text-2xl font-extrabold tracking-tight text-foreground small:text-display-sm">
               {title}
             </h2>
             {description && (

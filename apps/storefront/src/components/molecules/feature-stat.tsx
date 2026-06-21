@@ -18,7 +18,7 @@ export function FeatureStat({
   return (
     <div
       className={cn(
-        "flex items-start gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-foreground/15",
+        "clip-corner-cut-sm flex items-start gap-4 bg-card p-5 transition-colors hover:bg-surface-subtle",
         className
       )}
     >

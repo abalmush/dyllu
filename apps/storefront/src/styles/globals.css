@@ -69,11 +69,16 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background font-sans text-foreground;
     font-feature-settings: "ss01", "cv11";
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display;
     font-feature-settings: "ss01";
   }
@@ -148,6 +153,189 @@
     );
     background-size: 200% 100%;
     animation: shimmer 1.8s linear infinite;
+  }
+
+  .clip-corner-cut-xs {
+    clip-path: polygon(
+      4px 0,
+      100% 0,
+      100% calc(100% - 4px),
+      calc(100% - 4px) 100%,
+      0 100%,
+      0 4px
+    );
+  }
+
+  .clip-corner-cut-sm {
+    clip-path: polygon(
+      8px 0,
+      100% 0,
+      100% calc(100% - 8px),
+      calc(100% - 8px) 100%,
+      0 100%,
+      0 8px
+    );
+  }
+
+  .clip-corner-cut-md {
+    clip-path: polygon(
+      16px 0,
+      100% 0,
+      100% calc(100% - 16px),
+      calc(100% - 16px) 100%,
+      0 100%,
+      0 16px
+    );
+  }
+
+  .clip-corner-cut-lg {
+    clip-path: polygon(
+      28px 0,
+      100% 0,
+      100% calc(100% - 28px),
+      calc(100% - 28px) 100%,
+      0 100%,
+      0 28px
+    );
+  }
+
+  /* Shadow utilities that work with clip-path — uses CSS filter:
+     drop-shadow() which follows the cut-corner outline, unlike box-shadow
+     which gets clipped away. Layered two drops per level: a tight close-edge
+     shadow + a soft ambient one for depth. */
+  .clip-shadow-sm {
+    filter: drop-shadow(0 6px 12px rgba(15, 15, 15, 0.12))
+      drop-shadow(0 2px 4px rgba(15, 15, 15, 0.08));
+  }
+
+  .clip-shadow-md {
+    filter: drop-shadow(0 14px 22px rgba(15, 15, 15, 0.16))
+      drop-shadow(0 3px 6px rgba(15, 15, 15, 0.1));
+  }
+
+  .clip-shadow-lg {
+    filter: drop-shadow(0 24px 36px rgba(15, 15, 15, 0.2))
+      drop-shadow(0 4px 8px rgba(15, 15, 15, 0.12));
+  }
+
+  .clip-shadow-xl {
+    filter: drop-shadow(0 36px 56px rgba(15, 15, 15, 0.24))
+      drop-shadow(0 6px 12px rgba(15, 15, 15, 0.14));
+  }
+
+  /* ───────────────────────────────────────────────────────────────────
+     Corner-cut V2 — asymmetric engineered silhouettes, layered panel
+     depth via stacked drop-shadows, mechanical hover/press, matte
+     surface overlays. Drop-in replacement for clip-corner-cut-* — pair
+     a silhouette class with -surface-* and -depth-* for the full kit.
+
+     ┌─ Silhouettes ────────────────────────────────────────────────────
+     │  cc-v2-bracket   — big TL diagonal + small TR step notch
+     │  cc-v2-module    — bolder V1 (TL+BR) plus a TR service notch
+     │  cc-v2-chassis   — all 4 corners cut at varying sizes (connector)
+     └──────────────────────────────────────────────────────────────────
+  */
+
+  .cc-v2-bracket {
+    clip-path: polygon(
+      30px 0,
+      calc(100% - 20px) 0,
+      calc(100% - 20px) 8px,
+      calc(100% - 8px) 8px,
+      100% 8px,
+      100% 100%,
+      0 100%,
+      0 30px
+    );
+  }
+
+  .cc-v2-module {
+    clip-path: polygon(
+      24px 0,
+      calc(100% - 32px) 0,
+      calc(100% - 32px) 10px,
+      calc(100% - 14px) 10px,
+      100% 10px,
+      100% calc(100% - 24px),
+      calc(100% - 24px) 100%,
+      0 100%,
+      0 24px
+    );
+  }
+
+  .cc-v2-chassis {
+    clip-path: polygon(
+      28px 0,
+      calc(100% - 8px) 0,
+      100% 8px,
+      100% calc(100% - 20px),
+      calc(100% - 20px) 100%,
+      8px 100%,
+      0 calc(100% - 8px),
+      0 28px
+    );
+  }
+
+  /* Depth: stacked sharp drop-shadows simulate two back panels, plus a
+     soft ambient. Hover lifts the front panel (offsets grow + transform
+     up-left). Press collapses the stack. */
+  .cc-v2-depth {
+    filter: drop-shadow(3px 3px 0 hsl(0 0% 8% / 0.1))
+      drop-shadow(7px 7px 0 hsl(0 0% 8% / 0.06))
+      drop-shadow(0 10px 18px hsl(0 0% 8% / 0.14));
+    transition:
+      filter 220ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    will-change: transform, filter;
+  }
+
+  .cc-v2-depth:hover {
+    transform: translate(-1px, -2px);
+    filter: drop-shadow(4px 4px 0 hsl(0 0% 8% / 0.12))
+      drop-shadow(9px 9px 0 hsl(0 0% 8% / 0.08))
+      drop-shadow(0 16px 28px hsl(0 0% 8% / 0.18));
+  }
+
+  .cc-v2-depth:active {
+    transform: translate(1px, 1px);
+    transition-duration: 80ms;
+    filter: drop-shadow(1px 1px 0 hsl(0 0% 8% / 0.08))
+      drop-shadow(2px 2px 0 hsl(0 0% 8% / 0.05))
+      drop-shadow(0 4px 6px hsl(0 0% 8% / 0.1));
+  }
+
+  /* Reduced motion: keep depth, drop the transform. */
+  @media (prefers-reduced-motion: reduce) {
+    .cc-v2-depth,
+    .cc-v2-depth:hover,
+    .cc-v2-depth:active {
+      transform: none;
+      transition: filter 220ms ease;
+    }
+  }
+
+  /* Surface overlays — compose with the host's bg-color via background-blend.
+     Matte = subtle diagonal sheen + fine noise (metal feel).
+     Plastic = sheen only, no grain (smoother resin feel). */
+  .cc-v2-surface-matte {
+    background-image:
+      linear-gradient(
+        135deg,
+        hsl(0 0% 100% / 0.06) 0%,
+        transparent 32%,
+        hsl(0 0% 0% / 0.05) 100%
+      ),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.07 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-blend-mode: overlay, normal;
+  }
+
+  .cc-v2-surface-plastic {
+    background-image: linear-gradient(
+      135deg,
+      hsl(0 0% 100% / 0.08) 0%,
+      transparent 40%,
+      hsl(0 0% 0% / 0.04) 100%
+    );
   }
 }
 

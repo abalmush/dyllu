@@ -43,7 +43,7 @@ function CinematicMobile({ items }: { items: Item[] }) {
             <Link
               key={cat.handle}
               href={`/categories/${cat.handle}`}
-              className="relative flex h-64 flex-col justify-end overflow-hidden rounded-2xl border border-background/10 p-5"
+              className="clip-corner-cut-md relative flex h-64 flex-col justify-end overflow-hidden p-5"
               style={{
                 backgroundImage: `url(${visual.image})`,
                 backgroundSize: "cover",
@@ -175,7 +175,9 @@ function CinematicDesktop({ items }: { items: Item[] }) {
                     ease: "linear",
                   }}
                   className="absolute inset-y-0 left-0 bg-primary"
-                  style={{ animationPlayState: isPaused ? "paused" : "running" }}
+                  style={{
+                    animationPlayState: isPaused ? "paused" : "running",
+                  }}
                 />
               )}
             </button>

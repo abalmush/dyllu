@@ -11,7 +11,7 @@ export function ProductSpotlight() {
         <Link
           href="/products/dyllu-p20s-vacuum"
           aria-label="DYLLU P20S — aspirator portabil 20V Max Lithium"
-          className="group relative mx-auto block w-full max-w-3xl overflow-hidden rounded-3xl border border-background/10 shadow-[0_40px_120px_-40px_rgba(0,0,0,0.6)] transition-transform duration-500 hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/60"
+          className="clip-corner-cut-lg group relative mx-auto block w-full max-w-3xl overflow-hidden shadow-[0_40px_120px_-40px_rgba(0,0,0,0.6)] transition-transform duration-500 hover:scale-[1.01] focus-visible:outline-none"
         >
           <Image
             src="/images/dyllu-vacuum-p20s.png"

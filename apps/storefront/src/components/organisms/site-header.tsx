@@ -12,13 +12,15 @@ import { CartDrawer } from "@/components/organisms/cart-drawer";
 import { MegaMenu } from "@/components/organisms/mega-menu";
 import { MobileNav } from "@/components/organisms/mobile-nav";
 import { SearchCommand } from "@/components/organisms/search-command";
+import { type CategoryNode } from "@lib/data/categories";
 import { HttpTypes } from "@medusajs/types";
 
 export interface SiteHeaderProps {
   cart: HttpTypes.StoreCart | null;
+  categories: CategoryNode[];
 }
 
-export function SiteHeader({ cart }: SiteHeaderProps) {
+export function SiteHeader({ cart, categories }: SiteHeaderProps) {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
   const showcasePinned = useShowcasePinned((state) => state.pinnedCount > 0);
@@ -46,7 +48,7 @@ export function SiteHeader({ cart }: SiteHeaderProps) {
       className={cn(
         "sticky top-0 z-40 w-full border-b text-background transition-all duration-300",
         scrolled
-          ? "border-background/10 bg-foreground/85 backdrop-blur-md shadow-sm"
+          ? "border-background/10 bg-foreground/85 shadow-sm backdrop-blur-md"
           : "border-transparent bg-foreground",
         showcasePinned &&
           "medium:pointer-events-none medium:-translate-y-full medium:opacity-0"
@@ -54,7 +56,7 @@ export function SiteHeader({ cart }: SiteHeaderProps) {
     >
       <div className="content-container flex h-16 items-center gap-4 small:h-20 small:gap-6">
         <div className="flex shrink-0 items-center gap-1">
-          <MobileNav />
+          <MobileNav categories={categories} />
           <Link
             href="/"
             aria-label="DYLLU homepage"
@@ -65,7 +67,7 @@ export function SiteHeader({ cart }: SiteHeaderProps) {
         </div>
 
         <div className="hidden min-w-0 flex-1 items-center medium:flex">
-          <MegaMenu />
+          <MegaMenu categories={categories} />
         </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-1 small:gap-2">

@@ -4,9 +4,9 @@ import * as React from "react";
 import Image from "next/image";
 import { useMotionValueEvent, useScroll } from "framer-motion";
 
-
 import { cn } from "@lib/utils";
 import { useShowcasePinned } from "@lib/stores/showcase-pinned";
+import { Eyebrow } from "@/components/molecules/eyebrow";
 
 export type AnatomyItem = {
   key: string;
@@ -22,11 +22,26 @@ export interface AnatomyShowcaseProps {
   items: AnatomyItem[];
 }
 
-export function AnatomyShowcase({ eyebrow, title, intro, items }: AnatomyShowcaseProps) {
+export function AnatomyShowcase({
+  eyebrow,
+  title,
+  intro,
+  items,
+}: AnatomyShowcaseProps) {
   return (
     <section className="bg-foreground text-background" aria-label={title}>
-      <MobileShowcase eyebrow={eyebrow} title={title} intro={intro} items={items} />
-      <DesktopShowcase eyebrow={eyebrow} title={title} intro={intro} items={items} />
+      <MobileShowcase
+        eyebrow={eyebrow}
+        title={title}
+        intro={intro}
+        items={items}
+      />
+      <DesktopShowcase
+        eyebrow={eyebrow}
+        title={title}
+        intro={intro}
+        items={items}
+      />
     </section>
   );
 }
@@ -38,11 +53,7 @@ function ShowcaseHeader({
 }: Pick<AnatomyShowcaseProps, "eyebrow" | "title" | "intro">) {
   return (
     <header className="flex flex-col gap-3">
-      {eyebrow && (
-        <span className="inline-flex w-fit items-center gap-2 rounded-full bg-primary/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-          {eyebrow}
-        </span>
-      )}
+      {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
       <div className="flex flex-col gap-3 small:flex-row small:items-end small:justify-between">
         <h2 className="font-display text-display-sm font-extrabold tracking-tight text-background small:text-display-md">
           {title}
@@ -57,14 +68,21 @@ function ShowcaseHeader({
   );
 }
 
-function MobileShowcase({ eyebrow, title, intro, items }: AnatomyShowcaseProps) {
+function MobileShowcase({
+  eyebrow,
+  title,
+  intro,
+  items,
+}: AnatomyShowcaseProps) {
   const scrollerRef = React.useRef<HTMLDivElement>(null);
   const [active, setActive] = React.useState(0);
 
   React.useEffect(() => {
     const container = scrollerRef.current;
     if (!container) return;
-    const cards = container.querySelectorAll<HTMLElement>("[data-anatomy-card]");
+    const cards = container.querySelectorAll<HTMLElement>(
+      "[data-anatomy-card]"
+    );
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -122,7 +140,7 @@ function MobileShowcase({ eyebrow, title, intro, items }: AnatomyShowcaseProps) 
             key={item.key}
             data-anatomy-card
             data-anatomy-index={idx}
-            className="relative w-[82vw] max-w-sm shrink-0 snap-center overflow-hidden rounded-2xl bg-secondary/40 ring-1 ring-background/10"
+            className="clip-corner-cut-md relative w-[82vw] max-w-sm shrink-0 snap-center overflow-hidden bg-secondary/40"
           >
             <div className="relative aspect-[4/5] w-full">
               <Image
@@ -138,7 +156,8 @@ function MobileShowcase({ eyebrow, title, intro, items }: AnatomyShowcaseProps) 
               />
               <div className="absolute inset-x-0 bottom-0 p-5">
                 <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-                  {String(idx + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}
+                  {String(idx + 1).padStart(2, "0")} /{" "}
+                  {String(items.length).padStart(2, "0")}
                 </span>
                 <h3 className="mt-1 font-display text-xl font-bold tracking-tight">
                   {item.label}
@@ -177,7 +196,12 @@ function MobileShowcase({ eyebrow, title, intro, items }: AnatomyShowcaseProps) 
   );
 }
 
-function DesktopShowcase({ eyebrow, title, intro, items }: AnatomyShowcaseProps) {
+function DesktopShowcase({
+  eyebrow,
+  title,
+  intro,
+  items,
+}: AnatomyShowcaseProps) {
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: wrapperRef,
@@ -245,7 +269,7 @@ function DesktopShowcase({ eyebrow, title, intro, items }: AnatomyShowcaseProps)
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 ds-grid-bg opacity-10"
+          className="ds-grid-bg pointer-events-none absolute inset-0 opacity-10"
         />
 
         <div className="content-container relative z-[1] flex h-full flex-col gap-10 py-16">
@@ -285,7 +309,9 @@ function DesktopShowcase({ eyebrow, title, intro, items }: AnatomyShowcaseProps)
                         <span
                           className={cn(
                             "mt-1 block overflow-hidden text-[13px] leading-relaxed text-background/65 transition-[max-height,opacity] duration-300",
-                            isActive ? "max-h-32 opacity-100" : "max-h-0 opacity-0"
+                            isActive
+                              ? "max-h-32 opacity-100"
+                              : "max-h-0 opacity-0"
                           )}
                         >
                           {item.description}
@@ -297,7 +323,7 @@ function DesktopShowcase({ eyebrow, title, intro, items }: AnatomyShowcaseProps)
               })}
             </ol>
 
-            <div className="relative isolate overflow-hidden rounded-3xl bg-secondary/40 ring-1 ring-background/10">
+            <div className="clip-corner-cut-lg relative isolate overflow-hidden bg-secondary/40">
               {items.map((item, idx) => {
                 const isActive = idx === active;
                 return (
@@ -306,7 +332,9 @@ function DesktopShowcase({ eyebrow, title, intro, items }: AnatomyShowcaseProps)
                     aria-hidden={!isActive}
                     className={cn(
                       "absolute inset-0 transition-[opacity,transform] duration-700 ease-out",
-                      isActive ? "opacity-100 scale-100" : "scale-[1.04] opacity-0"
+                      isActive
+                        ? "scale-100 opacity-100"
+                        : "scale-[1.04] opacity-0"
                     )}
                   >
                     <Image
@@ -327,7 +355,8 @@ function DesktopShowcase({ eyebrow, title, intro, items }: AnatomyShowcaseProps)
               <div className="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between gap-4 p-8">
                 <div className="max-w-md">
                   <span className="block text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-                    {String(active + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+                    {String(active + 1).padStart(2, "0")} /{" "}
+                    {String(total).padStart(2, "0")}
                   </span>
                   <h3 className="mt-2 font-display text-3xl font-bold tracking-tight">
                     {items[active]?.label}

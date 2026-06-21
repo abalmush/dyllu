@@ -40,13 +40,11 @@ export const getCacheOptions = async (
     return {};
   }
 
+  const tags = [tag];
   const cacheTag = await getCacheTag(tag);
+  if (cacheTag) tags.push(cacheTag);
 
-  if (!cacheTag) {
-    return {};
-  }
-
-  return { tags: [`${cacheTag}`] };
+  return { tags };
 };
 
 export const setAuthToken = async (token: string) => {

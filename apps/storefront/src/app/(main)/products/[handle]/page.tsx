@@ -36,13 +36,13 @@ function getImagesForVariant(
     return product.images;
   }
 
-  const variant = product.variants!.find((v) => v.id === selectedVariantId);
-  if (!variant || !variant.images.length) {
+  const variant = product.variants.find((v) => v.id === selectedVariantId);
+  if (!variant?.images?.length) {
     return product.images;
   }
 
   const imageIdsMap = new Map(variant.images.map((i) => [i.id, true]));
-  return product.images!.filter((i) => imageIdsMap.has(i.id));
+  return product.images?.filter((i) => imageIdsMap.has(i.id)) ?? product.images;
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -88,11 +88,11 @@ export default async function ProductPage(props: Props) {
     queryParams: { handle: params.handle },
   }).then(({ response }) => response.products[0]);
 
-  const images = getImagesForVariant(pricedProduct, selectedVariantId);
-
   if (!pricedProduct) {
     notFound();
   }
+
+  const images = getImagesForVariant(pricedProduct, selectedVariantId);
 
   return (
     <ProductTemplate product={pricedProduct} region={region} images={images} />
