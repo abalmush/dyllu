@@ -6,7 +6,7 @@ import { Container } from "@/components/atoms/container";
 import { Eyebrow } from "@/components/molecules/eyebrow";
 
 type Project = {
-  seed: string;
+  src: string;
   width: number;
   height: number;
   handle: string;
@@ -17,7 +17,7 @@ type Project = {
 
 const PROJECTS: Project[] = [
   {
-    seed: "dyllu-atelier-auto",
+    src: "/images/dyllu-dyllu-cordless-2-pieces-combo-kit-dtck20273-power-tool-combo-kit-1209174688.webp",
     width: 800,
     height: 1000,
     handle: "@atelier_auto_md",
@@ -26,7 +26,7 @@ const PROJECTS: Project[] = [
     spanClass: "small:col-span-2 small:row-span-2",
   },
   {
-    seed: "dyllu-renovare",
+    src: "/images/grinder-sparks.jpeg",
     width: 800,
     height: 600,
     handle: "@constructori_bv",
@@ -35,7 +35,7 @@ const PROJECTS: Project[] = [
     spanClass: "small:col-span-2",
   },
   {
-    seed: "dyllu-gradina",
+    src: "/images/dyllu-consumables.png",
     width: 800,
     height: 600,
     handle: "@gradina_dan",
@@ -44,7 +44,7 @@ const PROJECTS: Project[] = [
     spanClass: "small:col-span-2",
   },
   {
-    seed: "dyllu-tamplarie",
+    src: "/images/dyllu-dyllu-20v-cordless-multi-tool-dtmup5020-drill-1215285508.webp",
     width: 800,
     height: 800,
     handle: "@workshop_md",
@@ -53,7 +53,7 @@ const PROJECTS: Project[] = [
     spanClass: "small:col-span-2",
   },
   {
-    seed: "dyllu-sudura",
+    src: "/images/dyllu-safety-gear.png",
     width: 800,
     height: 800,
     handle: "@meserii_md",
@@ -105,7 +105,7 @@ function ProjectCard({ project }: { project: Project }) {
       className={`clip-corner-cut-md group relative overflow-hidden bg-background/5 ${project.spanClass}`}
     >
       <Image
-        src={`https://picsum.photos/seed/${project.seed}/${project.width}/${project.height}`}
+        src={project.src}
         alt={`${project.handle} — ${project.caption}`}
         width={project.width}
         height={project.height}
