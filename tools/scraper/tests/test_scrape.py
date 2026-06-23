@@ -133,3 +133,30 @@ def test_parse_product_detail_empty_html():
     result = parse_product_detail("<html><body></body></html>")
     assert result["description"] is None
     assert result["category_path"] == []
+
+
+import json
+from pathlib import Path
+from scrape import load_checkpoint, save_checkpoint, write_products_atomic
+
+
+def test_save_and_load_checkpoint(tmp_path):
+    f = tmp_path / "progress.json"
+    data = {"next_url": "https://example.com/page/2/", "scraped_urls": ["https://example.com/p/1/"]}
+    save_checkpoint(data, f)
+    loaded = load_checkpoint(f)
+    assert loaded["next_url"] == "https://example.com/page/2/"
+    assert "https://example.com/p/1/" in loaded["scraped_urls"]
+
+
+def test_load_checkpoint_returns_defaults_when_missing(tmp_path):
+    loaded = load_checkpoint(tmp_path / "nonexistent.json")
+    assert loaded["next_url"] is None
+    assert loaded["scraped_urls"] == []
+
+
+def test_write_products_atomic(tmp_path):
+    f = tmp_path / "products.json"
+    write_products_atomic([{"id": "test"}], f)
+    assert f.exists()
+    assert json.loads(f.read_text())[0]["id"] == "test"
