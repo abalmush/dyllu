@@ -81,3 +81,18 @@ def _parse_price_fallback(card) -> float | None:
         return float(text)
     except ValueError:
         return None
+
+
+def parse_product_detail(html: str) -> dict:
+    soup = BeautifulSoup(html, "lxml")
+
+    desc_div = soup.find("div", class_="woocommerce-Tabs-panel--description")
+    description = desc_div.get_text(separator="\n", strip=True) if desc_div else None
+
+    breadcrumb = soup.find("nav", class_="woocommerce-breadcrumb")
+    category_path = []
+    if breadcrumb:
+        links = breadcrumb.find_all("a")
+        category_path = [a.get_text(strip=True) for a in links[2:]]
+
+    return {"description": description, "category_path": category_path}

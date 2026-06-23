@@ -94,3 +94,42 @@ def test_parse_catalog_page_no_next_when_none():
     data = {**SAMPLE_CATALOG_JSON, "nextPage": None}
     products, next_url = parse_catalog_page(data)
     assert next_url is None
+
+
+from scrape import parse_product_detail
+
+SAMPLE_DETAIL_HTML = """
+<!DOCTYPE html>
+<html>
+<body>
+<nav class="woocommerce-breadcrumb">
+  <a href="https://ingcomoldova.md/">Prima pagină</a> ›
+  <a href="https://ingcomoldova.md/catalog/">Catalog</a> ›
+  <a href="https://ingcomoldova.md/categorie-produs/scule-manuale/">Scule manuale</a> ›
+  <a href="https://ingcomoldova.md/categorie-produs/scule-manuale/perii/">Perii</a> ›
+  Set pensule artistice 10buc. DYLLU DTXA1K10
+</nav>
+<div class="entry-content woocommerce-Tabs-panel woocommerce-Tabs-panel--description wd-active panel wc-tab">
+  Material pensulă: Nailon
+  Include: 1 buc. pensulă rotundă #1
+</div>
+</body>
+</html>
+"""
+
+
+def test_parse_product_detail_extracts_description():
+    result = parse_product_detail(SAMPLE_DETAIL_HTML)
+    assert result["description"] is not None
+    assert "Nailon" in result["description"]
+
+
+def test_parse_product_detail_extracts_category_path():
+    result = parse_product_detail(SAMPLE_DETAIL_HTML)
+    assert result["category_path"] == ["Scule manuale", "Perii"]
+
+
+def test_parse_product_detail_empty_html():
+    result = parse_product_detail("<html><body></body></html>")
+    assert result["description"] is None
+    assert result["category_path"] == []
