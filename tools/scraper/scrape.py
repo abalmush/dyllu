@@ -180,7 +180,8 @@ def run_scraper(
         data = fetch_page(next_url, session)
         if data is None:
             logger.error("Failed to fetch %s — stopping", next_url)
-            break
+            save_checkpoint({"next_url": next_url, "scraped_urls": list(scraped_urls)}, progress_file)
+            return
 
         if data.get("status") != "have-posts":
             logger.info("No more posts — complete")
