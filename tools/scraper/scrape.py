@@ -28,7 +28,9 @@ def _parse_product_card(card) -> dict | None:
     source_url = title_a.get("href", "")
 
     img = card.select_one("img.attachment-woocommerce_thumbnail")
-    image_url = img.get("src") if img else None
+    image_url = (img.get("data-src") or img.get("src")) if img else None
+    if image_url and image_url.endswith("lazy.svg"):
+        image_url = None
 
     cat_a = card.select_one("div.wd-product-cats a")
     category_name = cat_a.get_text(strip=True) if cat_a else None
