@@ -5,7 +5,8 @@ import productRedirects from "@lib/data/product-redirects.json";
 
 const productHandleRedirects = productRedirects as Record<string, string>;
 
-export function proxy(request: NextRequest) {
+// opennextjs-cloudflare#962: proxy.ts forces the Node runtime, unsupported on Workers — revert to proxy.ts when fixed
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const productMatch = pathname.match(/^\/products\/([^/?#]+)\/?$/);
   if (productMatch) {
