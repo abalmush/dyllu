@@ -9,6 +9,10 @@ module.exports = defineConfig({
     databaseDriverOptions: {
       connection: { ssl: false },
     },
+    cookieOptions: {
+      secure: false,
+      sameSite: "lax",
+    },
     http: {
       storeCors: process.env.STORE_CORS!,
       adminCors: process.env.ADMIN_CORS!,
