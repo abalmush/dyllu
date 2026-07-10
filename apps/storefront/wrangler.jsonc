@@ -27,6 +27,10 @@
     ]
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DOQueueHandler"] }],
+  "routes": [
+    { "pattern": "dyllu.md", "custom_domain": true },
+    { "pattern": "www.dyllu.md", "custom_domain": true }
+  ],
   "vars": {
     "MEDUSA_BACKEND_URL": "https://api.dyllu.md"
   }
