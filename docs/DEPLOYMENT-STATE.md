@@ -5,10 +5,9 @@ Living handoff/status doc. Companion to the design spec
 execution plan (`docs/superpowers/plans/2026-07-10-production-deployment.md`).
 Last updated: 2026-07-10.
 
-> All deployment work currently lives on branch
-> `feat/catalog-master-consolidation` and is **not pushed to any remote**. It is
-> tangled with unrelated in-progress storefront/catalog work. `main` has none of
-> it. See "Known gaps" below.
+> All deployment work lives on branch `feat/catalog-master-consolidation` (now
+> pushed to origin), **not on `main`**. It is tangled with unrelated in-progress
+> storefront/catalog work in the working tree. See "Known gaps" below.
 
 ## Architecture
 
@@ -40,7 +39,8 @@ Last updated: 2026-07-10.
   **Proxied (orange)** + SSL/TLS **Full (strict)** (login confirmed working).
 - Apex `dyllu.md` + `www` — auto-created by the Worker custom-domain deploy,
   proxied through Cloudflare (resolve to `104.21.42.200` / `172.67.210.12`).
-- `cdn` — **no record yet** (created later with the R2 media bucket, Task 6).
+- `cdn` → R2 custom domain bound to bucket `dyllu-media`, proxied; serving
+  uploads (verified `https://cdn.dyllu.md/<object>` → 200 image/png).
 
 ## Deploy mechanisms
 
@@ -61,7 +61,7 @@ Coolify webhook → health check.
 | 3 OpenNext caching + spike (GO/Approach A)   | done (`5ed3f98`)                                                           |
 | 4 Custom CF image loader                     | done (`e42bb4b`)                                                           |
 | 5 Hetzner + Coolify backend                  | effectively done (running; manual, no commit)                              |
-| 6 R2 media + S3 file module                  | code done (`6169621`); R2 bucket/token/cdn domain + Coolify S3 env pending |
+| 6 R2 media + S3 file module                  | **done** — bucket + cdn.dyllu.md + S3 env live; admin upload → R2 verified |
 | 7 Storefront custom domain routing           | done (`e37eb6f`); deployed live to dyllu.md + www (version `8fc6aa7e`)     |
 | 8 `deploy-backend.yml` CI                    | done (`52831cc`)                                                           |
 | 9 `deploy-storefront.yml` CI                 | done (`c0c59fc`)                                                           |
@@ -80,23 +80,29 @@ Coolify webhook → health check.
    storefront's sales channel before anything shows on the PLP.
 4. Set the storefront Worker `REVALIDATE_SECRET` secret (match backend) via
    `wrangler secret put` so on-demand revalidation works.
-5. Cloudflare: flip `api` to Proxied (orange) + SSL Full (strict).
-6. **Task 6 remainder**: create R2 bucket `dyllu-media` + scoped token + bind
-   `cdn.dyllu.md`; add `S3_*` env in Coolify; redeploy; verify an admin image
-   upload lands in R2 with a `cdn.dyllu.md` URL.
-7. Nightly DB backups to R2 (`dyllu-backups`) — plan Task 5 Step 9.
-8. **Task 10**: retire NAS containers/DNS; rewrite the stale `apps/backend/DEPLOY.md`;
-   update `CLAUDE.md` (backend is deployed; storefront is on Cloudflare, not Vercel).
+5. ~~Task 6: R2 media + S3 file module.~~ **Done** — admin uploads land in
+   `dyllu-media` and serve from `https://cdn.dyllu.md/`.
+6. Cloudflare: flip `api` to Proxied (orange) + SSL Full (strict).
+7. Set the storefront Worker `REVALIDATE_SECRET` secret (match backend) via
+   `wrangler secret put` so on-demand revalidation works.
+8. **Close the CI gap**: set `COOLIFY_WEBHOOK_URL` + `COOLIFY_API_TOKEN` repo
+   secrets so `deploy-backend.yml` can auto-redeploy (currently the deploy step
+   fails and redeploy is manual in Coolify).
+9. Nightly DB backups to R2 (`dyllu-backups`) — plan Task 5 Step 9.
+10. **Task 10**: retire NAS containers/DNS; rewrite the stale `apps/backend/DEPLOY.md`;
+    update `CLAUDE.md` (backend is deployed; storefront is on Cloudflare, not Vercel).
 
 ## Known gaps / risks
 
-- **Nothing pushed to remote.** All deployment commits are local on
-  `feat/catalog-master-consolidation`.
-- **Backend image-build gap.** `deploy-backend.yml` only fires on push to
-  `main`, but the work isn't on `main` — so the running image was built
-  out-of-band. To ship backend changes: either land the work on `main` (fires
-  CI → GHCR → Coolify webhook) or build+push the image manually and redeploy in
-  Coolify.
+- **Branch pushed, not on `main`.** `feat/catalog-master-consolidation` is now
+  on origin, but `main` still has none of the deployment work.
+- **Backend image-build gap (partially closed).** `deploy-backend.yml` builds +
+  pushes the GHCR image fine when dispatched (`gh workflow run deploy-backend.yml
+--ref feat/catalog-master-consolidation`), but its **Coolify deploy step fails**
+  because `COOLIFY_WEBHOOK_URL` / `COOLIFY_API_TOKEN` repo secrets are unset — so
+  after a build you must **Redeploy manually in Coolify**. Set those secrets to
+  make it fully automatic. `main`-push auto-deploy still won't work until the
+  work lands on `main`.
 - **`apps/backend/DEPLOY.md` is stale** — still describes the old Vercel +
   Coolify git-build setup. Rewrite in Task 10.
 - **Branch hygiene.** Deployment commits are mixed with unrelated
