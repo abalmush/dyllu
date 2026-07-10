@@ -11,5 +11,5 @@ export default function cloudflareImageLoader({
     return src;
   }
   const params = `width=${width},quality=${quality ?? 80},format=auto`;
-  return `/cdn-cgi/image/${params}/${src}`;
+  return `/cdn-cgi/image/${params}/${src.replace(/^\/+/, "")}`;
 }
