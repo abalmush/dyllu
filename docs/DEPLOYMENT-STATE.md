@@ -30,7 +30,7 @@ Last updated: 2026-07-10.
 | Coolify UI       | `http://138.199.235.8:8000`                                         |
 | Backend admin    | `https://api.dyllu.md/backend` (live, real HTTPS)                   |
 | Backend temp URL | `http(s)://hdte0fa76dlun3pgv9avcyjk.138.199.235.8.sslip.io/backend` |
-| Storefront       | `*.workers.dev` (custom domain not wired yet)                       |
+| Storefront       | `https://dyllu.md` + `www.dyllu.md` (live via Cloudflare Workers)   |
 
 ## DNS (Cloudflare zone `dyllu.md`)
 
@@ -60,7 +60,7 @@ Coolify webhook → health check.
 | 4 Custom CF image loader                     | done (`e42bb4b`)                                                           |
 | 5 Hetzner + Coolify backend                  | effectively done (running; manual, no commit)                              |
 | 6 R2 media + S3 file module                  | code done (`6169621`); R2 bucket/token/cdn domain + Coolify S3 env pending |
-| 7 Storefront custom domain routing           | NOT done (no `routes` in `wrangler.jsonc`)                                 |
+| 7 Storefront custom domain routing           | done (`e37eb6f`); deployed live to dyllu.md + www (version `8fc6aa7e`)     |
 | 8 `deploy-backend.yml` CI                    | done (`52831cc`)                                                           |
 | 9 `deploy-storefront.yml` CI                 | done (`c0c59fc`)                                                           |
 | 10 Decommission NAS                          | NOT done                                                                   |
@@ -68,19 +68,22 @@ Coolify webhook → health check.
 
 ## Open items / next steps
 
-1. **Log into admin** at `https://api.dyllu.md/backend`; create the **Moldova
-   region** (currency MDL, country Moldova, payment provider **Manual**); copy
-   the **Publishable API Key**.
-2. Point the storefront at `api.dyllu.md` using that key; do **Task 7** (add the
-   custom-domain `routes` block to `wrangler.jsonc`, redeploy) so `dyllu.md`
-   serves the storefront.
-3. Cloudflare: flip `api` to Proxied (orange) + SSL Full (strict); add apex/www
-   (via `wrangler` custom_domain) and `cdn` (via R2 custom domain).
-4. **Task 6 remainder**: create R2 bucket `dyllu-media` + scoped token + bind
+1. ~~Log in, create Moldova region, copy publishable key.~~ **Done** — region
+   `reg_01KX6GW84R9BQFM6NGG6EY5K7R` (MDL/md); key `pk_f847…1642`.
+2. ~~Task 7: storefront custom-domain routing + deploy.~~ **Done** — live at
+   `https://dyllu.md`.
+3. **Populate the catalog** (separate workstream, `feat/catalog-master-consolidation`):
+   backend has 88 categories but **0 products** in the sales channel — products
+   must be created/imported, given MDL prices, published, and attached to the
+   storefront's sales channel before anything shows on the PLP.
+4. Set the storefront Worker `REVALIDATE_SECRET` secret (match backend) via
+   `wrangler secret put` so on-demand revalidation works.
+5. Cloudflare: flip `api` to Proxied (orange) + SSL Full (strict).
+6. **Task 6 remainder**: create R2 bucket `dyllu-media` + scoped token + bind
    `cdn.dyllu.md`; add `S3_*` env in Coolify; redeploy; verify an admin image
    upload lands in R2 with a `cdn.dyllu.md` URL.
-5. Nightly DB backups to R2 (`dyllu-backups`) — plan Task 5 Step 9.
-6. **Task 10**: retire NAS containers/DNS; rewrite the stale `apps/backend/DEPLOY.md`;
+7. Nightly DB backups to R2 (`dyllu-backups`) — plan Task 5 Step 9.
+8. **Task 10**: retire NAS containers/DNS; rewrite the stale `apps/backend/DEPLOY.md`;
    update `CLAUDE.md` (backend is deployed; storefront is on Cloudflare, not Vercel).
 
 ## Known gaps / risks
