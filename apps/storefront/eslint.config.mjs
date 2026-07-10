@@ -20,6 +20,9 @@ const eslintConfig = defineConfig([
   starterLegacyWarnings,
   globalIgnores([
     ".next/**",
+    ".open-next/**",
+    ".wrangler/**",
+    ".wrangler-dist/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
