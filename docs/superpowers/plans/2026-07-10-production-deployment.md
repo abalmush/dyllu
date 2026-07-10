@@ -10,7 +10,7 @@
 
 **Conventions for every task:**
 - Every commit message MUST start with `DYLLU-000` (a global hook rejects commits without a ticket id).
-- `dyllu.example` is a placeholder — substitute the real production domain everywhere. The Cloudflare zone for that domain must exist before Task 5.
+- The production domain is `dyllu.md`. The Cloudflare zone for it must exist before Task 5.
 - No comments in any code/config you write (project rule).
 - Manual dashboard steps (Hetzner console, Coolify UI, Cloudflare dashboard) are marked **[manual]** — the executor should ask the user to perform them or confirm access to do them, then verify the result with the given command.
 
@@ -152,7 +152,7 @@ cloudflare-env.d.ts
 ```bash
 cd apps/storefront
 NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_placeholder \
-NEXT_PUBLIC_BASE_URL=https://dyllu.example \
+NEXT_PUBLIC_BASE_URL=https://dyllu.md \
 MEDUSA_BACKEND_URL=https://medusa.inexlab.com \
 pnpm exec opennextjs-cloudflare build
 ```
@@ -313,7 +313,7 @@ git commit -m "DYLLU-000 feat(storefront): OpenNext caching via R2, D1 tag cache
 
 - [ ] **Step 1: [manual] Enable transformations on the zone**
 
-Cloudflare dashboard → zone `dyllu.example` → **Images → Transformations** → enable for the zone, and turn ON **"Resize images from any origin"** (marketing visuals still load from `images.unsplash.com` via `NEXT_PUBLIC_IMAGE_BASE`).
+Cloudflare dashboard → zone `dyllu.md` → **Images → Transformations** → enable for the zone, and turn ON **"Resize images from any origin"** (marketing visuals still load from `images.unsplash.com` via `NEXT_PUBLIC_IMAGE_BASE`).
 
 - [ ] **Step 2: Create `apps/storefront/src/lib/util/image-loader.ts`**
 
@@ -363,7 +363,7 @@ Open `http://localhost:4000` — images render (loader bypasses, returns `src`).
 cd apps/storefront
 NEXT_PUBLIC_CF_IMAGE_TRANSFORMS=on \
 NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_placeholder \
-NEXT_PUBLIC_BASE_URL=https://dyllu.example \
+NEXT_PUBLIC_BASE_URL=https://dyllu.md \
 pnpm exec next build
 ```
 
@@ -395,11 +395,11 @@ Verify: `ssh root@<VPS_IP> 'echo ok'` → `ok`.
 ssh root@<VPS_IP> 'curl -fsSL https://cdn.coolify.io/coolify/install.sh | bash'
 ```
 
-Verify: open `http://<VPS_IP>:8000`, create the Coolify admin account. **[manual]** In Coolify Settings set the instance domain so Coolify's own UI gets TLS (e.g. `coolify.dyllu.example`, DNS A record → VPS IP, **DNS-only/grey cloud** for the Coolify UI host).
+Verify: open `http://<VPS_IP>:8000`, create the Coolify admin account. **[manual]** In Coolify Settings set the instance domain so Coolify's own UI gets TLS (e.g. `coolify.dyllu.md`, DNS A record → VPS IP, **DNS-only/grey cloud** for the Coolify UI host).
 
 - [ ] **Step 3: [manual] Cloudflare DNS + TLS for the API**
 
-Zone `dyllu.example`: add **A record `api` → `<VPS_IP>`, Proxied (orange cloud)**. SSL/TLS → Overview → mode **Full (strict)**.
+Zone `dyllu.md`: add **A record `api` → `<VPS_IP>`, Proxied (orange cloud)**. SSL/TLS → Overview → mode **Full (strict)**.
 
 - [ ] **Step 4: [manual] Coolify: Postgres and Redis services**
 
@@ -416,18 +416,18 @@ The `ghcr.io/abalmush/dyllu-backend` package is private. Either make the package
 - [ ] **Step 6: [manual] Coolify: backend app resource**
 
 **+ New → Docker Image** → `ghcr.io/abalmush/dyllu-backend:latest`.
-- Port: `9000`; Domain: `https://api.dyllu.example`; Health check path: `/health`.
+- Port: `9000`; Domain: `https://api.dyllu.md`; Health check path: `/health`.
 - Environment variables (from `apps/backend/.env.production.example`):
 
 ```
 NODE_ENV=production
 DATABASE_URL=<Coolify Postgres internal URL>
 REDIS_URL=<Coolify Redis internal URL>
-STORE_CORS=https://dyllu.example
-ADMIN_CORS=https://api.dyllu.example
-AUTH_CORS=https://dyllu.example,https://api.dyllu.example
-BACKEND_URL=https://api.dyllu.example
-STOREFRONT_URL=https://dyllu.example
+STORE_CORS=https://dyllu.md
+ADMIN_CORS=https://api.dyllu.md
+AUTH_CORS=https://dyllu.md,https://api.dyllu.md
+BACKEND_URL=https://api.dyllu.md
+STOREFRONT_URL=https://dyllu.md
 JWT_SECRET=<openssl rand -hex 64>
 COOKIE_SECRET=<openssl rand -hex 64>
 REVALIDATE_SECRET=<openssl rand -hex 32 — reuse in Task 7 storefront secret>
@@ -435,17 +435,17 @@ REVALIDATE_SECRET=<openssl rand -hex 32 — reuse in Task 7 storefront secret>
 
 Deploy. The container CMD runs `medusa db:migrate && medusa start` (migrations + initial seed run automatically on first boot).
 
-Verify: `curl -s https://api.dyllu.example/health` → `OK`.
+Verify: `curl -s https://api.dyllu.md/health` → `OK`.
 
 - [ ] **Step 7: Create the admin user**
 
 Coolify → app → **Terminal**:
 
 ```bash
-node_modules/.bin/medusa user -e admin@dyllu.example -p <strong-password>
+node_modules/.bin/medusa user -e admin@dyllu.md -p <strong-password>
 ```
 
-Verify: log in at `https://api.dyllu.example/backend`.
+Verify: log in at `https://api.dyllu.md/backend`.
 
 - [ ] **Step 8: [manual] Region + publishable key**
 
@@ -467,10 +467,10 @@ Verify: trigger a manual backup run; object appears in the bucket.
 - [ ] **Step 1: [manual] Create the media bucket + CDN domain + token**
 
 - R2 → create bucket **`dyllu-media`**.
-- Bucket → Settings → **Custom Domains** → connect `cdn.dyllu.example` (Cloudflare auto-creates the proxied DNS record).
+- Bucket → Settings → **Custom Domains** → connect `cdn.dyllu.md` (Cloudflare auto-creates the proxied DNS record).
 - R2 API token: **Object Read & Write**, scoped to `dyllu-media`. Note Access Key ID / Secret.
 
-Verify: upload any test object via dashboard; `curl -sI https://cdn.dyllu.example/<test-object>` → `200`.
+Verify: upload any test object via dashboard; `curl -sI https://cdn.dyllu.md/<test-object>` → `200`.
 
 - [ ] **Step 2: Add the S3 file module to `apps/backend/medusa-config.ts`**
 
@@ -541,7 +541,7 @@ Expected: boots clean on `http://localhost:9000` (Ctrl-C after).
 Add to the backend app env in Coolify, then redeploy:
 
 ```
-S3_FILE_URL=https://cdn.dyllu.example
+S3_FILE_URL=https://cdn.dyllu.md
 S3_ACCESS_KEY_ID=<from Step 1>
 S3_SECRET_ACCESS_KEY=<from Step 1>
 S3_REGION=auto
@@ -549,7 +549,7 @@ S3_BUCKET=dyllu-media
 S3_ENDPOINT=https://<cf-account-id>.r2.cloudflarestorage.com
 ```
 
-Verify end-to-end: admin UI → any product → upload an image → object appears in `dyllu-media` and the product image URL starts with `https://cdn.dyllu.example/`.
+Verify end-to-end: admin UI → any product → upload an image → object appears in `dyllu-media` and the product image URL starts with `https://cdn.dyllu.md/`.
 
 - [ ] **Step 5: Commit**
 
@@ -571,11 +571,11 @@ Replace the `"vars"` block and add `"routes"`:
 
 ```jsonc
   "routes": [
-    { "pattern": "dyllu.example", "custom_domain": true },
-    { "pattern": "www.dyllu.example", "custom_domain": true }
+    { "pattern": "dyllu.md", "custom_domain": true },
+    { "pattern": "www.dyllu.md", "custom_domain": true }
   ],
   "vars": {
-    "MEDUSA_BACKEND_URL": "https://api.dyllu.example"
+    "MEDUSA_BACKEND_URL": "https://api.dyllu.md"
   }
 ```
 
@@ -592,10 +592,10 @@ Paste the value set in Task 5 Step 6.
 
 ```bash
 NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=<key from Task 5 Step 8> \
-NEXT_PUBLIC_BASE_URL=https://dyllu.example \
+NEXT_PUBLIC_BASE_URL=https://dyllu.md \
 NEXT_PUBLIC_DEFAULT_REGION=md \
 NEXT_PUBLIC_CF_IMAGE_TRANSFORMS=on \
-MEDUSA_BACKEND_URL=https://api.dyllu.example \
+MEDUSA_BACKEND_URL=https://api.dyllu.md \
 pnpm run deploy:cf
 ```
 
@@ -603,19 +603,19 @@ Expected: deploy succeeds; Cloudflare provisions the custom domains (apex + www 
 
 - [ ] **Step 4: Full production smoke test**
 
-1. `https://dyllu.example` renders home with products from the Hetzner backend.
+1. `https://dyllu.md` renders home with products from the Hetzner backend.
 2. PDP → add to cart → cart page → reach checkout address step.
 3. Rendered `<img>` tags contain `/cdn-cgi/image/` and images load (transformations active).
 4. Revalidation:
 
 ```bash
-curl -s -X POST https://dyllu.example/api/revalidate \
+curl -s -X POST https://dyllu.md/api/revalidate \
   -H "x-revalidate-secret: <REVALIDATE_SECRET>" \
   -d '{"tags":["products"]}'
 ```
 
 Expected: `{"revalidated":["products"]}`.
-5. Admin at `https://api.dyllu.example/backend` logs in (session cookie survives — Full (strict) TLS chain).
+5. Admin at `https://api.dyllu.md/backend` logs in (session cookie survives — Full (strict) TLS chain).
 
 - [ ] **Step 5: Commit**
 
@@ -699,7 +699,7 @@ jobs:
       - name: Health check
         run: |
           for i in $(seq 1 30); do
-            if curl -fsS https://api.dyllu.example/health >/dev/null 2>&1; then
+            if curl -fsS https://api.dyllu.md/health >/dev/null 2>&1; then
               echo "Backend healthy"
               exit 0
             fi
@@ -759,10 +759,10 @@ on:
 
 env:
   NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
-  NEXT_PUBLIC_BASE_URL: https://dyllu.example
+  NEXT_PUBLIC_BASE_URL: https://dyllu.md
   NEXT_PUBLIC_DEFAULT_REGION: md
   NEXT_PUBLIC_CF_IMAGE_TRANSFORMS: on
-  MEDUSA_BACKEND_URL: https://api.dyllu.example
+  MEDUSA_BACKEND_URL: https://api.dyllu.md
 
 jobs:
   deploy:
@@ -815,7 +815,7 @@ git add .github/workflows/deploy-storefront.yml
 git commit -m "DYLLU-000 ci: deploy storefront via OpenNext and wrangler"
 ```
 
-After merge to `main`: `gh workflow run deploy-storefront.yml` → green run → `https://dyllu.example` serves the new deploy (check the `x-opennext` / response headers change or a visible change ships).
+After merge to `main`: `gh workflow run deploy-storefront.yml` → green run → `https://dyllu.md` serves the new deploy (check the `x-opennext` / response headers change or a visible change ships).
 
 ---
 
@@ -841,7 +841,7 @@ Rewrite to describe the live setup: Coolify deploys the GHCR image via webhook f
 
 - [ ] **Step 3: Update `CLAUDE.md`**
 
-In the Project Overview and Deployment sections: backend is **deployed** on Hetzner + Coolify (drop "not yet deployed — local dev only"); storefront hosted on **Cloudflare Workers (OpenNext)**, not Vercel; images on R2 (`cdn.dyllu.example`).
+In the Project Overview and Deployment sections: backend is **deployed** on Hetzner + Coolify (drop "not yet deployed — local dev only"); storefront hosted on **Cloudflare Workers (OpenNext)**, not Vercel; images on R2 (`cdn.dyllu.md`).
 
 - [ ] **Step 4: [manual] Stop NAS containers and clean up**
 

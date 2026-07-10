@@ -11,8 +11,7 @@ images on production-grade infrastructure that is fast for users in Moldova and
 cheap enough for a starting business (~€13/mo). Replace the Synology NAS
 deployment and its GitHub Actions pipeline entirely.
 
-The production domain is referred to as `dyllu.example` in this doc; substitute
-the real apex domain when provisioning. All DNS lives in Cloudflare.
+The production domain is `dyllu.md`. All DNS lives in Cloudflare.
 
 ## Decision summary
 
@@ -37,17 +36,17 @@ Moldovan user
    ▼
 Cloudflare edge (Chișinău PoP) ── cached HTML, static assets, images
    │
-   ├── dyllu.example ──────────► Worker (OpenNext storefront, Node runtime)
+   ├── dyllu.md ──────────► Worker (OpenNext storefront, Node runtime)
    │                                │  R2: incremental cache
    │                                │  DO: revalidation queue
    │                                │  D1: tag cache
    │                                ▼
-   ├── api.dyllu.example ─────► Hetzner CX32 · Coolify (Traefik TLS)
+   ├── api.dyllu.md ─────► Hetzner CX32 · Coolify (Traefik TLS)
    │                                ├─ medusa-backend :9000 (admin at /backend)
    │                                ├─ postgres:16 (Docker volume)
    │                                └─ redis:7
    │
-   └── cdn.dyllu.example ─────► R2 bucket (product images)
+   └── cdn.dyllu.md ─────► R2 bucket (product images)
                                     └─ /cdn-cgi/image/… transformations
 ```
 
@@ -70,9 +69,9 @@ Cloudflare edge (Chișinău PoP) ── cached HTML, static assets, images
   - remove dead `pg` dependency
   - remove `output: "standalone"` and `outputFileTracingRoot` (Docker-era)
   - prune starter-era `images.remotePatterns` (unsplash, picsum, cloudinary,
-    ingcomoldova.md); keep only `cdn.dyllu.example` + localhost
+    ingcomoldova.md); keep only `cdn.dyllu.md` + localhost
   - add `open-next.config.ts` + `wrangler.jsonc`
-- Env (Workers secrets/vars): `MEDUSA_BACKEND_URL=https://api.dyllu.example`,
+- Env (Workers secrets/vars): `MEDUSA_BACKEND_URL=https://api.dyllu.md`,
   `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY`, `NEXT_PUBLIC_BASE_URL`,
   `NEXT_PUBLIC_DEFAULT_REGION`, `REVALIDATE_SECRET`.
 
@@ -89,14 +88,14 @@ Cloudflare edge (Chișinău PoP) ── cached HTML, static assets, images
 - Coolify's Traefik terminates real Let's Encrypt TLS, so Medusa's secure
   session cookie works without header hacks. Cloudflare SSL mode: **Full
   (strict)**.
-- `api.dyllu.example` proxied through Cloudflare. Admin UI at
-  `https://api.dyllu.example/backend`.
+- `api.dyllu.md` proxied through Cloudflare. Admin UI at
+  `https://api.dyllu.md/backend`.
 - Medusa file module → S3 provider pointed at R2 (bucket `dyllu-media`,
-  scoped API token, `S3_FILE_URL=https://cdn.dyllu.example`).
+  scoped API token, `S3_FILE_URL=https://cdn.dyllu.md`).
 
 ### Images — R2 + Transformations
 
-- Bucket `dyllu-media`, custom domain `cdn.dyllu.example` (proxied → edge
+- Bucket `dyllu-media`, custom domain `cdn.dyllu.md` (proxied → edge
   cached, free egress).
 - Enable Image Transformations on the zone. Storefront requests variants via
   the custom `next/image` loader; originals stay untouched at full resolution.
@@ -118,7 +117,7 @@ Both existing workflows lose all Tailscale/SSH/NAS steps.
 - **`deploy-backend.yml`** — on push to `main` touching `apps/backend/**`:
   build image → push to GHCR (`:latest` + `:sha`) → `curl` Coolify's deploy
   webhook (`COOLIFY_WEBHOOK_URL` + `COOLIFY_API_TOKEN` secrets) → poll
-  `https://api.dyllu.example/health` until green.
+  `https://api.dyllu.md/health` until green.
 - **`deploy-storefront.yml`** — on push to `main` touching
   `apps/storefront/**`: `pnpm install` → `opennextjs-cloudflare build` →
   `wrangler deploy` (secret `CLOUDFLARE_API_TOKEN`, var
