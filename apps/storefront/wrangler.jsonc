@@ -10,5 +10,24 @@
   },
   "services": [
     { "binding": "WORKER_SELF_REFERENCE", "service": "dyllu-storefront" }
-  ]
+  ],
+  "r2_buckets": [
+    { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "dyllu-next-cache" }
+  ],
+  "d1_databases": [
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "dyllu-tag-cache",
+      "database_id": "8bf378b6-0d2f-4755-b5b7-83afd2dd4a6b"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "NEXT_CACHE_DO_QUEUE", "class_name": "DOQueueHandler" }
+    ]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DOQueueHandler"] }],
+  "vars": {
+    "MEDUSA_BACKEND_URL": "https://api.dyllu.md"
+  }
 }
