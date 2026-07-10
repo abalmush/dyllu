@@ -10,9 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: ghcr.io
   IMAGE_NAME: ghcr.io/abalmush/dyllu-backend
-  DOCKER_PATH: /volume1/@appstore/ContainerManager/usr/bin
 
 jobs:
   build-and-deploy:
@@ -28,7 +26,7 @@ jobs:
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -48,79 +46,20 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Connect to Tailscale
-        uses: tailscale/github-action@v3
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_CLIENT_SECRET }}
-          tags: tag:ci
-
-      - name: Set up SSH key
+      - name: Trigger Coolify deploy
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.NAS_SSH_KEY }}" > ~/.ssh/nas_key
-          chmod 600 ~/.ssh/nas_key
-          printf 'Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile /dev/null\n' > ~/.ssh/config
-          chmod 600 ~/.ssh/config
-
-      - name: Provision database
-        run: |
-          ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
-            "export PATH=\$PATH:${{ env.DOCKER_PATH }} && \
-             docker network create postgres-net 2>/dev/null || true && \
-             docker network connect postgres-net context-postgres 2>/dev/null || true && \
-             docker exec context-postgres psql -U postgres -tc \"SELECT 1 FROM pg_database WHERE datname='medusa'\" | grep -q 1 || \
-             docker exec context-postgres psql -U postgres -c 'CREATE DATABASE medusa'"
-
-      - name: Copy compose file
-        run: |
-          SSH="ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }}"
-          $SSH "mkdir -p ~/dyllu-backend"
-          cat apps/backend/docker-compose.prod.yml | $SSH "cat > ~/dyllu-backend/docker-compose.yml"
-
-      - name: Write .env
-        run: |
-          cat > /tmp/dyllu-backend.env << 'EOF'
-          NODE_ENV=production
-          DATABASE_URL=postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@context-postgres:5432/medusa
-          REDIS_URL=redis://dyllu-redis:6379
-          JWT_SECRET=${{ secrets.MEDUSA_JWT_SECRET }}
-          COOKIE_SECRET=${{ secrets.MEDUSA_COOKIE_SECRET }}
-          STORE_CORS=https://dyllu.inexlab.com
-          ADMIN_CORS=https://medusa.inexlab.com
-          AUTH_CORS=https://medusa.inexlab.com,https://dyllu.inexlab.com
-          BACKEND_URL=https://medusa.inexlab.com
-          STOREFRONT_URL=https://dyllu.inexlab.com
-          REVALIDATE_SECRET=${{ secrets.MEDUSA_REVALIDATE_SECRET }}
-          EOF
-          cat /tmp/dyllu-backend.env | ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} "cat > ~/dyllu-backend/.env"
-          rm -f /tmp/dyllu-backend.env
-
-      - name: Pull and deploy
-        run: |
-          ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
-            "export PATH=\$PATH:${{ env.DOCKER_PATH }} && \
-             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin && \
-             cd ~/dyllu-backend && \
-             docker pull ghcr.io/abalmush/dyllu-backend:latest && \
-             docker compose up -d --remove-orphans && \
-             docker image prune -f"
+          curl --fail -sS "${{ secrets.COOLIFY_WEBHOOK_URL }}" \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}"
 
       - name: Health check
         run: |
-          if ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
-            "export PATH=\$PATH:${{ env.DOCKER_PATH }} && \
-             for i in \$(seq 1 18); do \
-               if docker exec dyllu-backend wget -qO- http://localhost:9000/health >/dev/null 2>&1; then \
-                 echo 'Backend healthy'; exit 0; \
-               fi; \
-               echo \"Attempt \$i/18 failed, retrying in 10s...\"; sleep 10; \
-             done; \
-             exit 1"; then
-            echo "Backend healthy"
-          else
-            echo "Backend failed to become healthy — dumping logs:"
-            ssh -i ~/.ssh/nas_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
-              "export PATH=\$PATH:${{ env.DOCKER_PATH }} && docker logs dyllu-backend --tail 60"
-            exit 1
-          fi
+          for i in $(seq 1 30); do
+            if curl -fsS https://api.dyllu.md/health >/dev/null 2>&1; then
+              echo "Backend healthy"
+              exit 0
+            fi
+            echo "Attempt $i/30 failed, retrying in 10s..."
+            sleep 10
+          done
+          echo "Backend failed health check"
+          exit 1
