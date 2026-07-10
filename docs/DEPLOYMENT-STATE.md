@@ -37,8 +37,10 @@ Last updated: 2026-07-10.
 - Nameservers delegated to Cloudflare: `galilea.ns.cloudflare.com`,
   `malcolm.ns.cloudflare.com` (registry whois lags; resolvers already use CF).
 - `api` → A `138.199.235.8`, currently **DNS-only (grey)**. TODO: flip to
-  **Proxied (orange)** + SSL/TLS **Full (strict)** once login is confirmed.
-- Apex `dyllu.md`, `www`, `cdn` — **no records yet**.
+  **Proxied (orange)** + SSL/TLS **Full (strict)** (login confirmed working).
+- Apex `dyllu.md` + `www` — auto-created by the Worker custom-domain deploy,
+  proxied through Cloudflare (resolve to `104.21.42.200` / `172.67.210.12`).
+- `cdn` — **no record yet** (created later with the R2 media bucket, Task 6).
 
 ## Deploy mechanisms
 
