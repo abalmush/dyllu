@@ -14,6 +14,7 @@ type PaginatedProductsParams = {
   limit: number;
   collection_id?: string[];
   category_id?: string[];
+  tag_id?: string[];
   id?: string[];
   order?: string;
   q?: string;
@@ -24,6 +25,7 @@ export default async function PaginatedProducts({
   page,
   collectionId,
   categoryId,
+  tagId,
   productsIds,
   query,
   onSale,
@@ -32,6 +34,7 @@ export default async function PaginatedProducts({
   page: number;
   collectionId?: string;
   categoryId?: string;
+  tagId?: string;
   productsIds?: string[];
   query?: string;
   onSale?: boolean;
@@ -46,6 +49,10 @@ export default async function PaginatedProducts({
 
   if (categoryId) {
     queryParams["category_id"] = [categoryId];
+  }
+
+  if (tagId) {
+    queryParams["tag_id"] = [tagId];
   }
 
   if (productsIds) {
