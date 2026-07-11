@@ -32,12 +32,14 @@
 
     --destructive: 0 78% 55%;
     --destructive-foreground: 0 0% 100%;
+    --destructive-subtle: 0 78% 96%;
 
     --success: 71 79% 45%;
     --success-foreground: 0 0% 4%;
 
     --warning: 25 95% 55%;
     --warning-foreground: 0 0% 4%;
+    --warning-subtle: 25 95% 95%;
 
     --border: 0 0% 90%;
     --input: 0 0% 90%;

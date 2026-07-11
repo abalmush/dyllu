@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
+import { SITE_CONTACT } from "@lib/site-content";
 import { cn } from "@lib/utils";
 import { Button } from "@/components/atoms/button";
 import { Input } from "@/components/atoms/input";
@@ -15,35 +16,30 @@ export interface NewsletterFormProps {
 
 export function NewsletterForm({ className, invert }: NewsletterFormProps) {
   const [email, setEmail] = React.useState("");
-  const [submitted, setSubmitted] = React.useState(false);
   const [pending, setPending] = React.useState(false);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!email.includes("@")) {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail.includes("@")) {
       toast.error("Te rugăm introdu un email valid");
       return;
     }
-    setPending(true);
-    setTimeout(() => {
-      setPending(false);
-      setSubmitted(true);
-      toast.success("Mulțumim! Te-am adăugat la newsletter.");
-    }, 600);
-  };
 
-  if (submitted) {
-    return (
-      <div
-        className={cn(
-          "flex items-center gap-3 rounded-full border border-success/30 bg-success/10 px-5 py-3 text-sm font-medium text-success",
-          className
-        )}
-      >
-        <Check className="size-4" /> Te-ai abonat. Verifică-ți emailul.
-      </div>
+    setPending(true);
+
+    const subject = encodeURIComponent("Abonare newsletter DYLLU");
+    const body = encodeURIComponent(
+      `Bună ziua,\n\nDoresc să primesc noutățile DYLLU pe adresa ${trimmedEmail}.\n`
     );
-  }
+
+    window.location.href = `${SITE_CONTACT.emailHref}?subject=${subject}&body=${body}`;
+    setPending(false);
+    toast.message(
+      "Se deschide aplicația de email pentru confirmarea abonării."
+    );
+  };
 
   return (
     <form
@@ -73,9 +69,24 @@ export function NewsletterForm({ className, invert }: NewsletterFormProps) {
         isLoading={pending}
         className="h-12 w-full rounded-full px-6"
       >
-        Abonează-mă
+        Solicită abonarea
         {!pending && <ArrowRight className="size-4" />}
       </Button>
+      <p
+        className={cn(
+          "px-1 text-xs",
+          invert ? "text-secondary-foreground/60" : "text-muted-foreground"
+        )}
+      >
+        Confirmarea se face prin email la{" "}
+        <a
+          href={SITE_CONTACT.emailHref}
+          className="underline underline-offset-4 hover:text-current"
+        >
+          {SITE_CONTACT.email}
+        </a>
+        .
+      </p>
     </form>
   );
 }

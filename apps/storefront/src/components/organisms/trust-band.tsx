@@ -1,10 +1,5 @@
 import * as React from "react";
-import {
-  CreditCard,
-  Headphones,
-  Repeat2,
-  Truck,
-} from "lucide-react";
+import { CreditCard, Headphones, Repeat2, Truck } from "lucide-react";
 
 import { Container } from "@/components/atoms/container";
 import { FeatureStat } from "@/components/molecules/feature-stat";
@@ -22,8 +17,8 @@ const FEATURES = [
   },
   {
     icon: <CreditCard className="size-5" />,
-    title: "Plată securizată",
-    description: "Procesare prin MAIB, 3-D Secure activat.",
+    title: "Confirmare comandă",
+    description: "Detaliile de plată se stabilesc la procesare.",
   },
   {
     icon: <Headphones className="size-5" />,

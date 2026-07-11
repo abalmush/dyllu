@@ -1,6 +1,12 @@
 import * as React from "react";
 import Link from "next/link";
-import { Mail, MapPin, Phone, Send, ShieldCheck, Truck, Wallet } from "lucide-react";
+import { Mail, MapPin, Phone, ShieldCheck, Truck, Wallet } from "lucide-react";
+
+import { categoriesTree } from "@lib/data/categories-tree";
+import { SITE_CONTACT, SITE_SOCIALS } from "@lib/site-content";
+import { Logo } from "@/components/atoms/logo";
+import { Separator } from "@/components/atoms/separator";
+import { NewsletterForm } from "@/components/molecules/newsletter-form";
 
 function PaymentBadge({ children }: { children: React.ReactNode }) {
   return (
@@ -20,7 +26,16 @@ function FacebookIcon(props: React.SVGProps<SVGSVGElement>) {
 
 function InstagramIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      {...props}
+    >
       <rect x="3" y="3" width="18" height="18" rx="5" />
       <circle cx="12" cy="12" r="4" />
       <circle cx="17.5" cy="6.5" r="0.9" fill="currentColor" stroke="none" />
@@ -28,16 +43,11 @@ function InstagramIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-import { Logo } from "@/components/atoms/logo";
-import { Separator } from "@/components/atoms/separator";
-import { NewsletterForm } from "@/components/molecules/newsletter-form";
-import { categoriesTree } from "@lib/data/categories-tree";
-
 const SHOP_LINKS = [
   { label: "Toate produsele", href: "/store" },
   { label: "Reduceri active", href: "/store?on_sale=true" },
-  { label: "Noutăți", href: "/store?sort=newest" },
-  { label: "Ghid de mărci", href: "/branduri" },
+  { label: "Noutăți", href: "/store?sortBy=created_at" },
+  { label: "Branduri și ghiduri", href: "/branduri" },
 ];
 
 const SUPPORT_LINKS = [
@@ -49,9 +59,8 @@ const SUPPORT_LINKS = [
 ];
 
 const SOCIAL = [
-  { label: "Facebook", href: "https://facebook.com", icon: FacebookIcon },
-  { label: "Instagram", href: "https://instagram.com", icon: InstagramIcon },
-  { label: "Telegram", href: "https://t.me/dyllu", icon: Send },
+  { label: "Facebook", href: SITE_SOCIALS.facebook, icon: FacebookIcon },
+  { label: "Instagram", href: SITE_SOCIALS.instagram, icon: InstagramIcon },
 ];
 
 export function SiteFooter() {
@@ -67,22 +76,22 @@ export function SiteFooter() {
           </p>
           <div className="space-y-3 text-sm">
             <a
-              href="tel:+37322000000"
+              href={SITE_CONTACT.phoneHref}
               className="flex items-center gap-3 text-secondary-foreground/85 transition-colors hover:text-secondary-foreground"
             >
               <Phone className="size-4 text-primary" />
-              +373 22 000 000
+              {SITE_CONTACT.phoneDisplay}
             </a>
             <a
-              href="mailto:contact@dyllu.md"
+              href={SITE_CONTACT.emailHref}
               className="flex items-center gap-3 text-secondary-foreground/85 transition-colors hover:text-secondary-foreground"
             >
               <Mail className="size-4 text-primary" />
-              contact@dyllu.md
+              {SITE_CONTACT.email}
             </a>
             <div className="flex items-start gap-3 text-secondary-foreground/85">
               <MapPin className="mt-0.5 size-4 text-primary" />
-              <span>str. Industrială 1, Chișinău, Moldova</span>
+              <span>{SITE_CONTACT.showroomSummary}</span>
             </div>
           </div>
         </div>
@@ -144,11 +153,11 @@ export function SiteFooter() {
 
         <div className="space-y-4 small:col-span-3">
           <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-foreground/60">
-            Newsletter
+            Noutăți DYLLU
           </h4>
           <p className="text-sm text-secondary-foreground/70">
             Promoții săptămânale, ghiduri de utilizare și produse noi direct în
-            inbox.
+            email.
           </p>
           <NewsletterForm invert />
           <div className="flex items-center gap-3 pt-2">
@@ -175,14 +184,12 @@ export function SiteFooter() {
 
       <div className="content-container flex flex-col items-center gap-4 py-6 small:flex-row small:justify-between">
         <span className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-foreground/60">
-          Metode de plată acceptate
+          Comenzi și confirmare
         </span>
         <div className="flex flex-wrap items-center gap-2">
-          <PaymentBadge>VISA</PaymentBadge>
-          <PaymentBadge>Mastercard</PaymentBadge>
-          <PaymentBadge>MAIB</PaymentBadge>
-          <PaymentBadge>Apple&nbsp;Pay</PaymentBadge>
-          <PaymentBadge>Google&nbsp;Pay</PaymentBadge>
+          <PaymentBadge>Confirmare telefonică</PaymentBadge>
+          <PaymentBadge>Detalii de plată la procesare</PaymentBadge>
+          <PaymentBadge>Facturare pentru firme</PaymentBadge>
         </div>
       </div>
 
@@ -190,11 +197,14 @@ export function SiteFooter() {
 
       <div className="content-container flex flex-col items-center justify-between gap-4 py-6 text-xs text-secondary-foreground/60 small:flex-row">
         <div className="flex flex-wrap items-center gap-4">
-          <span>© {new Date().getFullYear()} DYLLU. Toate drepturile rezervate.</span>
+          <span>
+            © {new Date().getFullYear()} DYLLU. Toate drepturile rezervate.
+          </span>
         </div>
         <div className="flex flex-wrap items-center gap-5">
           <span className="inline-flex items-center gap-2">
-            <ShieldCheck className="size-4 text-primary" /> Plată securizată MAIB
+            <ShieldCheck className="size-4 text-primary" /> Date validate la
+            confirmarea comenzii
           </span>
           <span className="inline-flex items-center gap-2">
             <Truck className="size-4 text-primary" /> Livrare în toată Moldova

@@ -14,6 +14,7 @@ export interface BannerCardProps {
   imageUrl?: string;
   className?: string;
   align?: "left" | "center";
+  headingLevel?: "h1" | "h2" | "h3";
 }
 
 const variantMap = {
@@ -40,7 +41,10 @@ export function BannerCard({
   imageUrl,
   className,
   align = "left",
+  headingLevel = "h3",
 }: BannerCardProps) {
+  const HeadingTag = headingLevel;
+
   return (
     <Link
       href={href}
@@ -75,9 +79,9 @@ export function BannerCard({
               {eyebrow}
             </span>
           )}
-          <h3 className="font-display text-2xl font-bold leading-tight tracking-tight sm:text-3xl">
+          <HeadingTag className="font-display text-2xl font-bold leading-tight tracking-tight sm:text-3xl">
             {title}
-          </h3>
+          </HeadingTag>
           {description && (
             <p className="text-sm/relaxed opacity-80">{description}</p>
           )}

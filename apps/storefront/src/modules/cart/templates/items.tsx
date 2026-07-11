@@ -11,12 +11,12 @@ type Props = {
 export default function ItemsTemplate({ cart }: Props) {
   const items = cart?.items;
   return (
-    <section className="rounded-2xl border border-border bg-card p-2 small:p-4">
-      <header className="flex items-baseline justify-between border-b border-border px-4 pb-3 pt-3">
+    <section className="clip-corner-cut-lg clip-shadow-md bg-card p-3 ring-1 ring-border small:p-4">
+      <header className="flex flex-wrap items-baseline justify-between gap-3 border-b border-border px-4 pb-4 pt-3">
         <h2 className="font-display text-xl font-bold tracking-tight text-foreground">
           Produsele tale
         </h2>
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <span className="clip-corner-cut-xs bg-surface-subtle px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           {items?.length ?? 0} {items?.length === 1 ? "produs" : "produse"}
         </span>
       </header>
@@ -24,7 +24,9 @@ export default function ItemsTemplate({ cart }: Props) {
         {items
           ? items
               .slice()
-              .sort((a, b) => ((a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1))
+              .sort((a, b) =>
+                (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
+              )
               .map((item) => (
                 <Item
                   key={item.id}

@@ -19,36 +19,47 @@ const Review = ({ cart }: { cart: any }) => {
     (cart.payment_collection || paidByGiftcard);
 
   return (
-    <div className="bg-white">
+    <section className="clip-corner-cut-lg clip-shadow-md bg-card p-6 ring-1 ring-border small:p-8">
       <div className="mb-6 flex flex-row items-center justify-between">
-        <Heading
-          level="h2"
-          className={clx(
-            "text-3xl-regular flex flex-row items-baseline gap-x-2",
-            {
-              "pointer-events-none select-none opacity-50": !isOpen,
-            }
+        <div className="space-y-2">
+          <Text className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Pasul 4
+          </Text>
+          <Heading
+            level="h2"
+            className={clx(
+              "flex flex-row items-baseline gap-x-2 font-display text-xl font-bold tracking-tight text-foreground",
+              {
+                "pointer-events-none select-none opacity-50": !isOpen,
+              }
+            )}
+          >
+            Verificare finală
+          </Heading>
+          {isOpen && (
+            <Text className="text-sm text-muted-foreground">
+              Ultimul pas: confirmă că detaliile comenzii sunt corecte și
+              plasează comanda.
+            </Text>
           )}
-        >
-          Review
-        </Heading>
+        </div>
       </div>
       {isOpen && previousStepsCompleted && (
         <>
-          <div className="mb-6 flex w-full items-start gap-x-1">
+          <div className="clip-corner-cut-md mb-6 bg-surface-subtle/60 p-5 ring-1 ring-border/70">
             <div className="w-full">
-              <Text className="txt-medium-plus mb-1 text-ui-fg-base">
-                By clicking the Place Order button, you confirm that you have
-                read, understand and accept our Terms of Use, Terms of Sale and
-                Returns Policy and acknowledge that you have read Medusa
-                Store&apos;s Privacy Policy.
+              <Text className="mb-1 text-sm text-muted-foreground">
+                Prin apăsarea butonului de plasare confirmi că datele comenzii
+                sunt corecte și că accepți termenii de vânzare, politica de
+                retur și prelucrarea datelor necesare pentru livrare și
+                facturare.
               </Text>
             </div>
           </div>
           <PaymentButton cart={cart} data-testid="submit-order-button" />
         </>
       )}
-    </div>
+    </section>
   );
 };
 

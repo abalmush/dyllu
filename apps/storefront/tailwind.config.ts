@@ -1,10 +1,11 @@
 import type { Config } from "tailwindcss";
+import * as medusaPreset from "@medusajs/ui-preset";
 import animate from "tailwindcss-animate";
-const radix = require("tailwindcss-radix");
+import radix from "tailwindcss-radix";
 
 const config: Config = {
   darkMode: "class",
-  presets: [require("@medusajs/ui-preset")],
+  presets: [medusaPreset],
   content: [
     "./src/app/**/*.{js,ts,jsx,tsx}",
     "./src/components/**/*.{js,ts,jsx,tsx}",
@@ -42,6 +43,7 @@ const config: Config = {
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+          subtle: "hsl(var(--destructive-subtle))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -58,6 +60,7 @@ const config: Config = {
         warning: {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
+          subtle: "hsl(var(--warning-subtle))",
         },
         card: {
           DEFAULT: "hsl(var(--card))",
@@ -120,11 +123,26 @@ const config: Config = {
       },
       fontSize: {
         "3xl": "2rem",
-        "display-sm": ["2.25rem", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" }],
-        "display-md": ["3rem", { lineHeight: "1.05", letterSpacing: "-0.025em", fontWeight: "700" }],
-        "display-lg": ["3.75rem", { lineHeight: "1", letterSpacing: "-0.03em", fontWeight: "800" }],
-        "display-xl": ["4.5rem", { lineHeight: "1", letterSpacing: "-0.035em", fontWeight: "800" }],
-        "display-2xl": ["5.5rem", { lineHeight: "0.95", letterSpacing: "-0.04em", fontWeight: "800" }],
+        "display-sm": [
+          "2.25rem",
+          { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" },
+        ],
+        "display-md": [
+          "3rem",
+          { lineHeight: "1.05", letterSpacing: "-0.025em", fontWeight: "700" },
+        ],
+        "display-lg": [
+          "3.75rem",
+          { lineHeight: "1", letterSpacing: "-0.03em", fontWeight: "800" },
+        ],
+        "display-xl": [
+          "4.5rem",
+          { lineHeight: "1", letterSpacing: "-0.035em", fontWeight: "800" },
+        ],
+        "display-2xl": [
+          "5.5rem",
+          { lineHeight: "0.95", letterSpacing: "-0.04em", fontWeight: "800" },
+        ],
       },
       maxWidth: {
         "8xl": "100rem",
@@ -169,12 +187,19 @@ const config: Config = {
           "100%": { visibility: "hidden" },
         },
         "accordion-slide-up": {
-          "0%": { height: "var(--radix-accordion-content-height)", opacity: "1" },
+          "0%": {
+            height: "var(--radix-accordion-content-height)",
+            opacity: "1",
+          },
           "100%": { height: "0", opacity: "0" },
         },
         "accordion-slide-down": {
           "0%": { "min-height": "0", "max-height": "0", opacity: "0" },
-          "100%": { "min-height": "var(--radix-accordion-content-height)", "max-height": "none", opacity: "1" },
+          "100%": {
+            "min-height": "var(--radix-accordion-content-height)",
+            "max-height": "none",
+            opacity: "1",
+          },
         },
         enter: {
           "0%": { transform: "scale(0.96)", opacity: "0" },
@@ -199,12 +224,16 @@ const config: Config = {
       },
       animation: {
         ring: "ring 2.2s cubic-bezier(0.5, 0, 0.5, 1) infinite",
-        "fade-in-right": "fade-in-right 0.3s cubic-bezier(0.5, 0, 0.5, 1) forwards",
+        "fade-in-right":
+          "fade-in-right 0.3s cubic-bezier(0.5, 0, 0.5, 1) forwards",
         "fade-in-up": "fade-in-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards",
         "fade-in-top": "fade-in-top 0.2s cubic-bezier(0.5, 0, 0.5, 1) forwards",
-        "fade-out-top": "fade-out-top 0.2s cubic-bezier(0.5, 0, 0.5, 1) forwards",
-        "accordion-open": "accordion-slide-down 300ms cubic-bezier(0.87, 0, 0.13, 1) forwards",
-        "accordion-close": "accordion-slide-up 300ms cubic-bezier(0.87, 0, 0.13, 1) forwards",
+        "fade-out-top":
+          "fade-out-top 0.2s cubic-bezier(0.5, 0, 0.5, 1) forwards",
+        "accordion-open":
+          "accordion-slide-down 300ms cubic-bezier(0.87, 0, 0.13, 1) forwards",
+        "accordion-close":
+          "accordion-slide-up 300ms cubic-bezier(0.87, 0, 0.13, 1) forwards",
         enter: "enter 200ms ease-out",
         leave: "leave 150ms ease-in forwards",
         "slide-in": "slide-in 1.2s cubic-bezier(.41,.73,.51,1.02)",

@@ -18,7 +18,7 @@ export function NewsletterBand() {
           <div className="relative grid items-center gap-10 small:grid-cols-2">
             <div className="space-y-4">
               <Eyebrow icon={<Mail className="size-3.5" />}>
-                Newsletter DYLLU
+                Noutăți DYLLU
               </Eyebrow>
               <h2 className="font-display text-display-sm font-extrabold tracking-tight small:text-display-md">
                 Promoții, sfaturi tehnice și
@@ -26,8 +26,8 @@ export function NewsletterBand() {
                 de toți.
               </h2>
               <p className="text-sm text-secondary-foreground/70 small:text-base">
-                Primești săptămânal selecția redacției — fără spam, dezabonare
-                cu un click.
+                Lasă-ne adresa și deschidem un email precompletat pentru
+                confirmarea abonării.
               </p>
             </div>
             <div className="flex flex-col gap-4">

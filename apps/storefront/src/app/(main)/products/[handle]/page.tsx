@@ -31,18 +31,20 @@ export async function generateStaticParams() {
 function getImagesForVariant(
   product: HttpTypes.StoreProduct,
   selectedVariantId?: string
-) {
+): HttpTypes.StoreProductImage[] {
   if (!selectedVariantId || !product.variants) {
-    return product.images;
+    return product.images ?? [];
   }
 
   const variant = product.variants.find((v) => v.id === selectedVariantId);
   if (!variant?.images?.length) {
-    return product.images;
+    return product.images ?? [];
   }
 
   const imageIdsMap = new Map(variant.images.map((i) => [i.id, true]));
-  return product.images?.filter((i) => imageIdsMap.has(i.id)) ?? product.images;
+  return (
+    product.images?.filter((i) => imageIdsMap.has(i.id)) ?? product.images ?? []
+  );
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {

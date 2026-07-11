@@ -22,7 +22,7 @@ const AccountInfo = ({
   isSuccess,
   isError,
   clearState,
-  errorMessage = "An error occurred, please try again",
+  errorMessage = "A apărut o eroare. Te rugăm să încerci din nou.",
   children,
   "data-testid": dataTestid,
 }: AccountInfoProps) => {
@@ -65,7 +65,7 @@ const AccountInfo = ({
             data-testid="edit-button"
             data-active={state}
           >
-            {state ? "Cancel" : "Edit"}
+            {state ? "Anulează" : "Editează"}
           </Button>
         </div>
       </div>
@@ -83,7 +83,7 @@ const AccountInfo = ({
           data-testid="success-message"
         >
           <Badge className="my-4 p-2" color="green">
-            <span>{label} updated succesfully</span>
+            <span>{label} a fost actualizat cu succes</span>
           </Badge>
         </Disclosure.Panel>
       </Disclosure>

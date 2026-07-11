@@ -9,6 +9,7 @@ import { HttpTypes } from "@medusajs/types";
 import { cn } from "@lib/utils";
 import { deleteLineItem, updateLineItem } from "@lib/data/cart";
 import { convertToLocale } from "@lib/util/money";
+import { IMAGE_BG_NEUTRALIZE } from "@/components/organisms/pdp-hero-variants";
 import { QuantityStepper } from "@/components/molecules/quantity-stepper";
 import ErrorMessage from "@modules/checkout/components/error-message";
 
@@ -18,7 +19,11 @@ type Props = {
   currencyCode: string;
 };
 
-export default function CartItemRow({ item, type = "full", currencyCode }: Props) {
+export default function CartItemRow({
+  item,
+  type = "full",
+  currencyCode,
+}: Props) {
   const [updating, setUpdating] = React.useState(false);
   const [removing, setRemoving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -75,7 +80,7 @@ export default function CartItemRow({ item, type = "full", currencyCode }: Props
       <Link
         href={`/products/${item.product_handle}`}
         className={cn(
-          "relative aspect-square overflow-hidden rounded-xl bg-surface-subtle",
+          "clip-corner-cut-md relative aspect-square overflow-hidden bg-surface-subtle ring-1 ring-border",
           isPreview ? "size-16" : "size-[88px] small:size-[120px]"
         )}
       >
@@ -85,7 +90,8 @@ export default function CartItemRow({ item, type = "full", currencyCode }: Props
             alt={item.title}
             fill
             sizes={isPreview ? "64px" : "120px"}
-            className="object-cover"
+            style={IMAGE_BG_NEUTRALIZE}
+            className="object-contain p-2"
           />
         )}
       </Link>
@@ -98,7 +104,10 @@ export default function CartItemRow({ item, type = "full", currencyCode }: Props
           {item.product_title}
         </Link>
         {item.variant?.title && (
-          <p className="text-xs text-muted-foreground" data-testid="product-variant">
+          <p
+            className="text-xs text-muted-foreground"
+            data-testid="product-variant"
+          >
             Variantă: {item.variant.title}
           </p>
         )}
@@ -116,7 +125,7 @@ export default function CartItemRow({ item, type = "full", currencyCode }: Props
               onClick={handleRemove}
               disabled={removing}
               data-testid="product-delete-button"
-              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-0 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
             >
               {removing ? (
                 <Loader2 className="size-3.5 animate-spin" />
@@ -133,7 +142,9 @@ export default function CartItemRow({ item, type = "full", currencyCode }: Props
             )}
           </div>
         )}
-        {error && <ErrorMessage error={error} data-testid="product-error-message" />}
+        {error && (
+          <ErrorMessage error={error} data-testid="product-error-message" />
+        )}
       </div>
       <div
         className={cn(
@@ -143,7 +154,11 @@ export default function CartItemRow({ item, type = "full", currencyCode }: Props
       >
         {isPreview ? (
           <p className="text-xs text-muted-foreground">
-            {item.quantity}× {convertToLocale({ amount: unitPrice, currency_code: currencyCode })}
+            {item.quantity}×{" "}
+            {convertToLocale({
+              amount: unitPrice,
+              currency_code: currencyCode,
+            })}
           </p>
         ) : null}
         {onSale && (
@@ -156,8 +171,8 @@ export default function CartItemRow({ item, type = "full", currencyCode }: Props
         )}
         <p
           className={cn(
-            "text-base font-semibold tracking-tight",
-            onSale ? "text-destructive" : "text-foreground"
+            "font-display text-base font-bold tracking-tight",
+            onSale ? "text-success" : "text-foreground"
           )}
           data-testid="product-price"
         >

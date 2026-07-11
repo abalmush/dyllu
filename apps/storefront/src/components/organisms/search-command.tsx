@@ -16,7 +16,7 @@ import {
 import { categoriesTree } from "@lib/data/categories-tree";
 
 const QUICK_LINKS = [
-  { label: "Produse noi", icon: Sparkles, href: "/store?sort=newest" },
+  { label: "Produse noi", icon: Sparkles, href: "/store?sortBy=created_at" },
   { label: "Reduceri active", icon: Tag, href: "/store?on_sale=true" },
   { label: "Toate categoriile", icon: Layers, href: "/store" },
 ];
@@ -87,7 +87,7 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
       />
       <CommandList>
         <CommandEmpty>
-          Niciun rezultat. Apasă Enter ca să cauți „{query}".
+          Niciun rezultat. Apasă Enter ca să cauți „{query}”.
         </CommandEmpty>
         {recent.length > 0 && (
           <>
@@ -130,9 +130,7 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
             <CommandItem
               key={term}
               value={term}
-              onSelect={() =>
-                go(`/store?q=${encodeURIComponent(term)}`, term)
-              }
+              onSelect={() => go(`/store?q=${encodeURIComponent(term)}`, term)}
             >
               <Sparkles className="size-4 text-muted-foreground" />
               <span>{term}</span>

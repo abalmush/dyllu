@@ -30,9 +30,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
             </span>
           </div>
           <div>
-            <UnderlineLink href="/customer-service">
-              Suport clienți
-            </UnderlineLink>
+            <UnderlineLink href="/contact">Contact și suport</UnderlineLink>
           </div>
         </div>
       </div>

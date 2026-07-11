@@ -1,0 +1,158 @@
+-- allium: 3
+-- pdp-combo-hero.allium
+
+-- Scope: The PDP "combo hero" — lets a customer add a primary product plus
+-- its matched accessory "satellites" to the cart in a single action, with
+-- per-tile inclusion/exclusion and a live-recomputed bundle total.
+-- Includes: combo membership (auto-matched, admin-overridable), per-tile
+-- selection state, add-to-cart behaviour for the currently-selected set.
+-- Excludes:
+--   - The existing compatible-accessories rail (separate, already-built feature)
+--   - Pre-packaged single-SKU "kit" products (regular products, no special hero)
+--   - The exact matching/mapping algorithm behind ComboMatching.suggest (black
+--     box; genuinely undecided, not just deferred)
+--   - Combo-level price discounts (no discount logic exists yet)
+--   - General cart line-item availability handling (a separate, not-yet-written
+--     Cart spec's concern; this spec only emits the attempted-add)
+-- Dependencies: Product is Medusa's existing product catalog entity. Session
+-- is the customer's existing browsing/cart session. Both are external to this
+-- spec.
+
+------------------------------------------------------------
+-- External Entities
+------------------------------------------------------------
+
+external entity Session {}
+
+external entity Product {
+    category: String
+    platform: String?
+    combo_override: List<Product>?
+
+    -- Admin-curated list wins outright when present; otherwise the set is
+    -- auto-matched. The matching algorithm itself is a black box — see the
+    -- open questions below.
+    combo_satellites: combo_override ?? ComboMatching.suggest(
+        considering: { category, platform }
+    )
+}
+
+------------------------------------------------------------
+-- Entities and Variants
+------------------------------------------------------------
+
+entity ComboSelection {
+    -- Fields
+    session: Session
+    primary_product: Product
+
+    -- Relationships
+    tiles: ComboTile with selection = this
+
+    -- Derived
+    selected_tiles: tiles where selected = true
+    can_add_to_cart: selected_tiles.count > 0
+}
+
+entity ComboTile {
+    selection: ComboSelection
+    product: Product
+    selected: Boolean
+}
+
+------------------------------------------------------------
+-- Config
+------------------------------------------------------------
+
+config {
+    min_satellites_for_combo: Integer = 1
+}
+
+------------------------------------------------------------
+-- Rules
+------------------------------------------------------------
+
+rule ComboSelectionInitializes {
+    when: CustomerViewsProduct(session, product)
+    requires: product.combo_satellites.count >= config.min_satellites_for_combo
+    requires: not exists ComboSelection{session, primary_product: product}
+    let bundle = { product } + product.combo_satellites
+    ensures:
+        let selection = ComboSelection.created(session: session, primary_product: product)
+        for member in bundle:
+            ComboTile.created(selection: selection, product: member, selected: true)
+    @guidance
+        -- Every tile (primary included) starts selected. Fires once per
+        -- (session, product) pair — a page refresh does not reinitialize
+        -- an already-open selection or reset prior toggles.
+}
+
+rule ToggleComboTile {
+    when: CustomerTogglesTile(session, tile)
+    requires: tile.selection.session = session
+    ensures: tile.selected = not tile.selected
+    @guidance
+        -- Toggling a tile never navigates. Viewing a satellite's own PDP
+        -- (via the product-name link) never changes its selection state.
+        -- These are two independent actions on the same tile.
+}
+
+rule CustomerAddsBundleToCart {
+    when: CustomerAddsBundleToCart(session, selection)
+    requires: selection.session = session
+    requires: selection.can_add_to_cart
+    ensures:
+        for tile in selection.selected_tiles:
+            BundleItemAddedToCart(session: session, product: tile.product)
+    @guidance
+        -- Every selected tile is attempted; nothing here filters by
+        -- availability. Whether an unavailable product's line item is
+        -- rejected or added-with-a-flag is the Cart spec's own concern —
+        -- this rule just emits the attempt per tile.
+}
+
+------------------------------------------------------------
+-- Invariants
+------------------------------------------------------------
+
+invariant UniqueSelectionPerSessionAndProduct {
+    for a in ComboSelections:
+        for b in ComboSelections:
+            a != b and a.session = b.session implies a.primary_product != b.primary_product
+}
+
+------------------------------------------------------------
+-- Surfaces
+------------------------------------------------------------
+
+surface ProductComboHero {
+    facing viewer: Session
+
+    context selection: ComboSelection where session = viewer
+
+    exposes:
+        selection.primary_product
+        selection.tiles
+        selection.can_add_to_cart
+
+    provides:
+        for tile in selection.tiles:
+            CustomerTogglesTile(viewer, tile)
+        CustomerAddsBundleToCart(viewer, selection) when selection.can_add_to_cart
+
+    @guidance
+        -- Each tile's product-name link navigates to that product's own PDP
+        -- (a separate, not-yet-specced surface) and is a distinct affordance
+        -- from the tile's toggle target; clicking one must never trigger
+        -- the other.
+}
+
+------------------------------------------------------------
+-- Open Questions
+------------------------------------------------------------
+
+open question "What exact signals and algorithm does ComboMatching.suggest use to pick satellites for a given primary product, beyond category and platform (e.g. how are pure consumables like drill bits matched, since they aren't platform-specific)?"
+open question "Is there a category-to-accessory-category compatibility map (e.g. cordless_drill -> drill_bit, battery_20v, charger_20v), and if so, who or what maintains it?"
+open question "What is the minimum number of matched satellites required to show the combo hero at all, versus falling back to the existing single-product PDP hero variants (Spotlight/Marquee)? config.min_satellites_for_combo defaults to 1 but this hasn't been confirmed."
+open question "Is tile quantity always 1, or can a customer adjust the quantity of an individual satellite before adding the bundle to cart?"
+open question "What are the rules for a combo-level price discount, and how is the discount percentage determined per product? No discount logic exists yet -- price shown today is a plain sum of selected tiles."

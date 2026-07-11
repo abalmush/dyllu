@@ -32,8 +32,7 @@ export function CartDrawer({ cart, trigger }: Props) {
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
   const pathname = usePathname();
   const previousCount = React.useRef<number | null>(null);
-  const totalItems =
-    cart?.items?.reduce((acc, i) => acc + i.quantity, 0) ?? 0;
+  const totalItems = cart?.items?.reduce((acc, i) => acc + i.quantity, 0) ?? 0;
 
   React.useEffect(() => {
     if (
@@ -161,8 +160,7 @@ export function CartDrawer({ cart, trigger }: Props) {
             <div className="border-t border-border bg-surface-subtle px-6 py-5">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">
-                  Subtotal{" "}
-                  <span className="text-xs">(fără TVA)</span>
+                  Subtotal <span className="text-xs">(fără livrare)</span>
                 </span>
                 <span
                   className="text-base font-bold tracking-tight text-foreground"

@@ -1,11 +1,13 @@
 "use server";
 
 import { sdk } from "@lib/config";
-import { revalidateTag } from "next/cache";
+import { revalidateTag as nextRevalidateTag } from "next/cache";
 import { cookies as nextCookies } from "next/headers";
 import { getAuthHeaders, getCacheTag, getCartId } from "./cookies";
 
 const LOCALE_COOKIE_NAME = "_medusa_locale";
+
+const revalidateTag = (tag: string) => nextRevalidateTag(tag, "max");
 
 export const getLocale = async (): Promise<string | null> => {
   try {

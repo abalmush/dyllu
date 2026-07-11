@@ -14,8 +14,13 @@ import ProductTabs from "@modules/products/components/product-tabs";
 import RelatedProducts from "@modules/products/components/related-products";
 import ProductInfo from "@modules/products/templates/product-info";
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products";
-
-import ProductActionsWrapper from "./product-actions-wrapper";
+import ComboProductTemplate from "./combo-product-template";
+import KitProductTemplate from "./kit-product-template";
+import SetProductTemplate from "./set-product-template";
+import {
+  getProductEyebrow,
+  getProductUiType,
+} from "../lib/product-presentation";
 
 type Props = {
   product: HttpTypes.StoreProduct;
@@ -26,14 +31,20 @@ type Props = {
 export default function ProductTemplate({ product, region, images }: Props) {
   if (!product || !product.id) return notFound();
 
-  const eyebrow = (() => {
-    const md = (product.metadata ?? {}) as Record<string, unknown>;
-    const cat = md.ingco_source_categories;
-    if (typeof cat === "string" && cat.length > 0) {
-      return cat.split(",")[0]?.trim();
-    }
-    return undefined;
-  })();
+  const eyebrow = getProductEyebrow(product);
+  const uiType = getProductUiType(product);
+
+  if (uiType === "kit") {
+    return <KitProductTemplate product={product} />;
+  }
+
+  if (uiType === "combo") {
+    return <ComboProductTemplate product={product} />;
+  }
+
+  if (uiType === "set") {
+    return <SetProductTemplate product={product} region={region} />;
+  }
 
   return (
     <>
@@ -53,13 +64,7 @@ export default function ProductTemplate({ product, region, images }: Props) {
           <div className="space-y-8 small:sticky small:top-28 small:self-start">
             <ProductInfo product={product} />
             <ProductOnboardingCta />
-            <Suspense
-              fallback={
-                <ProductActions disabled product={product} region={region} />
-              }
-            >
-              <ProductActionsWrapper id={product.id} region={region} />
-            </Suspense>
+            <ProductActions product={product} region={region} />
           </div>
         </div>
       </Container>

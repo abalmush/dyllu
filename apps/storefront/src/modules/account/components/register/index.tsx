@@ -20,9 +20,7 @@ const Register = ({ setCurrentView }: Props) => {
       className="flex max-w-sm flex-col items-center"
       data-testid="register-page"
     >
-      <h1 className="text-large-semi mb-6 uppercase">
-        Creează cont DYLLU
-      </h1>
+      <h1 className="text-large-semi mb-6 uppercase">Creează cont DYLLU</h1>
       <p className="text-base-regular mb-4 text-center text-ui-fg-base">
         Înregistrează-te pentru comenzi mai rapide, urmărirea livrărilor și
         oferte personalizate.
@@ -70,20 +68,14 @@ const Register = ({ setCurrentView }: Props) => {
         <ErrorMessage error={message} data-testid="register-error" />
         <span className="text-small-regular mt-6 text-center text-ui-fg-base">
           Prin crearea contului accepți{" "}
-          <LocalizedClientLink
-            href="/content/privacy-policy"
-            className="underline"
-          >
+          <LocalizedClientLink href="/confidentialitate" className="underline">
             Politica de confidențialitate
           </LocalizedClientLink>{" "}
           și{" "}
-          <LocalizedClientLink
-            href="/content/terms-of-use"
-            className="underline"
-          >
+          <LocalizedClientLink href="/termeni" className="underline">
             Termenii de utilizare
-          </LocalizedClientLink>
-          {" "}DYLLU.
+          </LocalizedClientLink>{" "}
+          DYLLU.
         </span>
         <SubmitButton className="mt-6 w-full" data-testid="register-button">
           Creează cont

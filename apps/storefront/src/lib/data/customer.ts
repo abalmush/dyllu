@@ -3,7 +3,7 @@
 import { sdk } from "@lib/config";
 import medusaError from "@lib/util/medusa-error";
 import { HttpTypes } from "@medusajs/types";
-import { revalidateTag } from "next/cache";
+import { revalidateTag as nextRevalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   getAuthHeaders,
@@ -14,6 +14,8 @@ import {
   removeCartId,
   setAuthToken,
 } from "./cookies";
+
+const revalidateTag = (tag: string) => nextRevalidateTag(tag, "max");
 
 export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {

@@ -39,8 +39,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${collection.title} | DYLLU`,
-    description: `${collection.title} collection`,
+    title: collection.title,
+    description: `Explorează selecția DYLLU din colecția ${collection.title}.`,
   } as Metadata;
 }
 

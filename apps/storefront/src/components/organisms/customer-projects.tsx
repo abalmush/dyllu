@@ -91,7 +91,7 @@ export function CustomerProjects() {
         </header>
         <div className="grid grid-cols-2 gap-3 small:grid-cols-6 small:gap-4">
           {PROJECTS.map((p) => (
-            <ProjectCard key={p.seed} project={p} />
+            <ProjectCard key={`${p.handle}-${p.city}`} project={p} />
           ))}
         </div>
       </Container>

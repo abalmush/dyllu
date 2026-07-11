@@ -5,15 +5,15 @@ import React from "react";
 const Help = () => {
   return (
     <div className="mt-6">
-      <Heading className="text-base-semi">Need help?</Heading>
+      <Heading className="text-base-semi">Ai nevoie de ajutor?</Heading>
       <div className="text-base-regular my-2">
         <ul className="flex flex-col gap-y-2">
           <li>
             <LocalizedClientLink href="/contact">Contact</LocalizedClientLink>
           </li>
           <li>
-            <LocalizedClientLink href="/contact">
-              Returns & Exchanges
+            <LocalizedClientLink href="/returnari">
+              Returnări și schimburi
             </LocalizedClientLink>
           </li>
         </ul>

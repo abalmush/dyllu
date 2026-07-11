@@ -10,6 +10,12 @@ type OverviewProps = {
   orders: HttpTypes.StoreOrder[] | null;
 };
 
+const orderDateFormatter = new Intl.DateTimeFormat("ro-MD", {
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+});
+
 const Overview = ({ customer, orders }: OverviewProps) => {
   return (
     <div data-testid="overview-page-wrapper">
@@ -86,15 +92,17 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                         >
                           <Container className="flex items-center justify-between bg-gray-50 p-4">
                             <div className="text-small-regular grid flex-1 grid-cols-3 grid-rows-2 gap-x-4">
-                              <span className="font-semibold">Dată plasare</span>
+                              <span className="font-semibold">
+                                Dată plasare
+                              </span>
                               <span className="font-semibold">
                                 Număr comandă
                               </span>
-                              <span className="font-semibold">
-                                Total
-                              </span>
+                              <span className="font-semibold">Total</span>
                               <span data-testid="order-created-date">
-                                {new Date(order.created_at).toDateString()}
+                                {orderDateFormatter.format(
+                                  new Date(order.created_at)
+                                )}
                               </span>
                               <span
                                 data-testid="order-id"
@@ -124,7 +132,9 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                     );
                   })
                 ) : (
-                  <span data-testid="no-orders-message">Nu ai comenzi recente</span>
+                  <span data-testid="no-orders-message">
+                    Nu ai comenzi recente
+                  </span>
                 )}
               </ul>
             </div>

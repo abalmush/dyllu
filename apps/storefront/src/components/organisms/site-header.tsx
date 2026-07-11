@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Heart, Search, User } from "lucide-react";
+import { Search, User } from "lucide-react";
 
 import { cn } from "@lib/utils";
 import { useShowcasePinned } from "@lib/stores/showcase-pinned";
@@ -59,7 +59,7 @@ export function SiteHeader({ cart, categories }: SiteHeaderProps) {
           <MobileNav categories={categories} />
           <Link
             href="/"
-            aria-label="DYLLU homepage"
+            aria-label="Pagina principală DYLLU"
             className="flex items-center text-background"
           >
             <Logo className="h-7 small:h-8" />
@@ -96,13 +96,6 @@ export function SiteHeader({ cart, categories }: SiteHeaderProps) {
             className="hidden size-10 place-items-center rounded-full text-background transition-colors hover:bg-background/10 medium:grid"
           >
             <User className="size-5" />
-          </Link>
-          <Link
-            href="/account/wishlist"
-            aria-label="Favorite"
-            className="hidden size-10 place-items-center rounded-full text-background transition-colors hover:bg-background/10 medium:grid"
-          >
-            <Heart className="size-5" />
           </Link>
           <CartDrawer cart={cart} />
         </div>

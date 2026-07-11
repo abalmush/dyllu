@@ -7,7 +7,6 @@ import { CheckCircleSolid, CreditCard } from "@medusajs/icons";
 import { Button, Container, Heading, Text, clx } from "@lib/ui-compat";
 import ErrorMessage from "@modules/checkout/components/error-message";
 import PaymentContainer from "@modules/checkout/components/payment-container";
-import Divider from "@modules/common/components/divider";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
@@ -87,29 +86,39 @@ const Payment = ({
   }, [isOpen]);
 
   return (
-    <div className="bg-white">
-      <div className="mb-6 flex flex-row items-center justify-between">
-        <Heading
-          level="h2"
-          className={clx(
-            "text-3xl-regular flex flex-row items-baseline gap-x-2",
-            {
-              "pointer-events-none select-none opacity-50":
-                !isOpen && !paymentReady,
-            }
+    <section className="clip-corner-cut-lg clip-shadow-md bg-card p-6 ring-1 ring-border small:p-8">
+      <div className="mb-6 flex flex-row items-center justify-between gap-4">
+        <div className="space-y-2">
+          <Text className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Pasul 3
+          </Text>
+          <Heading
+            level="h2"
+            className={clx(
+              "flex flex-row items-baseline gap-x-2 font-display text-xl font-bold tracking-tight text-foreground",
+              {
+                "pointer-events-none select-none opacity-50":
+                  !isOpen && !paymentReady,
+              }
+            )}
+          >
+            Plată
+            {!isOpen && paymentReady && <CheckCircleSolid />}
+          </Heading>
+          {isOpen && (
+            <Text className="text-sm text-muted-foreground">
+              Selectează metoda de plată și continuă către verificarea finală.
+            </Text>
           )}
-        >
-          Payment
-          {!isOpen && paymentReady && <CheckCircleSolid />}
-        </Heading>
+        </div>
         {!isOpen && paymentReady && (
           <Text>
             <button
               onClick={handleEdit}
-              className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+              className="text-sm font-semibold text-primary transition-colors hover:text-primary/80"
               data-testid="edit-payment-button"
             >
-              Edit
+              Editează
             </button>
           </Text>
         )}
@@ -134,15 +143,15 @@ const Payment = ({
           )}
 
           {paidByGiftcard && (
-            <div className="flex w-1/3 flex-col">
-              <Text className="txt-medium-plus mb-1 text-ui-fg-base">
-                Payment method
+            <div className="clip-corner-cut-md flex flex-col bg-surface-subtle/60 p-4 ring-1 ring-border/70">
+              <Text className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Metodă de plată
               </Text>
               <Text
-                className="txt-medium text-ui-fg-subtle"
+                className="text-sm text-foreground"
                 data-testid="payment-method-summary"
               >
-                Gift card
+                Card cadou
               </Text>
             </div>
           )}
@@ -154,65 +163,64 @@ const Payment = ({
 
           <Button
             size="large"
-            className="mt-6"
+            className="clip-corner-cut-sm mt-6 rounded-none"
             onClick={handleSubmit}
             isLoading={isLoading}
             disabled={!selectedPaymentMethod && !paidByGiftcard}
             data-testid="submit-payment-button"
           >
-            Continue to review
+            Continuă către verificare
           </Button>
         </div>
 
         <div className={isOpen ? "hidden" : "block"}>
           {cart && paymentReady && activeSession ? (
-            <div className="flex w-full items-start gap-x-1">
-              <div className="flex w-1/3 flex-col">
-                <Text className="txt-medium-plus mb-1 text-ui-fg-base">
-                  Payment method
+            <div className="clip-corner-cut-md grid gap-5 bg-surface-subtle/60 p-5 ring-1 ring-border/70 small:grid-cols-2">
+              <div className="flex flex-col">
+                <Text className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  Metodă de plată
                 </Text>
                 <Text
-                  className="txt-medium text-ui-fg-subtle"
+                  className="text-sm text-foreground"
                   data-testid="payment-method-summary"
                 >
                   {paymentInfoMap[activeSession?.provider_id]?.title ||
                     activeSession?.provider_id}
                 </Text>
               </div>
-              <div className="flex w-1/3 flex-col">
-                <Text className="txt-medium-plus mb-1 text-ui-fg-base">
-                  Payment details
+              <div className="flex flex-col">
+                <Text className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  Confirmare plată
                 </Text>
                 <div
-                  className="txt-medium flex items-center gap-2 text-ui-fg-subtle"
+                  className="flex items-center gap-2 text-sm text-muted-foreground"
                   data-testid="payment-details-summary"
                 >
-                  <Container className="flex h-7 w-fit items-center bg-ui-button-neutral-hover p-2">
+                  <Container className="clip-corner-cut-xs flex h-8 w-fit items-center bg-background px-3 ring-1 ring-border">
                     {paymentInfoMap[selectedPaymentMethod]?.icon || (
                       <CreditCard />
                     )}
                   </Container>
-                  <Text>Another step will appear</Text>
+                  <Text>Ultimul pas este confirmarea finală a comenzii.</Text>
                 </div>
               </div>
             </div>
           ) : paidByGiftcard ? (
-            <div className="flex w-1/3 flex-col">
-              <Text className="txt-medium-plus mb-1 text-ui-fg-base">
-                Payment method
+            <div className="clip-corner-cut-md flex flex-col bg-surface-subtle/60 p-5 ring-1 ring-border/70">
+              <Text className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Metodă de plată
               </Text>
               <Text
-                className="txt-medium text-ui-fg-subtle"
+                className="text-sm text-foreground"
                 data-testid="payment-method-summary"
               >
-                Gift card
+                Card cadou
               </Text>
             </div>
           ) : null}
         </div>
       </div>
-      <Divider className="mt-8" />
-    </div>
+    </section>
   );
 };
 

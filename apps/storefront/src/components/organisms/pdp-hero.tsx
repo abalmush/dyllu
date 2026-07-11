@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { isEqual } from "lodash";
-import { ChevronLeft, ChevronRight, Heart, ShoppingBag } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { HttpTypes } from "@medusajs/types";
 
@@ -276,13 +276,6 @@ export function PdpHero({ product, eyebrow }: Props) {
                   <ShoppingBag className="size-4" />
                   {ctaLabel}
                 </Button>
-                <button
-                  type="button"
-                  aria-label="Adaugă la favorite"
-                  className="grid size-12 shrink-0 place-items-center rounded-full border border-border bg-card text-foreground transition-colors hover:border-foreground/40 hover:bg-muted"
-                >
-                  <Heart className="size-5" />
-                </button>
               </div>
             </div>
           </div>

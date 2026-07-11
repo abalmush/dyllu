@@ -51,7 +51,7 @@ export const listProducts = async ({
           offset,
           region_id: region.id,
           fields:
-            "*variants.calculated_price,+variants.inventory_quantity,*variants.images,+variants.metadata,+metadata,+tags,",
+            "*options,*variants.options,*variants.calculated_price,+variants.inventory_quantity,*variants.images,+variants.metadata,+metadata,+tags,",
           ...queryParams,
         },
         headers,
@@ -77,10 +77,12 @@ export const listProductsWithSort = async ({
   page = 0,
   queryParams,
   sortBy = "created_at",
+  onlyOnSale = false,
 }: {
   page?: number;
   queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams;
   sortBy?: SortOptions;
+  onlyOnSale?: boolean;
 }): Promise<{
   response: { products: HttpTypes.StoreProduct[]; count: number };
   nextPage: number | null;
@@ -89,7 +91,7 @@ export const listProductsWithSort = async ({
   const limit = queryParams?.limit || 12;
 
   const {
-    response: { products, count },
+    response: { products },
   } = await listProducts({
     pageParam: 0,
     queryParams: {
@@ -99,17 +101,31 @@ export const listProductsWithSort = async ({
   });
 
   const sortedProducts = sortProducts(products, sortBy);
+  const filteredProducts = onlyOnSale
+    ? sortedProducts.filter(
+        (product) =>
+          product.variants?.some(
+            (variant) =>
+              (variant.calculated_price?.original_amount ?? 0) >
+              (variant.calculated_price?.calculated_amount ?? 0)
+          ) ?? false
+      )
+    : sortedProducts;
 
   const pageParam = (page - 1) * limit;
 
-  const nextPage = count > pageParam + limit ? pageParam + limit : null;
+  const nextPage =
+    filteredProducts.length > pageParam + limit ? pageParam + limit : null;
 
-  const paginatedProducts = sortedProducts.slice(pageParam, pageParam + limit);
+  const paginatedProducts = filteredProducts.slice(
+    pageParam,
+    pageParam + limit
+  );
 
   return {
     response: {
       products: paginatedProducts,
-      count,
+      count: filteredProducts.length,
     },
     nextPage,
     queryParams,

@@ -31,7 +31,11 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     );
   }
 
-  return <Button disabled>Select a payment method</Button>;
+  return (
+    <Button disabled className="clip-corner-cut-sm rounded-none">
+      Selectează metoda de plată
+    </Button>
+  );
 };
 
 const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
@@ -60,9 +64,10 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
         isLoading={submitting}
         onClick={handlePayment}
         size="large"
+        className="clip-corner-cut-sm w-full rounded-none"
         data-testid="submit-order-button"
       >
-        Place order
+        Plasează comanda
       </Button>
       <ErrorMessage
         error={errorMessage}

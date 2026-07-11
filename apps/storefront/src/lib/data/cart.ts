@@ -3,7 +3,7 @@
 import { sdk } from "@lib/config";
 import medusaError from "@lib/util/medusa-error";
 import { HttpTypes } from "@medusajs/types";
-import { revalidateTag } from "next/cache";
+import { revalidateTag as nextRevalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   getAuthHeaders,
@@ -15,6 +15,8 @@ import {
 } from "./cookies";
 import { getRegion } from "./regions";
 import { getLocale } from "@lib/data/locale-actions";
+
+const revalidateTag = (tag: string) => nextRevalidateTag(tag, "max");
 
 export async function retrieveCart(cartId?: string, fields?: string) {
   const id = cartId || (await getCartId());

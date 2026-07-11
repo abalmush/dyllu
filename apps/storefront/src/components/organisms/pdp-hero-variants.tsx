@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { isEqual } from "lodash";
-import { Heart, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
+import { ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import AutoplayPlugin from "embla-carousel-autoplay";
 import { HttpTypes } from "@medusajs/types";
@@ -31,7 +31,7 @@ const optionsAsKeymap = (
   }, {}) ?? {};
 
 const fmt = new Intl.NumberFormat("ro-MD");
-const formatPrice = (n: number | null | undefined) =>
+export const formatPrice = (n: number | null | undefined) =>
   n == null ? "—" : `${fmt.format(Math.round(n))} MDL`;
 
 // Pushes near-white pixels in product photos (manufacturer catalog shots
@@ -39,7 +39,7 @@ const formatPrice = (n: number | null | undefined) =>
 // stops being visible against pure-white tile backgrounds. Dark product
 // pixels are largely unaffected. Proper fix is per-image background removal
 // (see TODO.md — AI chat editor / batch cleanup pipeline).
-const IMAGE_BG_NEUTRALIZE: React.CSSProperties = {
+export const IMAGE_BG_NEUTRALIZE: React.CSSProperties = {
   filter: "brightness(1.04) contrast(1.05)",
 };
 
@@ -482,7 +482,7 @@ type LayoutProps = {
   card: ReturnType<typeof useInfoCardController>;
 };
 
-function InfoCard({
+export function InfoCard({
   product,
   eyebrow,
   card,
@@ -641,13 +641,6 @@ function InfoCard({
               <ShoppingBag className="size-4" />
               {ctaLabel}
             </Button>
-            <button
-              type="button"
-              aria-label="Adaugă la favorite"
-              className="clip-corner-cut-sm grid size-14 shrink-0 place-items-center border border-border bg-card text-foreground transition-colors hover:border-foreground/40 hover:bg-muted"
-            >
-              <Heart className="size-5" />
-            </button>
           </div>
         </div>
       </div>
@@ -672,8 +665,13 @@ function InfoCard({
             <ShieldCheck className="size-4" />
           </span>
           <span className="text-foreground">
-            <span className="font-semibold">Plată securizată MAIB</span>
-            <span className="text-muted-foreground"> · 3-D Secure</span>
+            <span className="font-semibold">
+              Confirmare înainte de procesare
+            </span>
+            <span className="text-muted-foreground">
+              {" "}
+              · metoda de plată se validează la confirmarea comenzii
+            </span>
           </span>
         </li>
       </ul>
@@ -681,7 +679,7 @@ function InfoCard({
   );
 }
 
-function useInfoCardController(product: HttpTypes.StoreProduct) {
+export function useInfoCardController(product: HttpTypes.StoreProduct) {
   const primaryOption = product.options?.[0];
   const optionValues = primaryOption?.values?.map((v) => v.value) ?? [];
   const isMultiVariant = (product.variants?.length ?? 0) > 1;

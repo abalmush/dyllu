@@ -37,33 +37,32 @@ const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
     }, [innerRef.current?.value]);
 
     return (
-      <div>
-        <div
-          onFocus={() => innerRef.current?.focus()}
-          onBlur={() => innerRef.current?.blur()}
-          className={clx(
-            "text-base-regular relative flex items-center rounded-md border border-ui-border-base bg-ui-bg-subtle hover:bg-ui-bg-field-hover",
-            className,
-            {
-              "text-ui-fg-muted": isPlaceholder,
-            }
-          )}
+      <div
+        onFocus={() => innerRef.current?.focus()}
+        onBlur={() => innerRef.current?.blur()}
+        className={clx(
+          "relative flex h-12 items-center rounded-md border border-border bg-background shadow-sm transition-colors focus-within:border-foreground focus-within:ring-2 focus-within:ring-ring/20 focus-within:ring-offset-0",
+          className,
+          {
+            "text-muted-foreground": isPlaceholder,
+            "text-foreground": !isPlaceholder,
+          }
+        )}
+      >
+        <select
+          ref={innerRef}
+          defaultValue={defaultValue}
+          {...props}
+          className="h-full w-full appearance-none border-none bg-transparent px-4 pr-12 text-sm outline-none transition-colors duration-150"
         >
-          <select
-            ref={innerRef}
-            defaultValue={defaultValue}
-            {...props}
-            className="flex-1 appearance-none border-none bg-transparent px-4 py-2.5 outline-none transition-colors duration-150"
-          >
-            <option disabled value="">
-              {placeholder}
-            </option>
-            {children}
-          </select>
-          <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center">
-            <ChevronUpDown />
-          </span>
-        </div>
+          <option disabled value="">
+            {placeholder}
+          </option>
+          {children}
+        </select>
+        <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-muted-foreground">
+          <ChevronUpDown />
+        </span>
       </div>
     );
   }

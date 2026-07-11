@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
+import { revalidateTag as nextRevalidateTag } from "next/cache";
 
 const DEFAULT_TAGS = [
   "products",
@@ -7,6 +7,8 @@ const DEFAULT_TAGS = [
   "collections",
   "compatible-accessories",
 ];
+
+const revalidateTag = (tag: string) => nextRevalidateTag(tag, "max");
 
 export async function POST(request: Request) {
   const secret = process.env.REVALIDATE_SECRET;

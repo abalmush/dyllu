@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { isEqual } from "lodash";
-import { Heart, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
+import { ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -28,14 +28,16 @@ const optionsAsKeymap = (
   variantOptions?.reduce((acc: Record<string, string>, opt: any) => {
     acc[opt.option_id] = opt.value;
     return acc;
-  }, {});
+  }, {}) ?? {};
 
 export default function ProductActions({ product, disabled }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [options, setOptions] = React.useState<Record<string, string | undefined>>({});
+  const [options, setOptions] = React.useState<
+    Record<string, string | undefined>
+  >({});
   const [quantity, setQuantity] = React.useState(1);
   const [isAdding, setIsAdding] = React.useState(false);
 
@@ -137,7 +139,13 @@ export default function ProductActions({ product, disabled }: Props) {
       <div className="flex flex-col gap-2">
         <Button
           onClick={handleAddToCart}
-          disabled={!inStock || !selectedVariant || !!disabled || isAdding || !isValidVariant}
+          disabled={
+            !inStock ||
+            !selectedVariant ||
+            !!disabled ||
+            isAdding ||
+            !isValidVariant
+          }
           isLoading={isAdding}
           size="xl"
           className="rounded-full"
@@ -146,14 +154,12 @@ export default function ProductActions({ product, disabled }: Props) {
           <ShoppingBag className="size-4" />
           {ctaLabel}
         </Button>
-        <Button variant="outline" size="lg" className="rounded-full">
-          <Heart className="size-4" />
-          Adaugă la favorite
-        </Button>
       </div>
 
       <div className="flex items-center justify-center gap-2 rounded-full bg-success/10 px-4 py-2 text-xs font-semibold text-success">
-        <span className={`size-2 rounded-full ${inStock ? "bg-success" : "bg-destructive"}`} />
+        <span
+          className={`size-2 rounded-full ${inStock ? "bg-success" : "bg-destructive"}`}
+        />
         {inStock ? "În stoc · livrare 24–48h" : "Indisponibil"}
       </div>
 
@@ -166,7 +172,10 @@ export default function ProductActions({ product, disabled }: Props) {
           </span>
           <span className="text-foreground">
             <span className="font-semibold">Livrare gratuită</span>
-            <span className="text-muted-foreground"> peste 1.000 MDL în Chișinău</span>
+            <span className="text-muted-foreground">
+              {" "}
+              peste 1.000 MDL în Chișinău
+            </span>
           </span>
         </li>
         <li className="flex items-start gap-3">
@@ -174,8 +183,13 @@ export default function ProductActions({ product, disabled }: Props) {
             <ShieldCheck className="size-4" />
           </span>
           <span className="text-foreground">
-            <span className="font-semibold">Plată securizată MAIB</span>
-            <span className="text-muted-foreground"> · 3-D Secure</span>
+            <span className="font-semibold">
+              Confirmare înainte de procesare
+            </span>
+            <span className="text-muted-foreground">
+              {" "}
+              · metoda de plată se validează la confirmarea comenzii
+            </span>
           </span>
         </li>
       </ul>

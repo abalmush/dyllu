@@ -10,6 +10,12 @@ type OrderCardProps = {
   order: HttpTypes.StoreOrder;
 };
 
+const orderDateFormatter = new Intl.DateTimeFormat("ro-MD", {
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+});
+
 const OrderCard = ({ order }: OrderCardProps) => {
   const numberOfLines = useMemo(() => {
     return (
@@ -30,7 +36,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
       </div>
       <div className="text-small-regular flex items-center divide-x divide-gray-200 text-ui-fg-base">
         <span className="pr-2" data-testid="order-created-at">
-          {new Date(order.created_at).toDateString()}
+          {orderDateFormatter.format(new Date(order.created_at))}
         </span>
         <span className="px-2" data-testid="order-amount">
           {convertToLocale({

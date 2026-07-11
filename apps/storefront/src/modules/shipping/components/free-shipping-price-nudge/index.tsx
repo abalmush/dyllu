@@ -144,10 +144,10 @@ function FreeShippingInline({
             {price.target_reached ? (
               <div className="flex items-center gap-1.5">
                 <CheckCircleSolid className="inline-block text-green-500" />{" "}
-                Free Shipping unlocked!
+                Livrare gratuită activată!
               </div>
             ) : (
-              `Unlock Free Shipping`
+              "Deblochează livrarea gratuită"
             )}
           </div>
 
@@ -156,14 +156,14 @@ function FreeShippingInline({
               "invisible opacity-0": price.target_reached,
             })}
           >
-            Only{" "}
+            Mai ai doar{" "}
             <span className="text-neutral-950">
               {convertToLocale({
                 amount: price.target_remaining,
                 currency_code: cart.currency_code,
               })}
             </span>{" "}
-            away
+            până la prag
           </div>
         </div>
         <div className="flex justify-between gap-1">
@@ -220,10 +220,10 @@ function FreeShippingPopup({
                 {price.target_reached ? (
                   <div className="flex items-center gap-1.5">
                     <CheckCircleSolid className="inline-block text-green-500" />{" "}
-                    Free Shipping unlocked!
+                    Livrare gratuită activată!
                   </div>
                 ) : (
-                  `Unlock Free Shipping`
+                  "Deblochează livrarea gratuită"
                 )}
               </div>
 
@@ -232,14 +232,14 @@ function FreeShippingPopup({
                   "invisible opacity-0": price.target_reached,
                 })}
               >
-                Only{" "}
+                Mai ai doar{" "}
                 <span className="text-white">
                   {convertToLocale({
                     amount: price.target_remaining,
                     currency_code: cart.currency_code,
                   })}
                 </span>{" "}
-                away
+                până la prag
               </div>
             </div>
             <div className="flex justify-between gap-1">
@@ -262,14 +262,14 @@ function FreeShippingPopup({
             className="rounded-2xl border-[1px] border-white bg-transparent px-4 py-2.5 text-[15px] shadow-none outline-none"
             href="/cart"
           >
-            View cart
+            Vezi coșul
           </LocalizedClientLink>
 
           <LocalizedClientLink
             className="flex-grow rounded-2xl border-[1px] border-white bg-white px-4 py-2.5 text-center text-[15px] text-neutral-950 shadow-none outline-none"
             href="/store"
           >
-            View products
+            Vezi produsele
           </LocalizedClientLink>
         </div>
       </div>

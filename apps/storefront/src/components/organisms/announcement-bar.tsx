@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Truck, X, Phone, ShieldCheck } from "lucide-react";
 
+import { SITE_CONTACT } from "@lib/site-content";
 import { cn } from "@lib/utils";
 
 type Message = {
@@ -11,9 +12,18 @@ type Message = {
 };
 
 const DEFAULT_MESSAGES: Message[] = [
-  { icon: <Truck className="size-3.5" />, text: "Livrare gratuită în Chișinău pentru comenzi peste 1.000 MDL" },
-  { icon: <ShieldCheck className="size-3.5" />, text: "Plată securizată MAIB · 30 de zile garanție de retur" },
-  { icon: <Phone className="size-3.5" />, text: "Suport tehnic L–V 9:00–18:00 · +373 22 000 000" },
+  {
+    icon: <Truck className="size-3.5" />,
+    text: "Livrare gratuită în Chișinău pentru comenzi peste 1.000 MDL",
+  },
+  {
+    icon: <ShieldCheck className="size-3.5" />,
+    text: "Comandă online, confirmare rapidă și retur în 14 zile",
+  },
+  {
+    icon: <Phone className="size-3.5" />,
+    text: `Suport și confirmări ${SITE_CONTACT.hoursShort} · ${SITE_CONTACT.phoneDisplay}`,
+  },
 ];
 
 const STORAGE_KEY = "dyllu_announcement_dismissed";

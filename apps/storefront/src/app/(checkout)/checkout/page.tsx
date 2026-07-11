@@ -1,30 +1,81 @@
+import { Container } from "@/components/atoms/container";
+import { Breadcrumbs } from "@/components/molecules/breadcrumbs";
+import { Eyebrow } from "@/components/molecules/eyebrow";
+import { CheckoutSteps } from "@/components/organisms/checkout-blocks";
 import { retrieveCart } from "@lib/data/cart";
 import { retrieveCustomer } from "@lib/data/customer";
 import PaymentWrapper from "@modules/checkout/components/payment-wrapper";
+import {
+  getActiveCheckoutStep,
+  getCheckoutStepIndex,
+} from "@modules/checkout/lib/presentation";
 import CheckoutForm from "@modules/checkout/templates/checkout-form";
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary";
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Checkout",
+  title: "Finalizare comandă",
 };
 
-export default async function Checkout() {
+type Props = {
+  searchParams: Promise<{ step?: string }>;
+};
+
+export default async function Checkout(props: Props) {
   const cart = await retrieveCart();
 
   if (!cart) {
-    return notFound();
+    redirect("/cart");
   }
 
   const customer = await retrieveCustomer();
+  const searchParams = await props.searchParams;
+  const activeStep = getActiveCheckoutStep(cart, searchParams.step);
 
   return (
-    <div className="content-container grid grid-cols-1 gap-x-40 py-12 small:grid-cols-[1fr_416px]">
-      <PaymentWrapper cart={cart}>
-        <CheckoutForm cart={cart} customer={customer} />
-      </PaymentWrapper>
-      <CheckoutSummary cart={cart} />
+    <div className="bg-surface-subtle">
+      <Container className="py-8 small:py-12">
+        <div className="mb-8 flex flex-col gap-3">
+          <Breadcrumbs
+            items={[
+              { label: "Acasă", href: "/" },
+              { label: "Coșul meu", href: "/cart" },
+              { label: "Finalizare comandă" },
+            ]}
+          />
+          <Eyebrow>Pas final</Eyebrow>
+          <h1 className="font-display text-display-sm font-extrabold tracking-tight text-foreground small:text-display-md">
+            Finalizează comanda
+          </h1>
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            Confirmă datele de livrare, alege plata și verifică întreaga comandă
+            înainte de plasare.
+          </p>
+        </div>
+
+        <div className="clip-corner-cut-lg clip-shadow-sm mb-8 bg-card p-4 ring-1 ring-border small:p-6">
+          <CheckoutSteps current={getCheckoutStepIndex(activeStep)} />
+        </div>
+
+        <div className="grid grid-cols-1 gap-8 small:grid-cols-[minmax(0,1fr)_380px] small:gap-12">
+          <PaymentWrapper cart={cart}>
+            <CheckoutForm
+              cart={cart}
+              customer={customer}
+              activeStep={activeStep}
+            />
+          </PaymentWrapper>
+          <CheckoutSummary
+            cart={
+              cart as typeof cart & {
+                promotions: import("@medusajs/types").HttpTypes.StorePromotion[];
+              }
+            }
+            activeStep={activeStep}
+          />
+        </div>
+      </Container>
     </div>
   );
 }

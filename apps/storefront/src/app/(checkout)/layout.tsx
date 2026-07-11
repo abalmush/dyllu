@@ -24,14 +24,16 @@ export default function CheckoutLayout({
           <Link
             href="/"
             data-testid="store-link"
-            aria-label="DYLLU homepage"
+            aria-label="Pagina principală DYLLU"
             className="flex items-center"
           >
             <Logo className="h-7" />
           </Link>
           <div className="flex flex-1 basis-0 items-center justify-end gap-2 text-xs text-muted-foreground">
             <ShieldCheck className="size-4 text-success" />
-            <span className="hidden small:inline">Plată securizată MAIB</span>
+            <span className="hidden small:inline">
+              Confirmare și verificare înainte de procesare
+            </span>
           </div>
         </nav>
       </header>
@@ -40,7 +42,8 @@ export default function CheckoutLayout({
       </div>
       <footer className="border-t border-border bg-surface-subtle">
         <div className="content-container flex h-14 items-center justify-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} DYLLU · Plăți procesate securizat prin MAIB
+          © {new Date().getFullYear()} DYLLU · Comenzile sunt validate înainte
+          de procesare
         </div>
       </footer>
     </div>

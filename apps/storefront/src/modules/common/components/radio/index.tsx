@@ -6,27 +6,24 @@ const Radio = ({
   "data-testid"?: string;
 }) => {
   return (
-    <>
-      <button
-        type="button"
-        role="radio"
-        aria-checked="true"
-        data-state={checked ? "checked" : "unchecked"}
-        className="group relative flex h-5 w-5 items-center justify-center outline-none"
-        data-testid={dataTestId || "radio-button"}
+    <button
+      type="button"
+      role="radio"
+      aria-checked={checked}
+      data-state={checked ? "checked" : "unchecked"}
+      className="group relative grid size-5 place-items-center outline-none"
+      data-testid={dataTestId || "radio-button"}
+    >
+      <span
+        className={`grid size-4 place-items-center rounded-full border transition-colors ${
+          checked
+            ? "border-foreground bg-foreground text-background"
+            : "border-border bg-background text-transparent"
+        }`}
       >
-        <div className="group-hover:shadow-borders-strong-with-shadow group-data-[state=checked]:shadow-borders-interactive flex h-[14px] w-[14px] items-center justify-center rounded-full bg-ui-bg-base shadow-borders-base transition-all group-focus:!shadow-borders-interactive-with-focus group-disabled:!bg-ui-bg-disabled group-disabled:!shadow-borders-base group-data-[state=checked]:bg-ui-bg-interactive">
-          {checked && (
-            <span
-              data-state={checked ? "checked" : "unchecked"}
-              className="group flex items-center justify-center"
-            >
-              <div className="h-1.5 w-1.5 rounded-full bg-ui-bg-base shadow-details-contrast-on-bg-interactive group-disabled:bg-ui-fg-disabled group-disabled:shadow-none"></div>
-            </span>
-          )}
-        </div>
-      </button>
-    </>
+        <span className="size-1.5 rounded-full bg-current" />
+      </span>
+    </button>
   );
 };
 

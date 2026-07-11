@@ -2,10 +2,10 @@ import Link from "next/link";
 import { PackageSearch } from "lucide-react";
 
 import { listProductsWithSort } from "@lib/data/products";
-import { getRegion } from "@lib/data/regions";
 import { Button } from "@/components/atoms/button";
-import ProductPreview from "@modules/products/components/product-preview";
+import { PlpProductCard } from "@/components/organisms/plp-product-card";
 import { Pagination } from "@modules/store/components/pagination";
+import { toPlpProduct } from "@modules/store/lib/to-plp-product";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
 
 const PRODUCT_LIMIT = 12;
@@ -16,6 +16,7 @@ type PaginatedProductsParams = {
   category_id?: string[];
   id?: string[];
   order?: string;
+  q?: string;
 };
 
 export default async function PaginatedProducts({
@@ -24,12 +25,16 @@ export default async function PaginatedProducts({
   collectionId,
   categoryId,
   productsIds,
+  query,
+  onSale,
 }: {
   sortBy?: SortOptions;
   page: number;
   collectionId?: string;
   categoryId?: string;
   productsIds?: string[];
+  query?: string;
+  onSale?: boolean;
 }) {
   const queryParams: PaginatedProductsParams = {
     limit: 12,
@@ -47,14 +52,12 @@ export default async function PaginatedProducts({
     queryParams["id"] = productsIds;
   }
 
-  if (sortBy === "created_at") {
-    queryParams["order"] = "created_at";
+  if (query) {
+    queryParams["q"] = query;
   }
 
-  const region = await getRegion();
-
-  if (!region) {
-    return null;
+  if (sortBy === "created_at") {
+    queryParams["order"] = "created_at";
   }
 
   const {
@@ -63,23 +66,32 @@ export default async function PaginatedProducts({
     page,
     queryParams,
     sortBy,
+    onlyOnSale: onSale,
   });
 
   const totalPages = Math.ceil(count / PRODUCT_LIMIT);
 
   if (products.length === 0) {
+    const emptyTitle = query
+      ? `Nu am găsit produse pentru „${query}”`
+      : onSale
+        ? "Nu există reduceri active în acest moment"
+        : "Categoria încă nu are produse";
+    const emptyDescription = query
+      ? "Încearcă alt termen de căutare, verifică o categorie apropiată sau cere ajutorul echipei DYLLU."
+      : onSale
+        ? "Promoțiile se actualizează constant. Revino curând sau vezi gama completă disponibilă acum."
+        : "Stocul se actualizează constant. Între timp, descoperă restul gamei sau contactează-ne pentru o cotație personalizată.";
+
     return (
       <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-16 text-center">
         <div className="grid size-14 place-items-center rounded-full bg-primary/10 text-primary">
           <PackageSearch className="size-6" />
         </div>
         <div className="space-y-1">
-          <h2 className="font-display text-xl font-semibold">
-            Categoria încă nu are produse
-          </h2>
+          <h2 className="font-display text-xl font-semibold">{emptyTitle}</h2>
           <p className="max-w-md text-sm text-muted-foreground">
-            Stocul se actualizează constant. Între timp, descoperă restul gamei
-            sau contactează-ne pentru o cotație personalizată.
+            {emptyDescription}
           </p>
         </div>
         <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
@@ -102,7 +114,7 @@ export default async function PaginatedProducts({
       >
         {products.map((p) => (
           <li key={p.id}>
-            <ProductPreview product={p} region={region} />
+            <PlpProductCard product={toPlpProduct(p)} />
           </li>
         ))}
       </ul>

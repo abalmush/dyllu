@@ -1,71 +1,35 @@
 "use client";
 
-import React, { useEffect, useActionState } from "react";
+import React from "react";
 
-import Input from "@modules/common/components/input";
-
-import AccountInfo from "../account-info";
 import { HttpTypes } from "@medusajs/types";
+import { Button } from "@lib/ui-compat";
+
+import UnderlineLink from "@modules/common/components/interactive-link";
 
 type MyInformationProps = {
   customer: HttpTypes.StoreCustomer;
 };
 
 const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
-  const [successState, setSuccessState] = React.useState(false);
-
-  const updateCustomerEmail = (
-    _currentState: Record<string, unknown>,
-    formData: FormData
-  ) => {
-    const customer = {
-      email: formData.get("email") as string,
-    };
-
-    try {
-      return { success: true, error: null };
-    } catch (error: any) {
-      return { success: false, error: error.toString() };
-    }
-  };
-
-  const [state, formAction] = useActionState(updateCustomerEmail, {
-    error: false,
-    success: false,
-  });
-
-  const clearState = () => {
-    setSuccessState(false);
-  };
-
-  useEffect(() => {
-    setSuccessState(state.success);
-  }, [state]);
-
   return (
-    <form action={formAction} className="w-full">
-      <AccountInfo
-        label="Email"
-        currentInfo={`${customer.email}`}
-        isSuccess={successState}
-        isError={!!state.error}
-        errorMessage={state.error}
-        clearState={clearState}
-        data-testid="account-email-editor"
-      >
-        <div className="grid grid-cols-1 gap-y-2">
-          <Input
-            label="Email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            defaultValue={customer.email}
-            data-testid="email-input"
-          />
+    <div className="text-small-regular" data-testid="account-email-editor">
+      <div className="flex items-end justify-between gap-4">
+        <div className="flex flex-col">
+          <span className="uppercase text-ui-fg-base">Email</span>
+          <span className="font-semibold" data-testid="current-info">
+            {customer.email}
+          </span>
         </div>
-      </AccountInfo>
-    </form>
+        <Button variant="secondary" className="min-h-[25px] py-1" disabled>
+          Verifică cu suportul
+        </Button>
+      </div>
+      <div className="mt-4 rounded-rounded border border-ui-border-base bg-ui-bg-subtle p-4 text-sm text-ui-fg-subtle">
+        Pentru schimbarea adresei de email, contactează echipa DYLLU din pagina{" "}
+        <UnderlineLink href="/contact">Contact</UnderlineLink>.
+      </div>
+    </div>
   );
 };
 

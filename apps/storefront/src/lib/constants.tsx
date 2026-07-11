@@ -12,7 +12,7 @@ export const paymentInfoMap: Record<
     icon: <PayPal />,
   },
   pp_system_default: {
-    title: "Manual Payment",
+    title: "Plată confirmată la procesare",
     icon: <CreditCard />,
   },
 };

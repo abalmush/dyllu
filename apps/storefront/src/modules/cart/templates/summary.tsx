@@ -6,6 +6,7 @@ import { HttpTypes } from "@medusajs/types";
 
 import { Button } from "@/components/atoms/button";
 import { Separator } from "@/components/atoms/separator";
+import { getNextCheckoutStep } from "@modules/checkout/lib/presentation";
 import CartTotals from "@modules/common/components/cart-totals";
 import DiscountCode from "@modules/checkout/components/discount-code";
 
@@ -15,29 +16,30 @@ type Props = {
   };
 };
 
-function getCheckoutStep(cart: HttpTypes.StoreCart) {
-  if (!cart?.shipping_address?.address_1 || !cart.email) return "address";
-  if (cart?.shipping_methods?.length === 0) return "delivery";
-  return "payment";
-}
-
 export default function Summary({ cart }: Props) {
-  const step = getCheckoutStep(cart);
+  const step = getNextCheckoutStep(cart);
 
   return (
-    <aside className="rounded-2xl border border-border bg-card p-6 shadow-sm small:p-7">
-      <h2 className="font-display text-xl font-bold tracking-tight text-foreground">
-        Sumar comandă
-      </h2>
-      <div className="mt-5">
+    <aside className="clip-corner-cut-lg clip-shadow-md flex flex-col gap-5 bg-card p-6 ring-1 ring-border small:p-7">
+      <div className="space-y-2">
+        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          Finalizare rapidă
+        </span>
+        <h2 className="font-display text-xl font-bold tracking-tight text-foreground">
+          Sumar comandă
+        </h2>
+      </div>
+      <div className="clip-corner-cut-md bg-surface-subtle/60 p-4 ring-1 ring-border/70">
         <DiscountCode cart={cart} />
       </div>
-      <Separator className="my-5" />
-      <CartTotals totals={cart} />
+      <Separator className="hidden" />
+      <div className="clip-corner-cut-md bg-background/80 p-4 ring-1 ring-border/70">
+        <CartTotals totals={cart} />
+      </div>
       <Button
         asChild
         size="xl"
-        className="mt-6 w-full rounded-full"
+        className="clip-corner-cut-sm mt-1 w-full rounded-none"
         data-testid="checkout-button"
       >
         <Link href={`/checkout?step=${step}`}>
@@ -45,10 +47,10 @@ export default function Summary({ cart }: Props) {
           <ArrowRight className="size-4" />
         </Link>
       </Button>
-      <ul className="mt-5 flex flex-col gap-2 text-xs text-muted-foreground">
+      <ul className="clip-corner-cut-md flex flex-col gap-3 bg-surface-subtle/60 p-4 text-xs text-muted-foreground ring-1 ring-border/70">
         <li className="flex items-center gap-2">
           <Lock className="size-3.5 text-success" />
-          Plată securizată MAIB · 3-D Secure
+          Comanda este confirmată de echipa DYLLU înainte de procesare
         </li>
         <li className="flex items-center gap-2">
           <Package className="size-3.5 text-primary" />

@@ -2,10 +2,11 @@
 
 import { setAddresses } from "@lib/data/cart";
 import compareAddresses from "@lib/util/compare-addresses";
+import { convertToLocale } from "@lib/util/money";
 import { CheckCircleSolid } from "@medusajs/icons";
 import { HttpTypes } from "@medusajs/types";
+import { CheckoutStepKey } from "@modules/checkout/lib/presentation";
 import { Heading, Text, useToggleState } from "@lib/ui-compat";
-import Divider from "@modules/common/components/divider";
 import Spinner from "@modules/common/icons/spinner";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useActionState } from "react";
@@ -17,9 +18,11 @@ import { SubmitButton } from "../submit-button";
 const Addresses = ({
   cart,
   customer,
+  activeStep,
 }: {
   cart: HttpTypes.StoreCart | null;
   customer: HttpTypes.StoreCustomer | null;
+  activeStep: CheckoutStepKey;
 }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -38,32 +41,46 @@ const Addresses = ({
   };
 
   const [message, formAction] = useActionState(setAddresses, null);
+  const selectedShippingMethod = cart?.shipping_methods?.at(-1);
+  const showDeliveryMethodSummary =
+    activeStep === "review" && !!selectedShippingMethod;
 
   return (
-    <div className="bg-white">
-      <div className="mb-6 flex flex-row items-center justify-between">
-        <Heading
-          level="h2"
-          className="text-3xl-regular flex flex-row items-baseline gap-x-2"
-        >
-          Shipping Address
-          {!isOpen && <CheckCircleSolid />}
-        </Heading>
+    <section className="clip-corner-cut-lg clip-shadow-md bg-card p-6 ring-1 ring-border small:p-8">
+      <div className="mb-6 flex flex-row items-center justify-between gap-4">
+        <div className="space-y-2">
+          <Text className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Pasul 1
+          </Text>
+          <Heading
+            level="h2"
+            className="flex flex-row items-baseline gap-x-2 font-display text-xl font-bold tracking-tight text-foreground"
+          >
+            Date de livrare
+            {!isOpen && <CheckCircleSolid />}
+          </Heading>
+          {isOpen && (
+            <Text className="text-sm text-muted-foreground">
+              Completează datele clientului și adresa unde trebuie să ajungă
+              comanda.
+            </Text>
+          )}
+        </div>
         {!isOpen && cart?.shipping_address && (
           <Text>
             <button
               onClick={handleEdit}
-              className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+              className="text-sm font-semibold text-primary transition-colors hover:text-primary/80"
               data-testid="edit-address-button"
             >
-              Edit
+              Editează
             </button>
           </Text>
         )}
       </div>
       {isOpen ? (
-        <form action={formAction}>
-          <div className="pb-8">
+        <form action={formAction} className="space-y-6">
+          <div className="space-y-6">
             <ShippingAddress
               customer={customer}
               checked={sameAsBilling}
@@ -72,112 +89,138 @@ const Addresses = ({
             />
 
             {!sameAsBilling && (
-              <div>
+              <div className="clip-corner-cut-md bg-surface-subtle/60 p-5 ring-1 ring-border/70">
                 <Heading
                   level="h2"
-                  className="text-3xl-regular gap-x-4 pb-6 pt-8"
+                  className="pb-2 font-display text-lg font-bold tracking-tight text-foreground"
                 >
-                  Billing address
+                  Date de facturare
                 </Heading>
 
                 <BillingAddress cart={cart} />
               </div>
             )}
-            <SubmitButton className="mt-6" data-testid="submit-address-button">
-              Continue to delivery
+            <SubmitButton
+              className="clip-corner-cut-sm mt-2 rounded-none"
+              data-testid="submit-address-button"
+            >
+              Continuă către livrare
             </SubmitButton>
             <ErrorMessage error={message} data-testid="address-error-message" />
           </div>
         </form>
       ) : (
-        <div>
-          <div className="text-small-regular">
-            {cart && cart.shipping_address ? (
-              <div className="flex items-start gap-x-8">
-                <div className="flex w-full items-start gap-x-1">
-                  <div
-                    className="flex w-1/3 flex-col"
-                    data-testid="shipping-address-summary"
-                  >
-                    <Text className="txt-medium-plus mb-1 text-ui-fg-base">
-                      Shipping Address
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.first_name}{" "}
-                      {cart.shipping_address.last_name}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.address_1}{" "}
-                      {cart.shipping_address.address_2}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.postal_code},{" "}
-                      {cart.shipping_address.city}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.country_code?.toUpperCase()}
-                    </Text>
-                  </div>
+        <div className="text-sm">
+          {cart && cart.shipping_address ? (
+            <div className="clip-corner-cut-md bg-surface-subtle/60 p-5 ring-1 ring-border/70">
+              <div
+                className={
+                  showDeliveryMethodSummary
+                    ? "grid gap-5 small:grid-cols-2 medium:grid-cols-4"
+                    : "grid gap-5 small:grid-cols-3"
+                }
+              >
+                <div
+                  className="flex flex-col"
+                  data-testid="shipping-address-summary"
+                >
+                  <Text className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Livrare
+                  </Text>
+                  <Text className="text-sm text-foreground">
+                    {cart.shipping_address.first_name}{" "}
+                    {cart.shipping_address.last_name}
+                  </Text>
+                  <Text className="text-sm text-muted-foreground">
+                    {cart.shipping_address.address_1}{" "}
+                    {cart.shipping_address.address_2}
+                  </Text>
+                  <Text className="text-sm text-muted-foreground">
+                    {cart.shipping_address.postal_code},{" "}
+                    {cart.shipping_address.city}
+                  </Text>
+                  <Text className="text-sm text-muted-foreground">
+                    {cart.shipping_address.country_code?.toUpperCase()}
+                  </Text>
+                </div>
 
-                  <div
-                    className="flex w-1/3 flex-col"
-                    data-testid="shipping-contact-summary"
-                  >
-                    <Text className="txt-medium-plus mb-1 text-ui-fg-base">
-                      Contact
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.phone}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.email}
-                    </Text>
-                  </div>
+                <div
+                  className="flex flex-col"
+                  data-testid="shipping-contact-summary"
+                >
+                  <Text className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Contact
+                  </Text>
+                  <Text className="text-sm text-foreground">
+                    {cart.shipping_address.phone}
+                  </Text>
+                  <Text className="text-sm text-muted-foreground">
+                    {cart.email}
+                  </Text>
+                </div>
 
-                  <div
-                    className="flex w-1/3 flex-col"
-                    data-testid="billing-address-summary"
-                  >
-                    <Text className="txt-medium-plus mb-1 text-ui-fg-base">
-                      Billing Address
-                    </Text>
+                <div
+                  className="flex flex-col"
+                  data-testid="billing-address-summary"
+                >
+                  <Text className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Facturare
+                  </Text>
 
-                    {sameAsBilling ? (
-                      <Text className="txt-medium text-ui-fg-subtle">
-                        Billing and delivery address are the same.
+                  {sameAsBilling ? (
+                    <Text className="text-sm text-muted-foreground">
+                      Folosește aceeași adresă ca la livrare.
+                    </Text>
+                  ) : (
+                    <>
+                      <Text className="text-sm text-foreground">
+                        {cart.billing_address?.first_name}{" "}
+                        {cart.billing_address?.last_name}
                       </Text>
-                    ) : (
-                      <>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.first_name}{" "}
-                          {cart.billing_address?.last_name}
-                        </Text>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.address_1}{" "}
-                          {cart.billing_address?.address_2}
-                        </Text>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.postal_code},{" "}
-                          {cart.billing_address?.city}
-                        </Text>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.country_code?.toUpperCase()}
-                        </Text>
-                      </>
+                      <Text className="text-sm text-muted-foreground">
+                        {cart.billing_address?.address_1}{" "}
+                        {cart.billing_address?.address_2}
+                      </Text>
+                      <Text className="text-sm text-muted-foreground">
+                        {cart.billing_address?.postal_code},{" "}
+                        {cart.billing_address?.city}
+                      </Text>
+                      <Text className="text-sm text-muted-foreground">
+                        {cart.billing_address?.country_code?.toUpperCase()}
+                      </Text>
+                    </>
+                  )}
+                </div>
+                {showDeliveryMethodSummary && (
+                  <div className="flex flex-col">
+                    <Text className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      Metodă de livrare
+                    </Text>
+                    <Text className="text-sm text-foreground">
+                      {selectedShippingMethod?.name}
+                    </Text>
+                    {selectedShippingMethod?.amount !== undefined && (
+                      <Text className="text-sm text-muted-foreground">
+                        {selectedShippingMethod.amount === 0
+                          ? "Gratuită"
+                          : convertToLocale({
+                              amount: selectedShippingMethod.amount,
+                              currency_code: cart.currency_code,
+                            })}
+                      </Text>
                     )}
                   </div>
-                </div>
+                )}
               </div>
-            ) : (
-              <div>
-                <Spinner />
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div>
+              <Spinner />
+            </div>
+          )}
         </div>
       )}
-      <Divider className="mt-8" />
-    </div>
+    </section>
   );
 };
 

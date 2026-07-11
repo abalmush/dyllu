@@ -2,6 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { Clock, MapPin, Phone, Wrench } from "lucide-react";
 
+import { SITE_CONTACT } from "@lib/site-content";
 import { Container } from "@/components/atoms/container";
 
 export function UtilityBar() {
@@ -11,15 +12,15 @@ export function UtilityBar() {
         <div className="flex h-9 items-center justify-between text-[12px]">
           <div className="flex items-center gap-5">
             <a
-              href="tel:+37322000000"
+              href={SITE_CONTACT.phoneHref}
               className="inline-flex items-center gap-1.5 font-medium tracking-tight transition-colors hover:text-foreground"
             >
               <Phone className="size-3.5" />
-              +373 22 000 000
+              {SITE_CONTACT.phoneDisplay}
             </a>
             <span className="inline-flex items-center gap-1.5 text-foreground/55">
               <Clock className="size-3.5" />
-              L–V 9:00–18:00
+              {SITE_CONTACT.hoursShort}
             </span>
           </div>
           <nav aria-label="Linkuri utile" className="flex items-center gap-5">
@@ -28,14 +29,14 @@ export function UtilityBar() {
               className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
             >
               <MapPin className="size-3.5" />
-              Magazinul DYLLU
+              Magazine DYLLU by INGCO
             </Link>
             <Link
-              href="/contact"
+              href="/returnari"
               className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
             >
               <Wrench className="size-3.5" />
-              Service & piese de schimb
+              Service și piese de schimb
             </Link>
           </nav>
         </div>

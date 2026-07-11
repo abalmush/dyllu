@@ -33,8 +33,12 @@ export default function DiscountCode({ cart }: Props) {
     setErrorMessage("");
     const code = formData.get("code");
     if (!code) return;
-    const input = document.getElementById("promotion-input") as HTMLInputElement | null;
-    const codes = promotions.filter((p) => p.code !== undefined).map((p) => p.code!);
+    const input = document.getElementById(
+      "promotion-input"
+    ) as HTMLInputElement | null;
+    const codes = promotions
+      .filter((p) => p.code !== undefined)
+      .map((p) => p.code!);
     codes.push(code.toString());
     try {
       await applyPromotions(codes);
@@ -50,14 +54,17 @@ export default function DiscountCode({ cart }: Props) {
         type="button"
         onClick={() => setIsOpen((v) => !v)}
         data-testid="add-discount-button"
-        className="inline-flex items-center gap-2 self-start text-sm font-semibold text-foreground transition-colors hover:text-primary"
+        className="inline-flex items-center gap-2 self-start text-xs font-semibold uppercase tracking-[0.16em] text-foreground transition-colors hover:text-primary"
       >
         <Tag className="size-4 text-primary" />
         Ai un cod promoțional?
       </button>
 
       {isOpen && (
-        <form action={(fd) => addPromotionCode(fd)} className="flex flex-col gap-2">
+        <form
+          action={(fd) => addPromotionCode(fd)}
+          className="flex flex-col gap-2"
+        >
           <div className="flex w-full gap-2">
             <Input
               id="promotion-input"
@@ -65,17 +72,20 @@ export default function DiscountCode({ cart }: Props) {
               type="text"
               placeholder="Introdu codul"
               data-testid="discount-input"
-              className="flex-1 rounded-full"
+              className="clip-corner-cut-sm h-11 flex-1 rounded-none border-border bg-background"
             />
             <SubmitButton
               variant="secondary"
               data-testid="discount-apply-button"
-              className="rounded-full"
+              className="rounded-md"
             >
               Aplică
             </SubmitButton>
           </div>
-          <ErrorMessage error={errorMessage} data-testid="discount-error-message" />
+          <ErrorMessage
+            error={errorMessage}
+            data-testid="discount-error-message"
+          />
         </form>
       )}
 
@@ -95,7 +105,7 @@ export default function DiscountCode({ cart }: Props) {
             return (
               <li
                 key={p.id}
-                className="flex items-center justify-between rounded-full border border-success/30 bg-success/10 px-3 py-1.5 text-xs"
+                className="clip-corner-cut-sm flex items-center justify-between border border-success/30 bg-success/10 px-3 py-2 text-xs"
                 data-testid="discount-row"
               >
                 <span className="flex items-center gap-2">

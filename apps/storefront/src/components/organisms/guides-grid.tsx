@@ -20,7 +20,7 @@ const GUIDES: Guide[] = [
     title: "Cum alegi un polizor unghiular potrivit",
     description:
       "Diametru disc, putere, turații variabile — ce contează pentru lucrul tău și ce e doar marketing.",
-    href: "/contact",
+    href: "/branduri",
   },
   {
     category: "Sudură",
@@ -28,7 +28,7 @@ const GUIDES: Guide[] = [
     title: "MIG vs TIG — ghid practic pentru atelier",
     description:
       "Două tehnologii, două cazuri de utilizare. Cum decizi care e potrivită pentru proiectul tău.",
-    href: "/contact",
+    href: "/branduri",
   },
   {
     category: "Întreținere",
@@ -36,7 +36,7 @@ const GUIDES: Guide[] = [
     title: "Cum prelungești viața sculelor electrice",
     description:
       "Curățare, depozitare, schimb de perii și acumulatori — pași simpli care înseamnă ani în plus.",
-    href: "/contact",
+    href: "/branduri",
   },
 ];
 
@@ -54,7 +54,7 @@ export function GuidesGrid() {
             </h2>
           </div>
           <Link
-            href="/contact"
+            href="/branduri"
             className="group inline-flex items-center gap-2 text-sm font-semibold text-foreground underline-offset-4 hover:underline"
           >
             Toate ghidurile

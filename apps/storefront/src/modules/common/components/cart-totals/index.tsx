@@ -37,7 +37,9 @@ function Row({
     <div className="flex items-baseline justify-between text-sm">
       <span
         className={cn(
-          emphasis ? "font-semibold tracking-tight text-foreground" : "text-muted-foreground"
+          emphasis
+            ? "font-semibold tracking-tight text-foreground"
+            : "text-muted-foreground"
         )}
       >
         {label}
@@ -45,8 +47,8 @@ function Row({
       <span
         className={cn(
           "font-medium tabular-nums",
-          highlight === "discount" ? "text-destructive" : "text-foreground",
-          emphasis && "text-base font-bold"
+          highlight === "discount" ? "text-success" : "text-foreground",
+          emphasis && "font-display text-2xl font-bold tracking-tight"
         )}
         data-testid={testId}
         data-value={testValue}
@@ -104,14 +106,19 @@ export default function CartTotals({ totals, className }: Props) {
       />
       <div className="my-2 h-px w-full bg-border" />
       <Row
-        label="Total"
+        label={
+          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Total
+          </span>
+        }
         value={fmt(total ?? 0)}
         emphasis
         testId="cart-total"
         testValue={total ?? 0}
       />
       <p className="mt-1 text-xs text-muted-foreground">
-        Toate prețurile includ TVA. Costul de livrare se calculează la finalizare.
+        Toate prețurile includ TVA. Costul de livrare se calculează la
+        finalizare.
       </p>
     </div>
   );

@@ -58,12 +58,17 @@ export function PromoMosaic({ promos }: PromoMosaicProps) {
     <section className="py-8 small:py-12">
       <Container>
         <div className={cn("grid gap-4 medium:gap-5", layout.gridClass)}>
-          <BannerCard {...dominant} className={layout.dominantClass} />
+          <BannerCard
+            {...dominant}
+            className={layout.dominantClass}
+            headingLevel="h1"
+          />
           {supporting.map((promo, i) => (
             <BannerCard
               key={`${promo.title}-${i}`}
               {...promo}
               className={layout.supportingClass}
+              headingLevel="h2"
             />
           ))}
         </div>

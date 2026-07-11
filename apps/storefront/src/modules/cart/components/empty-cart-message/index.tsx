@@ -2,9 +2,10 @@ import Link from "next/link";
 import { ArrowRight, ShoppingBag } from "lucide-react";
 
 import { Button } from "@/components/atoms/button";
+import { PlpProductCard } from "@/components/organisms/plp-product-card";
 import { listProducts } from "@lib/data/products";
 import { getRegion } from "@lib/data/regions";
-import ProductPreview from "@modules/products/components/product-preview";
+import { toPlpProduct } from "@modules/store/lib/to-plp-product";
 
 const EmptyCartMessage = async () => {
   const region = await getRegion();
@@ -16,10 +17,7 @@ const EmptyCartMessage = async () => {
     : null;
 
   return (
-    <div
-      className="flex flex-col gap-12"
-      data-testid="empty-cart-message"
-    >
+    <div className="flex flex-col gap-12" data-testid="empty-cart-message">
       <div className="flex flex-col items-start justify-center gap-5 px-2 pt-16 small:pt-24">
         <span className="grid size-12 place-items-center rounded-full bg-primary/10 text-primary">
           <ShoppingBag className="size-5" />
@@ -65,7 +63,7 @@ const EmptyCartMessage = async () => {
           <ul className="grid grid-cols-2 gap-4 small:grid-cols-3 medium:grid-cols-4">
             {recommended.response.products.slice(0, 4).map((p) => (
               <li key={p.id}>
-                <ProductPreview product={p} region={region} />
+                <PlpProductCard product={toPlpProduct(p)} />
               </li>
             ))}
           </ul>

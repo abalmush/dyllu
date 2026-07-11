@@ -34,11 +34,11 @@ export default function TransferRequestForm() {
       <div className="grid w-full items-center gap-x-8 gap-y-4 sm:grid-cols-2">
         <div className="flex flex-col gap-y-1">
           <Heading level="h3" className="text-lg text-neutral-950">
-            Order transfers
+            Transfer comandă
           </Heading>
           <Text className="text-base-regular text-neutral-500">
-            Can&apos;t find the order you are looking for?
-            <br /> Connect an order to your account.
+            Nu găsești comanda pe care o cauți?
+            <br /> Conecteaz-o la contul tău.
           </Text>
         </div>
         <form
@@ -46,12 +46,16 @@ export default function TransferRequestForm() {
           className="flex flex-col gap-y-1 sm:items-end"
         >
           <div className="flex w-full flex-col gap-y-2">
-            <Input className="w-full" name="order_id" placeholder="Order ID" />
+            <Input
+              className="w-full"
+              name="order_id"
+              placeholder="ID comandă"
+            />
             <SubmitButton
               variant="secondary"
               className="w-fit self-end whitespace-nowrap"
             >
-              Request transfer
+              Solicită transferul
             </SubmitButton>
           </div>
         </form>
@@ -67,10 +71,10 @@ export default function TransferRequestForm() {
             <CheckCircleMiniSolid className="h-4 w-4 text-emerald-500" />
             <div className="flex flex-col gap-y-1">
               <Text className="text-medim-pl text-neutral-950">
-                Transfer for order {state.order?.id} requested
+                Transferul pentru comanda {state.order?.id} a fost solicitat
               </Text>
               <Text className="text-base-regular text-neutral-600">
-                Transfer request email sent to {state.order?.email}
+                Emailul de transfer a fost trimis către {state.order?.email}
               </Text>
             </div>
           </div>

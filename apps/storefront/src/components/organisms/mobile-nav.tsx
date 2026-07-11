@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ChevronDown, Heart, Menu, Phone, User } from "lucide-react";
+import { ChevronDown, Menu, Phone, User } from "lucide-react";
 
+import { SITE_CONTACT } from "@lib/site-content";
 import { cn } from "@lib/utils";
 import {
   Accordion,
@@ -122,7 +123,7 @@ export function MobileNav({ categories }: MobileNavProps) {
             </Accordion>
           </nav>
           <div className="border-t border-border bg-surface-subtle px-6 py-4">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2">
               <Link
                 href="/account"
                 onClick={close}
@@ -132,20 +133,13 @@ export function MobileNav({ categories }: MobileNavProps) {
               >
                 <User className="size-4" /> Cont
               </Link>
-              <Link
-                href="/account/wishlist"
-                onClick={close}
-                className="flex items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium hover:bg-muted"
-              >
-                <Heart className="size-4" /> Favorite
-              </Link>
             </div>
             <a
-              href="tel:+37322000000"
+              href={SITE_CONTACT.phoneHref}
               className="mt-3 flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
             >
               <Phone className="size-4" />
-              +373 22 000 000
+              {SITE_CONTACT.phoneDisplay}
             </a>
           </div>
         </div>
