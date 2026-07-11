@@ -53,12 +53,12 @@ export const ANATOMY_ITEMS: AnatomyItem[] = [
   },
   {
     key: "siguranta",
-    label: "Echipament de protecție",
+    label: "Protecție",
     description:
       "Mănuși cut-resistant și ochelari anti-impact certificate EN ISO — incluse cu pachetele Pro.",
     image: {
       src: "/images/dyllu-safety-gear.png",
-      alt: "Echipament de protecție DYLLU",
+      alt: "Protecție DYLLU",
     },
   },
 ];

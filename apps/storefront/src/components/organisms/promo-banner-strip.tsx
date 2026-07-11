@@ -22,7 +22,7 @@ export function PromoBannerStrip() {
             title="Burghie SDS+ Pro Series"
             description="Performanță extremă pe beton armat."
             ctaLabel="Vezi noutățile"
-            href="/categories/burghie-pe-beton-sds-"
+            href="/categories/burghie-beton"
             variant="dark"
           />
           <BannerCard

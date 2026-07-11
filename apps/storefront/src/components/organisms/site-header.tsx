@@ -23,6 +23,7 @@ export interface SiteHeaderProps {
 export function SiteHeader({ cart, categories }: SiteHeaderProps) {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
+  const [primaryMenuOverlay, setPrimaryMenuOverlay] = React.useState(false);
   const showcasePinned = useShowcasePinned((state) => state.pinnedCount > 0);
 
   React.useEffect(() => {
@@ -66,8 +67,13 @@ export function SiteHeader({ cart, categories }: SiteHeaderProps) {
           </Link>
         </div>
 
-        <div className="hidden min-w-0 flex-1 items-center medium:flex">
-          <MegaMenu categories={categories} />
+        <div className="hidden min-w-0 flex-1 items-center justify-center medium:flex">
+          <MegaMenu
+            categories={categories}
+            tier="primary"
+            includeSaleLink
+            onOverlayStateChange={setPrimaryMenuOverlay}
+          />
         </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-1 small:gap-2">
@@ -98,6 +104,20 @@ export function SiteHeader({ cart, categories }: SiteHeaderProps) {
             <User className="size-5" />
           </Link>
           <CartDrawer cart={cart} />
+        </div>
+      </div>
+      <div
+        className={cn(
+          "hidden border-t border-background/10 transition-opacity duration-150 medium:block",
+          primaryMenuOverlay && "pointer-events-none opacity-0"
+        )}
+      >
+        <div className="content-container flex min-h-12 items-center">
+          <MegaMenu
+            categories={categories}
+            tier="secondary"
+            includeSaleLink={false}
+          />
         </div>
       </div>
       <SearchCommand open={searchOpen} onOpenChange={setSearchOpen} />

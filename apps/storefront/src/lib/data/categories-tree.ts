@@ -4,42 +4,20 @@ export type CategoryNode = {
   children: CategoryNode[];
 };
 
-const slug = (value: string) =>
-  value
-    .toLowerCase()
-    .replace(/ă/g, "a")
-    .replace(/â/g, "a")
-    .replace(/î/g, "i")
-    .replace(/ș/g, "s")
-    .replace(/ş/g, "s")
-    .replace(/ț/g, "t")
-    .replace(/ţ/g, "t")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-const node = (
-  name: string,
-  children: CategoryNode[] = [],
-  handleOverride?: string
-): CategoryNode => ({
+const node = (name: string, handle: string): CategoryNode => ({
   name,
-  handle: handleOverride ?? slug(name),
-  children,
+  handle,
+  children: [],
 });
 
 export const categoriesTree: CategoryNode[] = [
-  node("Scule electrice"),
-  node("Scule manuale"),
-  node(
-    "Sudură, compresoare și generatoare",
-    [],
-    "sudura-compresoare-generatoare"
-  ),
-  node("Grădină", [], "gradina"),
-  node("Auto și Garaj", [], "auto-garaj"),
-  node("Construcție", [], "constructie"),
-  node("Casă, Iluminat și Pompe", [], "casa-iluminat-pompe"),
-  node("Protecție și Îmbrăcăminte", [], "protectie-si-imbracaminte"),
-  node("Accesorii și Consumabile", [], "accesorii-si-consumabile"),
-  node("Depozitare"),
+  node("Scule electrice", "scule-electrice"),
+  node("Scule manuale", "scule-manuale"),
+  node("Consumabile și accesorii", "consumabile-si-accesorii"),
+  node("Grădinărit", "gradinarit"),
+  node("Auto și Moto", "auto-si-moto"),
+  node("Construcții", "constructii"),
+  node("Electrice", "electrice"),
+  node("Protecție", "echipament-de-protectie"),
+  node("Depozitare", "depozitare"),
 ];

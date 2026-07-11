@@ -22,6 +22,10 @@ import {
   SheetTrigger,
 } from "@/components/atoms/sheet";
 import { type CategoryNode } from "@lib/data/categories";
+import {
+  getCategoryNavLabel,
+  orderCategoriesForNavigation,
+} from "@lib/data/category-navigation";
 
 export interface MobileNavProps {
   categories: CategoryNode[];
@@ -30,6 +34,7 @@ export interface MobileNavProps {
 export function MobileNav({ categories }: MobileNavProps) {
   const [open, setOpen] = React.useState(false);
   const close = () => setOpen(false);
+  const navigationCategories = orderCategoriesForNavigation(categories);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -62,64 +67,68 @@ export function MobileNav({ categories }: MobileNavProps) {
               <ChevronDown className="size-4 -rotate-90 text-muted-foreground" />
             </Link>
             <Accordion type="multiple" className="px-2">
-              {categories.map((category) => (
-                <AccordionItem
-                  key={category.handle}
-                  value={category.handle}
-                  className="border-b border-border/60 last:border-b-0"
-                >
-                  <AccordionTrigger className="text-sm font-semibold tracking-tight">
-                    <Link
-                      href={`/categories/${category.handle}`}
-                      onClick={(e) => {
-                        if (category.children.length === 0) {
-                          close();
-                        } else {
-                          e.preventDefault();
-                        }
-                      }}
-                      className="flex-1 text-left"
-                    >
-                      {category.name}
-                    </Link>
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-0.5 pl-3">
-                    <Link
-                      href={`/categories/${category.handle}`}
-                      onClick={close}
-                      className="block rounded-md px-3 py-2 text-sm font-medium text-primary hover:bg-muted"
-                    >
-                      Vezi tot {category.name}
-                    </Link>
-                    {category.children.map((child) => (
-                      <div key={child.handle} className="space-y-0.5">
-                        <Link
-                          href={`/categories/${child.handle}`}
-                          onClick={close}
-                          className="block rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
-                        >
-                          {child.name}
-                        </Link>
-                        {child.children.length > 0 && (
-                          <ul className="ml-3 space-y-0.5 border-l border-border pl-3">
-                            {child.children.map((grand) => (
-                              <li key={grand.handle}>
-                                <Link
-                                  href={`/categories/${grand.handle}`}
-                                  onClick={close}
-                                  className="block rounded-md px-3 py-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
-                                >
-                                  {grand.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
+              {navigationCategories.map((category) => {
+                const displayName = getCategoryNavLabel(category);
+
+                return (
+                  <AccordionItem
+                    key={category.handle}
+                    value={category.handle}
+                    className="border-b border-border/60 last:border-b-0"
+                  >
+                    <AccordionTrigger className="text-sm font-semibold tracking-tight">
+                      <Link
+                        href={`/categories/${category.handle}`}
+                        onClick={(e) => {
+                          if (category.children.length === 0) {
+                            close();
+                          } else {
+                            e.preventDefault();
+                          }
+                        }}
+                        className="flex-1 text-left"
+                      >
+                        {displayName}
+                      </Link>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-0.5 pl-3">
+                      <Link
+                        href={`/categories/${category.handle}`}
+                        onClick={close}
+                        className="block rounded-md px-3 py-2 text-sm font-medium text-primary hover:bg-muted"
+                      >
+                        Vezi tot {displayName}
+                      </Link>
+                      {category.children.map((child) => (
+                        <div key={child.handle} className="space-y-0.5">
+                          <Link
+                            href={`/categories/${child.handle}`}
+                            onClick={close}
+                            className="block rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
+                          >
+                            {child.name}
+                          </Link>
+                          {child.children.length > 0 && (
+                            <ul className="ml-3 space-y-0.5 border-l border-border pl-3">
+                              {child.children.map((grand) => (
+                                <li key={grand.handle}>
+                                  <Link
+                                    href={`/categories/${grand.handle}`}
+                                    onClick={close}
+                                    className="block rounded-md px-3 py-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+                                  >
+                                    {grand.name}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      ))}
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
             </Accordion>
           </nav>
           <div className="border-t border-border bg-surface-subtle px-6 py-4">

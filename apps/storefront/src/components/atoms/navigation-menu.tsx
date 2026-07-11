@@ -13,7 +13,12 @@ export const NavigationMenu = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <NavigationMenuPrimitive.Root
     ref={ref}
-    className={cn("relative z-30 flex max-w-max flex-1 items-center", className)}
+    delayDuration={120}
+    skipDelayDuration={180}
+    className={cn(
+      "relative z-30 flex max-w-max flex-1 items-center",
+      className
+    )}
     {...props}
   >
     {children}
@@ -59,8 +64,7 @@ export const NavigationMenuTrigger = React.forwardRef<
     />
   </NavigationMenuPrimitive.Trigger>
 ));
-NavigationMenuTrigger.displayName =
-  NavigationMenuPrimitive.Trigger.displayName;
+NavigationMenuTrigger.displayName = NavigationMenuPrimitive.Trigger.displayName;
 
 export const NavigationMenuContent = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Content>,
@@ -75,8 +79,7 @@ export const NavigationMenuContent = React.forwardRef<
     {...props}
   />
 ));
-NavigationMenuContent.displayName =
-  NavigationMenuPrimitive.Content.displayName;
+NavigationMenuContent.displayName = NavigationMenuPrimitive.Content.displayName;
 
 export const NavigationMenuLink = NavigationMenuPrimitive.Link;
 
@@ -84,11 +87,13 @@ export const NavigationMenuViewport = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Viewport>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Viewport>
 >(({ className, ...props }, ref) => (
-  <div className={cn("absolute left-0 top-full flex justify-center")}>
+  <div
+    className={cn("absolute left-0 top-full z-50 flex w-full justify-center")}
+  >
     <NavigationMenuPrimitive.Viewport
       ref={ref}
       className={cn(
-        "origin-top-center relative mt-2 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]",
+        "origin-top-center relative -mt-3 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-visible bg-transparent text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 md:w-[var(--radix-navigation-menu-viewport-width)]",
         className
       )}
       {...props}

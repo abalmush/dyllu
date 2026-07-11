@@ -23,32 +23,47 @@ const local = {
 };
 
 export const categoryVisuals: Record<string, CategoryVisual> = {
-  "auto-moto": {
-    handle: "auto-moto",
+  "scule-electrice": {
+    handle: "scule-electrice",
+    kicker: "Putere pentru atelier",
+    description:
+      "Bormașini, flexuri, ciocane și seturi DYLLU pentru orice lucrare.",
+    image: local.comboKit,
+    accent: "dark",
+  },
+  "auto-si-moto": {
+    handle: "auto-si-moto",
     kicker: "Atelier auto",
     description: "Echipamente, canistre și accesorii pentru garaj.",
     image: local.workshopWorker,
     accent: "dark",
   },
-  consumabile: {
-    handle: "consumabile",
+  "consumabile-si-accesorii": {
+    handle: "consumabile-si-accesorii",
     kicker: "Consumabile pro",
     description: "Burghie, discuri și accesorii pentru lucrări precise.",
     image: local.multiToolCloseup,
     accent: "neutral",
   },
-  "echipamente-de-protectie": {
-    handle: "echipamente-de-protectie",
+  "echipament-de-protectie": {
+    handle: "echipament-de-protectie",
     kicker: "Siguranță întâi",
     description: "EIP certificat — căști, mănuși, ochelari, măști.",
     image: local.grinderSparks,
     accent: "primary",
   },
-  "gospodarie-intretinere": {
-    handle: "gospodarie-intretinere",
-    kicker: "Gospodărie",
-    description: "Lăcăți și soluții de întreținere pentru casă.",
+  constructii: {
+    handle: "constructii",
+    kicker: "Șantier DYLLU",
+    description: "Utilaje beton, sanitare și echipamente de finisaj.",
     image: u("photo-1503602642458-232111445657"),
+    accent: "neutral",
+  },
+  electrice: {
+    handle: "electrice",
+    kicker: "Electric & iluminat",
+    description: "Prelungitoare, testere și proiectoare pentru lucru sigur.",
+    image: local.multiToolCloseup,
     accent: "neutral",
   },
   gradinarit: {
@@ -64,6 +79,13 @@ export const categoryVisuals: Record<string, CategoryVisual> = {
     description: "Ciocane, șurubelnițe, chei și seturi profesionale.",
     image: local.comboKit,
     accent: "dark",
+  },
+  depozitare: {
+    handle: "depozitare",
+    kicker: "Ordine în atelier",
+    description: "Cutii, organizatoare și soluții practice de depozitare.",
+    image: local.workshopWorker,
+    accent: "neutral",
   },
 };
 

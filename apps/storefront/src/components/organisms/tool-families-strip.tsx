@@ -21,12 +21,12 @@ type Family = {
 const FAMILIES: Family[] = [
   {
     label: "Scule electrice",
-    href: "/store",
+    href: "/categories/scule-electrice",
     icon: <Drill className="size-6" strokeWidth={1.75} />,
   },
   {
     label: "Sudură",
-    href: "/store",
+    href: "/categories/aparat-de-sudura",
     icon: <Flame className="size-6" strokeWidth={1.75} />,
   },
   {
@@ -41,12 +41,12 @@ const FAMILIES: Family[] = [
   },
   {
     label: "Protecție",
-    href: "/categories/echipamente-de-protectie",
+    href: "/categories/echipament-de-protectie",
     icon: <HardHat className="size-6" strokeWidth={1.75} />,
   },
   {
     label: "Consumabile",
-    href: "/categories/consumabile",
+    href: "/categories/consumabile-si-accesorii",
     icon: <PackageOpen className="size-6" strokeWidth={1.75} />,
   },
 ];

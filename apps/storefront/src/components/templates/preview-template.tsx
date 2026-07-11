@@ -146,7 +146,7 @@ const SAMPLE_PROMO_4: PromoCardData = {
   title: "Burghie SDS+ Pro Series",
   description: "Performanță extremă pe beton armat.",
   ctaLabel: "Vezi noutățile",
-  href: "/categories/burghie-pe-beton-sds-",
+  href: "/categories/burghie-beton",
   variant: "muted",
 };
 
@@ -211,7 +211,7 @@ const SAMPLE_SYSTEM_TILES: SystemTileData[] = [
       </>
     ),
     ctaLabel: "Vezi EIP",
-    href: "/categories/echipamente-de-protectie",
+    href: "/categories/echipament-de-protectie",
   },
   {
     background: {
@@ -230,7 +230,7 @@ const SAMPLE_SYSTEM_TILES: SystemTileData[] = [
       </>
     ),
     ctaLabel: "Vezi consumabilele",
-    href: "/categories/consumabile",
+    href: "/categories/consumabile-si-accesorii",
   },
 ];
 
@@ -317,7 +317,7 @@ const SAMPLE_TILES: PromoTileData[] = [
   {
     title: "Protecție la lucru",
     ctaLabel: "Vezi EIP",
-    href: "/categories/echipamente-de-protectie",
+    href: "/categories/echipament-de-protectie",
     titlePosition: "bottom-center",
     image: {
       src: "/images/dyllu-safety-gear.png",

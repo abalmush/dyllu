@@ -3,7 +3,7 @@
 import { sdk } from "@lib/config";
 import medusaError from "@lib/util/medusa-error";
 import { HttpTypes } from "@medusajs/types";
-import { revalidateTag as nextRevalidateTag } from "next/cache";
+import { refresh, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   getAuthHeaders,
@@ -16,7 +16,31 @@ import {
 import { getRegion } from "./regions";
 import { getLocale } from "@lib/data/locale-actions";
 
-const revalidateTag = (tag: string) => nextRevalidateTag(tag, "max");
+async function updateTaggedCache(...tags: string[]) {
+  const nextTags = new Set<string>();
+
+  for (const tag of tags) {
+    if (!tag) {
+      continue;
+    }
+
+    nextTags.add(tag);
+
+    const scopedTag = await getCacheTag(tag);
+    if (scopedTag) {
+      nextTags.add(scopedTag);
+    }
+  }
+
+  for (const tag of nextTags) {
+    updateTag(tag);
+  }
+}
+
+async function syncCartStorefront(...tags: string[]) {
+  await updateTaggedCache("carts", ...tags);
+  refresh();
+}
 
 export async function retrieveCart(cartId?: string, fields?: string) {
   const id = cartId || (await getCartId());
@@ -72,15 +96,12 @@ export async function getOrSetCart() {
     cart = cartResp.cart;
 
     await setCartId(cart.id);
-
-    const cartCacheTag = await getCacheTag("carts");
-    revalidateTag(cartCacheTag);
+    await updateTaggedCache("carts");
   }
 
   if (cart && cart?.region_id !== region.id) {
     await sdk.store.cart.update(cart.id, { region_id: region.id }, {}, headers);
-    const cartCacheTag = await getCacheTag("carts");
-    revalidateTag(cartCacheTag);
+    await updateTaggedCache("carts");
   }
 
   return cart;
@@ -102,12 +123,7 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
   return sdk.store.cart
     .update(cartId, data, {}, headers)
     .then(async ({ cart }: { cart: HttpTypes.StoreCart }) => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
-
-      const fulfillmentCacheTag = await getCacheTag("fulfillment");
-      revalidateTag(fulfillmentCacheTag);
-
+      await syncCartStorefront("fulfillment", "shippingOptions");
       return cart;
     })
     .catch(medusaError);
@@ -145,11 +161,7 @@ export async function addToCart({
       headers
     )
     .then(async () => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
-
-      const fulfillmentCacheTag = await getCacheTag("fulfillment");
-      revalidateTag(fulfillmentCacheTag);
+      await syncCartStorefront("fulfillment", "shippingOptions");
     })
     .catch(medusaError);
 }
@@ -178,11 +190,7 @@ export async function updateLineItem({
   await sdk.store.cart
     .updateLineItem(cartId, lineId, { quantity }, {}, headers)
     .then(async () => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
-
-      const fulfillmentCacheTag = await getCacheTag("fulfillment");
-      revalidateTag(fulfillmentCacheTag);
+      await syncCartStorefront("fulfillment", "shippingOptions");
     })
     .catch(medusaError);
 }
@@ -205,11 +213,7 @@ export async function deleteLineItem(lineId: string) {
   await sdk.store.cart
     .deleteLineItem(cartId, lineId, {}, headers)
     .then(async () => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
-
-      const fulfillmentCacheTag = await getCacheTag("fulfillment");
-      revalidateTag(fulfillmentCacheTag);
+      await syncCartStorefront("fulfillment", "shippingOptions");
     })
     .catch(medusaError);
 }
@@ -228,8 +232,7 @@ export async function setShippingMethod({
   return sdk.store.cart
     .addShippingMethod(cartId, { option_id: shippingMethodId }, {}, headers)
     .then(async () => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
+      await syncCartStorefront("fulfillment", "shippingOptions");
     })
     .catch(medusaError);
 }
@@ -245,8 +248,7 @@ export async function initiatePaymentSession(
   return sdk.store.payment
     .initiatePaymentSession(cart, data, {}, headers)
     .then(async (resp) => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
+      await syncCartStorefront();
       return resp;
     })
     .catch(medusaError);
@@ -266,11 +268,7 @@ export async function applyPromotions(codes: string[]) {
   return sdk.store.cart
     .update(cartId, { promo_codes: codes }, {}, headers)
     .then(async () => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
-
-      const fulfillmentCacheTag = await getCacheTag("fulfillment");
-      revalidateTag(fulfillmentCacheTag);
+      await syncCartStorefront("fulfillment", "shippingOptions");
     })
     .catch(medusaError);
 }
@@ -357,20 +355,19 @@ export async function placeOrder(cartId?: string) {
   const cartRes = await sdk.store.cart
     .complete(id, {}, headers)
     .then(async (cartRes) => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
+      await updateTaggedCache("carts");
       return cartRes;
     })
     .catch(medusaError);
 
   if (cartRes?.type === "order") {
-    const orderCacheTag = await getCacheTag("orders");
-    revalidateTag(orderCacheTag);
+    await updateTaggedCache("orders");
 
-    removeCartId();
+    await removeCartId();
     redirect(`/order/${cartRes?.order.id}/confirmed`);
   }
 
+  refresh();
   return cartRes.cart;
 }
 
