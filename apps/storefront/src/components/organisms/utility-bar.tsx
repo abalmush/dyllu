@@ -29,7 +29,7 @@ export function UtilityBar() {
               className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
             >
               <MapPin className="size-3.5" />
-              Magazine DYLLU by INGCO
+              Magazine DYLLU
             </Link>
             <Link
               href="/returnari"

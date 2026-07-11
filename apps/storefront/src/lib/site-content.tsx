@@ -1,17 +1,12 @@
 export const SITE_CONTACT = {
   phoneDisplay: "+373 79 121 220",
   phoneHref: "tel:+37379121220",
-  email: "marketing@ingcomoldova.md",
-  emailHref: "mailto:marketing@ingcomoldova.md",
+  email: "contact@dyllu.md",
+  emailHref: "mailto:contact@dyllu.md",
   hoursShort: "L–S 08:00–18:00 · D 09:00–14:00",
   citiesSummary:
     "Chișinău, Bălți, Orhei, Edineț, Ungheni, Căușeni, Fălești și Cahul",
-  showroomSummary: "Rețea de magazine DYLLU by INGCO în toată Moldova",
-} as const;
-
-export const SITE_SOCIALS = {
-  facebook: "https://www.facebook.com/p/INGCO-Moldova-61566762338202/",
-  instagram: "https://www.instagram.com/ingco_moldova/",
+  showroomSummary: "Rețea de magazine DYLLU în toată Moldova",
 } as const;
 
 export const SHOWROOMS = [
@@ -27,7 +22,7 @@ export const SHOWROOMS = [
     address: "str. Calea Ieșilor 10",
     schedule: "L–S 08:00–18:00 · D 09:00–14:00",
     phone: "+373 79 979 888",
-    note: "Showroom DYLLU by INGCO",
+    note: "Showroom DYLLU",
   },
   {
     city: "Chișinău",
@@ -58,12 +53,12 @@ export const INFO_PAGES: Record<
 > = {
   branduri: {
     eyebrow: "Branduri și selecție",
-    title: "Gama DYLLU by INGCO",
+    title: "Gama DYLLU",
     description:
       "Descoperă cum sunt structurate gamele noastre și ce platforme merită alese pentru atelier, șantier sau bricolaj acasă.",
     sections: [
       {
-        title: "DYLLU by INGCO",
+        title: "DYLLU",
         paragraphs: [
           "DYLLU reunește produse pentru lucru zilnic: scule electrice, scule manuale, consumabile, accesorii și echipamente pentru grădină sau atelier.",
           "Selecția este construită în jurul produselor care oferă raport bun între preț, fiabilitate și compatibilitate între accesorii sau acumulatori.",

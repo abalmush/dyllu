@@ -6,12 +6,12 @@ import { Button } from "@/components/atoms/button";
 import { Container } from "@/components/atoms/container";
 import { PageHero } from "@/components/molecules/page-hero";
 import { SectionHeading } from "@/components/molecules/section-heading";
-import { SHOWROOMS, SITE_CONTACT, SITE_SOCIALS } from "@lib/site-content";
+import { SHOWROOMS, SITE_CONTACT } from "@lib/site-content";
 
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Date de contact, showroomuri și canale rapide pentru suportul DYLLU by INGCO în Moldova.",
+    "Date de contact, showroomuri și canale rapide pentru suportul DYLLU în Moldova.",
 };
 
 const NETWORK_CITIES = [
@@ -23,33 +23,6 @@ const NETWORK_CITIES = [
   "Fălești",
   "Cahul",
 ];
-
-function FacebookIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...props}>
-      <path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06C2 17.07 5.66 21.21 10.44 22v-7.03H7.9v-2.91h2.54V9.85c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.44 2.91h-2.34V22C18.34 21.21 22 17.07 22 12.06Z" />
-    </svg>
-  );
-}
-
-function InstagramIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-      {...props}
-    >
-      <rect x="3" y="3" width="18" height="18" rx="5" />
-      <circle cx="12" cy="12" r="4" />
-      <circle cx="17.5" cy="6.5" r="0.9" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
 
 export default function ContactPage() {
   return (
@@ -100,35 +73,25 @@ export default function ContactPage() {
               </p>
             </a>
 
-            <a
-              href={SITE_SOCIALS.facebook}
-              target="_blank"
-              rel="noreferrer"
-              className="clip-corner-cut-lg bg-card p-5 ring-1 ring-border transition-colors hover:border-foreground/25"
-            >
-              <FacebookIcon className="size-5 text-primary" />
+            <div className="clip-corner-cut-lg bg-card p-5 ring-1 ring-border">
+              <MapPin className="size-5 text-primary" />
               <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Facebook
+                Rețea magazine
               </p>
               <p className="mt-2 text-sm font-semibold text-foreground">
-                INGCO Moldova
+                {SITE_CONTACT.citiesSummary}
               </p>
-            </a>
+            </div>
 
-            <a
-              href={SITE_SOCIALS.instagram}
-              target="_blank"
-              rel="noreferrer"
-              className="clip-corner-cut-lg bg-card p-5 ring-1 ring-border transition-colors hover:border-foreground/25"
-            >
-              <InstagramIcon className="size-5 text-primary" />
+            <div className="clip-corner-cut-lg bg-card p-5 ring-1 ring-border">
+              <Phone className="size-5 text-primary" />
               <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Instagram
+                Program
               </p>
               <p className="mt-2 text-sm font-semibold text-foreground">
-                @ingco_moldova
+                {SITE_CONTACT.hoursShort}
               </p>
-            </a>
+            </div>
           </div>
         </section>
 
@@ -170,7 +133,7 @@ export default function ContactPage() {
           <SectionHeading
             eyebrow="Rețea națională"
             title="Suntem prezenți și în alte orașe"
-            description="Extindem constant rețeaua DYLLU by INGCO, iar informațiile de stoc și transfer între magazine se confirmă prin echipa comercială."
+            description="Extindem constant rețeaua DYLLU, iar informațiile de stoc și transfer între magazine se confirmă prin echipa comercială."
           />
 
           <div className="clip-corner-cut-lg mt-6 bg-card p-6 ring-1 ring-border">

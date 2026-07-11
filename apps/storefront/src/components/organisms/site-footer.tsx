@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Mail, MapPin, Phone, ShieldCheck, Truck, Wallet } from "lucide-react";
 
 import { categoriesTree } from "@lib/data/categories-tree";
-import { SITE_CONTACT, SITE_SOCIALS } from "@lib/site-content";
+import { SITE_CONTACT } from "@lib/site-content";
 import { Logo } from "@/components/atoms/logo";
 import { Separator } from "@/components/atoms/separator";
 import { NewsletterForm } from "@/components/molecules/newsletter-form";
@@ -13,33 +13,6 @@ function PaymentBadge({ children }: { children: React.ReactNode }) {
     <span className="inline-flex h-9 items-center rounded-md border border-secondary-foreground/15 bg-secondary-foreground/[0.04] px-3 text-[11px] font-bold uppercase tracking-wider text-secondary-foreground/85">
       {children}
     </span>
-  );
-}
-
-function FacebookIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...props}>
-      <path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06C2 17.07 5.66 21.21 10.44 22v-7.03H7.9v-2.91h2.54V9.85c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.44 2.91h-2.34V22C18.34 21.21 22 17.07 22 12.06Z" />
-    </svg>
-  );
-}
-
-function InstagramIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-      {...props}
-    >
-      <rect x="3" y="3" width="18" height="18" rx="5" />
-      <circle cx="12" cy="12" r="4" />
-      <circle cx="17.5" cy="6.5" r="0.9" fill="currentColor" stroke="none" />
-    </svg>
   );
 }
 
@@ -56,11 +29,6 @@ const SUPPORT_LINKS = [
   { label: "Returnări și garanție", href: "/returnari" },
   { label: "Termeni și condiții", href: "/termeni" },
   { label: "Politica de confidențialitate", href: "/confidentialitate" },
-];
-
-const SOCIAL = [
-  { label: "Facebook", href: SITE_SOCIALS.facebook, icon: FacebookIcon },
-  { label: "Instagram", href: SITE_SOCIALS.instagram, icon: InstagramIcon },
 ];
 
 export function SiteFooter() {
@@ -160,23 +128,16 @@ export function SiteFooter() {
             email.
           </p>
           <NewsletterForm invert />
-          <div className="flex items-center gap-3 pt-2">
-            {SOCIAL.map((s) => {
-              const Icon = s.icon;
-              return (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  aria-label={s.label}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="grid size-9 place-items-center rounded-full border border-secondary-foreground/15 text-secondary-foreground/70 transition-colors hover:border-secondary-foreground/40 hover:text-secondary-foreground"
-                >
-                  <Icon className="size-4" />
-                </a>
-              );
-            })}
-          </div>
+          <p className="text-xs text-secondary-foreground/60">
+            Pentru solicitări comerciale și suport, scrie-ne la{" "}
+            <a
+              href={SITE_CONTACT.emailHref}
+              className="underline underline-offset-4 hover:text-secondary-foreground"
+            >
+              {SITE_CONTACT.email}
+            </a>
+            .
+          </p>
         </div>
       </div>
 

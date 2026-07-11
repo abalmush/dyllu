@@ -21,7 +21,7 @@ Updated: 2026-07-11
   - `/content/privacy-policy`
   - `/content/terms-of-use`
   - `/account/wishlist`
-- [x] Shared contact details now use the current public INGCO Moldova contact data
+- [x] Shared contact details now use DYLLU-branded public contact copy
 - [x] Store search now works through `/store?q=...`
 - [x] Sale navigation now works through `/store?on_sale=true`
 - [x] “Noutăți” navigation now uses `/store?sortBy=created_at`
