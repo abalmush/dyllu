@@ -28,6 +28,10 @@ dist/
 .DS_Store
 *.pem
 
+# local agent tooling
+.agents/
+.codex/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
