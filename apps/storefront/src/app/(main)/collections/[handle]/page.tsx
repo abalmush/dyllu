@@ -41,7 +41,9 @@ export async function generateStaticParams() {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
-  const collection = await getCollectionByHandle(params.handle);
+  const collection = await getCollectionByHandle(params.handle).catch(
+    () => null
+  );
 
   if (!collection) {
     notFound();
@@ -58,9 +60,9 @@ export default async function CollectionPage(props: Props) {
   const params = await props.params;
   const { sortBy, page } = searchParams;
 
-  const collection = await getCollectionByHandle(params.handle).then(
-    (collection: StoreCollection) => collection
-  );
+  const collection = await getCollectionByHandle(params.handle)
+    .then((collection: StoreCollection) => collection)
+    .catch(() => null);
 
   if (!collection) {
     notFound();

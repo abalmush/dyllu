@@ -55,7 +55,7 @@ jobs:
         run: |
           sleep 30
           for i in $(seq 1 60); do
-            if curl -fsS https://api.dyllu.md/health >/dev/null 2>&1; then
+            if curl -fsS --resolve api.dyllu.md:443:138.199.235.8 https://api.dyllu.md/health >/dev/null 2>&1; then
               echo "Backend healthy"
               exit 0
             fi
