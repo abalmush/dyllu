@@ -17,7 +17,7 @@ Last updated: 2026-07-10.
 - **Backend** — Medusa v2.14 on **Hetzner CX32 + Coolify**, Postgres 16 + Redis
   7 as Coolify services. Image `ghcr.io/abalmush/dyllu-backend`.
 - **Images** — Cloudflare R2 (`dyllu-media`) + Image Transformations, custom
-  domain `cdn.dyllu.md` (not created yet).
+  domain `cdn.dyllu.md` (live).
 - **Edge** — everything eventually proxied through Cloudflare, SSL mode
   **Full (strict)**.
 
@@ -78,10 +78,9 @@ Coolify webhook → health check.
    backend has 88 categories but **0 products** in the sales channel — products
    must be created/imported, given MDL prices, published, and attached to the
    storefront's sales channel before anything shows on the PLP.
-4. Set the storefront Worker `REVALIDATE_SECRET` secret (match backend) via
-   `wrangler secret put` so on-demand revalidation works.
-5. ~~Task 6: R2 media + S3 file module.~~ **Done** — admin uploads land in
+4. ~~Task 6: R2 media + S3 file module.~~ **Done** — admin uploads land in
    `dyllu-media` and serve from `https://cdn.dyllu.md/`.
+5. **Populate the catalog** — the real blocker to a usable store (see item 3).
 6. Cloudflare: flip `api` to Proxied (orange) + SSL Full (strict).
 7. Set the storefront Worker `REVALIDATE_SECRET` secret (match backend) via
    `wrangler secret put` so on-demand revalidation works.
