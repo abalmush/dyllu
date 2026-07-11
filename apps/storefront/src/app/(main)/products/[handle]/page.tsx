@@ -10,23 +10,7 @@ type Props = {
   searchParams: Promise<{ v_id?: string }>;
 };
 
-export async function generateStaticParams() {
-  try {
-    const { response } = await listProducts({
-      queryParams: { limit: 100, fields: "handle" },
-    });
-    return response.products
-      .map((product) => ({ handle: product.handle }))
-      .filter((p) => p.handle);
-  } catch (error) {
-    console.error(
-      `Failed to generate static paths for product pages: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }.`
-    );
-    return [];
-  }
-}
+export const dynamic = "force-dynamic";
 
 function getImagesForVariant(
   product: HttpTypes.StoreProduct,

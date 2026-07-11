@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getCollectionByHandle, listCollections } from "@lib/data/collections";
+import { getCollectionByHandle } from "@lib/data/collections";
 import { StoreCollection } from "@medusajs/types";
 import CollectionTemplate from "@modules/collections/templates";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
@@ -16,28 +16,7 @@ type Props = {
 
 export const PRODUCT_LIMIT = 12;
 
-export async function generateStaticParams() {
-  try {
-    const { collections } = await listCollections({
-      fields: "*products",
-    });
-
-    if (!collections) {
-      return [];
-    }
-
-    return collections
-      .map((collection: StoreCollection) => ({ handle: collection.handle }))
-      .filter((p) => p.handle);
-  } catch (error) {
-    console.error(
-      `Failed to generate static paths for collection pages: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }.`
-    );
-    return [];
-  }
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;

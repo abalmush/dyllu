@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getCategoryByHandle, listCategories } from "@lib/data/categories";
+import { getCategoryByHandle } from "@lib/data/categories";
 import CategoryTemplate from "@modules/categories/templates";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
 
@@ -13,26 +13,7 @@ type Props = {
   }>;
 };
 
-export async function generateStaticParams() {
-  try {
-    const product_categories = await listCategories();
-
-    if (!product_categories) {
-      return [];
-    }
-
-    return product_categories.map((category: any) => ({
-      category: [category.handle],
-    }));
-  } catch (error) {
-    console.error(
-      `Failed to generate static paths for category pages: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }.`
-    );
-    return [];
-  }
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
