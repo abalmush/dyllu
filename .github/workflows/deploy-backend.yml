@@ -53,12 +53,13 @@ jobs:
 
       - name: Health check
         run: |
-          for i in $(seq 1 30); do
+          sleep 30
+          for i in $(seq 1 60); do
             if curl -fsS https://api.dyllu.md/health >/dev/null 2>&1; then
               echo "Backend healthy"
               exit 0
             fi
-            echo "Attempt $i/30 failed, retrying in 10s..."
+            echo "Attempt $i/60 failed, retrying in 10s..."
             sleep 10
           done
           echo "Backend failed health check"

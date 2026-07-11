@@ -17,17 +17,26 @@ type Props = {
 export const PRODUCT_LIMIT = 12;
 
 export async function generateStaticParams() {
-  const { collections } = await listCollections({
-    fields: "*products",
-  });
+  try {
+    const { collections } = await listCollections({
+      fields: "*products",
+    });
 
-  if (!collections) {
+    if (!collections) {
+      return [];
+    }
+
+    return collections
+      .map((collection: StoreCollection) => ({ handle: collection.handle }))
+      .filter((p) => p.handle);
+  } catch (error) {
+    console.error(
+      `Failed to generate static paths for collection pages: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }.`
+    );
     return [];
   }
-
-  return collections
-    .map((collection: StoreCollection) => ({ handle: collection.handle }))
-    .filter((p) => p.handle);
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {

@@ -14,15 +14,24 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-  const product_categories = await listCategories();
+  try {
+    const product_categories = await listCategories();
 
-  if (!product_categories) {
+    if (!product_categories) {
+      return [];
+    }
+
+    return product_categories.map((category: any) => ({
+      category: [category.handle],
+    }));
+  } catch (error) {
+    console.error(
+      `Failed to generate static paths for category pages: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }.`
+    );
     return [];
   }
-
-  return product_categories.map((category: any) => ({
-    category: [category.handle],
-  }));
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
