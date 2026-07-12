@@ -2,7 +2,7 @@ import * as React from "react";
 import Image from "next/image";
 import { Layers } from "lucide-react";
 
-import { Container } from "@/components/atoms/container";
+import { cn } from "@lib/utils";
 import { IMAGE_BG_NEUTRALIZE } from "@/components/organisms/pdp-hero-variants";
 
 export type SetPiece = {
@@ -13,73 +13,126 @@ export type SetPiece = {
 };
 
 type Props = {
-  title?: string;
   pieceCount: number;
   pieces: SetPiece[];
+  tone?: "light" | "dark";
+  className?: string;
 };
 
-export function SetBreakdown({ title, pieceCount, pieces }: Props) {
-  const hasImages = pieces.some((piece) => piece.image);
+export function SetBreakdown({
+  pieceCount,
+  pieces,
+  tone = "light",
+  className,
+}: Props) {
+  const visualPieces = pieces.filter((piece) => piece.image);
+  const textPieces = pieces.filter((piece) => !piece.image);
+
+  if (pieces.length === 0) return null;
 
   return (
-    <section className="bg-background py-16 small:py-20">
-      <Container>
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-              <Layers className="size-4" />
-              Conținutul setului
-            </span>
-            <h2 className="mt-2 font-display text-2xl font-extrabold tracking-tight text-foreground small:text-3xl">
-              {title ?? "Ce conține setul"}
-            </h2>
-          </div>
-          <span className="clip-corner-cut-sm bg-foreground px-4 py-2 text-sm font-bold text-background">
-            {pieceCount} piese incluse
-          </span>
-        </div>
+    <div
+      className={cn(
+        "space-y-4",
+        tone === "dark" &&
+          "clip-corner-cut-lg bg-foreground p-5 text-background ring-1 ring-background/15 small:p-6",
+        className
+      )}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <span
+          className={cn(
+            "flex items-center gap-2 font-display text-xl font-bold tracking-tight",
+            tone === "dark" ? "text-background" : "text-foreground"
+          )}
+        >
+          <Layers className="size-4" />
+          Accesorii incluse în pachet
+        </span>
+        <span className="clip-corner-cut-sm bg-foreground px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-background">
+          {pieceCount} {pieceCount === 1 ? "piesă" : "piese"}
+        </span>
+      </div>
 
-        {hasImages ? (
-          <div className="grid grid-cols-2 gap-3 small:grid-cols-4 medium:grid-cols-6">
-            {pieces.map((piece) => (
-              <div
-                key={piece.id}
-                className="clip-corner-cut-md relative flex aspect-square flex-col justify-end overflow-hidden bg-card p-2 ring-1 ring-border"
-              >
-                {piece.image && (
-                  <Image
-                    src={piece.image}
-                    alt={piece.label}
-                    fill
-                    sizes="160px"
-                    style={IMAGE_BG_NEUTRALIZE}
-                    className="object-contain p-4"
-                  />
-                )}
-                <span className="relative z-[1] text-[11px] font-semibold leading-tight text-foreground">
+      {visualPieces.length > 0 && (
+        <div
+          className="grid gap-3"
+          style={{
+            gridTemplateColumns: "repeat(auto-fit, minmax(128px, 1fr))",
+          }}
+        >
+          {visualPieces.map((piece) => (
+            <article
+              key={piece.id}
+              className="clip-corner-cut-md clip-shadow-sm relative aspect-[1.02] overflow-hidden bg-background ring-1 ring-foreground/10"
+            >
+              <Image
+                src={piece.image!}
+                alt={piece.label}
+                fill
+                sizes="(min-width: 1024px) 220px, (min-width: 640px) 180px, 44vw"
+                style={IMAGE_BG_NEUTRALIZE}
+                className="object-contain p-4 small:p-5"
+              />
+              <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-2.5">
+                <span
+                  className="max-w-[72%] truncate bg-foreground px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-background"
+                  title={piece.label}
+                >
                   {piece.label}
                 </span>
+                <span className="shrink-0 bg-foreground px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-background">
+                  {piece.qty ?? 1} {piece.qty === 1 ? "inclus" : "incluse"}
+                </span>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {pieces.map((piece) => (
-              <span
-                key={piece.id}
-                className="clip-corner-cut-xs inline-flex items-center gap-1.5 border border-border bg-card px-3 py-2 text-sm font-medium text-foreground"
-              >
-                {piece.label}
-                {piece.qty != null && piece.qty > 1 && (
-                  <span className="text-xs font-bold text-primary">
-                    ×{piece.qty}
+            </article>
+          ))}
+        </div>
+      )}
+
+      {textPieces.length > 0 && (
+        <div
+          className={cn(
+            "clip-corner-cut-md p-4 ring-1",
+            tone === "dark"
+              ? "bg-background/[0.08] ring-background/20"
+              : "bg-card ring-border/70"
+          )}
+        >
+          <div>
+            <p
+              className={cn(
+                "text-[11px] font-semibold uppercase tracking-[0.18em]",
+                tone === "dark" ? "text-background/70" : "text-muted-foreground"
+              )}
+            >
+              Alte accesorii incluse
+            </p>
+            <ul className="mt-3 space-y-2">
+              {textPieces.map((piece) => (
+                <li
+                  key={piece.id}
+                  className={cn(
+                    "flex items-start gap-2 text-sm font-semibold leading-relaxed",
+                    tone === "dark" ? "text-background" : "text-foreground"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "mt-2 size-1.5 shrink-0 rounded-full",
+                      tone === "dark" ? "bg-primary" : "bg-foreground"
+                    )}
+                  />
+                  <span>
+                    {piece.label}
+                    {piece.qty != null && piece.qty > 1 ? ` ×${piece.qty}` : ""}
                   </span>
-                )}
-              </span>
-            ))}
+                </li>
+              ))}
+            </ul>
           </div>
-        )}
-      </Container>
-    </section>
+        </div>
+      )}
+    </div>
   );
 }

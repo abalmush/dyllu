@@ -1,6 +1,12 @@
 "use client";
 
-import { ArrowDownAZ, ArrowDownUp, ArrowUpAZ, Check, Sparkles } from "lucide-react";
+import {
+  ArrowDownAZ,
+  ArrowDownUp,
+  ArrowUpAZ,
+  Check,
+  Sparkles,
+} from "lucide-react";
 
 import { Button } from "@/components/atoms/button";
 import {
@@ -35,7 +41,8 @@ export default function SortProducts({
   setQueryParams,
   "data-testid": dataTestId,
 }: Props) {
-  const active = SORT_OPTIONS.find((o) => o.value === sortBy) ?? SORT_OPTIONS[0];
+  const active =
+    SORT_OPTIONS.find((o) => o.value === sortBy) ?? SORT_OPTIONS[0];
 
   return (
     <DropdownMenu>
@@ -46,7 +53,7 @@ export default function SortProducts({
           className="rounded-full"
           data-testid={dataTestId}
         >
-          <ArrowDownUp className="size-4" />
+          <ArrowDownUp aria-hidden="true" className="size-5" />
           <span className="hidden xsmall:inline">Sortează:</span>
           <span className="font-semibold">{active.label}</span>
         </Button>
@@ -62,9 +69,14 @@ export default function SortProducts({
               key={opt.value}
               onSelect={() => setQueryParams("sortBy", opt.value)}
             >
-              <Icon className="size-4 text-muted-foreground" />
+              <Icon
+                aria-hidden="true"
+                className="size-5 text-muted-foreground"
+              />
               <span className="flex-1">{opt.label}</span>
-              {selected && <Check className="size-4 text-primary" />}
+              {selected && (
+                <Check aria-hidden="true" className="size-5 text-brand-800" />
+              )}
             </DropdownMenuItem>
           );
         })}

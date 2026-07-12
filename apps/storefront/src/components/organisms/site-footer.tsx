@@ -66,9 +66,9 @@ export function SiteFooter() {
 
         <div className="grid grid-cols-2 gap-8 small:col-span-5 small:grid-cols-3">
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-foreground/60">
+            <h2 className="text-sm font-semibold tracking-wide text-secondary-foreground/75">
               Categorii
-            </h4>
+            </h2>
             <ul className="mt-4 space-y-2 text-sm">
               {topCategories.map((c) => (
                 <li key={c.handle}>
@@ -84,9 +84,9 @@ export function SiteFooter() {
             </ul>
           </div>
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-foreground/60">
+            <h2 className="text-sm font-semibold tracking-wide text-secondary-foreground/75">
               Magazin
-            </h4>
+            </h2>
             <ul className="mt-4 space-y-2 text-sm">
               {SHOP_LINKS.map((l) => (
                 <li key={l.href}>
@@ -101,9 +101,9 @@ export function SiteFooter() {
             </ul>
           </div>
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-foreground/60">
+            <h2 className="text-sm font-semibold tracking-wide text-secondary-foreground/75">
               Suport
-            </h4>
+            </h2>
             <ul className="mt-4 space-y-2 text-sm">
               {SUPPORT_LINKS.map((l) => (
                 <li key={l.href}>
@@ -120,9 +120,9 @@ export function SiteFooter() {
         </div>
 
         <div className="space-y-4 small:col-span-3">
-          <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-foreground/60">
+          <h2 className="text-sm font-semibold tracking-wide text-secondary-foreground/75">
             Noutăți DYLLU
-          </h4>
+          </h2>
           <p className="text-sm text-secondary-foreground/70">
             Promoții săptămânale, ghiduri de utilizare și produse noi direct în
             email.

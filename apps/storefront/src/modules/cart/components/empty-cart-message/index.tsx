@@ -18,9 +18,9 @@ const EmptyCartMessage = async () => {
 
   return (
     <div className="flex flex-col gap-12" data-testid="empty-cart-message">
-      <div className="flex flex-col items-start justify-center gap-5 px-2 pt-16 small:pt-24">
-        <span className="grid size-12 place-items-center rounded-full bg-primary/10 text-primary">
-          <ShoppingBag className="size-5" />
+      <div className="flex flex-col items-start justify-center gap-5 px-2 pt-4 small:pt-8">
+        <span className="grid size-12 place-items-center rounded-full bg-primary/15 text-brand-800">
+          <ShoppingBag aria-hidden="true" className="size-5" />
         </span>
         <h1 className="font-display text-display-sm font-extrabold tracking-tight text-foreground sm:text-display-md">
           Coșul tău este gol.
@@ -33,7 +33,7 @@ const EmptyCartMessage = async () => {
           <Button asChild size="lg" className="rounded-full">
             <Link href="/store">
               Explorează produsele
-              <ArrowRight className="size-4" />
+              <ArrowRight aria-hidden="true" className="size-5" />
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="rounded-full">
@@ -55,7 +55,7 @@ const EmptyCartMessage = async () => {
             </div>
             <Link
               href="/store"
-              className="hidden text-sm font-semibold text-primary hover:underline small:inline"
+              className="hidden text-base font-semibold text-brand-800 hover:underline small:inline"
             >
               Vezi toate produsele →
             </Link>

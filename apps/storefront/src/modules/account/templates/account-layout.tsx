@@ -16,18 +16,20 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
 }) => {
   return (
     <div className="flex-1 small:py-12" data-testid="account-page">
-      <div className="content-container mx-auto flex h-full max-w-5xl flex-1 flex-col bg-white">
+      <div className="content-container mx-auto flex h-full max-w-5xl flex-1 flex-col bg-card">
         <div className="grid grid-cols-1 py-12 small:grid-cols-[240px_1fr]">
           <div>{customer && <AccountNav customer={customer} />}</div>
           <div className="flex-1">{children}</div>
         </div>
         <div className="flex flex-col items-end justify-between gap-8 border-gray-200 py-12 small:flex-row small:border-t">
           <div>
-            <h3 className="text-xl-semi mb-4">Ai întrebări?</h3>
-            <span className="txt-medium">
+            <h2 className="mb-4 font-display text-2xl font-semibold tracking-tight">
+              Ai întrebări?
+            </h2>
+            <p className="text-base leading-relaxed text-muted-foreground">
               Răspunsurile la întrebările frecvente le găsești pe pagina de
               suport pentru clienți.
-            </span>
+            </p>
           </div>
           <div>
             <UnderlineLink href="/contact">Contact și suport</UnderlineLink>

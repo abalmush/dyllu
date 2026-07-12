@@ -1855,7 +1855,6 @@ export async function PreviewTemplate() {
 
       <ComponentLabel {...find("pdp-set-breakdown")} />
       <SetBreakdown
-        title="Set biți șurubelniță 62 piese"
         pieceCount={62}
         pieces={SET_PIECES}
       />

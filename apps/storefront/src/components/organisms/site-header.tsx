@@ -47,7 +47,7 @@ export function SiteHeader({ cart, categories }: SiteHeaderProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 w-full border-b text-background transition-all duration-300",
+        "sticky top-0 z-40 w-full border-b text-background transition-[background-color,border-color,box-shadow,transform,opacity] duration-300",
         scrolled
           ? "border-background/10 bg-foreground/85 shadow-sm backdrop-blur-md"
           : "border-transparent bg-foreground",
@@ -82,7 +82,10 @@ export function SiteHeader({ cart, categories }: SiteHeaderProps) {
             onClick={() => setSearchOpen(true)}
             className="hidden h-10 items-center gap-2 rounded-full border border-background/15 bg-background/5 px-4 text-left text-sm text-background/70 transition-colors hover:border-background/30 hover:bg-background/10 xlarge:flex xlarge:w-64 2xlarge:w-72"
           >
-            <Search className="size-4 shrink-0 text-background/60" />
+            <Search
+              aria-hidden="true"
+              className="size-4 shrink-0 text-background/75"
+            />
             <span className="flex-1 truncate">Caută scule, accesorii…</span>
             <kbd className="hidden shrink-0 items-center gap-1 rounded border border-background/20 bg-background/5 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-background/70 2xlarge:inline-flex">
               ⌘K
@@ -99,9 +102,9 @@ export function SiteHeader({ cart, categories }: SiteHeaderProps) {
           <Link
             href="/account"
             aria-label="Contul tău"
-            className="hidden size-10 place-items-center rounded-full text-background transition-colors hover:bg-background/10 medium:grid"
+            className="hidden size-11 place-items-center rounded-full text-background transition-colors hover:bg-background/10 medium:grid"
           >
-            <User className="size-5" />
+            <User aria-hidden="true" className="size-5" />
           </Link>
           <CartDrawer cart={cart} />
         </div>

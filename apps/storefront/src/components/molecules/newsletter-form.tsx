@@ -15,18 +15,25 @@ export interface NewsletterFormProps {
 }
 
 export function NewsletterForm({ className, invert }: NewsletterFormProps) {
+  const inputId = React.useId();
+  const errorId = `${inputId}-error`;
   const [email, setEmail] = React.useState("");
   const [pending, setPending] = React.useState(false);
+  const [error, setError] = React.useState("");
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const trimmedEmail = email.trim();
 
     if (!trimmedEmail.includes("@")) {
-      toast.error("Te rugăm introdu un email valid");
+      const message =
+        "Introdu o adresă de email validă, de exemplu nume@domeniu.md.";
+      setError(message);
+      toast.error(message);
       return;
     }
 
+    setError("");
     setPending(true);
 
     const subject = encodeURIComponent("Abonare newsletter DYLLU");
@@ -46,22 +53,43 @@ export function NewsletterForm({ className, invert }: NewsletterFormProps) {
       onSubmit={handleSubmit}
       className={cn("flex w-full max-w-lg flex-col gap-2", className)}
     >
-      <label htmlFor="newsletter-email" className="sr-only">
+      <label htmlFor={inputId} className="text-sm font-semibold">
         Adresa de email
       </label>
       <Input
-        id="newsletter-email"
+        id={inputId}
+        name="email"
         type="email"
+        inputMode="email"
+        autoComplete="email"
+        spellCheck={false}
         required
-        placeholder="adresa@email.com"
+        placeholder="nume@domeniu.md…"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? errorId : undefined}
+        onChange={(e) => {
+          setEmail(e.target.value);
+          if (error) setError("");
+        }}
         className={cn(
           "h-12 w-full rounded-full border-2 px-5",
           invert &&
             "border-background/30 bg-background/10 text-background placeholder:text-background/60 focus-visible:ring-background"
         )}
       />
+      {error ? (
+        <p
+          id={errorId}
+          role="alert"
+          className={cn(
+            "text-sm font-medium",
+            invert ? "text-red-200" : "text-destructive"
+          )}
+        >
+          {error}
+        </p>
+      ) : null}
       <Button
         type="submit"
         size="lg"
@@ -70,12 +98,12 @@ export function NewsletterForm({ className, invert }: NewsletterFormProps) {
         className="h-12 w-full rounded-full px-6"
       >
         Solicită abonarea
-        {!pending && <ArrowRight className="size-4" />}
+        {!pending && <ArrowRight aria-hidden="true" className="size-5" />}
       </Button>
       <p
         className={cn(
-          "px-1 text-xs",
-          invert ? "text-secondary-foreground/60" : "text-muted-foreground"
+          "px-1 text-sm leading-relaxed",
+          invert ? "text-secondary-foreground/75" : "text-muted-foreground"
         )}
       >
         Confirmarea se face prin email la{" "}

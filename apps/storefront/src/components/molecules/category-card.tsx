@@ -43,7 +43,7 @@ export const CategoryCard = React.forwardRef<
       ref={ref}
       href={href}
       className={cn(
-        "clip-corner-cut-md group relative flex h-full min-h-[260px] flex-col overflow-hidden p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_30px_70px_-40px_rgba(15,23,42,0.4)]",
+        "clip-corner-cut-md group relative flex h-full min-h-[260px] flex-col overflow-hidden border border-border p-6 transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1 hover:border-foreground/20 hover:shadow-[0_30px_70px_-40px_rgba(15,23,42,0.4)]",
         accentMap[accent],
         className
       )}
@@ -76,13 +76,13 @@ export const CategoryCard = React.forwardRef<
             data-arrow
             className="grid size-9 shrink-0 place-items-center rounded-full bg-foreground text-background transition-transform duration-300 group-hover:rotate-[-45deg]"
           >
-            <ArrowRight className="size-4" />
+            <ArrowRight aria-hidden="true" className="size-4" />
           </span>
         </div>
         {description && (
           <p
             className={cn(
-              "mt-2 text-sm",
+              "mt-3 text-base leading-relaxed",
               imageUrl ? "text-background/85" : "text-muted-foreground"
             )}
           >

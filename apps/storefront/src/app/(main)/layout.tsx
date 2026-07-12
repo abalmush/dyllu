@@ -46,7 +46,9 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
           shippingOptions={shippingOptions}
         />
       )}
-      <main className="flex-1">{props.children}</main>
+      <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
+        {props.children}
+      </main>
       <SiteFooter />
     </div>
   );

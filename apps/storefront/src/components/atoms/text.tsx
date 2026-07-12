@@ -6,17 +6,17 @@ import { cn } from "@lib/utils";
 const textVariants = cva("text-foreground", {
   variants: {
     size: {
-      xsmall: "text-[11px] leading-[1.5]",
-      small: "text-xs leading-5",
-      base: "text-sm leading-6",
+      xsmall: "text-xs",
+      small: "text-xs",
+      base: "text-base",
       large: "text-base leading-7",
       xlarge: "text-lg leading-8",
     },
     tone: {
       default: "text-foreground",
       muted: "text-muted-foreground",
-      subtle: "text-muted-foreground/80",
-      primary: "text-primary",
+      subtle: "text-muted-foreground",
+      primary: "text-brand-800",
       success: "text-success",
       warning: "text-warning-foreground",
       destructive: "text-destructive",

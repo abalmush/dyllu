@@ -3,11 +3,11 @@ import { HttpTypes } from "@medusajs/types";
 
 import { Badge } from "@/components/atoms/badge";
 import { Container } from "@/components/atoms/container";
+import { Breadcrumbs } from "@/components/molecules/breadcrumbs";
 import { LinkedProducts } from "@/components/organisms/linked-products";
 import { PdpHeroCombo } from "@/components/organisms/pdp-hero-combo";
 import { ProductTypeBadge } from "@/components/organisms/product-type-badge";
 import { SetBreakdown } from "@/components/organisms/set-breakdown";
-import { Breadcrumbs } from "@/components/molecules/breadcrumbs";
 import { getCompatibleAccessories } from "@lib/data/compatible-accessories";
 import RelatedProducts from "@modules/products/components/related-products";
 import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta";
@@ -15,6 +15,7 @@ import ProductTabs from "@modules/products/components/product-tabs";
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products";
 
 import {
+  buildProductBreadcrumbs,
   getEffectivePlatform,
   getPieceCount,
   getProductEyebrow,
@@ -74,17 +75,31 @@ export default async function ComboProductTemplate({ product }: Props) {
     }
   }
 
+  const comboItems = toComboItems(parsedItems, imageByCode);
+  const setPieces = toSetPieces(parsedItems, imageByCode);
+  const breadcrumbs = buildProductBreadcrumbs(product);
+  const summary = platform.startsWith("dyllu-")
+    ? `Produs principal livrat cu accesoriile incluse în pachet, pregătit pentru lucru și compatibil cu platforma ${prettifyPlatform(platform)}.`
+    : "Produs principal livrat cu accesoriile incluse în pachet, gata pentru folosire imediată.";
+
   return (
     <>
       <PdpHeroCombo
         product={product}
-        items={toComboItems(parsedItems, imageByCode)}
+        items={comboItems}
         eyebrow={eyebrow}
         layout="row"
-      />
-
-      <section className="border-y border-border bg-surface-subtle/40 py-6">
-        <Container>
+        includedContent={
+          setPieces.length > 0 ? (
+            <SetBreakdown
+              pieceCount={pieceCount}
+              pieces={setPieces}
+              tone="dark"
+            />
+          ) : undefined
+        }
+        topContent={<Breadcrumbs items={breadcrumbs} />}
+        afterTitleContent={
           <div className="flex flex-wrap items-center gap-2">
             <ProductTypeBadge type="combo" />
             {pieceCount > 0 && (
@@ -94,36 +109,19 @@ export default async function ComboProductTemplate({ product }: Props) {
               <Badge variant="outline">{prettifyPlatform(platform)}</Badge>
             )}
           </div>
-
-          <div className="mt-4 max-w-3xl space-y-3">
-            <Breadcrumbs items={buildBreadcrumbs(product)} />
-            <p className="text-sm leading-relaxed text-muted-foreground small:text-base">
-              Produs principal livrat cu accesoriile din cutie, gata pentru
-              folosire imediată. Structura este extrasă din descrierea importată
-              și poate susține produse conectate pe aceeași platformă.
-            </p>
-          </div>
-        </Container>
-      </section>
-
-      {parsedItems.length > 0 && (
-        <SetBreakdown
-          title="Ce primești în cutie"
-          pieceCount={pieceCount}
-          pieces={toSetPieces(parsedItems)}
-        />
-      )}
+        }
+        descriptionContent={
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {summary}
+          </p>
+        }
+      />
 
       <Container className="pb-24 pt-12 small:pb-32 small:pt-16">
-        <div className="grid gap-10 small:grid-cols-[minmax(0,1.05fr)_minmax(0,0.9fr)] small:gap-14">
-          <div className="space-y-10">
-            <div className="rounded-2xl border border-border bg-card p-6 small:p-8">
-              <ProductTabs product={product} />
-            </div>
-          </div>
-
-          <div className="space-y-8 small:sticky small:top-28 small:self-start">
-            <ProductOnboardingCta />
+        <div className="mx-auto max-w-5xl space-y-8">
+          <ProductOnboardingCta />
+          <div className="clip-corner-cut-lg clip-shadow-lg bg-card p-6 ring-1 ring-border small:p-8">
+            <ProductTabs product={product} />
           </div>
         </div>
       </Container>
@@ -147,17 +145,4 @@ export default async function ComboProductTemplate({ product }: Props) {
       </Suspense>
     </>
   );
-}
-
-function buildBreadcrumbs(product: HttpTypes.StoreProduct) {
-  const category = product.categories?.[0];
-
-  return [
-    { label: "Acasă", href: "/" },
-    { label: "Magazin", href: "/store" },
-    ...(category
-      ? [{ label: category.name, href: `/categories/${category.handle}` }]
-      : []),
-    { label: product.title ?? "Produs" },
-  ];
 }

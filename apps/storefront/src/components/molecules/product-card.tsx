@@ -45,7 +45,7 @@ export const ProductCard = React.forwardRef<
       href={href}
       data-testid="product-wrapper"
       className={cn(
-        "clip-corner-cut-md group relative flex flex-col overflow-hidden bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)]",
+        "clip-corner-cut-md group relative flex flex-col overflow-hidden border border-border bg-card transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1 hover:border-foreground/20 hover:shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)]",
         className
       )}
     >
@@ -76,8 +76,11 @@ export const ProductCard = React.forwardRef<
             {badge}
           </Badge>
         )}
-        <span className="pointer-events-none absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-background/90 text-foreground opacity-0 shadow-md transition-all duration-300 group-hover:opacity-100">
-          <ArrowUpRight className="size-4" />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute right-3 top-3 grid size-11 place-items-center rounded-full bg-background/95 text-foreground opacity-0 shadow-md transition-[opacity,transform] duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
+        >
+          <ArrowUpRight className="size-5" />
         </span>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
@@ -87,7 +90,7 @@ export const ProductCard = React.forwardRef<
           </span>
         )}
         <h3
-          className="line-clamp-2 text-sm font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary"
+          className="line-clamp-2 text-base font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-brand-800"
           data-testid="product-title"
         >
           {title}

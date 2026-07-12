@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@lib/utils";
 
 const iconButtonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-5",
+  "inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full transition-[background-color,color,border-color,box-shadow,opacity] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55 [&_svg]:size-5",
   {
     variants: {
       variant: {
@@ -15,8 +15,8 @@ const iconButtonVariants = cva(
           "bg-foreground text-background hover:bg-foreground/90 [&_svg]:text-background",
       },
       size: {
-        sm: "size-9",
-        md: "size-10",
+        sm: "size-11",
+        md: "size-11",
         lg: "size-11",
       },
     },
@@ -36,12 +36,16 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       ref={ref}
       type="button"
       aria-label={label}
-      className={cn("relative", iconButtonVariants({ variant, size }), className)}
+      className={cn(
+        "relative",
+        iconButtonVariants({ variant, size }),
+        className
+      )}
       {...props}
     >
       {children}
       {typeof badge === "number" && badge > 0 && (
-        <span className="absolute -right-0.5 -top-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground shadow">
+        <span className="absolute -right-0.5 -top-0.5 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-bold leading-none text-primary-foreground shadow">
           {badge > 99 ? "99+" : badge}
         </span>
       )}

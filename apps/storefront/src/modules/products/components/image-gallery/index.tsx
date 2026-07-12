@@ -6,11 +6,7 @@ import { ZoomIn } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 
 import { cn } from "@lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/atoms/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/atoms/dialog";
 
 type Props = {
   images: HttpTypes.StoreProductImage[];
@@ -24,7 +20,7 @@ export default function ImageGallery({ images }: Props) {
 
   return (
     <div className="grid w-full gap-4 small:grid-cols-[88px_1fr] small:items-start">
-      <div className="order-2 flex gap-3 overflow-x-auto pb-1 small:order-1 small:max-h-[640px] small:flex-col small:overflow-y-auto small:pb-0 small:pr-1 no-scrollbar">
+      <div className="no-scrollbar order-2 flex gap-3 overflow-x-auto pb-1 small:order-1 small:max-h-[640px] small:flex-col small:overflow-y-auto small:pb-0 small:pr-1">
         {safeImages.map((img, i) => (
           <button
             key={img.id}
@@ -32,7 +28,7 @@ export default function ImageGallery({ images }: Props) {
             onClick={() => setActive(i)}
             aria-label={`Imaginea ${i + 1}`}
             className={cn(
-              "relative aspect-square w-20 shrink-0 overflow-hidden rounded-xl border-2 bg-surface-subtle transition-all small:w-full",
+              "relative aspect-square w-20 shrink-0 overflow-hidden rounded-xl border-2 bg-surface-subtle transition-[border-color,box-shadow,opacity,transform] small:w-full",
               active === i
                 ? "border-foreground shadow-md"
                 : "border-transparent opacity-70 hover:opacity-100"
@@ -99,7 +95,7 @@ export default function ImageGallery({ images }: Props) {
               />
             )}
           </div>
-          <div className="flex gap-2 overflow-x-auto px-6 pb-6 no-scrollbar">
+          <div className="no-scrollbar flex gap-2 overflow-x-auto px-6 pb-6">
             {safeImages.map((img, i) => (
               <button
                 key={img.id}

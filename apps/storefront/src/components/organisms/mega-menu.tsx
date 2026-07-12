@@ -211,8 +211,8 @@ export function MegaMenu({
   const itemClassName = cn(
     navigationMenuTriggerStyle(),
     isPrimary
-      ? "h-10 whitespace-nowrap rounded-full px-3.5 text-[15px] font-semibold tracking-tight text-background/92 hover:bg-background/10 hover:text-background focus:bg-background/10 focus:text-background data-[active]:bg-background/10 data-[state=open]:bg-background/10"
-      : "h-9 whitespace-nowrap rounded-full px-2.5 text-[13px] font-medium tracking-tight text-background/78 hover:bg-background/10 hover:text-background focus:bg-background/10 focus:text-background data-[active]:bg-background/10 data-[state=open]:bg-background/10"
+      ? "min-h-11 whitespace-nowrap rounded-full px-3.5 text-base font-semibold tracking-tight text-background hover:bg-background/10 focus:bg-background/10 data-[active]:bg-background/10 data-[state=open]:bg-background/10"
+      : "min-h-11 whitespace-nowrap rounded-full px-3 text-sm font-medium tracking-tight text-background/85 hover:bg-background/10 hover:text-background focus:bg-background/10 focus:text-background data-[active]:bg-background/10 data-[state=open]:bg-background/10"
   );
 
   if (navigationCategories.length === 0 && !includeSaleLink) {
@@ -361,7 +361,7 @@ export function MegaMenu({
                 href="/store?on_sale=true"
                 className={cn(
                   itemClassName,
-                  "text-destructive hover:text-destructive focus:text-destructive"
+                  "text-red-300 hover:text-red-200 focus:text-red-200"
                 )}
               >
                 Reduceri

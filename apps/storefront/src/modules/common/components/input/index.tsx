@@ -11,8 +11,6 @@ type InputProps = Omit<
 > & {
   label: string;
   placeholder?: string;
-  errors?: Record<string, unknown>;
-  touched?: Record<string, unknown>;
   name: string;
   topLabel?: string;
 };
@@ -39,16 +37,21 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex w-full flex-col gap-2">
         {topLabel && (
-          <Label className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          <span className="text-sm font-semibold tracking-wide text-muted-foreground">
             {topLabel}
-          </Label>
+          </span>
         )}
         <Label
           htmlFor={inputId}
           className="text-sm font-medium tracking-tight text-foreground"
         >
           {label}
-          {required && <span className="text-rose-500">*</span>}
+          {required && (
+            <span aria-hidden="true" className="text-destructive">
+              {" "}
+              *
+            </span>
+          )}
         </Label>
         <div className="relative z-0 flex w-full">
           <input
@@ -58,7 +61,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             placeholder={props.placeholder}
             required={required}
             className={cn(
-              "mt-0 block h-12 w-full appearance-none rounded-md border border-border bg-background px-4 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus:border-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 focus:ring-offset-0",
+              "mt-0 block h-12 w-full appearance-none rounded-md border border-input bg-background px-4 text-base text-foreground shadow-sm transition-[border-color,box-shadow,background-color,color] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               type === "password" && "pr-12",
               className
             )}
@@ -69,7 +72,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-0 top-3 px-4 text-muted-foreground outline-none transition-colors duration-150 hover:text-foreground focus:text-foreground focus:outline-none"
+              aria-label={showPassword ? "Ascunde parola" : "Afișează parola"}
+              aria-pressed={showPassword}
+              className="absolute right-0 top-0 grid size-12 place-items-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {showPassword ? <Eye /> : <EyeOff />}
             </button>

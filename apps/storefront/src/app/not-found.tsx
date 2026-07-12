@@ -11,13 +11,17 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-[calc(100vh-12rem)] flex-col items-center justify-center gap-6 px-6 text-center">
-      <span className="rounded-full bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="flex min-h-[calc(100vh-12rem)] flex-col items-center justify-center gap-6 px-6 text-center outline-none"
+    >
+      <span className="rounded-full bg-primary/15 px-4 py-1 text-sm font-semibold tracking-wide text-brand-900">
         Eroare 404
       </span>
       <h1 className="font-display text-display-md font-extrabold tracking-tight text-foreground sm:text-display-lg">
         Pagina nu a fost
-        <span className="block text-primary">găsită.</span>
+        <span className="block text-brand-800">găsită.</span>
       </h1>
       <p className="max-w-md text-sm text-muted-foreground sm:text-base">
         Linkul pe care l-ai accesat nu există sau a fost mutat. Întoarce-te la
@@ -38,6 +42,6 @@ export default function NotFound() {
           </Link>
         </Button>
       </div>
-    </div>
+    </main>
   );
 }

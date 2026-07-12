@@ -199,7 +199,7 @@ export function PdpHero({ product, eyebrow }: Props) {
           <div className="clip-corner-cut-md clip-shadow-lg grid gap-6 bg-card p-6 ring-1 ring-border small:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] small:gap-10 small:p-8 medium:p-10">
             <div className="space-y-3 small:space-y-4">
               {eyebrow && (
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-800">
                   {eyebrow}
                 </span>
               )}

@@ -11,13 +11,17 @@ import {
 
 export type NativeSelectProps = {
   placeholder?: string;
-  errors?: Record<string, unknown>;
-  touched?: Record<string, unknown>;
 } & SelectHTMLAttributes<HTMLSelectElement>;
 
 const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
   (
-    { placeholder = "Select...", defaultValue, className, children, ...props },
+    {
+      placeholder = "Selectează…",
+      defaultValue,
+      className,
+      children,
+      ...props
+    },
     ref
   ) => {
     const innerRef = useRef<HTMLSelectElement>(null);
@@ -52,8 +56,12 @@ const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
         <select
           ref={innerRef}
           defaultValue={defaultValue}
+          aria-label={
+            props["aria-label"] ??
+            (props.name === "country_code" ? "Țară" : "Selectează o opțiune")
+          }
           {...props}
-          className="h-full w-full appearance-none border-none bg-transparent px-4 pr-12 text-sm outline-none transition-colors duration-150"
+          className="h-full w-full appearance-none border-none bg-transparent px-4 pr-12 text-base outline-none transition-colors duration-150"
         >
           <option disabled value="">
             {placeholder}

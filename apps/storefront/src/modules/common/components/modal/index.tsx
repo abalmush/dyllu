@@ -34,10 +34,10 @@ const Modal = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 h-screen bg-opacity-75 backdrop-blur-md" />
+          <div className="fixed inset-0 h-screen bg-foreground/60 backdrop-blur-md" />
         </Transition.Child>
 
-        <div className="fixed inset-0 overflow-y-hidden">
+        <div className="fixed inset-0 overflow-y-auto overscroll-contain">
           <div
             className={clx(
               "flex h-full min-h-full justify-center p-4 text-center",
@@ -59,13 +59,14 @@ const Modal = ({
               <Dialog.Panel
                 data-testid={dataTestId}
                 className={clx(
-                  "flex h-fit max-h-[75vh] w-full transform flex-col justify-start p-5 text-left align-middle transition-all",
+                  "flex h-fit max-h-[calc(100dvh-2rem)] w-full transform flex-col justify-start overflow-y-auto overscroll-contain p-6 text-left align-middle transition-[opacity,transform]",
                   {
                     "max-w-md": size === "small",
                     "max-w-xl": size === "medium",
                     "max-w-3xl": size === "large",
                     "bg-transparent shadow-none": search,
-                    "rounded-rounded border bg-white shadow-xl": !search,
+                    "rounded-rounded border border-border bg-background shadow-xl":
+                      !search,
                   }
                 )}
               >
@@ -86,7 +87,13 @@ const Title: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <Dialog.Title className="flex items-center justify-between">
       <div className="text-large-semi">{children}</div>
       <div>
-        <button onClick={close} data-testid="close-modal-button">
+        <button
+          type="button"
+          onClick={close}
+          aria-label="Închide"
+          className="grid size-11 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          data-testid="close-modal-button"
+        >
           <X size={20} />
         </button>
       </div>

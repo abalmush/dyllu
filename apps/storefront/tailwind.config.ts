@@ -122,6 +122,10 @@ const config: Config = {
         display: ["var(--font-display)", "Inter", "system-ui", "sans-serif"],
       },
       fontSize: {
+        xs: ["0.875rem", { lineHeight: "1.4" }],
+        sm: ["1rem", { lineHeight: "1.5" }],
+        base: ["1rem", { lineHeight: "1.5" }],
+        lg: ["1.125rem", { lineHeight: "1.5" }],
         "3xl": "2rem",
         "display-sm": [
           "2.25rem",

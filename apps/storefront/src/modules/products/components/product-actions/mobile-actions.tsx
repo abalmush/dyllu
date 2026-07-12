@@ -83,11 +83,12 @@ export default function MobileActions({
                 Opțiuni
               </Button>
               <Button
+                variant="brand"
                 size="lg"
                 onClick={handleAddToCart}
                 disabled={!inStock || !variant}
                 isLoading={isAdding}
-                className="rounded-full"
+                className="clip-corner-cut-sm rounded-none"
                 data-testid="mobile-cart-button"
               >
                 <ShoppingBag className="size-4" />
@@ -96,11 +97,12 @@ export default function MobileActions({
             </>
           ) : (
             <Button
+              variant="brand"
               size="lg"
               onClick={handleAddToCart}
               disabled={!inStock || !variant}
               isLoading={isAdding}
-              className="rounded-full"
+              className="clip-corner-cut-sm rounded-none"
               data-testid="mobile-cart-button"
             >
               <ShoppingBag className="size-4" />
@@ -127,6 +129,7 @@ export default function MobileActions({
               />
             ))}
             <Button
+              variant="brand"
               size="lg"
               onClick={() => {
                 handleAddToCart();
@@ -134,7 +137,7 @@ export default function MobileActions({
               }}
               disabled={!inStock || !variant}
               isLoading={isAdding}
-              className="mt-2 rounded-full"
+              className="clip-corner-cut-sm mt-2 rounded-none"
             >
               <ShoppingBag className="size-4" />
               {!variant ? "Selectează varianta" : !inStock ? "Stoc epuizat" : "Adaugă în coș"}

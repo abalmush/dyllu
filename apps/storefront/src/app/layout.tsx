@@ -41,11 +41,14 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       className={`${inter.variable} ${sora.variable}`}
     >
       <body className="bg-background text-foreground antialiased">
+        <a className="skip-link" href="#main-content">
+          Sari la conținut
+        </a>
         <SmoothScrollProvider
           enabled={smoothScrollEnabled}
           disableOnTouch={smoothScrollDisableOnTouch}
         >
-          <main className="relative">{props.children}</main>
+          <div className="relative">{props.children}</div>
         </SmoothScrollProvider>
         <Toaster richColors closeButton position="top-right" />
       </body>

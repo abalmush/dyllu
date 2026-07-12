@@ -23,6 +23,11 @@ export type ParsedKitItem = {
   qty: number;
 };
 
+export type ProductBreadcrumb = {
+  label: string;
+  href?: string;
+};
+
 export function getProductEyebrow(
   product: HttpTypes.StoreProduct
 ): string | undefined {
@@ -166,13 +171,22 @@ export function parseKitItems(description?: string | null): ParsedKitItem[] {
   return items;
 }
 
-export function toSetPieces(items: ParsedKitItem[]): SetPiece[] {
+export function toSetPieces(
+  items: ParsedKitItem[],
+  imageByCode = new Map<string, string>()
+): SetPiece[] {
   return items.map((item) => ({
     id: item.id,
     label: item.label,
+    image: item.code ? imageByCode.get(item.code) : undefined,
     qty: item.qty,
   }));
 }
+
+// Included-item labels that are a plastic case/box. These don't sell separately
+// (no SKU) but should still show in "what's included" with a shared box image.
+const PLASTIC_BOX_RE = /cutie\s+(?:de|din)\s+plastic|cutie\s+tip\s+bmc/i;
+const PLASTIC_BOX_IMAGE = "/images/dyllu-box.png";
 
 export function toComboItems(
   items: ParsedKitItem[],
@@ -181,7 +195,11 @@ export function toComboItems(
   return items.map((item) => ({
     id: item.id,
     name: item.label,
-    image: item.code ? (imageByCode.get(item.code) ?? "") : "",
+    image: item.code
+      ? (imageByCode.get(item.code) ?? "")
+      : PLASTIC_BOX_RE.test(item.label)
+        ? PLASTIC_BOX_IMAGE
+        : "",
     quantity: item.qty,
   }));
 }
@@ -225,6 +243,32 @@ export function getProductCategoryLabel(
   }
 
   return product.categories?.[0]?.name;
+}
+
+export function buildProductBreadcrumbs(
+  product: HttpTypes.StoreProduct
+): ProductBreadcrumb[] {
+  const metadata = (product.metadata ?? {}) as ProductMetadata;
+  const category = product.categories?.[0];
+  const sourceCategory = String(metadata.ingco_source_categories ?? "")
+    .split(",")[0]
+    ?.trim();
+
+  return [
+    { label: "Acasă", href: "/" },
+    { label: "Magazin", href: "/store" },
+    ...(category?.handle && category.name
+      ? [{ label: category.name, href: `/categories/${category.handle}` }]
+      : sourceCategory
+        ? [
+            {
+              label: sourceCategory,
+              href: `/categories/${slugify(sourceCategory)}`,
+            },
+          ]
+        : []),
+    { label: product.title ?? "Produs" },
+  ];
 }
 
 export function isProductInStock(product: HttpTypes.StoreProduct): boolean {
