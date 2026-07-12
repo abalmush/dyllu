@@ -17,7 +17,9 @@ const Login = ({ setCurrentView }: Props) => {
       className="flex w-full max-w-sm flex-col items-center"
       data-testid="login-page"
     >
-      <h1 className="text-large-semi mb-6 uppercase">Bine ai revenit</h1>
+      <h1 className="mb-4 font-display text-3xl font-bold tracking-tight text-foreground">
+        Bine ai revenit
+      </h1>
       <p className="text-base-regular mb-8 text-center text-ui-fg-base">
         Autentifică-te pentru a accesa experiența completă DYLLU.
       </p>
@@ -50,7 +52,7 @@ const Login = ({ setCurrentView }: Props) => {
         Nu ai cont încă?{" "}
         <button
           onClick={() => setCurrentView(LOGIN_VIEW.REGISTER)}
-          className="underline"
+          className="rounded-sm px-1 font-semibold text-brand-800 underline underline-offset-4"
           data-testid="register-button"
         >
           Creează unul

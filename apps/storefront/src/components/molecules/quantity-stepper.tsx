@@ -27,7 +27,7 @@ export function QuantityStepper({
   const dec = () => onChange?.(Math.max(min, value - 1));
   const inc = () => onChange?.(Math.min(max, value + 1));
   const sizeCls =
-    size === "sm" ? "h-8 [&_button]:size-8" : "h-10 [&_button]:size-10";
+    size === "sm" ? "h-11 [&_button]:size-11" : "h-12 [&_button]:size-12";
   return (
     <div
       className={cn(
@@ -39,24 +39,27 @@ export function QuantityStepper({
     >
       <button
         type="button"
-        aria-label="Decrease quantity"
+        aria-label="Micșorează cantitatea"
         onClick={dec}
         disabled={disabled || value <= min}
         className="grid place-items-center text-foreground transition-colors hover:bg-muted disabled:opacity-40"
       >
-        <Minus className="size-3.5" />
+        <Minus aria-hidden="true" className="size-4" />
       </button>
-      <span className="min-w-[36px] text-center text-sm font-semibold">
+      <span
+        aria-live="polite"
+        className="min-w-10 text-center text-base font-semibold tabular-nums"
+      >
         {value}
       </span>
       <button
         type="button"
-        aria-label="Increase quantity"
+        aria-label="Mărește cantitatea"
         onClick={inc}
         disabled={disabled || value >= max}
         className="grid place-items-center text-foreground transition-colors hover:bg-muted disabled:opacity-40"
       >
-        <Plus className="size-3.5" />
+        <Plus aria-hidden="true" className="size-4" />
       </button>
     </div>
   );

@@ -24,6 +24,7 @@ export function PlpToolbar({ resultCount }: { resultCount: number }) {
         <span className="text-muted-foreground">Sortează</span>
         <span className="clip-corner-cut-xs relative inline-flex items-center border border-border bg-card">
           <select
+            name="sort"
             value={sort}
             onChange={(e) => setSort(e.target.value)}
             className="appearance-none bg-transparent py-2 pl-3 pr-8 text-sm font-medium text-foreground focus:outline-none"
@@ -34,7 +35,10 @@ export function PlpToolbar({ resultCount }: { resultCount: number }) {
               </option>
             ))}
           </select>
-          <ChevronDown className="pointer-events-none absolute right-2 size-4 text-muted-foreground" />
+          <ChevronDown
+            aria-hidden="true"
+            className="pointer-events-none absolute right-2 size-5 text-muted-foreground"
+          />
         </span>
       </label>
     </div>

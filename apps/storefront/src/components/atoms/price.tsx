@@ -11,7 +11,7 @@ export interface PriceProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const sizeMap = {
-  sm: "text-sm",
+  sm: "text-base",
   md: "text-base",
   lg: "text-lg",
   xl: "text-2xl",
@@ -51,12 +51,12 @@ export const Price = React.forwardRef<HTMLDivElement, PriceProps>(
           {amount}
         </span>
         {originalAmount && (
-          <span className="text-xs text-muted-foreground line-through">
+          <span className="text-sm text-muted-foreground line-through">
             {originalAmount}
           </span>
         )}
         {saleLabel && (
-          <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-destructive">
+          <span className="rounded-full border border-destructive/20 bg-destructive/10 px-2 py-1 text-sm font-semibold tracking-wide text-destructive">
             {saleLabel}
           </span>
         )}

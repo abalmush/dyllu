@@ -115,7 +115,7 @@ export const listProductsWithSort = async ({
   const pageParam = (page - 1) * limit;
 
   const nextPage =
-    filteredProducts.length > pageParam + limit ? pageParam + limit : null;
+    filteredProducts.length > pageParam + limit ? page + 1 : null;
 
   const paginatedProducts = filteredProducts.slice(
     pageParam,

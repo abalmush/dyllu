@@ -20,7 +20,9 @@ const Register = ({ setCurrentView }: Props) => {
       className="flex max-w-sm flex-col items-center"
       data-testid="register-page"
     >
-      <h1 className="text-large-semi mb-6 uppercase">Creează cont DYLLU</h1>
+      <h1 className="mb-4 font-display text-3xl font-bold tracking-tight text-foreground">
+        Creează cont DYLLU
+      </h1>
       <p className="text-base-regular mb-4 text-center text-ui-fg-base">
         Înregistrează-te pentru comenzi mai rapide, urmărirea livrărilor și
         oferte personalizate.
@@ -85,7 +87,7 @@ const Register = ({ setCurrentView }: Props) => {
         Ai deja cont?{" "}
         <button
           onClick={() => setCurrentView(LOGIN_VIEW.SIGN_IN)}
-          className="underline"
+          className="rounded-sm px-1 font-semibold text-brand-800 underline underline-offset-4"
         >
           Autentifică-te
         </button>

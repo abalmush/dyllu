@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { isEqual } from "lodash";
-import { ShieldCheck, ShoppingBag, Truck } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import AutoplayPlugin from "embla-carousel-autoplay";
 import { HttpTypes } from "@medusajs/types";
@@ -11,7 +11,7 @@ import { HttpTypes } from "@medusajs/types";
 import { addToCart } from "@lib/data/cart";
 import { cn } from "@lib/utils";
 import { Button } from "@/components/atoms/button";
-import { Separator } from "@/components/atoms/separator";
+import { PurchaseTrustGrid } from "@/components/organisms/purchase-trust-grid";
 import { QuantityStepper } from "@/components/molecules/quantity-stepper";
 
 type Variant = "spotlight" | "marquee" | "staggered";
@@ -338,7 +338,7 @@ function VariantTilesMarquee({
                 )}
 
                 <div className="relative z-[1] space-y-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-800">
                     {card.primaryOption?.title ?? "Variantă"}
                   </span>
                   <h3 className="font-display text-xl font-bold leading-tight text-background small:text-2xl">
@@ -370,12 +370,14 @@ function ImageMarquee({ images, product, eyebrow, card }: LayoutProps) {
     return padded.slice(0, Math.max(8, images.length * 2));
   }, [images]);
 
-  const autoplayPlugin = React.useRef(
-    AutoplayPlugin({
-      delay: 2800,
-      stopOnInteraction: false,
-      stopOnMouseEnter: true,
-    })
+  const autoplayPlugin = React.useMemo(
+    () =>
+      AutoplayPlugin({
+        delay: 2800,
+        stopOnInteraction: false,
+        stopOnMouseEnter: true,
+      }),
+    []
   );
 
   const [emblaRef] = useEmblaCarousel(
@@ -385,7 +387,7 @@ function ImageMarquee({ images, product, eyebrow, card }: LayoutProps) {
       dragFree: true,
       containScroll: false,
     },
-    [autoplayPlugin.current]
+    [autoplayPlugin]
   );
 
   return (
@@ -488,12 +490,18 @@ export function InfoCard({
   card,
   tone,
   className,
+  topContent,
+  afterTitleContent,
+  descriptionContent,
 }: {
   product: HttpTypes.StoreProduct;
   eyebrow?: string;
   card: ReturnType<typeof useInfoCardController>;
   tone: "light" | "dark";
   className?: string;
+  topContent?: React.ReactNode;
+  afterTitleContent?: React.ReactNode;
+  descriptionContent?: React.ReactNode;
 }) {
   const {
     selectedVariant,
@@ -522,64 +530,55 @@ export function InfoCard({
   return (
     <div
       className={cn(
-        "clip-corner-cut-lg clip-shadow-lg p-6 small:p-8 medium:p-10",
+        "clip-corner-cut-lg clip-shadow-lg p-6 small:p-7 medium:p-8",
         tone === "dark"
           ? "bg-background/95 ring-1 ring-foreground/10 backdrop-blur"
           : "bg-card ring-1 ring-border",
         className
       )}
     >
-      <div className="grid gap-6 small:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] small:gap-10">
-        <div className="flex flex-col gap-4 small:gap-5">
-          {eyebrow && (
-            <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-              {eyebrow}
-            </span>
-          )}
-          <h1 className="font-display text-2xl font-extrabold leading-[1.05] tracking-tight text-foreground small:text-3xl medium:text-4xl">
-            {product.title}
-          </h1>
+      <div className="flex flex-col gap-4 small:gap-5">
+        {topContent}
+        {eyebrow && (
+          <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-800">
+            {eyebrow}
+          </span>
+        )}
 
+        <h1 className="font-display text-[2.35rem] font-extrabold leading-[0.96] tracking-tight text-foreground small:text-[2.7rem] medium:text-[3rem]">
+          {product.title}
+        </h1>
+
+        <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
-            <div className="flex items-baseline gap-2">
-              {showFromPrefix && (
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  de la
-                </span>
-              )}
-              <span className="font-display text-2xl font-bold tracking-tight text-foreground small:text-3xl">
-                {formatPrice(displayPrice)}
+            {showFromPrefix && (
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                de la
               </span>
-            </div>
-            <span
-              className={cn(
-                "clip-corner-cut-xs inline-flex items-center gap-2 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]",
-                inStock
-                  ? "bg-success/10 text-success"
-                  : "bg-destructive/10 text-destructive"
-              )}
-            >
-              <span
-                className={cn(
-                  "size-1.5",
-                  inStock ? "bg-success" : "bg-destructive"
-                )}
-              />
-              {inStock ? "În stoc · 24–48h" : "Indisponibil"}
+            )}
+            <span className="font-display text-[2.9rem] font-extrabold leading-none tracking-tight text-foreground small:text-[3.2rem] medium:text-[3.35rem]">
+              {formatPrice(displayPrice)}
             </span>
           </div>
+          <span
+            className={cn(
+              "clip-corner-cut-xs inline-flex w-fit items-center gap-2 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]",
+              inStock
+                ? "bg-success/10 text-success"
+                : "bg-destructive/10 text-destructive"
+            )}
+          >
+          <span className={cn("size-1.5", inStock ? "bg-success" : "bg-destructive")} />
+          {inStock ? "În stoc · 24–48h" : "Indisponibil"}
+        </span>
+      </div>
 
-          {product.description && (
-            <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-              {product.description}
-            </p>
-          )}
-        </div>
+        <div className="clip-corner-cut-md flex flex-col gap-4 bg-surface-subtle/70 p-4 ring-1 ring-border/70 small:p-5">
+          {afterTitleContent}
 
-        <div className="flex flex-col gap-5">
           {isMultiVariant && primaryOption && optionValues.length > 0 && (
             <div className="space-y-2">
-              <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline justify-between gap-3">
                 <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   {primaryOption.title}
                 </span>
@@ -623,58 +622,42 @@ export function InfoCard({
             </div>
           )}
 
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Cantitate
-            </span>
-            <QuantityStepper value={quantity} onChange={setQuantity} max={20} />
-          </div>
-
-          <div className="flex items-stretch gap-2">
+          <div className="grid gap-3 small:grid-cols-[132px_minmax(0,1fr)] small:items-end">
+            <div className="space-y-2">
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Cantitate
+              </span>
+              <QuantityStepper
+                value={quantity}
+                onChange={setQuantity}
+                max={20}
+                className="w-full justify-between"
+              />
+            </div>
             <Button
               type="button"
               onClick={onAddToCart}
               disabled={isAdding || (isMultiVariant && !selectedVariant)}
               size="xl"
-              className="clip-corner-cut-sm flex-1 rounded-none"
+              variant="brand"
+              className="clip-corner-cut-sm min-h-14 rounded-none px-8 shadow-[0_20px_40px_-24px_rgba(201,255,46,0.95)]"
             >
               <ShoppingBag className="size-4" />
               {ctaLabel}
             </Button>
           </div>
         </div>
+
+        {descriptionContent === undefined
+          ? product.description && (
+              <p className="line-clamp-4 text-sm leading-relaxed text-muted-foreground">
+                {product.description}
+              </p>
+            )
+          : descriptionContent}
+
+        <PurchaseTrustGrid />
       </div>
-
-      <Separator className="mt-6 small:mt-8" />
-
-      <ul className="mt-5 grid gap-3 text-sm small:mt-6 small:grid-cols-2 small:gap-4">
-        <li className="flex items-start gap-3">
-          <span className="clip-corner-cut-xs grid size-9 shrink-0 place-items-center bg-primary/10 text-primary">
-            <Truck className="size-4" />
-          </span>
-          <span className="text-foreground">
-            <span className="font-semibold">Livrare gratuită</span>
-            <span className="text-muted-foreground">
-              {" "}
-              peste 1.000 MDL în Chișinău
-            </span>
-          </span>
-        </li>
-        <li className="flex items-start gap-3">
-          <span className="clip-corner-cut-xs grid size-9 shrink-0 place-items-center bg-primary/10 text-primary">
-            <ShieldCheck className="size-4" />
-          </span>
-          <span className="text-foreground">
-            <span className="font-semibold">
-              Confirmare înainte de procesare
-            </span>
-            <span className="text-muted-foreground">
-              {" "}
-              · metoda de plată se validează la confirmarea comenzii
-            </span>
-          </span>
-        </li>
-      </ul>
     </div>
   );
 }

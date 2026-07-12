@@ -7,19 +7,19 @@ import { Container } from "@/components/atoms/container";
 
 export function UtilityBar() {
   return (
-    <div className="hidden border-b border-border bg-surface-subtle/60 text-foreground/70 medium:block">
+    <div className="hidden border-b border-border bg-surface-subtle text-muted-foreground medium:block">
       <Container>
-        <div className="flex h-9 items-center justify-between text-[12px]">
+        <div className="flex min-h-11 items-center justify-between text-sm">
           <div className="flex items-center gap-5">
             <a
               href={SITE_CONTACT.phoneHref}
               className="inline-flex items-center gap-1.5 font-medium tracking-tight transition-colors hover:text-foreground"
             >
-              <Phone className="size-3.5" />
+              <Phone aria-hidden="true" className="size-4" />
               {SITE_CONTACT.phoneDisplay}
             </a>
-            <span className="inline-flex items-center gap-1.5 text-foreground/55">
-              <Clock className="size-3.5" />
+            <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+              <Clock aria-hidden="true" className="size-4" />
               {SITE_CONTACT.hoursShort}
             </span>
           </div>
@@ -28,14 +28,14 @@ export function UtilityBar() {
               href="/contact"
               className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
             >
-              <MapPin className="size-3.5" />
+              <MapPin aria-hidden="true" className="size-4" />
               Magazine DYLLU
             </Link>
             <Link
               href="/returnari"
               className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
             >
-              <Wrench className="size-3.5" />
+              <Wrench aria-hidden="true" className="size-4" />
               Service și piese de schimb
             </Link>
           </nav>

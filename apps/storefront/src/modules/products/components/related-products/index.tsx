@@ -13,17 +13,25 @@ export default async function RelatedProducts({ product }: Props) {
   const region = await getRegion();
   if (!region) return null;
 
+  const collectionId = product.collection_id ?? undefined;
+  const hasCollection = Boolean(collectionId);
+  const tagIds =
+    product.tags?.map((tag) => tag.id).filter(Boolean) as string[] | undefined;
+  const hasTags = Boolean(tagIds?.length);
+
+  if (!hasCollection && !hasTags) {
+    return null;
+  }
+
   const queryParams: HttpTypes.StoreProductListParams = {
     region_id: region.id,
     is_giftcard: false,
   };
-  if (product.collection_id) {
-    queryParams.collection_id = [product.collection_id];
+  if (collectionId) {
+    queryParams.collection_id = [collectionId];
   }
-  if (product.tags) {
-    queryParams.tag_id = product.tags
-      .map((t) => t.id)
-      .filter(Boolean) as string[];
+  if (hasTags && tagIds) {
+    queryParams.tag_id = tagIds;
   }
 
   const products = await listProducts({ queryParams }).then(({ response }) =>

@@ -2,19 +2,24 @@
 
 import * as React from "react";
 import { isEqual } from "lodash";
-import { ShieldCheck, ShoppingBag, Truck } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { addToCart } from "@lib/data/cart";
 import { useIntersection } from "@lib/hooks/use-in-view";
+import { cn } from "@lib/utils";
+import { Badge } from "@/components/atoms/badge";
 import { Button } from "@/components/atoms/button";
-import { Separator } from "@/components/atoms/separator";
+import { PriceBlock } from "@/components/molecules/price-block";
+import { PurchaseTrustGrid } from "@/components/organisms/purchase-trust-grid";
+import { ProductTypeBadge } from "@/components/organisms/product-type-badge";
 import { QuantityStepper } from "@/components/molecules/quantity-stepper";
+import { getProductUiType } from "@modules/products/lib/product-presentation";
 
 import MobileActions from "./mobile-actions";
 import OptionSelect from "./option-select";
-import ProductPrice from "../product-price";
+import { getProductPrice } from "@lib/util/get-product-price";
 
 type Props = {
   product: HttpTypes.StoreProduct;
@@ -25,8 +30,10 @@ type Props = {
 const optionsAsKeymap = (
   variantOptions: HttpTypes.StoreProductVariant["options"]
 ) =>
-  variantOptions?.reduce((acc: Record<string, string>, opt: any) => {
-    acc[opt.option_id] = opt.value;
+  variantOptions?.reduce((acc: Record<string, string>, opt) => {
+    if (opt.option_id) {
+      acc[opt.option_id] = opt.value;
+    }
     return acc;
   }, {}) ?? {};
 
@@ -37,15 +44,16 @@ export default function ProductActions({ product, disabled }: Props) {
 
   const [options, setOptions] = React.useState<
     Record<string, string | undefined>
-  >({});
+  >(() => {
+    if ((product.variants?.length ?? 0) === 1 && product.variants?.[0]) {
+      return optionsAsKeymap(product.variants[0].options) ?? {};
+    }
+
+    return {};
+  });
   const [quantity, setQuantity] = React.useState(1);
   const [isAdding, setIsAdding] = React.useState(false);
-
-  React.useEffect(() => {
-    if (product.variants?.length === 1) {
-      setOptions(optionsAsKeymap(product.variants[0].options) ?? {});
-    }
-  }, [product.variants]);
+  const productType = getProductUiType(product);
 
   const selectedVariant = React.useMemo(() => {
     if (!product.variants?.length) return undefined;
@@ -84,6 +92,33 @@ export default function ProductActions({ product, disabled }: Props) {
     return false;
   }, [selectedVariant]);
 
+  const { variantPrice, cheapestPrice } = getProductPrice({
+    product,
+    variantId: selectedVariant?.id,
+  });
+  const displayPrice = selectedVariant ? variantPrice : cheapestPrice;
+  const badges: React.ReactNode[] = [];
+
+  if (productType === "needs-battery") {
+    badges.push(<ProductTypeBadge key="type" type={productType} />);
+  }
+
+  if (product.collection?.title) {
+    badges.push(
+      <Badge key="collection" variant="soft">
+        {product.collection.title}
+      </Badge>
+    );
+  }
+
+  if (product.material) {
+    badges.push(
+      <Badge key="material" variant="outline">
+        {product.material}
+      </Badge>
+    );
+  }
+
   const setOptionValue = (id: string, value: string) =>
     setOptions((prev) => ({ ...prev, [id]: value }));
 
@@ -108,91 +143,100 @@ export default function ProductActions({ product, disabled }: Props) {
 
   return (
     <div
-      className="flex flex-col gap-6 rounded-2xl border border-border bg-card p-6 shadow-sm small:p-7"
+      className="clip-corner-cut-lg clip-shadow-lg flex flex-col gap-4 bg-card p-6 ring-1 ring-border small:gap-5 small:p-7"
       ref={actionsRef}
     >
-      <ProductPrice product={product} variant={selectedVariant} />
+      <div className="flex flex-col gap-2">
+        <PriceBlock
+          price={displayPrice}
+          prefix={!selectedVariant ? "de la" : undefined}
+          size="xl"
+          className="[&_span[data-testid='product-price']]:font-display [&_span[data-testid='product-price']]:text-[2.9rem] [&_span[data-testid='product-price']]:font-extrabold [&_span[data-testid='product-price']]:leading-none small:[&_span[data-testid='product-price']]:text-[3.2rem] medium:[&_span[data-testid='product-price']]:text-[3.35rem]"
+        />
 
-      {(product.variants?.length ?? 0) > 1 && (
-        <div className="flex flex-col gap-5">
-          {(product.options || []).map((option) => (
-            <OptionSelect
-              key={option.id}
-              option={option}
-              current={options[option.id]}
-              updateOption={setOptionValue}
-              title={option.title ?? ""}
-              data-testid="product-options"
-              disabled={!!disabled || isAdding}
+        <span
+          className={cn(
+            "clip-corner-cut-xs inline-flex w-fit items-center gap-2 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]",
+            inStock
+              ? "bg-success/10 text-success"
+              : "bg-destructive/10 text-destructive"
+          )}
+        >
+          <span
+            className={cn(
+              "size-1.5",
+              inStock ? "bg-success" : "bg-destructive"
+            )}
+          />
+          {inStock ? "În stoc · 24–48h" : "Indisponibil"}
+        </span>
+      </div>
+
+      <div className="clip-corner-cut-md flex flex-col gap-4 bg-surface-subtle/70 p-4 ring-1 ring-border/70 small:p-5">
+        {badges.length > 0 && (
+          <div className="flex flex-wrap gap-2">{badges}</div>
+        )}
+
+        {(product.variants?.length ?? 0) > 1 && (
+          <div className="flex flex-col gap-4">
+            {(product.options || []).map((option) => (
+              <OptionSelect
+                key={option.id}
+                option={option}
+                current={options[option.id]}
+                updateOption={setOptionValue}
+                title={option.title ?? ""}
+                data-testid="product-options"
+                disabled={!!disabled || isAdding}
+              />
+            ))}
+          </div>
+        )}
+
+        <div className="grid gap-3 small:grid-cols-[132px_minmax(0,1fr)] small:items-end">
+          <div className="space-y-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Cantitate
+            </span>
+            <QuantityStepper
+              value={quantity}
+              onChange={setQuantity}
+              max={20}
+              className="w-full justify-between"
             />
-          ))}
+          </div>
+
+          <Button
+            onClick={handleAddToCart}
+            disabled={
+              !inStock ||
+              !selectedVariant ||
+              !!disabled ||
+              isAdding ||
+              !isValidVariant
+            }
+            isLoading={isAdding}
+            size="xl"
+            variant="brand"
+            className="clip-corner-cut-sm min-h-14 rounded-none px-8 shadow-[0_20px_40px_-24px_rgba(201,255,46,0.95)]"
+            data-testid="add-product-button"
+          >
+            <ShoppingBag className="size-4" />
+            {ctaLabel}
+          </Button>
         </div>
+      </div>
+
+      {product.description && (
+        <p
+          className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground"
+          data-testid="product-description"
+        >
+          {product.description}
+        </p>
       )}
 
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-          Cantitate
-        </span>
-        <QuantityStepper value={quantity} onChange={setQuantity} max={20} />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Button
-          onClick={handleAddToCart}
-          disabled={
-            !inStock ||
-            !selectedVariant ||
-            !!disabled ||
-            isAdding ||
-            !isValidVariant
-          }
-          isLoading={isAdding}
-          size="xl"
-          className="rounded-full"
-          data-testid="add-product-button"
-        >
-          <ShoppingBag className="size-4" />
-          {ctaLabel}
-        </Button>
-      </div>
-
-      <div className="flex items-center justify-center gap-2 rounded-full bg-success/10 px-4 py-2 text-xs font-semibold text-success">
-        <span
-          className={`size-2 rounded-full ${inStock ? "bg-success" : "bg-destructive"}`}
-        />
-        {inStock ? "În stoc · livrare 24–48h" : "Indisponibil"}
-      </div>
-
-      <Separator />
-
-      <ul className="flex flex-col gap-3 text-sm">
-        <li className="flex items-start gap-3">
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-            <Truck className="size-4" />
-          </span>
-          <span className="text-foreground">
-            <span className="font-semibold">Livrare gratuită</span>
-            <span className="text-muted-foreground">
-              {" "}
-              peste 1.000 MDL în Chișinău
-            </span>
-          </span>
-        </li>
-        <li className="flex items-start gap-3">
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-            <ShieldCheck className="size-4" />
-          </span>
-          <span className="text-foreground">
-            <span className="font-semibold">
-              Confirmare înainte de procesare
-            </span>
-            <span className="text-muted-foreground">
-              {" "}
-              · metoda de plată se validează la confirmarea comenzii
-            </span>
-          </span>
-        </li>
-      </ul>
+      <PurchaseTrustGrid />
 
       <MobileActions
         product={product}

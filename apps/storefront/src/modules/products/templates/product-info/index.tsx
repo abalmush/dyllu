@@ -24,7 +24,7 @@ export default function ProductInfo({ product }: Props) {
       <Breadcrumbs items={crumbs} />
       <div className="flex flex-wrap items-center gap-2">
         {collection && (
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+          <span className="inline-flex items-center rounded-full bg-primary/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-900">
             {collection.title}
           </span>
         )}

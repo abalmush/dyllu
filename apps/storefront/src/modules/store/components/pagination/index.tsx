@@ -12,7 +12,11 @@ type Props = {
   "data-testid"?: string;
 };
 
-export function Pagination({ page, totalPages, "data-testid": dataTestid }: Props) {
+export function Pagination({
+  page,
+  totalPages,
+  "data-testid": dataTestid,
+}: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -29,8 +33,15 @@ export function Pagination({ page, totalPages, "data-testid": dataTestid }: Prop
   const buildPages = (): Array<number | "ellipsis"> => {
     if (totalPages <= 7) return range(1, totalPages);
     if (page <= 4) return [...range(1, 5), "ellipsis", totalPages];
-    if (page >= totalPages - 3) return [1, "ellipsis", ...range(totalPages - 4, totalPages)];
-    return [1, "ellipsis", ...range(page - 1, page + 1), "ellipsis", totalPages];
+    if (page >= totalPages - 3)
+      return [1, "ellipsis", ...range(totalPages - 4, totalPages)];
+    return [
+      1,
+      "ellipsis",
+      ...range(page - 1, page + 1),
+      "ellipsis",
+      totalPages,
+    ];
   };
 
   return (
@@ -47,16 +58,16 @@ export function Pagination({ page, totalPages, "data-testid": dataTestid }: Prop
         disabled={page <= 1}
         aria-label="Pagina anterioară"
       >
-        <ChevronLeft className="size-4" />
+        <ChevronLeft aria-hidden="true" className="size-5" />
       </Button>
       {buildPages().map((p, i) => {
         if (p === "ellipsis") {
           return (
             <span
               key={`ellipsis-${i}`}
-              className="grid size-9 place-items-center text-muted-foreground"
+              className="grid size-11 place-items-center text-muted-foreground"
             >
-              <MoreHorizontal className="size-4" />
+              <MoreHorizontal aria-hidden="true" className="size-5" />
             </span>
           );
         }
@@ -69,7 +80,7 @@ export function Pagination({ page, totalPages, "data-testid": dataTestid }: Prop
             disabled={isCurrent}
             aria-current={isCurrent ? "page" : undefined}
             className={cn(
-              "grid size-9 place-items-center rounded-full text-sm font-medium tracking-tight transition-colors",
+              "grid size-11 place-items-center rounded-full text-sm font-semibold tracking-tight transition-colors",
               isCurrent
                 ? "bg-foreground text-background"
                 : "text-foreground hover:bg-muted"
@@ -87,7 +98,7 @@ export function Pagination({ page, totalPages, "data-testid": dataTestid }: Prop
         disabled={page >= totalPages}
         aria-label="Pagina următoare"
       >
-        <ChevronRight className="size-4" />
+        <ChevronRight aria-hidden="true" className="size-5" />
       </Button>
     </nav>
   );

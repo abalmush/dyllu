@@ -22,8 +22,8 @@ export function BudgetSlider({
 
   return (
     <div className="clip-corner-cut-lg mx-auto max-w-[560px] bg-card p-6 ring-1 ring-border small:p-8">
-      <div className="flex items-center gap-2 text-primary">
-        <Sparkles className="size-4" />
+      <div className="flex items-center gap-2 text-brand-800">
+        <Sparkles aria-hidden="true" className="size-5" />
         <span className="text-xs font-semibold uppercase tracking-[0.2em]">
           Optimizare buget
         </span>
@@ -38,7 +38,7 @@ export function BudgetSlider({
         </div>
         <div className="text-right">
           <p className="flex items-center gap-1 font-display text-2xl font-bold text-success">
-            <TrendingUp className="size-5" />
+            <TrendingUp aria-hidden="true" className="size-5" />
             {performance}%
           </p>
           <p className="text-sm text-muted-foreground">Performanță</p>
@@ -47,6 +47,7 @@ export function BudgetSlider({
 
       <input
         type="range"
+        name="budget"
         min={0}
         max={100}
         value={value}

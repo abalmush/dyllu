@@ -3,8 +3,6 @@
 import * as React from "react";
 import { SlidersHorizontal } from "lucide-react";
 
-import { cn } from "@lib/utils";
-
 export type FilterOption = { value: string; label: string; count?: number };
 export type FilterGroup = {
   id: string;
@@ -26,10 +24,8 @@ export function PlpFilters({ groups, priceRange }: Props) {
   return (
     <aside className="flex flex-col gap-6">
       <div className="flex items-center gap-2 text-foreground">
-        <SlidersHorizontal className="size-4" />
-        <span className="text-sm font-bold uppercase tracking-[0.16em]">
-          Filtre
-        </span>
+        <SlidersHorizontal aria-hidden="true" className="size-5" />
+        <span className="text-base font-bold tracking-wide">Filtre</span>
       </div>
 
       {groups.map((group) => (
@@ -42,12 +38,13 @@ export function PlpFilters({ groups, priceRange }: Props) {
               const key = `${group.id}:${option.value}`;
               return (
                 <li key={key}>
-                  <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground">
+                  <label className="flex min-h-11 cursor-pointer items-center gap-3 text-base text-foreground">
                     <input
+                      name={key}
                       type="checkbox"
                       checked={!!selected[key]}
                       onChange={() => toggle(key)}
-                      className="size-4 accent-primary"
+                      className="size-5 accent-primary"
                     />
                     <span className="flex-1">{option.label}</span>
                     {option.count != null && (
@@ -71,6 +68,9 @@ export function PlpFilters({ groups, priceRange }: Props) {
           <div className="flex items-center gap-2">
             <input
               type="number"
+              name="price_min"
+              inputMode="numeric"
+              min={0}
               defaultValue={priceRange.min}
               aria-label="Preț minim"
               className="clip-corner-cut-xs w-full border border-border bg-card px-3 py-2 text-sm text-foreground"
@@ -78,6 +78,9 @@ export function PlpFilters({ groups, priceRange }: Props) {
             <span className="text-muted-foreground">—</span>
             <input
               type="number"
+              name="price_max"
+              inputMode="numeric"
+              min={0}
               defaultValue={priceRange.max}
               aria-label="Preț maxim"
               className="clip-corner-cut-xs w-full border border-border bg-card px-3 py-2 text-sm text-foreground"
@@ -117,7 +120,7 @@ export function ActiveFilterChips({
       <button
         type="button"
         onClick={onClear}
-        className="text-xs font-semibold text-primary underline-offset-2 hover:underline"
+        className="px-2 text-sm font-semibold text-brand-800 underline-offset-2 hover:underline"
       >
         Șterge tot
       </button>

@@ -21,6 +21,7 @@ export function CartSummary({
   note,
   cta = { label: "Finalizează comanda", href: "/checkout" },
 }: Props) {
+  const promoId = React.useId();
   const [promo, setPromo] = React.useState("");
 
   return (
@@ -30,13 +31,19 @@ export function CartSummary({
       </h2>
 
       <div className="flex gap-2">
+        <label htmlFor={promoId} className="sr-only">
+          Cod promoțional
+        </label>
         <span className="clip-corner-cut-xs flex flex-1 items-center gap-2 border border-border bg-background px-3">
-          <Tag className="size-4 text-muted-foreground" />
+          <Tag aria-hidden="true" className="size-5 text-muted-foreground" />
           <input
+            id={promoId}
+            name="promo_code"
+            autoComplete="off"
             value={promo}
             onChange={(e) => setPromo(e.target.value)}
-            placeholder="Cod promoțional"
-            className="w-full bg-transparent py-2.5 text-sm text-foreground focus:outline-none"
+            placeholder="Exemplu: DYLLU10…"
+            className="w-full bg-transparent py-3 text-base text-foreground focus-visible:outline-none"
           />
         </span>
         <Button
@@ -82,7 +89,7 @@ export function CartSummary({
 
       {note && (
         <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
-          <ShieldCheck className="size-3.5 text-success" />
+          <ShieldCheck aria-hidden="true" className="size-4 text-success" />
           {note}
         </p>
       )}

@@ -51,7 +51,7 @@ export function PlpProductCard({ product }: { product: PlpProduct }) {
   };
 
   return (
-    <article className="clip-corner-cut-md group relative flex flex-col overflow-hidden bg-card ring-1 ring-border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)]">
+    <article className="clip-corner-cut-md group relative flex flex-col overflow-hidden bg-card ring-1 ring-border transition-[box-shadow,transform] duration-300 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:-translate-y-1 hover:shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)]">
       <div className="relative aspect-square w-full overflow-hidden bg-surface-subtle">
         <Link href={product.href} aria-label={product.title}>
           {product.thumbnail ? (
@@ -101,14 +101,17 @@ export function PlpProductCard({ product }: { product: PlpProduct }) {
         )}
         <Link
           href={product.href}
-          className="line-clamp-2 text-sm font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary"
+          className="line-clamp-2 text-base font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-brand-800"
         >
           {product.title}
         </Link>
 
         {product.rating != null && (
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Star className="size-3.5 fill-warning text-warning" />
+            <Star
+              aria-hidden="true"
+              className="size-4 fill-warning text-warning-foreground"
+            />
             {product.rating.toFixed(1)}
             {product.reviewCount != null && (
               <span>({product.reviewCount})</span>
@@ -123,12 +126,12 @@ export function PlpProductCard({ product }: { product: PlpProduct }) {
             aria-label={`Adaugă ${product.title} în coș`}
             disabled={soldOut || !product.variantId || isAdding}
             onClick={handleAdd}
-            className="clip-corner-cut-xs grid size-9 shrink-0 place-items-center bg-foreground text-background transition-colors hover:bg-foreground/90 disabled:opacity-40"
+            className="clip-corner-cut-xs grid size-11 shrink-0 place-items-center bg-foreground text-background transition-colors hover:bg-foreground/90 disabled:opacity-55"
           >
             {justAdded ? (
-              <Check className="size-4" />
+              <Check aria-hidden="true" className="size-5" />
             ) : (
-              <ShoppingCart className="size-4" />
+              <ShoppingCart aria-hidden="true" className="size-5" />
             )}
           </button>
         </div>

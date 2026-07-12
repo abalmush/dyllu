@@ -40,9 +40,12 @@ export function PromoBanner() {
                 </p>
               )}
             </div>
-            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+            <span className="inline-flex items-center gap-1.5 text-base font-semibold text-brand-800">
               Explorează
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight
+                aria-hidden="true"
+                className="size-5 transition-transform group-hover:translate-x-0.5"
+              />
             </span>
           </Link>
         ))}

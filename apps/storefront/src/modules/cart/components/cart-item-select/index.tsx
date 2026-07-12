@@ -14,12 +14,10 @@ import ChevronDown from "@modules/common/icons/chevron-down";
 
 type NativeSelectProps = {
   placeholder?: string;
-  errors?: Record<string, unknown>;
-  touched?: Record<string, unknown>;
 } & Omit<SelectHTMLAttributes<HTMLSelectElement>, "size">;
 
 const CartItemSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
-  ({ placeholder = "Select...", className, children, ...props }, ref) => {
+  ({ placeholder = "Selectează…", className, children, ...props }, ref) => {
     const innerRef = useRef<HTMLSelectElement>(null);
     const [isPlaceholder, setIsPlaceholder] = useState(false);
 
@@ -51,6 +49,7 @@ const CartItemSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
         >
           <select
             ref={innerRef}
+            aria-label={props["aria-label"] ?? "Cantitate"}
             {...props}
             className="h-16 w-16 appearance-none items-center justify-center border-none bg-transparent px-4 outline-none transition-colors duration-150 focus:border-gray-700"
           >

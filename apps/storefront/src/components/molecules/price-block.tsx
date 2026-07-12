@@ -16,7 +16,7 @@ export interface PriceBlockProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const sizeMap = {
-  sm: "text-sm",
+  sm: "text-base",
   md: "text-base",
   lg: "text-xl",
   xl: "text-3xl",
@@ -55,7 +55,7 @@ export const PriceBlock = React.forwardRef<HTMLDivElement, PriceBlockProps>(
           </span>
         )}
         {isSale && price.percentage_diff && (
-          <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-destructive">
+          <span className="rounded-full border border-destructive/20 bg-destructive/10 px-2 py-1 text-sm font-semibold tracking-wide text-destructive">
             -{price.percentage_diff}%
           </span>
         )}

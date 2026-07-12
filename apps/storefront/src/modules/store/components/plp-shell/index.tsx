@@ -47,6 +47,7 @@ export default function PlpShell({
     (name: string, value: string) => {
       const params = new URLSearchParams(searchParams);
       params.set(name, value);
+      params.delete("page");
       router.push(`${pathname}?${params.toString()}`);
     },
     [pathname, router, searchParams]

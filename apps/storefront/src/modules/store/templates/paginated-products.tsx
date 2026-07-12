@@ -1,24 +1,14 @@
 import Link from "next/link";
 import { PackageSearch } from "lucide-react";
 
-import { listProductsWithSort } from "@lib/data/products";
 import { Button } from "@/components/atoms/button";
-import { PlpProductCard } from "@/components/organisms/plp-product-card";
-import { Pagination } from "@modules/store/components/pagination";
-import { toPlpProduct } from "@modules/store/lib/to-plp-product";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
-
-const PRODUCT_LIMIT = 12;
-
-type PaginatedProductsParams = {
-  limit: number;
-  collection_id?: string[];
-  category_id?: string[];
-  tag_id?: string[];
-  id?: string[];
-  order?: string;
-  q?: string;
-};
+import InfiniteProductsGrid from "@modules/store/components/infinite-products-grid";
+import {
+  getProductFeedPage,
+  getProductFeedRequestKey,
+  type ProductFeedRequest,
+} from "@modules/store/lib/product-feed";
 
 export default async function PaginatedProducts({
   sortBy,
@@ -39,44 +29,20 @@ export default async function PaginatedProducts({
   query?: string;
   onSale?: boolean;
 }) {
-  const queryParams: PaginatedProductsParams = {
-    limit: 12,
+  const request: ProductFeedRequest = {
+    sortBy,
+    page,
+    collectionId,
+    categoryId,
+    tagId,
+    productsIds,
+    query,
+    onSale,
   };
 
-  if (collectionId) {
-    queryParams["collection_id"] = [collectionId];
-  }
-
-  if (categoryId) {
-    queryParams["category_id"] = [categoryId];
-  }
-
-  if (tagId) {
-    queryParams["tag_id"] = [tagId];
-  }
-
-  if (productsIds) {
-    queryParams["id"] = productsIds;
-  }
-
-  if (query) {
-    queryParams["q"] = query;
-  }
-
-  if (sortBy === "created_at") {
-    queryParams["order"] = "created_at";
-  }
-
-  const {
-    response: { products, count },
-  } = await listProductsWithSort({
-    page,
-    queryParams,
-    sortBy,
-    onlyOnSale: onSale,
-  });
-
-  const totalPages = Math.ceil(count / PRODUCT_LIMIT);
+  const { products, count, currentPage, nextPage } = await getProductFeedPage(
+    request
+  );
 
   if (products.length === 0) {
     const emptyTitle = query
@@ -114,26 +80,20 @@ export default async function PaginatedProducts({
   }
 
   return (
-    <>
-      <ul
-        className="grid w-full grid-cols-2 gap-4 small:grid-cols-3 medium:grid-cols-4"
-        data-testid="products-list"
-      >
-        {products.map((p) => (
-          <li key={p.id}>
-            <PlpProductCard product={toPlpProduct(p)} />
-          </li>
-        ))}
-      </ul>
-      {totalPages > 1 && (
-        <div className="mt-12">
-          <Pagination
-            data-testid="product-pagination"
-            page={page}
-            totalPages={totalPages}
-          />
-        </div>
-      )}
-    </>
+    <InfiniteProductsGrid
+      key={getProductFeedRequestKey({ ...request, page: currentPage })}
+      initialProducts={products}
+      initialNextPage={nextPage}
+      totalCount={count}
+      request={{
+        sortBy,
+        collectionId,
+        categoryId,
+        tagId,
+        productsIds,
+        query,
+        onSale,
+      }}
+    />
   );
 }

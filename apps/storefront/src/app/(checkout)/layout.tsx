@@ -29,19 +29,24 @@ export default function CheckoutLayout({
           >
             <Logo className="h-7" />
           </Link>
-          <div className="flex flex-1 basis-0 items-center justify-end gap-2 text-xs text-muted-foreground">
-            <ShieldCheck className="size-4 text-success" />
+          <div className="flex flex-1 basis-0 items-center justify-end gap-2 text-sm text-muted-foreground">
+            <ShieldCheck aria-hidden="true" className="size-5 text-success" />
             <span className="hidden small:inline">
               Confirmare și verificare înainte de procesare
             </span>
           </div>
         </nav>
       </header>
-      <div className="relative" data-testid="checkout-container">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="relative outline-none"
+        data-testid="checkout-container"
+      >
         {children}
-      </div>
+      </main>
       <footer className="border-t border-border bg-surface-subtle">
-        <div className="content-container flex h-14 items-center justify-center text-xs text-muted-foreground">
+        <div className="content-container flex min-h-14 items-center justify-center py-3 text-center text-sm text-muted-foreground">
           © {new Date().getFullYear()} DYLLU · Comenzile sunt validate înainte
           de procesare
         </div>
