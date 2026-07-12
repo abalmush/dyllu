@@ -204,23 +204,42 @@ It then appears at `https://dyllu.md/c/prelucrarea-lemnului`. To add a NEW promo
 edit `promos.ts` (add `{slug, tag, title, active, featured,...}`) and deploy the
 storefront. `active` toggles visibility; `featured` puts it on the home page.
 
-### 4e. Upload an image / media
+### 4e. Upload / replace product images (preferred: `tools/upload-images.py`)
 
-Admin UI upload (product → media) stores to R2 and serves from `cdn.dyllu.md`.
-Via API (multipart):
+Images live in R2 under `products/<name>-<contenthash>.png`, served immutably from
+`cdn.dyllu.md`. The content hash means **replacing an image gives it a new URL
+automatically** — no cache purge, never stale; re-uploading unchanged content is a
+no-op (same hash). Use the helper:
 
 ```bash
-curl -sX POST "$API/admin/uploads" \
-  -H "Authorization: Bearer $TOKEN" \
-  -F "files=@/path/to/image.png"
-# -> { "files": [{ "url": "https://cdn.dyllu.md/<key>", ... }] }
+export AWS_ACCESS_KEY_ID=...  AWS_SECRET_ACCESS_KEY=...   # R2 S3 token (scoped to dyllu-media)
+
+# one or many
+python tools/upload-images.py /path/DTAAC501.png
+python tools/upload-images.py output/*.png --json
+
+# name the object after a SKU (default = filename stem)
+python tools/upload-images.py new-photo.png --name DTAAC501
+
+# upload AND set it on a Medusa product (thumbnail + images) in one shot
+export MEDUSA_ADMIN_TOKEN=$TOKEN
+python tools/upload-images.py new-photo.png --name DTAAC501 --set-product prod_01...
 ```
 
-Then set it on a product: `POST /admin/products/<id>` with
-`{"images":[{"url":"https://cdn.dyllu.md/<key>"}], "thumbnail":"https://cdn.dyllu.md/<key>"}`.
-Direct-to-bucket (bulk): use rclone/aws-cli against the R2 S3 endpoint
-`https://592732e1a9ae45cfe9cafce4228ebe2d.r2.cloudflarestorage.com`, bucket
-`dyllu-media`, with an R2 API token (Cloudflare dash → R2 → Manage API Tokens).
+Output is `<name>\t<url>` lines (or `--json`). To replace an image: run the same
+command with the new file — you get a new hashed URL; pass `--set-product` (or paste
+the URL into the product/manifest) to point at it. R2/CDN config is overridable via
+env (`R2_ENDPOINT`, `R2_BUCKET`, `CDN_BASE`); creds come from standard `AWS_*` env.
+
+R2 S3 credentials: Cloudflare dash → R2 → **Manage R2 API Tokens** (scope to
+`dyllu-media`), or reuse the backend's `S3_ACCESS_KEY_ID`/`S3_SECRET_ACCESS_KEY`
+from Coolify. Endpoint: `https://592732e1a9ae45cfe9cafce4228ebe2d.r2.cloudflarestorage.com`.
+
+Alternatives: Admin UI (product → Media) uploads through Medusa (adds a ULID suffix
+instead of a content hash). Bulk sync of many files: `aws s3 sync <dir>/
+s3://dyllu-media/products/ --endpoint-url <R2_ENDPOINT> --content-type image/png
+--cache-control "public, max-age=31536000, immutable"` (but the helper is preferred
+because it does the content-hash naming).
 
 ### 4f. Create the admin user (first time / new operator)
 
