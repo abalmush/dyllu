@@ -51,6 +51,8 @@ type MergedProduct = {
   descriptionHtml: string;
   brand: string;
   optionTitle: string;
+  categoryHandle?: string;
+  classification?: Record<string, unknown>;
   variants: MergedVariant[];
   images: string[];
   inStock: boolean;
@@ -208,6 +210,9 @@ function toCreateInput(
     images: p.images.map((url) => ({ url })),
     category_ids: categoryId ? [categoryId] : [],
     metadata: {
+      // classification (platform / accessory_kind / requires_battery / voltage)
+      // computed upstream in the catalog pipeline — drives PDP accessories & combos
+      ...(p.classification ?? {}),
       ingco_family: p.metadata.ingco_family,
       ingco_articles: p.metadata.ingco_articles.join(","),
       ingco_source_urls: p.metadata.ingco_source_urls.join("\n"),
@@ -235,6 +240,9 @@ function toCreateInput(
 }
 
 function resolveCategoryHandle(p: MergedProduct): string | undefined {
+  // Explicit leaf handle from the catalog pipeline wins — lands the product in the
+  // correct sub-category. Falls back to the source-breadcrumb → root map below.
+  if (p.categoryHandle) return p.categoryHandle;
   for (const slug of p.breadcrumbs ?? []) {
     if (SOURCE_CATEGORY_MAP[slug]) return SOURCE_CATEGORY_MAP[slug];
   }

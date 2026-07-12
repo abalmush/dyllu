@@ -68,9 +68,7 @@ const ROOT_HANDLE_BY_NAME = new Map(
   CATEGORY_TREE.map((root) => [root.name, root.handle] as const)
 );
 
-const ROOT_NAME_ALIASES: Record<string, string> = {
-  "Echipament de protecție": "Protecție",
-};
+const ROOT_NAME_ALIASES: Record<string, string> = {};
 
 const LEAF_HANDLE_BY_KEY = new Map(
   CATEGORY_TREE.flatMap((root) =>
