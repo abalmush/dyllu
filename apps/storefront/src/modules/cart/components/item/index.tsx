@@ -29,11 +29,15 @@ export default function CartItemRow({
   const [error, setError] = React.useState<string | null>(null);
   const [quantity, setQuantity] = React.useState(item.quantity);
 
-  React.useEffect(() => {
-    setQuantity(item.quantity);
-  }, [item.quantity]);
-
   const debounced = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (debounced.current) {
+        clearTimeout(debounced.current);
+      }
+    };
+  }, []);
 
   const handleQty = (next: number) => {
     setQuantity(next);
@@ -53,9 +57,21 @@ export default function CartItemRow({
   };
 
   const handleRemove = async () => {
+    if (debounced.current) {
+      clearTimeout(debounced.current);
+      debounced.current = null;
+    }
+
+    setError(null);
     setRemoving(true);
     try {
       await deleteLineItem(item.id);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Nu am putut șterge produsul. Încearcă din nou."
+      );
     } finally {
       setRemoving(false);
     }
@@ -118,12 +134,12 @@ export default function CartItemRow({
               onChange={handleQty}
               max={10}
               size="sm"
-              disabled={updating}
+              disabled={updating || removing}
             />
             <button
               type="button"
               onClick={handleRemove}
-              disabled={removing}
+              disabled={removing || updating}
               data-testid="product-delete-button"
               className="inline-flex items-center gap-1.5 px-0 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
             >

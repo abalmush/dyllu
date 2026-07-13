@@ -2,3 +2,5 @@
 .dev.vars
 cloudflare-env.d.ts
 .wrangler/
+.wrangler-dist/
+*.cpuprofile

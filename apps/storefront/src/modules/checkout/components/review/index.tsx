@@ -1,22 +1,31 @@
 "use client";
 
 import { Heading, Text, clx } from "@lib/ui-compat";
+import { HttpTypes } from "@medusajs/types";
+import {
+  CheckoutStepKey,
+  hasReadyPayment,
+} from "@modules/checkout/lib/presentation";
 
 import PaymentButton from "../payment-button";
-import { useSearchParams } from "next/navigation";
 
-const Review = ({ cart }: { cart: any }) => {
-  const searchParams = useSearchParams();
+type CheckoutCart = HttpTypes.StoreCart & {
+  gift_cards?: Array<unknown> | null;
+};
 
-  const isOpen = searchParams.get("step") === "review";
-
-  const paidByGiftcard =
-    cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0;
+const Review = ({
+  cart,
+  activeStep,
+}: {
+  cart: CheckoutCart;
+  activeStep: CheckoutStepKey;
+}) => {
+  const isOpen = activeStep === "review";
 
   const previousStepsCompleted =
     cart.shipping_address &&
-    cart.shipping_methods.length > 0 &&
-    (cart.payment_collection || paidByGiftcard);
+    (cart.shipping_methods?.length ?? 0) > 0 &&
+    hasReadyPayment(cart);
 
   return (
     <section className="clip-corner-cut-lg clip-shadow-md bg-card p-6 ring-1 ring-border small:p-8">

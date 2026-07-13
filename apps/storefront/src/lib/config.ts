@@ -29,9 +29,15 @@ sdk.client.fetch = async <T>(
     ...localeHeader,
     ...headers,
   };
+  const timeoutSignal = AbortSignal.timeout(12_000);
+  const signal = init?.signal
+    ? AbortSignal.any([init.signal, timeoutSignal])
+    : timeoutSignal;
+
   init = {
     ...init,
     headers: newHeaders,
+    signal,
   };
   return originalFetch(input, init);
 };

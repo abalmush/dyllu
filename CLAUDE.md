@@ -93,7 +93,9 @@ Orchestrated by Turborepo — `pnpm <script>` fans out to the right workspace(s)
 4. **First-time only:**
    ```bash
    pnpm -F @dyllu/backend db:migrate
-   pnpm -F @dyllu/backend db:create-user -e admin@dyllu.local -p supersecret
+   read -s ADMIN_PASSWORD
+   pnpm -F @dyllu/backend db:create-user -e admin@dyllu.local -p "$ADMIN_PASSWORD"
+   unset ADMIN_PASSWORD
    ```
 5. **Copy env:**
    ```bash

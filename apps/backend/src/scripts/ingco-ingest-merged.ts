@@ -92,7 +92,8 @@ export default async function ingcoIngestMerged({ container, args }: ExecArgs) {
   const defaultSc =
     salesChannels.find((sc) => sc.name === "Default Sales Channel") ??
     salesChannels[0];
-  if (!defaultSc) throw new Error("No sales channel found; run db:migrate first.");
+  if (!defaultSc)
+    throw new Error("No sales channel found; run db:migrate first.");
 
   const { data: profiles } = await query.graph({
     entity: "shipping_profile",
@@ -161,7 +162,13 @@ export default async function ingcoIngestMerged({ container, args }: ExecArgs) {
   for (let i = 0; i < fresh.length; i += batchSize) {
     const batch = fresh.slice(i, i + batchSize);
     const input = batch.map((p) =>
-      toCreateInput(p, shippingProfileId, defaultSc.id, categoryIdByHandle, fallbackCategoryId)
+      toCreateInput(
+        p,
+        shippingProfileId,
+        defaultSc.id,
+        categoryIdByHandle,
+        fallbackCategoryId
+      )
     );
     try {
       const { result } = await createProductsWorkflow(container).run({
@@ -193,6 +200,19 @@ function toCreateInput(
   categoryIdByHandle: Map<string, string>,
   fallbackCategoryId: string | undefined
 ) {
+  if (!p.handle || !p.name || p.variants.length === 0) {
+    throw new Error("Merged product is missing a handle, name, or variant");
+  }
+  for (const variant of p.variants) {
+    if (
+      !variant.sku ||
+      !Number.isFinite(variant.priceMdl) ||
+      variant.priceMdl <= 0
+    ) {
+      throw new Error(`Invalid SKU or price for ${p.handle}`);
+    }
+  }
+
   const description = buildDescription(p);
   const categoryHandle = resolveCategoryHandle(p);
   const categoryId =
@@ -203,7 +223,7 @@ function toCreateInput(
     title: p.name,
     handle: p.handle,
     description,
-    status: "published" as const,
+    status: (p.inStock ? "published" : "draft") as "published" | "draft",
     shipping_profile_id: shippingProfileId,
     sales_channels: [{ id: salesChannelId }],
     options: [{ title: p.optionTitle, values: optionValues }],
@@ -220,6 +240,7 @@ function toCreateInput(
       ingco_breadcrumbs: p.breadcrumbs.join(" > "),
       ingco_source_categories: p.sourceCategories.join(", "),
       ingco_kind: p.kind,
+      ingco_in_stock: p.inStock,
       ingco_mapped_category: categoryHandle ?? "(fallback)",
     },
     variants: p.variants.map((v) => ({

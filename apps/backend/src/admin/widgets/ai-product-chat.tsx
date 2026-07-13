@@ -1,15 +1,6 @@
 import { defineWidgetConfig } from "@medusajs/admin-sdk";
 import { DetailWidgetProps, AdminProduct } from "@medusajs/framework/types";
-import {
-  Button,
-  Container,
-  Heading,
-  IconButton,
-  Text,
-  Textarea,
-  toast,
-} from "@medusajs/ui";
-import { ArrowUturnLeft, PaperPlane, SparklesSolid } from "@medusajs/icons";
+import { toast } from "@medusajs/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type Role = "user" | "assistant" | "system";
@@ -50,16 +41,15 @@ const STARTERS = [
 ];
 
 function genId() {
-  return Math.random().toString(36).slice(2);
+  return crypto.randomUUID();
 }
 
-function ChatWidget({ data }: DetailWidgetProps<AdminProduct>) {
+function DevelopmentChatWidget({ data }: DetailWidgetProps<AdminProduct>) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "intro",
       role: "assistant",
-      text:
-        "Salut. Sunt asistentul AI pentru editare produs. Pot rescrie descrierea, ajusta titlul, sau curăța imaginea (fundal alb, fără badge-uri). Spune-mi ce vrei să schimbi — îți voi arăta o previzualizare înainte de a aplica.",
+      text: "Salut. Sunt asistentul AI pentru editare produs. Pot rescrie descrierea, ajusta titlul, sau curăța imaginea (fundal alb, fără badge-uri). Spune-mi ce vrei să schimbi — îți voi arăta o previzualizare înainte de a aplica.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -162,7 +152,8 @@ function ChatWidget({ data }: DetailWidgetProps<AdminProduct>) {
         });
       } catch (err) {
         toast.error("Nu am putut aplica modificarea", {
-          description: err instanceof Error ? err.message : "eroare necunoscută",
+          description:
+            err instanceof Error ? err.message : "eroare necunoscută",
         });
       }
     },
@@ -170,21 +161,20 @@ function ChatWidget({ data }: DetailWidgetProps<AdminProduct>) {
   );
 
   return (
-    <Container className="flex h-[640px] flex-col gap-3 divide-y p-0">
+    <div className="border-ui-border-base bg-ui-bg-base shadow-elevation-card-rest flex h-[640px] flex-col gap-3 divide-y rounded-lg border p-0">
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-2">
-          <SparklesSolid className="text-ui-fg-interactive" />
-          <Heading level="h2">Asistent AI</Heading>
+          <span aria-hidden="true" className="text-ui-fg-interactive">
+            ✦
+          </span>
+          <h2 className="text-ui-fg-base text-base font-semibold">
+            Asistent AI
+          </h2>
         </div>
-        <Text size="xsmall" className="text-ui-fg-subtle">
-          {data.title}
-        </Text>
+        <p className="text-ui-fg-subtle text-xs">{data.title}</p>
       </div>
 
-      <div
-        ref={listRef}
-        className="flex-1 space-y-3 overflow-y-auto px-6 py-4"
-      >
+      <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-6 py-4">
         {messages.map((m) => (
           <ChatMessage key={m.id} message={m} onApply={() => apply(m.id)} />
         ))}
@@ -192,9 +182,7 @@ function ChatWidget({ data }: DetailWidgetProps<AdminProduct>) {
 
       {messages.length === 1 && (
         <div className="space-y-2 px-6 py-3">
-          <Text size="xsmall" className="text-ui-fg-subtle">
-            Sugestii rapide
-          </Text>
+          <p className="text-ui-fg-subtle text-xs">Sugestii rapide</p>
           <div className="flex flex-wrap gap-2">
             {STARTERS.map((s) => (
               <button
@@ -202,7 +190,7 @@ function ChatWidget({ data }: DetailWidgetProps<AdminProduct>) {
                 type="button"
                 onClick={() => send(s)}
                 disabled={sending}
-                className="rounded-full border border-ui-border-base bg-ui-bg-subtle px-3 py-1 text-xs text-ui-fg-base transition hover:border-ui-border-strong hover:bg-ui-bg-base disabled:opacity-50"
+                className="border-ui-border-base bg-ui-bg-subtle text-ui-fg-base hover:border-ui-border-strong hover:bg-ui-bg-base rounded-full border px-3 py-1 text-xs transition disabled:opacity-50"
               >
                 {s}
               </button>
@@ -218,7 +206,7 @@ function ChatWidget({ data }: DetailWidgetProps<AdminProduct>) {
         }}
         className="flex items-end gap-2 px-6 py-4"
       >
-        <Textarea
+        <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -232,17 +220,22 @@ function ChatWidget({ data }: DetailWidgetProps<AdminProduct>) {
           disabled={sending}
           className="flex-1 resize-none"
         />
-        <IconButton
+        <button
           type="submit"
-          variant="primary"
           disabled={sending || !input.trim()}
           aria-label="Trimite mesaj"
+          className="bg-ui-bg-interactive text-ui-fg-on-color flex size-10 shrink-0 items-center justify-center rounded-md disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <PaperPlane />
-        </IconButton>
+          <span aria-hidden="true">→</span>
+        </button>
       </form>
-    </Container>
+    </div>
   );
+}
+
+function ChatWidget(props: DetailWidgetProps<AdminProduct>) {
+  if (process.env.NODE_ENV === "production") return null;
+  return <DevelopmentChatWidget {...props} />;
 }
 
 function ChatMessage({
@@ -295,50 +288,63 @@ function ProposalCard({
   onApply: () => void;
 }) {
   return (
-    <div className="mt-3 rounded-lg border border-ui-border-base bg-ui-bg-base p-3">
-      <Text size="xsmall" weight="plus" className="text-ui-fg-subtle">
-        Propunere · {proposal.kind === "image_edit" ? "Imagine" : proposal.kind === "title" ? "Titlu" : "Descriere"}
-      </Text>
+    <div className="border-ui-border-base bg-ui-bg-base mt-3 rounded-lg border p-3">
+      <p className="text-ui-fg-subtle text-xs font-semibold">
+        Propunere ·{" "}
+        {proposal.kind === "image_edit"
+          ? "Imagine"
+          : proposal.kind === "title"
+            ? "Titlu"
+            : "Descriere"}
+      </p>
 
       {proposal.kind === "image_edit" ? (
         <div className="mt-2 grid grid-cols-2 gap-2">
           <div className="space-y-1">
-            <Text size="xsmall" className="text-ui-fg-muted">Înainte</Text>
-            <img src={proposal.sourceUrl} alt="" className="aspect-square w-full rounded border border-ui-border-base object-contain" />
+            <p className="text-ui-fg-muted text-xs">Înainte</p>
+            <img
+              src={proposal.sourceUrl}
+              alt=""
+              className="border-ui-border-base aspect-square w-full rounded border object-contain"
+            />
           </div>
           <div className="space-y-1">
-            <Text size="xsmall" className="text-ui-fg-muted">După</Text>
-            <img src={proposal.previewUrl} alt="" className="aspect-square w-full rounded border border-ui-border-base object-contain" />
+            <p className="text-ui-fg-muted text-xs">După</p>
+            <img
+              src={proposal.previewUrl}
+              alt=""
+              className="border-ui-border-base aspect-square w-full rounded border object-contain"
+            />
           </div>
         </div>
       ) : (
         <div className="mt-2 space-y-2">
-          <div className="rounded bg-ui-bg-subtle p-2 text-xs">
-            <Text size="xsmall" className="text-ui-fg-muted">Actual</Text>
-            <p className="mt-1 whitespace-pre-wrap text-ui-fg-base">{proposal.currentValue}</p>
+          <div className="bg-ui-bg-subtle rounded p-2 text-xs">
+            <p className="text-ui-fg-muted text-xs">Actual</p>
+            <p className="text-ui-fg-base mt-1 whitespace-pre-wrap">
+              {proposal.currentValue}
+            </p>
           </div>
-          <div className="rounded bg-ui-tag-green-bg p-2 text-xs">
-            <Text size="xsmall" className="text-ui-fg-muted">Propus</Text>
-            <p className="mt-1 whitespace-pre-wrap text-ui-fg-base">{proposal.proposedValue}</p>
+          <div className="bg-ui-tag-green-bg rounded p-2 text-xs">
+            <p className="text-ui-fg-muted text-xs">Propus</p>
+            <p className="text-ui-fg-base mt-1 whitespace-pre-wrap">
+              {proposal.proposedValue}
+            </p>
           </div>
         </div>
       )}
 
       <div className="mt-3 flex items-center gap-2">
         {applied ? (
-          <Text size="xsmall" className="text-ui-tag-green-text">
-            ✓ Aplicat
-          </Text>
+          <p className="text-ui-tag-green-text text-xs">✓ Aplicat</p>
         ) : (
-          <Button size="small" variant="primary" onClick={onApply}>
+          <button
+            type="button"
+            className="bg-ui-bg-interactive text-ui-fg-on-color rounded-md px-3 py-1.5 text-xs font-medium"
+            onClick={onApply}
+          >
             Aplică
-          </Button>
-        )}
-        {!applied && (
-          <Button size="small" variant="secondary">
-            <ArrowUturnLeft />
-            Modifică promptul
-          </Button>
+          </button>
         )}
       </div>
     </div>

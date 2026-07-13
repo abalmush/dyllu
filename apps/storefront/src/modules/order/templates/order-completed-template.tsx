@@ -19,7 +19,9 @@ export default async function OrderCompletedTemplate({
 }: OrderCompletedTemplateProps) {
   const cookies = await nextCookies();
 
-  const isOnboarding = cookies.get("_medusa_onboarding")?.value === "true";
+  const isOnboarding =
+    process.env.NODE_ENV !== "production" &&
+    cookies.get("_medusa_onboarding")?.value === "true";
 
   return (
     <div className="min-h-[calc(100vh-64px)] py-6">

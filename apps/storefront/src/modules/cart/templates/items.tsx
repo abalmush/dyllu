@@ -29,7 +29,7 @@ export default function ItemsTemplate({ cart }: Props) {
               )
               .map((item) => (
                 <Item
-                  key={item.id}
+                  key={`${item.id}:${item.quantity}`}
                   item={item}
                   currencyCode={cart?.currency_code ?? "mdl"}
                 />

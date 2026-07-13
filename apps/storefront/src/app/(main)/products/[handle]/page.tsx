@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { listProducts } from "@lib/data/products";
 import { getRegion } from "@lib/data/regions";
+import { buildSocialMetadata, getProductSocialImage } from "@/lib/seo/metadata";
 import ProductTemplate from "@modules/products/templates";
 import { HttpTypes } from "@medusajs/types";
 
@@ -48,15 +49,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound();
   }
 
-  return {
-    title: `${product.title} | DYLLU`,
-    description: `${product.title}`,
-    openGraph: {
-      title: `${product.title} | DYLLU`,
-      description: `${product.title}`,
-      images: product.thumbnail ? [product.thumbnail] : [],
-    },
-  };
+  return buildSocialMetadata({
+    title: product.title,
+    description: product.description,
+    fallbackDescription: `${product.title} disponibil la DYLLU. Comandă online cu livrare rapidă în toată Moldova.`,
+    path: `/products/${handle}`,
+    image: getProductSocialImage(product),
+    imageAlt: `${product.title} — imagine produs`,
+  });
 }
 
 export default async function ProductPage(props: Props) {

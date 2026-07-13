@@ -15,6 +15,7 @@ import { ScrollArea } from "@/components/atoms/scroll-area";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -79,6 +80,10 @@ export function CartDrawer({ cart, trigger }: Props) {
             <ShoppingBag className="size-4 text-primary" />
             Coșul tău · {totalItems} {totalItems === 1 ? "produs" : "produse"}
           </SheetTitle>
+          <SheetDescription className="sr-only">
+            Produsele adăugate în coș, subtotalul și acțiunile de finalizare a
+            comenzii.
+          </SheetDescription>
         </SheetHeader>
 
         {cart?.items && cart.items.length > 0 ? (

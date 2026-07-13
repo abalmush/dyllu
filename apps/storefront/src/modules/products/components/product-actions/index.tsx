@@ -19,7 +19,11 @@ import { getProductUiType } from "@modules/products/lib/product-presentation";
 
 import MobileActions from "./mobile-actions";
 import OptionSelect from "./option-select";
+import ConfigurationSelect from "./configuration-select";
 import { getProductPrice } from "@lib/util/get-product-price";
+
+const isConfigurationOption = (title?: string | null) =>
+  (title ?? "").trim().toLowerCase() === "configurație";
 
 type Props = {
   product: HttpTypes.StoreProduct;
@@ -45,7 +49,7 @@ export default function ProductActions({ product, disabled }: Props) {
   const [options, setOptions] = React.useState<
     Record<string, string | undefined>
   >(() => {
-    if ((product.variants?.length ?? 0) === 1 && product.variants?.[0]) {
+    if (product.variants?.[0]) {
       return optionsAsKeymap(product.variants[0].options) ?? {};
     }
 
@@ -179,17 +183,29 @@ export default function ProductActions({ product, disabled }: Props) {
 
         {(product.variants?.length ?? 0) > 1 && (
           <div className="flex flex-col gap-4">
-            {(product.options || []).map((option) => (
-              <OptionSelect
-                key={option.id}
-                option={option}
-                current={options[option.id]}
-                updateOption={setOptionValue}
-                title={option.title ?? ""}
-                data-testid="product-options"
-                disabled={!!disabled || isAdding}
-              />
-            ))}
+            {(product.options || []).map((option) =>
+              isConfigurationOption(option.title) ? (
+                <ConfigurationSelect
+                  key={option.id}
+                  product={product}
+                  option={option}
+                  current={options[option.id]}
+                  updateOption={setOptionValue}
+                  data-testid="product-options"
+                  disabled={!!disabled || isAdding}
+                />
+              ) : (
+                <OptionSelect
+                  key={option.id}
+                  option={option}
+                  current={options[option.id]}
+                  updateOption={setOptionValue}
+                  title={option.title ?? ""}
+                  data-testid="product-options"
+                  disabled={!!disabled || isAdding}
+                />
+              )
+            )}
           </div>
         )}
 

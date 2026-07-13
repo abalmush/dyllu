@@ -1,6 +1,7 @@
 "use client";
 
 import { HttpTypes } from "@medusajs/types";
+import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 
 import { cn } from "@lib/utils";
 
@@ -35,25 +36,24 @@ export default function OptionSelect({
           </span>
         )}
       </div>
-      <div
+      <RadioGroupPrimitive.Root
         className="flex flex-wrap gap-2"
         data-testid={dataTestId}
-        role="radiogroup"
         aria-label={title}
+        value={current ?? ""}
+        onValueChange={(value) => updateOption(option.id, value)}
+        disabled={disabled}
       >
         {values.map((v) => {
           const selected = v === current;
           return (
-            <button
+            <RadioGroupPrimitive.Item
               key={v}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              onClick={() => updateOption(option.id, v)}
+              value={v}
               disabled={disabled}
               data-testid="option-button"
               className={cn(
-                "min-w-[72px] rounded-full border px-4 py-2.5 text-sm font-medium tracking-tight transition-all duration-200",
+                "min-w-[72px] rounded-full border px-4 py-2.5 text-sm font-medium tracking-tight transition-[background-color,border-color,color,box-shadow] duration-200",
                 "disabled:pointer-events-none disabled:opacity-40",
                 selected
                   ? "border-foreground bg-foreground text-background shadow-sm"
@@ -61,10 +61,10 @@ export default function OptionSelect({
               )}
             >
               {v}
-            </button>
+            </RadioGroupPrimitive.Item>
           );
         })}
-      </div>
+      </RadioGroupPrimitive.Root>
     </div>
   );
 }

@@ -23,7 +23,9 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     !cart.email ||
     (cart.shipping_methods?.length ?? 0) < 1;
 
-  const paymentSession = cart.payment_collection?.payment_sessions?.[0];
+  const paymentSession = cart.payment_collection?.payment_sessions?.find(
+    (session) => session.status === "pending" && isManual(session.provider_id)
+  );
 
   if (isManual(paymentSession?.provider_id)) {
     return (
@@ -33,7 +35,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
 
   return (
     <Button disabled className="clip-corner-cut-sm rounded-none">
-      Selectează metoda de plată
+      Metoda de plată nu este disponibilă
     </Button>
   );
 };

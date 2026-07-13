@@ -6,23 +6,31 @@ import { cookies as nextCookies } from "next/headers";
 import { getAuthHeaders, getCacheTag, getCartId } from "./cookies";
 
 const LOCALE_COOKIE_NAME = "_medusa_locale";
+const LOCALE_PATTERN = /^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/;
 
 const revalidateTag = (tag: string) => nextRevalidateTag(tag, "max");
 
 export const getLocale = async (): Promise<string | null> => {
   try {
     const cookies = await nextCookies();
-    return cookies.get(LOCALE_COOKIE_NAME)?.value ?? null;
+    const locale = cookies.get(LOCALE_COOKIE_NAME)?.value;
+    return locale && locale.length <= 35 && LOCALE_PATTERN.test(locale)
+      ? locale
+      : null;
   } catch {
     return null;
   }
 };
 
 export const setLocaleCookie = async (locale: string) => {
+  if (locale.length > 35 || !LOCALE_PATTERN.test(locale)) {
+    throw new Error("Invalid locale");
+  }
   const cookies = await nextCookies();
   cookies.set(LOCALE_COOKIE_NAME, locale, {
+    path: "/",
     maxAge: 60 * 60 * 24 * 365,
-    httpOnly: false,
+    httpOnly: true,
     sameSite: "strict",
     secure: process.env.NODE_ENV === "production",
   });

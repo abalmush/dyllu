@@ -11,25 +11,25 @@ All commands assume repo root `/Users/abalmus/Projects/DYLLU` unless noted.
 
 ## 1. Systems at a glance
 
-| System              | URL / Address                                | Auth                            | Notes                                                |
-| ------------------- | -------------------------------------------- | ------------------------------- | ---------------------------------------------------- |
-| Storefront          | https://dyllu.md                             | public                          | Cloudflare Worker `dyllu-storefront`                 |
-| Backend API + Admin | https://api.dyllu.md, admin at `/backend`    | see §3                          | Medusa v2.14                                         |
-| Media CDN           | https://cdn.dyllu.md                         | public read                     | R2 bucket `dyllu-media`                              |
-| VPS (host)          | `root@138.199.235.8` (hostname `dyllu-prod`) | SSH key                         | Hetzner CX32                                         |
-| Coolify             | http://138.199.235.8:8000                    | dashboard login                 | manages backend container                            |
-| GitHub              | github.com/abalmush/dyllu                    | `gh` as **abalmush**            | never use abalmus-celonis                            |
-| Cloudflare          | account `592732e1a9ae45cfe9cafce4228ebe2d`   | `wrangler` (abalmush@gmail.com) | zone `dyllu.md` = `f3c1a775580e4dd7d787f93bf3cb326e` |
+| System              | URL / Address                              | Auth                            | Notes                                                |
+| ------------------- | ------------------------------------------ | ------------------------------- | ---------------------------------------------------- |
+| Storefront          | https://dyllu.md                           | public                          | Cloudflare Worker `dyllu-storefront`                 |
+| Backend API + Admin | https://api.dyllu.md, admin at `/backend`  | see §3                          | Medusa v2.14                                         |
+| Media CDN           | https://cdn.dyllu.md                       | public read                     | R2 bucket `dyllu-media`                              |
+| VPS (host)          | private VPN/management address             | SSH key                         | origin ports accept Cloudflare/private traffic only  |
+| Coolify             | protected HTTPS operator URL               | Access/VPN + dashboard login    | port 8000 must never be exposed publicly             |
+| GitHub              | github.com/abalmush/dyllu                  | `gh` as **abalmush**            | never use abalmus-celonis                            |
+| Cloudflare          | account `592732e1a9ae45cfe9cafce4228ebe2d` | `wrangler` (abalmush@gmail.com) | zone `dyllu.md` = `f3c1a775580e4dd7d787f93bf3cb326e` |
 
 ### Well-known IDs (Medusa)
 
 | Thing                               | Value                                                                 |
-| ----------------------------------- | --------------------------------------------------------------------- | ---- |
+| ----------------------------------- | --------------------------------------------------------------------- |
 | Region — Moldova (MDL)              | `reg_01KX6GW84R9BQFM6NGG6EY5K7R`                                      |
 | Default Sales Channel               | `sc_01KX6GW7X1GP6C72YDCXD3GTVK`                                       |
 | Stock location — Chisinau Warehouse | `sloc_01KX6GW87AQFS9YCFV7DM0F83D`                                     |
 | Publishable API key (storefront)    | `pk_f8479e2f56fa610c2d51e0bbc5212bde3c17ac6e396dd5764fff8c7436ba1642` |
-| Currency                            | `mdl` · Country                                                       | `md` |
+| Currency / country                  | `mdl` / `md`                                                          |
 
 > Price amounts are whole MDL (e.g. `amount: 1500` = 1500 MDL) — verified: setting
 > 1500 yielded `calculated_amount: 1500` and a cart total of 1500. Confirm against
@@ -42,15 +42,19 @@ All commands assume repo root `/Users/abalmus/Projects/DYLLU` unless noted.
 ### SSH to the VPS
 
 ```bash
-ssh root@138.199.235.8        # hostname: dyllu-prod
+ssh <operator>@<private-vpn-host>
 ```
 
-Uses your Hetzner SSH key (already configured in this environment). The VPS runs
-Coolify + Docker; the Medusa container, Postgres, and Redis are Coolify-managed.
+Connect only over the approved private VPN/management path. Do not publish SSH,
+Coolify, Postgres, Redis, or the HTTPS origin directly to the internet. The VPS
+runs Coolify + Docker; the Medusa container, Postgres, and Redis are
+Coolify-managed.
 
 ### Coolify (backend container, env vars, logs, redeploy)
 
-Open http://138.199.235.8:8000 → project `dyllu` → production → `dyllu-backend`.
+Open the protected HTTPS Coolify URL through Cloudflare Access or the operator
+VPN, then select project `dyllu` → production → `dyllu-backend`. Direct access to
+port 8000 is forbidden, including temporary troubleshooting access.
 
 - **Logs:** app → Logs (runtime). **Env:** app → Environment Variables.
 - **Redeploy / Restart:** buttons top-right.
@@ -105,6 +109,7 @@ Where secrets live:
 
 - **Admin password:** whatever was set via `medusa user` (ask the owner / password manager).
 - **Coolify env** (`DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `S3_*`, `REVALIDATE_SECRET`): Coolify → dyllu-backend → Environment Variables.
+- **Cloudflare Worker secrets** (`REVALIDATE_SECRET`, `ORDER_ACCESS_SECRET`): configure with Wrangler; generate distinct values with `openssl rand -hex 32`.
 - **CI secrets:** `gh secret list --repo abalmush/dyllu` (values are write-only).
 - **R2 S3 keys:** Cloudflare dash → R2 → Manage R2 API Tokens (scoped to `dyllu-media`).
 
@@ -258,7 +263,11 @@ Update `NEXT_PUBLIC_DEFAULT_REGION` in storefront CI env if the default changes.
 
 ## 5. Deploy & CI
 
-Both apps **auto-deploy on push to `main`** (path-filtered).
+Pull requests run build-quality validation without production credentials or
+deployments. Pushes to `main` deploy only after validation and the protected
+GitHub `production` environment gate. Configure that environment with required
+reviewers, main-only deployment branches, and environment-scoped secrets before
+relying on this workflow protection.
 
 ```bash
 # storefront changes -> apps/storefront/**  ; backend -> apps/backend/**
@@ -270,6 +279,10 @@ gh run watch <run-id>
 
 Manual dispatch: `gh workflow run deploy-storefront.yml` /
 `gh workflow run deploy-backend.yml`.
+
+Production workflows run public post-deploy smoke checks. They must use the
+Cloudflare-proxied hostnames; never bypass Cloudflare with an origin IP or
+`curl --resolve`.
 
 Local build-gate before pushing to live (recommended for big diffs):
 
@@ -300,18 +313,31 @@ tag `ghcr.io/abalmush/dyllu-backend:<sha>` in Coolify.
 
 ## 6. Debugging
 
-| Symptom                           | Where to look                                                                                                                                                |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Storefront 500 / runtime error    | `cd apps/storefront && pnpm exec wrangler tail dyllu-storefront` (bust edge cache with `?nc=$RANDOM`)                                                        |
-| Backend error                     | Coolify → dyllu-backend → Logs (runtime). Errors are masked over HTTP as `unknown_error`; the real stack is in these logs                                    |
-| Backend down                      | `curl -s https://api.dyllu.md/health` (200 = ok). From a datacenter IP use `--resolve api.dyllu.md:443:138.199.235.8` (Cloudflare bot-blocks datacenter IPs) |
-| CI build fails on API fetch (403) | Cloudflare bot protection blocks GitHub runner IPs; build-time fetches must tolerate failure (already handled)                                               |
-| Add-to-cart "unknown error"       | Variant has no MDL price in the region — see §4a                                                                                                             |
-| Image 404                         | Must be a direct `cdn.dyllu.md` or `/images/...` URL; the `/cdn-cgi/image/` transform does NOT work behind the Worker                                        |
+| Symptom                           | Where to look                                                                                                         |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Storefront 500 / runtime error    | `cd apps/storefront && pnpm exec wrangler tail dyllu-storefront` (bust edge cache with `?nc=$RANDOM`)                 |
+| Backend error                     | Coolify → dyllu-backend → Logs. HTTP errors may be masked; the real stack is in the protected operator logs           |
+| Backend down                      | `curl -fsS https://api.dyllu.md/health`; if Cloudflare blocks CI, fix the rule or use a scoped service token          |
+| CI build fails on API fetch (403) | Build-time fetches must tolerate unavailable catalog data; never work around this by opening or addressing the origin |
+| Add-to-cart "unknown error"       | Variant has no MDL price in the region — see §4a                                                                      |
+| Image 404                         | Use a direct `cdn.dyllu.md` or `/images/...` URL; `/cdn-cgi/image/` does not work behind the Worker                   |
+
+## 7. Mandatory production controls
+
+- Coolify is reachable only at HTTPS through Access/VPN; direct port 8000 is
+  firewalled.
+- The backend origin accepts HTTPS only from Cloudflare networks or a Cloudflare
+  Tunnel. Operator access uses the private management path.
+- Postgres is backed up off-host every night with retention and failure alerts.
+  A restore drill is completed and recorded after setup and at least quarterly.
+- The GitHub `production` environment requires approval and holds production
+  deployment secrets. `main` requires pull requests and passing checks.
+- Public uptime checks cover the storefront and backend; alerts have a named
+  owner and escalation path.
 
 ---
 
-## 7. Conventions
+## 8. Conventions
 
 - **Commits** must start with `DYLLU-000` (a global hook rejects commits/PRs without a ticket id).
 - **GitHub** operations use the **abalmush** account only. Never switch to abalmus-celonis.

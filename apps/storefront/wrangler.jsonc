@@ -2,8 +2,20 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "dyllu-storefront",
   "main": ".open-next/worker.js",
-  "compatibility_date": "2025-12-01",
+  "compatibility_date": "2026-07-12",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true
+    },
+    "traces": { "enabled": true, "head_sampling_rate": 0.1 }
+  },
+  "secrets": {
+    "required": ["REVALIDATE_SECRET", "ORDER_ACCESS_SECRET"]
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

@@ -167,13 +167,28 @@ async function crawlProductsViaApi({ limit }: { limit: number }) {
 }
 
 function transformApiProduct(p: ApiProduct): ScrapedProduct {
-  const priceMdl = parsePriceFromApi(p.prices.price, p.prices.currency_minor_unit);
-  const regularPrice = parsePriceFromApi(
+  if (p.prices.currency_code.toUpperCase() !== "MDL") {
+    throw new Error(`Unexpected currency ${p.prices.currency_code}`);
+  }
+  if (p.prices.currency_minor_unit !== 2) {
+    throw new Error(
+      `Unexpected MDL minor unit ${p.prices.currency_minor_unit}`
+    );
+  }
+
+  const priceMdl = parsePriceFromApi(
+    p.prices.price,
+    p.prices.currency_minor_unit,
+    "price"
+  );
+  const regularPrice = parseOptionalPriceFromApi(
     p.prices.regular_price,
     p.prices.currency_minor_unit
   );
   const oldPriceMdl =
-    p.on_sale && regularPrice > priceMdl ? regularPrice : undefined;
+    p.on_sale && regularPrice && regularPrice > priceMdl
+      ? regularPrice
+      : undefined;
 
   const brandName =
     p.brands?.find((b) => b.slug === BRAND_SLUG)?.name ?? "DYLLU";
@@ -211,7 +226,10 @@ function transformApiProduct(p: ApiProduct): ScrapedProduct {
     brand: brandName,
     priceMdl,
     oldPriceMdl,
-    inStock: p.is_in_stock ?? true,
+    inStock:
+      p.is_in_stock === true &&
+      p.is_purchasable !== false &&
+      p.is_on_backorder !== true,
     sourceCategories,
     sourceCategorySlugs,
     breadcrumbs: breadcrumbSlugPath,
@@ -223,10 +241,32 @@ function transformApiProduct(p: ApiProduct): ScrapedProduct {
   };
 }
 
-function parsePriceFromApi(priceStr: string, minorUnit: number): number {
-  const n = Number.parseInt(priceStr, 10);
-  if (!Number.isFinite(n)) return 0;
-  return minorUnit > 0 ? n / 10 ** minorUnit : n;
+function parsePriceFromApi(
+  priceStr: string,
+  minorUnit: number,
+  field: string
+): number {
+  if (!/^\d+$/.test(priceStr)) {
+    throw new Error(`Invalid ${field} value`);
+  }
+  const minorAmount = Number(priceStr);
+  const amount = minorAmount / 10 ** minorUnit;
+  if (
+    !Number.isSafeInteger(minorAmount) ||
+    !Number.isFinite(amount) ||
+    amount <= 0
+  ) {
+    throw new Error(`Invalid ${field} amount`);
+  }
+  return amount;
+}
+
+function parseOptionalPriceFromApi(
+  priceStr: string,
+  minorUnit: number
+): number | undefined {
+  if (!priceStr) return undefined;
+  return parsePriceFromApi(priceStr, minorUnit, "regular price");
 }
 
 function stripHtml(html: string): string {
@@ -251,9 +291,7 @@ function extractSlugPath(link: string): string[] {
   try {
     const u = new URL(link);
     const parts = u.pathname.split("/").filter(Boolean);
-    return parts.filter(
-      (p) => p !== "categorie-produs" && p !== "catalog"
-    );
+    return parts.filter((p) => p !== "categorie-produs" && p !== "catalog");
   } catch {
     return [];
   }
@@ -331,7 +369,10 @@ async function politeFetchJson<T>(
   }
 }
 
-async function politeFetchBinary(url: string, attempt = 0): Promise<Uint8Array> {
+async function politeFetchBinary(
+  url: string,
+  attempt = 0
+): Promise<Uint8Array> {
   await delay(DELAY_MS / 3 + Math.random() * JITTER_MS);
   try {
     const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });

@@ -5,16 +5,76 @@ on:
     branches: [main]
     paths:
       - "apps/backend/**"
+      - "packages/**"
+      - "package.json"
+      - "pnpm-workspace.yaml"
       - "pnpm-lock.yaml"
+      - "turbo.json"
+      - ".npmrc"
+      - ".nvmrc"
+      - ".dockerignore"
+      - ".github/workflows/deploy-backend.yml"
+  pull_request:
+    paths:
+      - "apps/backend/**"
+      - "packages/**"
+      - "package.json"
+      - "pnpm-workspace.yaml"
+      - "pnpm-lock.yaml"
+      - "turbo.json"
+      - ".npmrc"
+      - ".nvmrc"
+      - ".dockerignore"
       - ".github/workflows/deploy-backend.yml"
   workflow_dispatch:
+
+concurrency:
+  group: deploy-backend-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   IMAGE_NAME: ghcr.io/abalmush/dyllu-backend
 
 jobs:
-  build-and-deploy:
+  validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level high
+
+      - name: Typecheck backend
+        run: pnpm --filter @dyllu/backend typecheck
+
+      - name: Run backend unit tests
+        run: pnpm --filter @dyllu/backend test:unit
+
+      - name: Compile backend and admin
+        run: pnpm --filter @dyllu/backend build
+
+  build-and-deploy:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
     permissions:
       contents: read
       packages: write
@@ -48,19 +108,17 @@ jobs:
 
       - name: Trigger Coolify deploy
         run: |
-          curl --fail -sS "${{ secrets.COOLIFY_WEBHOOK_URL }}" \
+          curl --fail --silent --show-error "${{ secrets.COOLIFY_WEBHOOK_URL }}" \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}"
 
-      - name: Health check
+      - name: Smoke-test public backend
         run: |
           sleep 30
-          for i in $(seq 1 60); do
-            if curl -fsS --resolve api.dyllu.md:443:138.199.235.8 https://api.dyllu.md/health >/dev/null 2>&1; then
-              echo "Backend healthy"
-              exit 0
-            fi
-            echo "Attempt $i/60 failed, retrying in 10s..."
-            sleep 10
-          done
-          echo "Backend failed health check"
-          exit 1
+          curl --fail --silent --show-error --location \
+            --connect-timeout 10 --max-time 30 \
+            --retry 60 --retry-delay 10 --retry-all-errors \
+            https://api.dyllu.md/ready >/dev/null
+          curl --fail --silent --show-error --location \
+            --connect-timeout 10 --max-time 30 \
+            --retry 12 --retry-delay 10 --retry-all-errors \
+            https://api.dyllu.md/backend >/dev/null

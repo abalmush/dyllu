@@ -1,24 +1,41 @@
 "use client";
 
 import { RadioGroup } from "@headlessui/react";
-import { paymentInfoMap } from "@lib/constants";
+import { isManual, paymentInfoMap } from "@lib/constants";
 import { initiatePaymentSession } from "@lib/data/cart";
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons";
+import { HttpTypes } from "@medusajs/types";
 import { Button, Container, Heading, Text, clx } from "@lib/ui-compat";
 import ErrorMessage from "@modules/checkout/components/error-message";
 import PaymentContainer from "@modules/checkout/components/payment-container";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { CheckoutStepKey } from "@modules/checkout/lib/presentation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+
+type CheckoutCart = HttpTypes.StoreCart & {
+  gift_cards?: Array<unknown> | null;
+};
+
+type PaymentMethod = {
+  id: string;
+};
 
 const Payment = ({
   cart,
   availablePaymentMethods,
+  activeStep,
 }: {
-  cart: any;
-  availablePaymentMethods: any[];
+  cart: CheckoutCart;
+  availablePaymentMethods: PaymentMethod[];
+  activeStep: CheckoutStepKey;
 }) => {
+  const supportedPaymentMethods = availablePaymentMethods.filter((method) =>
+    isManual(method.id)
+  );
   const activeSession = cart.payment_collection?.payment_sessions?.find(
-    (paymentSession: any) => paymentSession.status === "pending"
+    (paymentSession) =>
+      paymentSession.status === "pending" &&
+      isManual(paymentSession.provider_id)
   );
 
   const [isLoading, setIsLoading] = useState(false);
@@ -27,63 +44,58 @@ const Payment = ({
     activeSession?.provider_id ?? ""
   );
 
-  const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  const isOpen = searchParams.get("step") === "payment";
+  const isOpen = activeStep === "payment";
 
   const setPaymentMethod = (method: string) => {
     setError(null);
     setSelectedPaymentMethod(method);
   };
 
-  const paidByGiftcard =
-    cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0;
+  const paidByGiftcard = !!cart.gift_cards?.length && cart.total === 0;
+  const hasSupportedPaymentMethod = supportedPaymentMethods.length > 0;
 
   const paymentReady =
-    (activeSession && cart?.shipping_methods.length !== 0) || paidByGiftcard;
-
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams);
-      params.set(name, value);
-      return params.toString();
-    },
-    [searchParams]
-  );
+    (activeSession && (cart.shipping_methods?.length ?? 0) !== 0) ||
+    paidByGiftcard;
 
   const handleEdit = () => {
-    router.push(pathname + "?" + createQueryString("step", "payment"), {
+    setError(null);
+    router.push(`${pathname}?step=payment`, {
       scroll: false,
     });
   };
 
   const handleSubmit = async () => {
+    if (!paidByGiftcard && !isManual(selectedPaymentMethod)) {
+      setError("Metoda de plată selectată nu este disponibilă.");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const checkActiveSession =
         activeSession?.provider_id === selectedPaymentMethod;
 
-      if (!checkActiveSession) {
-        await initiatePaymentSession(cart, {
-          provider_id: selectedPaymentMethod,
-        });
+      if (!paidByGiftcard && !checkActiveSession) {
+        await initiatePaymentSession(selectedPaymentMethod);
       }
 
-      return router.push(pathname + "?" + createQueryString("step", "review"), {
+      router.push(`${pathname}?step=review`, {
         scroll: false,
       });
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Nu am putut inițializa plata. Încearcă din nou."
+      );
     } finally {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    setError(null);
-  }, [isOpen]);
 
   return (
     <section className="clip-corner-cut-lg clip-shadow-md bg-card p-6 ring-1 ring-border small:p-8">
@@ -125,12 +137,12 @@ const Payment = ({
       </div>
       <div>
         <div className={isOpen ? "block" : "hidden"}>
-          {!paidByGiftcard && availablePaymentMethods?.length && (
+          {!paidByGiftcard && hasSupportedPaymentMethod && (
             <RadioGroup
               value={selectedPaymentMethod}
               onChange={(value: string) => setPaymentMethod(value)}
             >
-              {availablePaymentMethods.map((paymentMethod) => (
+              {supportedPaymentMethods.map((paymentMethod) => (
                 <div key={paymentMethod.id}>
                   <PaymentContainer
                     paymentInfoMap={paymentInfoMap}
@@ -157,7 +169,12 @@ const Payment = ({
           )}
 
           <ErrorMessage
-            error={error}
+            error={
+              error ??
+              (!paidByGiftcard && !hasSupportedPaymentMethod
+                ? "Momentan nu este disponibilă nicio metodă de plată. Contactează echipa DYLLU pentru ajutor."
+                : null)
+            }
             data-testid="payment-method-error-message"
           />
 
@@ -166,7 +183,10 @@ const Payment = ({
             className="clip-corner-cut-sm mt-6 rounded-none"
             onClick={handleSubmit}
             isLoading={isLoading}
-            disabled={!selectedPaymentMethod && !paidByGiftcard}
+            disabled={
+              (!selectedPaymentMethod && !paidByGiftcard) ||
+              (!paidByGiftcard && !hasSupportedPaymentMethod)
+            }
             data-testid="submit-payment-button"
           >
             Continuă către verificare

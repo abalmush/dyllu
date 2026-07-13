@@ -21,12 +21,10 @@ export default async function CheckoutForm({
     return null;
   }
 
-  const shippingMethods = await listCartShippingMethods(cart.id);
-  const paymentMethods = await listCartPaymentMethods(cart.region?.id ?? "");
-
-  if (!shippingMethods || !paymentMethods) {
-    return null;
-  }
+  const [shippingMethods, paymentMethods] = await Promise.all([
+    listCartShippingMethods(),
+    listCartPaymentMethods(cart.region?.id ?? ""),
+  ]);
 
   const shouldUseReviewLayout =
     activeStep === "review" && (cart.shipping_methods?.length ?? 0) > 0;
@@ -45,9 +43,13 @@ export default async function CheckoutForm({
         />
       )}
 
-      <Payment cart={cart} availablePaymentMethods={paymentMethods} />
+      <Payment
+        cart={cart}
+        availablePaymentMethods={paymentMethods}
+        activeStep={activeStep}
+      />
 
-      <Review cart={cart} />
+      <Review cart={cart} activeStep={activeStep} />
     </div>
   );
 }

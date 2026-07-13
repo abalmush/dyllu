@@ -1,39 +1,62 @@
 import { loadEnv, defineConfig } from "@medusajs/framework/utils";
 
+import { parseBackendEnvironment } from "./src/config/environment";
+
 loadEnv(process.env.NODE_ENV || "development", process.cwd());
+
+const environment = parseBackendEnvironment(process.env);
 
 module.exports = defineConfig({
   projectConfig: {
-    databaseUrl: process.env.DATABASE_URL,
-    redisUrl: process.env.REDIS_URL,
+    databaseUrl: environment.databaseUrl,
+    redisUrl: environment.redisUrl,
     databaseDriverOptions: {
-      connection: { ssl: false },
+      connection: { ssl: environment.databaseSsl },
     },
     http: {
-      storeCors: process.env.STORE_CORS!,
-      adminCors: process.env.ADMIN_CORS!,
-      authCors: process.env.AUTH_CORS!,
-      jwtSecret: process.env.JWT_SECRET || "supersecret",
-      cookieSecret: process.env.COOKIE_SECRET || "supersecret",
+      storeCors: environment.storeCors,
+      adminCors: environment.adminCors,
+      authCors: environment.authCors,
+      jwtSecret: environment.jwtSecret,
+      cookieSecret: environment.cookieSecret,
     },
   },
   admin: {
     path: "/backend",
   },
   modules: [
-    ...(process.env.REDIS_URL
+    ...(environment.redisUrl
       ? [
           {
             resolve: "@medusajs/medusa/event-bus-redis",
-            options: { redisUrl: process.env.REDIS_URL },
+            options: {
+              redisUrl: environment.redisUrl,
+              jobOptions: {
+                removeOnComplete: { age: 3_600, count: 1_000 },
+                removeOnFail: { age: 86_400, count: 5_000 },
+              },
+            },
           },
           {
             resolve: "@medusajs/medusa/workflow-engine-redis",
-            options: { redis: { url: process.env.REDIS_URL } },
+            options: { redis: { redisUrl: environment.redisUrl } },
+          },
+          {
+            resolve: "@medusajs/medusa/locking",
+            options: {
+              providers: [
+                {
+                  resolve: "@medusajs/medusa/locking-redis",
+                  id: "locking-redis",
+                  is_default: true,
+                  options: { redisUrl: environment.redisUrl },
+                },
+              ],
+            },
           },
         ]
       : []),
-    ...(process.env.S3_BUCKET
+    ...(environment.s3
       ? [
           {
             resolve: "@medusajs/medusa/file",
@@ -43,12 +66,12 @@ module.exports = defineConfig({
                   resolve: "@medusajs/medusa/file-s3",
                   id: "s3",
                   options: {
-                    file_url: process.env.S3_FILE_URL,
-                    access_key_id: process.env.S3_ACCESS_KEY_ID,
-                    secret_access_key: process.env.S3_SECRET_ACCESS_KEY,
-                    region: process.env.S3_REGION,
-                    bucket: process.env.S3_BUCKET,
-                    endpoint: process.env.S3_ENDPOINT,
+                    file_url: environment.s3.fileUrl,
+                    access_key_id: environment.s3.accessKeyId,
+                    secret_access_key: environment.s3.secretAccessKey,
+                    region: environment.s3.region,
+                    bucket: environment.s3.bucket,
+                    endpoint: environment.s3.endpoint,
                   },
                 },
               ],

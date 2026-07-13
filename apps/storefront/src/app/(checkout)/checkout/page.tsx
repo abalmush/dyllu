@@ -23,15 +23,21 @@ type Props = {
 };
 
 export default async function Checkout(props: Props) {
-  const cart = await retrieveCart();
+  const [cart, customer, searchParams] = await Promise.all([
+    retrieveCart(),
+    retrieveCustomer(),
+    props.searchParams,
+  ]);
 
   if (!cart) {
     redirect("/cart");
   }
 
-  const customer = await retrieveCustomer();
-  const searchParams = await props.searchParams;
   const activeStep = getActiveCheckoutStep(cart, searchParams.step);
+
+  if (searchParams.step !== activeStep) {
+    redirect(`/checkout?step=${activeStep}`);
+  }
 
   return (
     <div className="bg-surface-subtle">
