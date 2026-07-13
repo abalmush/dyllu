@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import { Inter, Sora } from "next/font/google";
 
 import { getBaseURL } from "@lib/util/env";
+import {
+  DEFAULT_DESCRIPTION,
+  DEFAULT_SOCIAL_IMAGE,
+  DEFAULT_TITLE,
+  SITE_NAME,
+} from "@/lib/seo/metadata";
 import { SmoothScrollProvider } from "@/components/atoms/smooth-scroll-provider";
 import { Toaster } from "@/components/atoms/sonner";
 
@@ -25,12 +31,34 @@ const sora = Sora({
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
+  applicationName: SITE_NAME,
   title: {
-    default: "DYLLU — Scule și echipamente profesionale",
+    default: DEFAULT_TITLE,
     template: "%s · DYLLU",
   },
-  description:
-    "Scule manuale, electrice, echipamente de protecție și grădinărit pentru profesioniști și pasionați. Livrare rapidă în Moldova.",
+  description: DEFAULT_DESCRIPTION,
+  openGraph: {
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    url: "/",
+    siteName: SITE_NAME,
+    locale: "ro_MD",
+    type: "website",
+    images: [
+      {
+        url: DEFAULT_SOCIAL_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: DEFAULT_TITLE,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    images: [{ url: DEFAULT_SOCIAL_IMAGE, alt: DEFAULT_TITLE }],
+  },
 };
 
 export default function RootLayout(props: { children: React.ReactNode }) {

@@ -61,32 +61,28 @@ export function SetBreakdown({
             gridTemplateColumns: "repeat(auto-fit, minmax(128px, 1fr))",
           }}
         >
-          {visualPieces.map((piece) => (
-            <article
-              key={piece.id}
-              className="clip-corner-cut-md clip-shadow-sm relative aspect-[1.02] overflow-hidden bg-background ring-1 ring-foreground/10"
-            >
-              <Image
-                src={piece.image!}
-                alt={piece.label}
-                fill
-                sizes="(min-width: 1024px) 220px, (min-width: 640px) 180px, 44vw"
-                style={IMAGE_BG_NEUTRALIZE}
-                className="object-contain p-4 small:p-5"
-              />
-              <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-2.5">
-                <span
-                  className="max-w-[72%] truncate bg-foreground px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-background"
-                  title={piece.label}
-                >
-                  {piece.label}
+          {visualPieces.map((piece) => {
+            const quantity = piece.qty ?? 1;
+
+            return (
+              <article
+                key={piece.id}
+                className="clip-corner-cut-md clip-shadow-sm relative aspect-[1.02] overflow-hidden bg-background ring-1 ring-foreground/10"
+              >
+                <Image
+                  src={piece.image!}
+                  alt={piece.label}
+                  fill
+                  sizes="(min-width: 1024px) 220px, (min-width: 640px) 180px, 44vw"
+                  style={IMAGE_BG_NEUTRALIZE}
+                  className="object-contain p-4 small:p-5"
+                />
+                <span className="absolute right-2.5 top-2.5 shrink-0 bg-foreground px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-background">
+                  {quantity} {quantity === 1 ? "inclus" : "incluse"}
                 </span>
-                <span className="shrink-0 bg-foreground px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-background">
-                  {piece.qty ?? 1} {piece.qty === 1 ? "inclus" : "incluse"}
-                </span>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       )}
 

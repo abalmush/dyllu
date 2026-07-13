@@ -7,7 +7,6 @@ import { revalidateTag as nextRevalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   getAuthHeaders,
-  getCacheOptions,
   getCacheTag,
   getCartId,
   removeAuthToken,
@@ -16,19 +15,86 @@ import {
 } from "./cookies";
 
 const revalidateTag = (tag: string) => nextRevalidateTag(tag, "max");
+type AddressActionResult = Record<string, unknown> & {
+  success: boolean;
+  error: string | null;
+};
+
+function boundedString(
+  value: unknown,
+  label: string,
+  { required = false, max = 200 }: { required?: boolean; max?: number } = {}
+) {
+  const normalized = typeof value === "string" ? value.trim() : "";
+  if (required && !normalized) throw new Error(`${label} is required`);
+  if (normalized.length > max) throw new Error(`${label} is too long`);
+  return normalized;
+}
+
+function formString(
+  formData: FormData,
+  key: string,
+  options?: { required?: boolean; max?: number }
+) {
+  return boundedString(formData.get(key), key, options);
+}
+
+function assertIdentifier(value: string, label: string) {
+  if (!/^[A-Za-z0-9_:-]{1,128}$/.test(value)) {
+    throw new Error(`Invalid ${label}`);
+  }
+}
+
+function customerAddressFromForm(formData: FormData) {
+  const countryCode = formString(formData, "country_code", {
+    required: true,
+    max: 2,
+  }).toLowerCase();
+  if (!/^[a-z]{2}$/.test(countryCode)) {
+    throw new Error("country_code is invalid");
+  }
+
+  return {
+    first_name: formString(formData, "first_name", {
+      required: true,
+      max: 100,
+    }),
+    last_name: formString(formData, "last_name", { required: true, max: 100 }),
+    company: formString(formData, "company", { max: 200 }),
+    address_1: formString(formData, "address_1", { required: true, max: 200 }),
+    address_2: formString(formData, "address_2", { max: 200 }),
+    city: formString(formData, "city", { required: true, max: 100 }),
+    postal_code: formString(formData, "postal_code", {
+      required: true,
+      max: 32,
+    }),
+    province: formString(formData, "province", { max: 100 }),
+    country_code: countryCode,
+    phone: formString(formData, "phone", { max: 40 }),
+  };
+}
+
+async function requireCustomerAuth() {
+  const headers = await getAuthHeaders();
+  if (!("authorization" in headers)) {
+    throw new Error("Authentication required");
+  }
+  return headers;
+}
+
+async function revalidateCustomerScope(tag: string) {
+  const cacheTag = await getCacheTag(tag);
+  if (cacheTag) revalidateTag(cacheTag);
+}
 
 export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {
     const authHeaders = await getAuthHeaders();
 
-    if (!authHeaders) return null;
+    if (!("authorization" in authHeaders)) return null;
 
     const headers = {
       ...authHeaders,
-    };
-
-    const next = {
-      ...(await getCacheOptions("customers")),
     };
 
     return await sdk.client
@@ -38,36 +104,82 @@ export const retrieveCustomer =
           fields: "*orders",
         },
         headers,
-        next,
-        cache: "force-cache",
+        cache: "no-store",
       })
       .then(({ customer }) => customer)
-      .catch(() => null);
+      .catch((error: unknown) => {
+        const status =
+          typeof error === "object" && error && "status" in error
+            ? error.status
+            : undefined;
+        if (status === 401 || status === 404) return null;
+        throw error;
+      });
   };
 
 export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  const headers = await requireCustomerAuth();
+  const update: HttpTypes.StoreUpdateCustomer = {};
+  if (body.first_name !== undefined) {
+    update.first_name = boundedString(body.first_name, "first_name", {
+      required: true,
+      max: 100,
+    });
+  }
+  if (body.last_name !== undefined) {
+    update.last_name = boundedString(body.last_name, "last_name", {
+      required: true,
+      max: 100,
+    });
+  }
+  if (body.phone !== undefined) {
+    update.phone = boundedString(body.phone, "phone", { max: 40 });
+  }
+  if (body.company_name !== undefined) {
+    update.company_name = boundedString(body.company_name, "company_name", {
+      max: 200,
+    });
+  }
+  if (Object.keys(update).length === 0) {
+    throw new Error("No supported customer fields provided");
+  }
 
   const updateRes = await sdk.store.customer
-    .update(body, {}, headers)
+    .update(update, {}, headers)
     .then(({ customer }) => customer)
     .catch(medusaError);
 
-  const cacheTag = await getCacheTag("customers");
-  revalidateTag(cacheTag);
+  await revalidateCustomerScope("customers");
 
   return updateRes;
 };
 
 export async function signup(_currentState: unknown, formData: FormData) {
-  const password = formData.get("password") as string;
+  const password = formString(formData, "password", {
+    required: true,
+    max: 128,
+  });
+  if (password.length < 8) {
+    return "Parola trebuie să aibă cel puțin 8 caractere.";
+  }
+  const email = formString(formData, "email", {
+    required: true,
+    max: 254,
+  }).toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return "Adresa de email nu este validă.";
+  }
   const customerForm = {
-    email: formData.get("email") as string,
-    first_name: formData.get("first_name") as string,
-    last_name: formData.get("last_name") as string,
-    phone: formData.get("phone") as string,
+    email,
+    first_name: formString(formData, "first_name", {
+      required: true,
+      max: 100,
+    }),
+    last_name: formString(formData, "last_name", {
+      required: true,
+      max: 100,
+    }),
+    phone: formString(formData, "phone", { max: 40 }),
   };
 
   try {
@@ -82,11 +194,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
       ...(await getAuthHeaders()),
     };
 
-    const { customer: createdCustomer } = await sdk.store.customer.create(
-      customerForm,
-      {},
-      headers
-    );
+    await sdk.store.customer.create(customerForm, {}, headers);
 
     const loginToken = await sdk.auth.login("customer", "emailpass", {
       email: customerForm.email,
@@ -95,37 +203,43 @@ export async function signup(_currentState: unknown, formData: FormData) {
 
     await setAuthToken(loginToken as string);
 
-    const customerCacheTag = await getCacheTag("customers");
-    revalidateTag(customerCacheTag);
+    await revalidateCustomerScope("customers");
 
     await transferCart();
-
-    return createdCustomer;
-  } catch (error: any) {
-    return error.toString();
+  } catch (error: unknown) {
+    console.error("Customer registration failed", error);
+    return "Contul nu a putut fi creat. Verifică datele și încearcă din nou.";
   }
+
+  redirect("/account");
 }
 
 export async function login(_currentState: unknown, formData: FormData) {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const email = formString(formData, "email", {
+    required: true,
+    max: 254,
+  }).toLowerCase();
+  const password = formString(formData, "password", {
+    required: true,
+    max: 128,
+  });
 
   try {
     await sdk.auth
       .login("customer", "emailpass", { email, password })
       .then(async (token) => {
         await setAuthToken(token as string);
-        const customerCacheTag = await getCacheTag("customers");
-        revalidateTag(customerCacheTag);
+        await revalidateCustomerScope("customers");
       });
-  } catch (error: any) {
-    return error.toString();
+  } catch {
+    return "Email sau parolă incorectă.";
   }
 
   try {
     await transferCart();
-  } catch (error: any) {
-    return error.toString();
+  } catch (error: unknown) {
+    console.error("Cart transfer after login failed", error);
+    return "Autentificarea a reușit, dar coșul nu a putut fi transferat.";
   }
 }
 
@@ -134,13 +248,11 @@ export async function signout() {
 
   await removeAuthToken();
 
-  const customerCacheTag = await getCacheTag("customers");
-  revalidateTag(customerCacheTag);
+  await revalidateCustomerScope("customers");
 
   await removeCartId();
 
-  const cartCacheTag = await getCacheTag("carts");
-  revalidateTag(cartCacheTag);
+  await revalidateCustomerScope("carts");
 
   redirect("/account");
 }
@@ -152,113 +264,92 @@ export async function transferCart() {
     return;
   }
 
-  const headers = await getAuthHeaders();
+  const headers = await requireCustomerAuth();
 
   await sdk.store.cart.transferCart(cartId, {}, headers);
 
-  const cartCacheTag = await getCacheTag("carts");
-  revalidateTag(cartCacheTag);
+  await revalidateCustomerScope("carts");
 }
 
 export const addCustomerAddress = async (
   currentState: Record<string, unknown>,
   formData: FormData
-): Promise<any> => {
+): Promise<AddressActionResult> => {
   const isDefaultBilling = (currentState.isDefaultBilling as boolean) || false;
   const isDefaultShipping =
     (currentState.isDefaultShipping as boolean) || false;
 
   const address = {
-    first_name: formData.get("first_name") as string,
-    last_name: formData.get("last_name") as string,
-    company: formData.get("company") as string,
-    address_1: formData.get("address_1") as string,
-    address_2: formData.get("address_2") as string,
-    city: formData.get("city") as string,
-    postal_code: formData.get("postal_code") as string,
-    province: formData.get("province") as string,
-    country_code: formData.get("country_code") as string,
-    phone: formData.get("phone") as string,
+    ...customerAddressFromForm(formData),
     is_default_billing: isDefaultBilling,
     is_default_shipping: isDefaultShipping,
   };
 
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  const headers = await requireCustomerAuth();
 
   return sdk.store.customer
     .createAddress(address, {}, headers)
-    .then(async ({ customer }) => {
-      const customerCacheTag = await getCacheTag("customers");
-      revalidateTag(customerCacheTag);
+    .then(async () => {
+      await revalidateCustomerScope("customers");
       return { success: true, error: null };
     })
-    .catch((err) => {
-      return { success: false, error: err.toString() };
+    .catch(() => {
+      return {
+        ...currentState,
+        success: false,
+        error: "Adresa nu a putut fi salvată.",
+      };
     });
 };
 
 export const deleteCustomerAddress = async (
   addressId: string
-): Promise<void> => {
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+): Promise<AddressActionResult> => {
+  assertIdentifier(addressId, "address ID");
+  const headers = await requireCustomerAuth();
 
-  await sdk.store.customer
+  return sdk.store.customer
     .deleteAddress(addressId, headers)
     .then(async () => {
-      const customerCacheTag = await getCacheTag("customers");
-      revalidateTag(customerCacheTag);
+      await revalidateCustomerScope("customers");
       return { success: true, error: null };
     })
-    .catch((err) => {
-      return { success: false, error: err.toString() };
+    .catch(() => {
+      return { success: false, error: "Adresa nu a putut fi ștearsă." };
     });
 };
 
 export const updateCustomerAddress = async (
   currentState: Record<string, unknown>,
   formData: FormData
-): Promise<any> => {
+): Promise<AddressActionResult> => {
   const addressId =
     (currentState.addressId as string) || (formData.get("addressId") as string);
 
   if (!addressId) {
-    return { success: false, error: "Address ID is required" };
+    return {
+      ...currentState,
+      success: false,
+      error: "Address ID is required",
+    };
   }
 
-  const address = {
-    first_name: formData.get("first_name") as string,
-    last_name: formData.get("last_name") as string,
-    company: formData.get("company") as string,
-    address_1: formData.get("address_1") as string,
-    address_2: formData.get("address_2") as string,
-    city: formData.get("city") as string,
-    postal_code: formData.get("postal_code") as string,
-    province: formData.get("province") as string,
-    country_code: formData.get("country_code") as string,
-  } as HttpTypes.StoreUpdateCustomerAddress;
-
-  const phone = formData.get("phone") as string;
-
-  if (phone) {
-    address.phone = phone;
-  }
-
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  assertIdentifier(addressId, "address ID");
+  const address: HttpTypes.StoreUpdateCustomerAddress =
+    customerAddressFromForm(formData);
+  const headers = await requireCustomerAuth();
 
   return sdk.store.customer
     .updateAddress(addressId, address, {}, headers)
     .then(async () => {
-      const customerCacheTag = await getCacheTag("customers");
-      revalidateTag(customerCacheTag);
-      return { success: true, error: null };
+      await revalidateCustomerScope("customers");
+      return { ...currentState, success: true, error: null };
     })
-    .catch((err) => {
-      return { success: false, error: err.toString() };
+    .catch(() => {
+      return {
+        ...currentState,
+        success: false,
+        error: "Adresa nu a putut fi actualizată.",
+      };
     });
 };

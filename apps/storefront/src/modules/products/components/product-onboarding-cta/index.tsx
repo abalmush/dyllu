@@ -2,6 +2,8 @@ import { Button, Container, Text } from "@lib/ui-compat";
 import { cookies as nextCookies } from "next/headers";
 
 async function ProductOnboardingCta() {
+  if (process.env.NODE_ENV === "production") return null;
+
   const cookies = await nextCookies();
 
   const isOnboarding = cookies.get("_medusa_onboarding")?.value === "true";
@@ -19,7 +21,7 @@ async function ProductOnboardingCta() {
         <Text className="text-small-regular text-ui-fg-subtle">
           Poți continua configurarea magazinului din panoul de administrare.
         </Text>
-        <a href="http://localhost:7001/a/orders?onboarding_step=create_order_nextjs">
+        <a href="http://localhost:9000/backend/orders?onboarding_step=create_order_nextjs">
           <Button className="w-full">Continuă configurarea în admin</Button>
         </a>
       </div>

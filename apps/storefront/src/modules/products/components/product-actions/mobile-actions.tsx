@@ -17,6 +17,10 @@ import {
 import { PriceBlock } from "@/components/molecules/price-block";
 
 import OptionSelect from "./option-select";
+import ConfigurationSelect from "./configuration-select";
+
+const isConfigurationOption = (title?: string | null) =>
+  (title ?? "").trim().toLowerCase() === "configurație";
 
 type Props = {
   product: HttpTypes.StoreProduct;
@@ -56,7 +60,7 @@ export default function MobileActions({
       <div
         className={cn(
           "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 shadow-[0_-12px_30px_-15px_rgba(15,23,42,0.25)] backdrop-blur transition-transform duration-300 small:hidden",
-          show ? "translate-y-0" : "translate-y-full pointer-events-none"
+          show ? "translate-y-0" : "pointer-events-none translate-y-full"
         )}
         data-testid="mobile-actions"
       >
@@ -118,16 +122,27 @@ export default function MobileActions({
             <SheetTitle>Alege opțiuni</SheetTitle>
           </SheetHeader>
           <div className="mt-4 flex flex-col gap-6">
-            {(product.options || []).map((option) => (
-              <OptionSelect
-                key={option.id}
-                option={option}
-                current={options[option.id]}
-                updateOption={updateOptions}
-                title={option.title ?? ""}
-                disabled={optionsDisabled}
-              />
-            ))}
+            {(product.options || []).map((option) =>
+              isConfigurationOption(option.title) ? (
+                <ConfigurationSelect
+                  key={option.id}
+                  product={product}
+                  option={option}
+                  current={options[option.id]}
+                  updateOption={updateOptions}
+                  disabled={optionsDisabled}
+                />
+              ) : (
+                <OptionSelect
+                  key={option.id}
+                  option={option}
+                  current={options[option.id]}
+                  updateOption={updateOptions}
+                  title={option.title ?? ""}
+                  disabled={optionsDisabled}
+                />
+              )
+            )}
             <Button
               variant="brand"
               size="lg"
@@ -140,7 +155,11 @@ export default function MobileActions({
               className="clip-corner-cut-sm mt-2 rounded-none"
             >
               <ShoppingBag className="size-4" />
-              {!variant ? "Selectează varianta" : !inStock ? "Stoc epuizat" : "Adaugă în coș"}
+              {!variant
+                ? "Selectează varianta"
+                : !inStock
+                  ? "Stoc epuizat"
+                  : "Adaugă în coș"}
             </Button>
           </div>
         </SheetContent>

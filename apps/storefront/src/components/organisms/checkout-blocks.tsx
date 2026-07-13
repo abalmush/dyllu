@@ -24,7 +24,11 @@ export function CheckoutSteps({ current }: { current: number }) {
         const done = i < current;
         const active = i === current;
         return (
-          <li key={label} className="flex flex-1 items-center gap-2">
+          <li
+            key={label}
+            aria-current={active ? "step" : undefined}
+            className="flex flex-1 items-center gap-2"
+          >
             <span
               className={cn(
                 "grid size-8 shrink-0 place-items-center rounded-full text-xs font-bold",
@@ -33,7 +37,7 @@ export function CheckoutSteps({ current }: { current: number }) {
                 !done && !active && "bg-muted text-muted-foreground"
               )}
             >
-              {done ? <Check className="size-4" /> : i + 1}
+              {done ? <Check aria-hidden="true" className="size-4" /> : i + 1}
             </span>
             <span
               className={cn(
@@ -41,10 +45,15 @@ export function CheckoutSteps({ current }: { current: number }) {
                 active ? "text-foreground" : "text-muted-foreground"
               )}
             >
+              {done && <span className="sr-only">Finalizat: </span>}
+              {active && <span className="sr-only">Pas curent: </span>}
               {label}
             </span>
             {i < STEPS.length - 1 && (
-              <span className="mx-1 hidden h-px flex-1 bg-border small:block" />
+              <span
+                aria-hidden="true"
+                className="mx-1 hidden h-px flex-1 bg-border small:block"
+              />
             )}
           </li>
         );

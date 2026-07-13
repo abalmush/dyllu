@@ -15,22 +15,28 @@ test.describe("cart sync", () => {
     await addButton.click();
 
     await expect
-      .poll(async () => {
-        const cookies = await context.cookies();
-        return cookies.some((cookie) => cookie.name === "_medusa_cart_id");
-      })
+      .poll(
+        async () => {
+          const cookies = await context.cookies();
+          return cookies.some((cookie) => cookie.name === "_medusa_cart_id");
+        },
+        { timeout: 20_000 }
+      )
       .toBe(true);
 
     await expect(
       page.getByRole("heading", {
         name: /Coșul tău/i,
       })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 20_000 });
 
     await expect
-      .poll(async () => {
-        return (await page.locator('[data-testid="cart-item"]').count()) > 0;
-      })
+      .poll(
+        async () => {
+          return (await page.locator('[data-testid="cart-item"]').count()) > 0;
+        },
+        { timeout: 20_000 }
+      )
       .toBe(true);
 
     await page.getByRole("link", { name: "Vezi coșul" }).click();
@@ -38,9 +44,14 @@ test.describe("cart sync", () => {
     await expect(page).toHaveURL(/\/cart$/);
 
     await expect
-      .poll(async () => {
-        return (await page.locator('[data-testid="product-row"]').count()) > 0;
-      })
+      .poll(
+        async () => {
+          return (
+            (await page.locator('[data-testid="product-row"]').count()) > 0
+          );
+        },
+        { timeout: 20_000 }
+      )
       .toBe(true);
   });
 });

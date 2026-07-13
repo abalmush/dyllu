@@ -6,7 +6,12 @@ import { ZoomIn } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 
 import { cn } from "@lib/utils";
-import { Dialog, DialogContent, DialogTitle } from "@/components/atoms/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/atoms/dialog";
 
 type Props = {
   images: HttpTypes.StoreProductImage[];
@@ -84,6 +89,9 @@ export default function ImageGallery({ images }: Props) {
           <DialogTitle className="px-6 pt-6 text-sm font-semibold text-muted-foreground">
             Imagine {active + 1} / {safeImages.length}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Vizualizare mărită a imaginii produsului.
+          </DialogDescription>
           <div className="relative overflow-hidden">
             {current?.url && (
               <Image

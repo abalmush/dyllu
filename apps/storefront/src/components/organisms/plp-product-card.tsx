@@ -31,7 +31,13 @@ export type PlpProduct = {
   reviewCount?: number;
 };
 
-export function PlpProductCard({ product }: { product: PlpProduct }) {
+export function PlpProductCard({
+  product,
+  imagePriority = false,
+}: {
+  product: PlpProduct;
+  imagePriority?: boolean;
+}) {
   const [isAdding, setIsAdding] = React.useState(false);
   const [justAdded, setJustAdded] = React.useState(false);
   const isSale = product.price?.price_type === "sale";
@@ -53,12 +59,17 @@ export function PlpProductCard({ product }: { product: PlpProduct }) {
   return (
     <article className="clip-corner-cut-md group relative flex flex-col overflow-hidden bg-card ring-1 ring-border transition-[box-shadow,transform] duration-300 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:-translate-y-1 hover:shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)]">
       <div className="relative aspect-square w-full overflow-hidden bg-surface-subtle">
-        <Link href={product.href} aria-label={product.title}>
+        <Link
+          href={product.href}
+          aria-label={product.title}
+          className="absolute inset-0"
+        >
           {product.thumbnail ? (
             <Image
               src={product.thumbnail}
               alt={product.title}
               fill
+              loading={imagePriority ? "eager" : "lazy"}
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 22vw"
               className="object-contain p-6 transition-transform duration-500 ease-out group-hover:scale-[1.04]"
             />

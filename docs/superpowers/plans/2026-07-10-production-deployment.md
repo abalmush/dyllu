@@ -9,6 +9,7 @@
 **Tech Stack:** `@opennextjs/cloudflare`, `wrangler`, Cloudflare R2/D1/Durable Objects/Image Transformations, Hetzner CX32, Coolify, GHCR, GitHub Actions.
 
 **Conventions for every task:**
+
 - Every commit message MUST start with `DYLLU-000` (a global hook rejects commits without a ticket id).
 - The production domain is `dyllu.md`. The Cloudflare zone for it must exist before Task 5.
 - No comments in any code/config you write (project rule).
@@ -21,6 +22,7 @@
 Remove Docker-era config and the dead `pg` dependency. Keep `apps/storefront/Dockerfile` and `docker-compose.prod.yml` for now — they are the Approach B fallback until Task 3 passes; they get deleted in Task 10.
 
 **Files:**
+
 - Modify: `apps/storefront/package.json` (dependency removal only, via pnpm)
 - Modify: `apps/storefront/next.config.ts`
 
@@ -65,6 +67,7 @@ git commit -m "DYLLU-000 chore(storefront): drop dead pg dep and standalone outp
 ### Task 2: Install the OpenNext Cloudflare adapter and pass the bundle-size gate
 
 **Files:**
+
 - Modify: `apps/storefront/package.json` (deps + scripts)
 - Create: `apps/storefront/open-next.config.ts`
 - Create: `apps/storefront/wrangler.jsonc`
@@ -98,11 +101,11 @@ export default defineCloudflareConfig({});
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
   },
   "services": [
-    { "binding": "WORKER_SELF_REFERENCE", "service": "dyllu-storefront" }
-  ]
+    { "binding": "WORKER_SELF_REFERENCE", "service": "dyllu-storefront" },
+  ],
 }
 ```
 
@@ -122,7 +125,8 @@ Add to `"scripts"`:
 ```
 NEXTJS_ENV=development
 MEDUSA_BACKEND_URL=http://localhost:9000
-REVALIDATE_SECRET=supersecret
+REVALIDATE_SECRET=<generate-with-openssl-rand-hex-32>
+ORDER_ACCESS_SECRET=<generate-a-different-value-with-openssl-rand-hex-32>
 ```
 
 Copy it to `.dev.vars` locally (gitignored) for wrangler preview runs.
@@ -183,6 +187,7 @@ Deploys to `workers.dev` against the still-running NAS backend (`https://medusa.
 **Prerequisites:** Cloudflare account with Workers paid plan ($5/mo) enabled; `wrangler login` completed (or `CLOUDFLARE_API_TOKEN` exported).
 
 **Files:**
+
 - Modify: `apps/storefront/open-next.config.ts`
 - Modify: `apps/storefront/wrangler.jsonc`
 
@@ -217,30 +222,33 @@ Full file content (replace `<D1_DATABASE_ID>` with the UUID from Step 1):
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
   },
   "services": [
-    { "binding": "WORKER_SELF_REFERENCE", "service": "dyllu-storefront" }
+    { "binding": "WORKER_SELF_REFERENCE", "service": "dyllu-storefront" },
   ],
   "r2_buckets": [
-    { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "dyllu-next-cache" }
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "dyllu-next-cache",
+    },
   ],
   "d1_databases": [
     {
       "binding": "NEXT_TAG_CACHE_D1",
       "database_name": "dyllu-tag-cache",
-      "database_id": "<D1_DATABASE_ID>"
-    }
+      "database_id": "<D1_DATABASE_ID>",
+    },
   ],
   "durable_objects": {
     "bindings": [
-      { "name": "NEXT_CACHE_DO_QUEUE", "class_name": "DOQueueHandler" }
-    ]
+      { "name": "NEXT_CACHE_DO_QUEUE", "class_name": "DOQueueHandler" },
+    ],
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DOQueueHandler"] }],
   "vars": {
-    "MEDUSA_BACKEND_URL": "https://medusa.inexlab.com"
-  }
+    "MEDUSA_BACKEND_URL": "https://medusa.inexlab.com",
+  },
 }
 ```
 
@@ -308,6 +316,7 @@ git commit -m "DYLLU-000 feat(storefront): OpenNext caching via R2, D1 tag cache
 ### Task 4: Custom `next/image` loader for Cloudflare Image Transformations
 
 **Files:**
+
 - Create: `apps/storefront/src/lib/util/image-loader.ts`
 - Modify: `apps/storefront/next.config.ts`
 
@@ -320,8 +329,7 @@ Cloudflare dashboard → zone `dyllu.md` → **Images → Transformations** → 
 ```ts
 import type { ImageLoaderProps } from "next/image";
 
-const isTransformEnabled =
-  process.env.NEXT_PUBLIC_CF_IMAGE_TRANSFORMS === "on";
+const isTransformEnabled = process.env.NEXT_PUBLIC_CF_IMAGE_TRANSFORMS === "on";
 
 export default function cloudflareImageLoader({
   src,
@@ -404,6 +412,7 @@ Zone `dyllu.md`: add **A record `api` → `<VPS_IP>`, Proxied (orange cloud)**. 
 - [ ] **Step 4: [manual] Coolify: Postgres and Redis services**
 
 Coolify → Project `dyllu` → production environment:
+
 - **+ New → Database → PostgreSQL** (image `postgres:16`). Copy the internal connection URL.
 - **+ New → Database → Redis** (image `redis:7`). Copy the internal URL.
 
@@ -416,6 +425,7 @@ The `ghcr.io/abalmush/dyllu-backend` package is private. Either make the package
 - [ ] **Step 6: [manual] Coolify: backend app resource**
 
 **+ New → Docker Image** → `ghcr.io/abalmush/dyllu-backend:latest`.
+
 - Port: `9000`; Domain: `https://api.dyllu.md`; Health check path: `/health`.
 - Environment variables (from `apps/backend/.env.production.example`):
 
@@ -462,6 +472,7 @@ Verify: trigger a manual backup run; object appears in the bucket.
 ### Task 6: R2 media bucket + Medusa S3 file module
 
 **Files:**
+
 - Modify: `apps/backend/medusa-config.ts`
 
 - [ ] **Step 1: [manual] Create the media bucket + CDN domain + token**
@@ -491,8 +502,8 @@ module.exports = defineConfig({
       storeCors: process.env.STORE_CORS!,
       adminCors: process.env.ADMIN_CORS!,
       authCors: process.env.AUTH_CORS!,
-      jwtSecret: process.env.JWT_SECRET || "supersecret",
-      cookieSecret: process.env.COOKIE_SECRET || "supersecret",
+      jwtSecret: process.env.JWT_SECRET!,
+      cookieSecret: process.env.COOKIE_SECRET!,
     },
   },
   admin: {
@@ -563,6 +574,7 @@ git commit -m "DYLLU-000 feat(backend): S3 file module for Cloudflare R2 media"
 ### Task 7: Production storefront deploy on the custom domain
 
 **Files:**
+
 - Modify: `apps/storefront/wrangler.jsonc`
 
 - [ ] **Step 1: Add the custom domain and production vars to `wrangler.jsonc`**
@@ -614,8 +626,7 @@ curl -s -X POST https://dyllu.md/api/revalidate \
   -d '{"tags":["products"]}'
 ```
 
-Expected: `{"revalidated":["products"]}`.
-5. Admin at `https://api.dyllu.md/backend` logs in (session cookie survives — Full (strict) TLS chain).
+Expected: `{"revalidated":["products"]}`. 5. Admin at `https://api.dyllu.md/backend` logs in (session cookie survives — Full (strict) TLS chain).
 
 - [ ] **Step 5: Commit**
 
@@ -638,6 +649,7 @@ gh auth switch --user abalmus-celonis
 ```
 
 **Files:**
+
 - Modify: `.github/workflows/deploy-backend.yml` (full replacement)
 
 - [ ] **Step 1: Replace the file content**
@@ -738,6 +750,7 @@ gh auth switch --user abalmus-celonis
 (`NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` now holds the production key from Task 5.)
 
 **Files:**
+
 - Modify: `.github/workflows/deploy-storefront.yml` (full replacement)
 
 - [ ] **Step 1: Replace the file content**
@@ -824,6 +837,7 @@ After merge to `main`: `gh workflow run deploy-storefront.yml` → green run →
 Only after Tasks 7–9 are verified green in production.
 
 **Files:**
+
 - Delete: `apps/storefront/Dockerfile`, `apps/storefront/docker-compose.prod.yml`, `apps/backend/docker-compose.prod.yml`
 - Modify: `apps/backend/DEPLOY.md`, `CLAUDE.md`
 

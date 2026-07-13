@@ -4,11 +4,33 @@ import { deleteProductsWorkflow } from "@medusajs/medusa/core-flows";
 
 import { revalidateStorefront } from "./_revalidate";
 
-export default async function ingcoWipe({ container }: ExecArgs) {
+const CONFIRMATION = "DELETE_INGCO_PRODUCTS";
+
+export default async function ingcoWipe({ container, args }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   const query = container.resolve(ContainerRegistrationKeys.QUERY);
+  const confirmed = (args ?? []).includes(`--confirm=${CONFIRMATION}`);
 
-  const allProducts: Array<{ id: string; handle?: string; metadata?: Record<string, unknown> | null }> = [];
+  if (!confirmed) {
+    logger.warn(
+      `[wipe] dry run only; pass --confirm=${CONFIRMATION} to delete matching products`
+    );
+  }
+  if (
+    confirmed &&
+    process.env.NODE_ENV === "production" &&
+    process.env.ALLOW_DESTRUCTIVE_CATALOG_SCRIPTS !== "1"
+  ) {
+    throw new Error(
+      "Production deletion is disabled; set ALLOW_DESTRUCTIVE_CATALOG_SCRIPTS=1 for this one operation"
+    );
+  }
+
+  const allProducts: Array<{
+    id: string;
+    handle?: string;
+    metadata?: Record<string, unknown> | null;
+  }> = [];
   const pageSize = 200;
   let skip = 0;
   while (true) {
@@ -22,12 +44,6 @@ export default async function ingcoWipe({ container }: ExecArgs) {
     skip += pageSize;
   }
   logger.info(`[wipe] queried ${allProducts.length} total products`);
-  if (allProducts.length > 0) {
-    logger.info(
-      `[wipe] sample metadata: ${JSON.stringify(allProducts[0]?.metadata)?.slice(0, 200)}`
-    );
-  }
-
   const targets = allProducts.filter((p) => {
     if (!p.metadata) return false;
     return Object.keys(p.metadata).some((k) => k.startsWith("ingco_"));
@@ -39,6 +55,10 @@ export default async function ingcoWipe({ container }: ExecArgs) {
   }
 
   logger.info(`[wipe] found ${targets.length} ingco products to delete`);
+  if (!confirmed) {
+    logger.info("[wipe] dry run complete; nothing was deleted");
+    return;
+  }
 
   const batchSize = 50;
   let deleted = 0;

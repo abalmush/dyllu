@@ -1,13 +1,16 @@
 import { Metadata } from "next";
 
+import { buildSocialMetadata } from "@/lib/seo/metadata";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
 import StoreTemplate from "@modules/store/templates";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildSocialMetadata({
   title: "Magazin",
   description:
     "Explorează gama completă de scule, accesorii și echipamente DYLLU.",
-};
+  path: "/store",
+  imageAlt: "Catalogul de scule și echipamente DYLLU",
+});
 
 type Params = {
   searchParams: Promise<{

@@ -9,8 +9,8 @@ import SkeletonProductPreview from "@modules/skeletons/components/skeleton-produ
 import type {
   ProductFeedRequest,
   ProductFeedResponse,
-} from "@modules/store/lib/product-feed";
-import { toProductFeedSearchParams } from "@modules/store/lib/product-feed";
+} from "@modules/store/lib/product-feed-contract";
+import { toProductFeedSearchParams } from "@modules/store/lib/product-feed-contract";
 
 type Props = {
   initialProducts: ProductFeedResponse["products"];
@@ -119,15 +119,17 @@ export default function InfiniteProductsGrid({
         className="grid w-full grid-cols-2 gap-4 small:grid-cols-3 medium:grid-cols-4"
         data-testid="products-list"
       >
-        {products.map((product) => (
+        {products.map((product, index) => (
           <li key={product.id}>
-            <PlpProductCard product={product} />
+            <PlpProductCard product={product} imagePriority={index < 4} />
           </li>
         ))}
       </ul>
 
       <div className="mt-8 space-y-4">
-        {nextPage && <div ref={sentinelRef} className="h-px w-full" aria-hidden />}
+        {nextPage && (
+          <div ref={sentinelRef} className="h-px w-full" aria-hidden />
+        )}
 
         {isLoading && (
           <ul className="grid w-full grid-cols-2 gap-4 small:grid-cols-3 medium:grid-cols-4">
@@ -151,7 +153,11 @@ export default function InfiniteProductsGrid({
                 </p>
                 <p className="text-sm text-muted-foreground">{error}</p>
               </div>
-              <Button type="button" variant="outline" onClick={() => void loadMore()}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void loadMore()}
+              >
                 Încearcă din nou
               </Button>
             </div>

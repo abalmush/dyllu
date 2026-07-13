@@ -42,11 +42,22 @@ export function getProductEyebrow(
 
 export function getProductUiType(product: HttpTypes.StoreProduct): ProductType {
   const metadata = (product.metadata ?? {}) as ProductMetadata;
+
+  // A "Configurație" option (bare vs. tool+battery+charger kit) is an authoritative
+  // variant selector: the shopper must be able to pick a configuration, so this
+  // product always renders the interactive purchase card — never a static
+  // combo/kit/set breakdown (the bare hero's description may still list a battery).
+  const hasConfigurationOption = (product.options ?? []).some(
+    (o) => (o.title ?? "").trim().toLowerCase() === "configurație"
+  );
+  if (hasConfigurationOption) {
+    return metadata.requires_battery === true ? "needs-battery" : "single";
+  }
+
   const sourceCategory = String(
     metadata.ingco_source_categories ?? ""
   ).toLowerCase();
   const title = String(product.title ?? "").toLowerCase();
-  const accessoryKind = String(metadata.accessory_kind ?? "");
   const includedItems = parseKitItems(product.description);
   const setCount = getSetCount(product, includedItems);
   const hasBundledPowerAccessories = includedItems.some((item) =>
@@ -74,10 +85,10 @@ export function getProductUiType(product: HttpTypes.StoreProduct): ProductType {
     return "set";
   }
 
-  if (!accessoryKind && hasBundledPowerAccessories) {
-    return "combo";
-  }
-
+  // A single tool that merely ships with its own batteries/charger (or its
+  // standard accessories) is NOT a combo — it renders the normal purchase PDP,
+  // and its bundled contents show in an "Include în cutie" section. The combo/kit
+  // templates are reserved for genuine multi-tool bundles (handled above).
   if (metadata.requires_battery === true) {
     return "needs-battery";
   }

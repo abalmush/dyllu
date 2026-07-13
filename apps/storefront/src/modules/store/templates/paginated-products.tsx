@@ -4,11 +4,11 @@ import { PackageSearch } from "lucide-react";
 import { Button } from "@/components/atoms/button";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
 import InfiniteProductsGrid from "@modules/store/components/infinite-products-grid";
+import { getProductFeedPage } from "@modules/store/lib/product-feed";
 import {
-  getProductFeedPage,
   getProductFeedRequestKey,
   type ProductFeedRequest,
-} from "@modules/store/lib/product-feed";
+} from "@modules/store/lib/product-feed-contract";
 
 export default async function PaginatedProducts({
   sortBy,
@@ -40,9 +40,8 @@ export default async function PaginatedProducts({
     onSale,
   };
 
-  const { products, count, currentPage, nextPage } = await getProductFeedPage(
-    request
-  );
+  const { products, count, currentPage, nextPage } =
+    await getProductFeedPage(request);
 
   if (products.length === 0) {
     const emptyTitle = query

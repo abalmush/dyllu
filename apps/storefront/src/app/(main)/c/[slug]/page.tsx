@@ -5,6 +5,7 @@ import { Sparkles } from "lucide-react";
 
 import { getPromoBySlug } from "@lib/promos";
 import { getProductTagByValue } from "@lib/data/product-tags";
+import { buildSocialMetadata } from "@/lib/seo/metadata";
 import PlpShell from "@modules/store/components/plp-shell";
 import PaginatedProducts from "@modules/store/templates/paginated-products";
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid";
@@ -25,10 +26,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound();
   }
 
-  return {
+  return buildSocialMetadata({
     title: promo.title,
     description: promo.subtitle ?? `Descoperă selecția DYLLU: ${promo.title}.`,
-  };
+    path: `/c/${slug}`,
+    imageAlt: `${promo.title} — selecție DYLLU`,
+  });
 }
 
 export default async function PromoPage(props: Props) {

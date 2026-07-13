@@ -2,15 +2,14 @@
 
 import { sdk } from "@lib/config";
 import { HttpTypes } from "@medusajs/types";
-import { getAuthHeaders, getCacheOptions } from "./cookies";
+import { getAuthHeaders, getCartId } from "./cookies";
 
-export const listCartShippingMethods = async (cartId: string) => {
+export const listCartShippingMethods = async () => {
+  const cartId = await getCartId();
+  if (!cartId) return [];
+
   const headers = {
     ...(await getAuthHeaders()),
-  };
-
-  const next = {
-    ...(await getCacheOptions("fulfillment")),
   };
 
   return sdk.client
@@ -22,47 +21,34 @@ export const listCartShippingMethods = async (cartId: string) => {
           cart_id: cartId,
         },
         headers,
-        next,
-        cache: "force-cache",
+        cache: "no-store",
       }
     )
-    .then(({ shipping_options }) => shipping_options)
-    .catch(() => {
-      return null;
-    });
+    .then(({ shipping_options }) => shipping_options);
 };
 
-export const calculatePriceForShippingOption = async (
-  optionId: string,
-  cartId: string,
-  data?: Record<string, unknown>
-) => {
+export const calculatePriceForShippingOption = async (optionId: string) => {
+  if (!/^[A-Za-z0-9_:-]{1,128}$/.test(optionId)) {
+    throw new Error("Invalid shipping option ID");
+  }
+  const cartId = await getCartId();
+  if (!cartId) {
+    throw new Error("No existing cart found");
+  }
+
   const headers = {
     ...(await getAuthHeaders()),
   };
-
-  const next = {
-    ...(await getCacheOptions("fulfillment")),
-  };
-
-  const body = { cart_id: cartId, data };
-
-  if (data) {
-    body.data = data;
-  }
 
   return sdk.client
     .fetch<{ shipping_option: HttpTypes.StoreCartShippingOption }>(
       `/store/shipping-options/${optionId}/calculate`,
       {
         method: "POST",
-        body,
+        body: { cart_id: cartId },
         headers,
-        next,
+        cache: "no-store",
       }
     )
-    .then(({ shipping_option }) => shipping_option)
-    .catch((e) => {
-      return null;
-    });
+    .then(({ shipping_option }) => shipping_option);
 };

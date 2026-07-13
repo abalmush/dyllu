@@ -1,4 +1,5 @@
 import { HttpTypes } from "@medusajs/types";
+import { isManual } from "@lib/constants";
 
 type CheckoutCart = HttpTypes.StoreCart & {
   gift_cards?: Array<unknown> | null;
@@ -36,12 +37,18 @@ export function hasReadyPayment(cart: CheckoutCart): boolean {
   }
 
   return !!cart.payment_collection?.payment_sessions?.find(
-    (paymentSession) => paymentSession.status === "pending"
+    (paymentSession) =>
+      paymentSession.status === "pending" &&
+      isManual(paymentSession.provider_id)
   );
 }
 
 export function getNextCheckoutStep(cart: CheckoutCart): CheckoutStepKey {
-  if (!cart?.shipping_address?.address_1 || !cart.email) {
+  if (
+    !cart?.shipping_address?.address_1 ||
+    !cart.billing_address?.address_1 ||
+    !cart.email
+  ) {
     return "address";
   }
 
@@ -60,9 +67,16 @@ export function getActiveCheckoutStep(
   cart: CheckoutCart,
   requestedStep?: string
 ): CheckoutStepKey {
-  if (requestedStep && isCheckoutStep(requestedStep)) {
+  const nextRequiredStep = getNextCheckoutStep(cart);
+
+  if (
+    requestedStep &&
+    isCheckoutStep(requestedStep) &&
+    getCheckoutStepIndex(requestedStep) <=
+      getCheckoutStepIndex(nextRequiredStep)
+  ) {
     return requestedStep;
   }
 
-  return getNextCheckoutStep(cart);
+  return nextRequiredStep;
 }

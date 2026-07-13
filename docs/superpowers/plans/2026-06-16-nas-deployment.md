@@ -729,7 +729,7 @@ gh secret set NAS_HOST --body "colonitahome.tail2bef8a.ts.net" --repo abalmush/d
 gh secret set NAS_PORT --body "2222" --repo abalmush/dyllu
 gh secret set NAS_USER --body "deploy" --repo abalmush/dyllu
 gh secret set NAS_SSH_KEY < ~/.ssh/synology-deploy --repo abalmush/dyllu
-gh secret set POSTGRES_PASSWORD --body "ctx-pg-S3cur3-2026" --repo abalmush/dyllu
+gh secret set POSTGRES_PASSWORD --repo abalmush/dyllu
 ```
 
 - [ ] **Generate and set Medusa secrets**

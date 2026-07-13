@@ -1,10 +1,12 @@
-"use server";
+import "server-only";
 
 import { sdk } from "@lib/config";
 import { getAuthHeaders, getCacheOptions } from "./cookies";
 import { HttpTypes } from "@medusajs/types";
 
 export const listCartPaymentMethods = async (regionId: string) => {
+  if (!/^[A-Za-z0-9_:-]{1,128}$/.test(regionId)) return [];
+
   const headers = {
     ...(await getAuthHeaders()),
   };
@@ -28,8 +30,5 @@ export const listCartPaymentMethods = async (regionId: string) => {
       payment_providers.sort((a, b) => {
         return a.id > b.id ? 1 : -1;
       })
-    )
-    .catch(() => {
-      return null;
-    });
+    );
 };

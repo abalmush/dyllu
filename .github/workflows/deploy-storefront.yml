@@ -5,25 +5,96 @@ on:
     branches: [main]
     paths:
       - "apps/storefront/**"
+      - "packages/**"
+      - "package.json"
+      - "pnpm-workspace.yaml"
       - "pnpm-lock.yaml"
+      - "turbo.json"
+      - ".npmrc"
+      - ".nvmrc"
       - ".github/workflows/deploy-storefront.yml"
   pull_request:
     paths:
       - "apps/storefront/**"
+      - "packages/**"
+      - "package.json"
+      - "pnpm-workspace.yaml"
+      - "pnpm-lock.yaml"
+      - "turbo.json"
+      - ".npmrc"
+      - ".nvmrc"
+      - ".github/workflows/deploy-storefront.yml"
   workflow_dispatch:
 
+concurrency:
+  group: deploy-storefront-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
-  NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
   NEXT_PUBLIC_BASE_URL: https://dyllu.md
   NEXT_PUBLIC_DEFAULT_REGION: md
   NEXT_PUBLIC_CF_IMAGE_TRANSFORMS: "on"
   MEDUSA_BACKEND_URL: https://api.dyllu.md
 
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     permissions:
       contents: read
+    env:
+      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || 'pk_ci_validation_placeholder' }}
+      REVALIDATE_SECRET: ${{ secrets.MEDUSA_REVALIDATE_SECRET || 'ci-only-revalidation-secret-32-chars' }}
+      ORDER_ACCESS_SECRET: ${{ secrets.ORDER_ACCESS_SECRET || 'ci-only-order-access-secret-32-chars' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level high
+
+      - name: Lint
+        run: pnpm --filter @dyllu/storefront lint
+
+      - name: Typecheck
+        run: pnpm --filter @dyllu/storefront typecheck
+
+      - name: Install Chromium for end-to-end tests
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        run: pnpm --filter @dyllu/storefront exec playwright install --with-deps chromium
+
+      - name: Run storefront end-to-end test
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        run: pnpm --filter @dyllu/storefront test
+
+      - name: Build with OpenNext
+        working-directory: apps/storefront
+        run: pnpm exec opennextjs-cloudflare build
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    permissions:
+      contents: read
+    env:
+      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
+      REVALIDATE_SECRET: ${{ secrets.MEDUSA_REVALIDATE_SECRET }}
+      ORDER_ACCESS_SECRET: ${{ secrets.ORDER_ACCESS_SECRET }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,17 +116,21 @@ jobs:
         run: pnpm exec opennextjs-cloudflare build
 
       - name: Deploy to production
-        if: github.event_name != 'pull_request'
         working-directory: apps/storefront
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: pnpm exec opennextjs-cloudflare deploy
 
-      - name: Upload preview version
-        if: github.event_name == 'pull_request'
-        working-directory: apps/storefront
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm exec opennextjs-cloudflare upload
+      - name: Smoke-test public storefront
+        run: |
+          for url in https://dyllu.md https://dyllu.md/store https://dyllu.md/cart; do
+            curl --fail --silent --show-error --location \
+              --connect-timeout 10 --max-time 30 \
+              --retry 12 --retry-delay 10 --retry-all-errors \
+              "$url" >/dev/null
+          done
+          curl --fail --silent --show-error --location \
+            --connect-timeout 10 --max-time 30 \
+            --retry 12 --retry-delay 10 --retry-all-errors \
+            https://api.dyllu.md/ready >/dev/null

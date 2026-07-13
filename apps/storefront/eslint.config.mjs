@@ -20,6 +20,7 @@ const eslintConfig = defineConfig([
   starterLegacyWarnings,
   globalIgnores([
     ".next/**",
+    ".next-e2e/**",
     ".open-next/**",
     ".wrangler/**",
     ".wrangler-dist/**",

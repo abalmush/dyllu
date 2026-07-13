@@ -1,4 +1,4 @@
-"use server";
+import "server-only";
 
 import { sdk } from "@lib/config";
 import { sortProducts } from "@lib/util/sort-products";
@@ -6,6 +6,9 @@ import { HttpTypes } from "@medusajs/types";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
 import { getAuthHeaders, getCacheOptions } from "./cookies";
 import { getRegion, retrieveRegion } from "./regions";
+
+const CATALOG_FETCH_LIMIT = 100;
+const CATALOG_FETCH_CONCURRENCY = 4;
 
 export const listProducts = async ({
   pageParam = 1,
@@ -60,7 +63,7 @@ export const listProducts = async ({
       }
     )
     .then(({ products, count }) => {
-      const nextPage = count > offset + limit ? pageParam + 1 : null;
+      const nextPage = count > offset + limit ? _pageParam + 1 : null;
 
       return {
         response: {
@@ -74,7 +77,7 @@ export const listProducts = async ({
 };
 
 export const listProductsWithSort = async ({
-  page = 0,
+  page = 1,
   queryParams,
   sortBy = "created_at",
   onlyOnSale = false,
@@ -89,16 +92,69 @@ export const listProductsWithSort = async ({
   queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams;
 }> => {
   const limit = queryParams?.limit || 12;
+  const normalizedPage = Number.isFinite(page)
+    ? Math.max(1, Math.floor(page))
+    : 1;
 
-  const {
-    response: { products },
-  } = await listProducts({
-    pageParam: 0,
-    queryParams: {
-      ...queryParams,
-      limit: 100,
-    },
+  if (sortBy === "created_at" && !onlyOnSale) {
+    const pageResult = await listProducts({
+      pageParam: normalizedPage,
+      queryParams: {
+        ...queryParams,
+        limit,
+        order: "-created_at",
+      } as HttpTypes.FindParams & HttpTypes.StoreProductListParams,
+    });
+
+    return {
+      response: pageResult.response,
+      nextPage: pageResult.nextPage,
+      queryParams,
+    };
+  }
+
+  const bulkQueryParams = {
+    ...queryParams,
+    limit: CATALOG_FETCH_LIMIT,
+  } as HttpTypes.FindParams & HttpTypes.StoreProductListParams;
+
+  const firstPage = await listProducts({
+    pageParam: 1,
+    queryParams: bulkQueryParams,
   });
+  const productsById = new Map(
+    firstPage.response.products.map((product) => [product.id, product])
+  );
+  const totalPages = Math.ceil(firstPage.response.count / CATALOG_FETCH_LIMIT);
+
+  for (
+    let firstPendingPage = 2;
+    firstPendingPage <= totalPages;
+    firstPendingPage += CATALOG_FETCH_CONCURRENCY
+  ) {
+    const lastPendingPage = Math.min(
+      totalPages,
+      firstPendingPage + CATALOG_FETCH_CONCURRENCY - 1
+    );
+    const pages = await Promise.all(
+      Array.from(
+        { length: lastPendingPage - firstPendingPage + 1 },
+        (_, index) =>
+          listProducts({
+            pageParam: firstPendingPage + index,
+            queryParams: bulkQueryParams,
+          })
+      )
+    );
+
+    for (const productPage of pages) {
+      for (const product of productPage.response.products) {
+        productsById.set(product.id, product);
+      }
+    }
+  }
+
+  const products = Array.from(productsById.values());
 
   const sortedProducts = sortProducts(products, sortBy);
   const filteredProducts = onlyOnSale
@@ -112,14 +168,14 @@ export const listProductsWithSort = async ({
       )
     : sortedProducts;
 
-  const pageParam = (page - 1) * limit;
+  const pageOffset = (normalizedPage - 1) * limit;
 
   const nextPage =
-    filteredProducts.length > pageParam + limit ? page + 1 : null;
+    filteredProducts.length > pageOffset + limit ? normalizedPage + 1 : null;
 
   const paginatedProducts = filteredProducts.slice(
-    pageParam,
-    pageParam + limit
+    pageOffset,
+    pageOffset + limit
   );
 
   return {

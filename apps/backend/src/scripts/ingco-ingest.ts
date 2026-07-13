@@ -69,10 +69,11 @@ export default async function ingcoIngest({ container, args }: ExecArgs) {
     entity: "sales_channel",
     fields: ["id", "name"],
   });
-  const defaultSc = salesChannels.find(
-    (sc) => sc.name === "Default Sales Channel"
-  ) ?? salesChannels[0];
-  if (!defaultSc) throw new Error("No sales channel found; run db:migrate first.");
+  const defaultSc =
+    salesChannels.find((sc) => sc.name === "Default Sales Channel") ??
+    salesChannels[0];
+  if (!defaultSc)
+    throw new Error("No sales channel found; run db:migrate first.");
 
   const { data: profiles } = await query.graph({
     entity: "shipping_profile",
@@ -120,7 +121,13 @@ export default async function ingcoIngest({ container, args }: ExecArgs) {
   for (let i = 0; i < fresh.length; i += batchSize) {
     const batch = fresh.slice(i, i + batchSize);
     const input = batch.map((p) =>
-      toCreateInput(p, shippingProfileId, defaultSc.id, categoryIdByHandle, fallbackCategoryId)
+      toCreateInput(
+        p,
+        shippingProfileId,
+        defaultSc.id,
+        categoryIdByHandle,
+        fallbackCategoryId
+      )
     );
     try {
       const { result } = await createProductsWorkflow(container).run({
@@ -150,6 +157,12 @@ function toCreateInput(
   categoryIdByHandle: Map<string, string>,
   fallbackCategoryId: string | undefined
 ) {
+  if (!p.name || !p.sku || !Number.isFinite(p.priceMdl) || p.priceMdl <= 0) {
+    throw new Error(
+      `Invalid product identity or price for source ${p.sourceId}`
+    );
+  }
+
   const handle = deriveHandle(p);
   const description = buildDescription(p);
   const categoryHandle = resolveCategoryHandle(p);
@@ -160,7 +173,7 @@ function toCreateInput(
     title: p.name,
     handle,
     description,
-    status: "published" as const,
+    status: (p.inStock ? "published" : "draft") as "published" | "draft",
     shipping_profile_id: shippingProfileId,
     sales_channels: [{ id: salesChannelId }],
     options: [{ title: "Variantă", values: ["Standard"] }],
@@ -207,19 +220,14 @@ function buildDescription(p: ScrapedProduct): string {
   const parts: string[] = [];
   if (p.descriptionText) parts.push(p.descriptionText);
   if (p.attributes.length) {
-    const specs = p.attributes
-      .map((a) => `${a.key}: ${a.value}`)
-      .join("\n");
+    const specs = p.attributes.map((a) => `${a.key}: ${a.value}`).join("\n");
     parts.push(`\nSpecificații:\n${specs}`);
   }
   return parts.join("\n\n") || p.name;
 }
 
 function deriveHandle(p: ScrapedProduct): string {
-  const raw = p.sourceUrl
-    .replace(/\/$/, "")
-    .split("/")
-    .pop() ?? "";
+  const raw = p.sourceUrl.replace(/\/$/, "").split("/").pop() ?? "";
   return decodeURIComponent(raw)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
