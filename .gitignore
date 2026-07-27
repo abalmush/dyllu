@@ -60,3 +60,19 @@ tmp/
 images/
 !apps/storefront/public/images/
 !apps/storefront/public/images/**
+
+# Catalog admin (local-only tool, not committed yet)
+apps/catalog-admin/
+tools/.venv-images/
+
+# Brainstorming mockup sessions (superpowers skill)
+.superpowers/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local catalog artefacts
+outputs/
+apps/backend/backups/

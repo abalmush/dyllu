@@ -1,6 +1,6 @@
 const SkeletonOrderConfirmedHeader = () => {
   return (
-    <div className="flex animate-pulse flex-col gap-y-2 pb-10">
+    <div className="flex animate-pulse flex-col gap-y-2 pb-12">
       <div className="h-4 w-2/5 bg-gray-100"></div>
       <div className="h-6 w-3/6 bg-gray-100"></div>
       <div className="flex gap-x-4">

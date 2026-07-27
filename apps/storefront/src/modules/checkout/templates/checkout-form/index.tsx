@@ -5,7 +5,7 @@ import { CheckoutStepKey } from "@modules/checkout/lib/presentation";
 import Addresses from "@modules/checkout/components/addresses";
 import Payment from "@modules/checkout/components/payment";
 import Review from "@modules/checkout/components/review";
-import ReviewItems from "@modules/checkout/components/review-items";
+import ScrollToActiveStep from "@modules/checkout/components/scroll-to-active-step";
 import Shipping from "@modules/checkout/components/shipping";
 
 export default async function CheckoutForm({
@@ -26,30 +26,38 @@ export default async function CheckoutForm({
     listCartPaymentMethods(cart.region?.id ?? ""),
   ]);
 
-  const shouldUseReviewLayout =
+  const shippingIsHidden =
     activeStep === "review" && (cart.shipping_methods?.length ?? 0) > 0;
 
   return (
     <div className="grid w-full grid-cols-1 gap-y-6">
-      <Addresses cart={cart} customer={customer} activeStep={activeStep} />
+      <ScrollToActiveStep />
 
-      {shouldUseReviewLayout ? (
-        <ReviewItems cart={cart} />
-      ) : (
-        <Shipping
-          cart={cart}
-          availableShippingMethods={shippingMethods}
-          activeStep={activeStep}
-        />
+      <div data-checkout-section="address">
+        <Addresses cart={cart} customer={customer} activeStep={activeStep} />
+      </div>
+
+      {!shippingIsHidden && (
+        <div data-checkout-section="delivery">
+          <Shipping
+            cart={cart}
+            availableShippingMethods={shippingMethods}
+            activeStep={activeStep}
+          />
+        </div>
       )}
 
-      <Payment
-        cart={cart}
-        availablePaymentMethods={paymentMethods}
-        activeStep={activeStep}
-      />
+      <div data-checkout-section="payment">
+        <Payment
+          cart={cart}
+          availablePaymentMethods={paymentMethods}
+          activeStep={activeStep}
+        />
+      </div>
 
-      <Review cart={cart} activeStep={activeStep} />
+      <div data-checkout-section="review">
+        <Review cart={cart} activeStep={activeStep} />
+      </div>
     </div>
   );
 }

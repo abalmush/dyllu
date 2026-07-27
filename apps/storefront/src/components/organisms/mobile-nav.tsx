@@ -43,7 +43,7 @@ export function MobileNav({ categories }: MobileNavProps) {
           label="Deschide meniul"
           variant="ghost"
           size="md"
-          className="medium:hidden"
+          className="min-[1120px]:hidden"
         >
           <Menu className="size-5" />
         </IconButton>
@@ -52,7 +52,7 @@ export function MobileNav({ categories }: MobileNavProps) {
         side="left"
         className="flex w-full max-w-sm flex-col gap-0 p-0"
       >
-        <SheetHeader className="flex flex-row items-center justify-between gap-2 border-b border-border px-6 py-5">
+        <SheetHeader className="border-border flex flex-row items-center justify-between gap-2 border-b px-6 py-6">
           <Logo className="h-7" />
           <SheetTitle className="sr-only">Navigare</SheetTitle>
         </SheetHeader>
@@ -61,10 +61,10 @@ export function MobileNav({ categories }: MobileNavProps) {
             <Link
               href="/store"
               onClick={close}
-              className="mx-2 mt-3 flex items-center justify-between rounded-lg bg-surface px-4 py-3 text-sm font-semibold tracking-tight text-foreground hover:bg-surface-strong"
+              className="bg-surface text-foreground hover:bg-surface-strong mx-2 mt-4 flex items-center justify-between rounded-lg px-4 py-4 text-sm font-semibold tracking-tight"
             >
               Toate produsele
-              <ChevronDown className="size-4 -rotate-90 text-muted-foreground" />
+              <ChevronDown className="text-muted-foreground size-4 -rotate-90" />
             </Link>
             <Accordion type="multiple" className="px-2">
               {navigationCategories.map((category) => {
@@ -74,7 +74,7 @@ export function MobileNav({ categories }: MobileNavProps) {
                   <AccordionItem
                     key={category.handle}
                     value={category.handle}
-                    className="border-b border-border/60 last:border-b-0"
+                    className="border-border/60 border-b last:border-b-0"
                   >
                     <AccordionTrigger className="text-sm font-semibold tracking-tight">
                       <Link
@@ -91,11 +91,11 @@ export function MobileNav({ categories }: MobileNavProps) {
                         {displayName}
                       </Link>
                     </AccordionTrigger>
-                    <AccordionContent className="space-y-0.5 pl-3">
+                    <AccordionContent className="space-y-0.5 pl-4">
                       <Link
                         href={`/categories/${category.handle}`}
                         onClick={close}
-                        className="block rounded-md px-3 py-2 text-sm font-medium text-primary hover:bg-muted"
+                        className="text-primary hover:bg-muted block rounded-md px-4 py-2 text-sm font-medium"
                       >
                         Vezi tot {displayName}
                       </Link>
@@ -104,18 +104,18 @@ export function MobileNav({ categories }: MobileNavProps) {
                           <Link
                             href={`/categories/${child.handle}`}
                             onClick={close}
-                            className="block rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
+                            className="text-foreground hover:bg-muted block rounded-md px-4 py-2 text-sm"
                           >
                             {child.name}
                           </Link>
                           {child.children.length > 0 && (
-                            <ul className="ml-3 space-y-0.5 border-l border-border pl-3">
+                            <ul className="border-border ml-4 space-y-0.5 border-l pl-4">
                               {child.children.map((grand) => (
                                 <li key={grand.handle}>
                                   <Link
                                     href={`/categories/${grand.handle}`}
                                     onClick={close}
-                                    className="block rounded-md px-3 py-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+                                    className="text-muted-foreground hover:bg-muted hover:text-foreground block rounded-md px-4 py-2 text-xs"
                                   >
                                     {grand.name}
                                   </Link>
@@ -131,13 +131,13 @@ export function MobileNav({ categories }: MobileNavProps) {
               })}
             </Accordion>
           </nav>
-          <div className="border-t border-border bg-surface-subtle px-6 py-4">
+          <div className="border-border bg-surface-subtle border-t px-6 py-4">
             <div className="grid grid-cols-1 gap-2">
               <Link
                 href="/account"
                 onClick={close}
                 className={cn(
-                  "flex items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium hover:bg-muted"
+                  "border-border bg-background hover:bg-muted flex items-center justify-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium"
                 )}
               >
                 <User className="size-4" /> Cont
@@ -145,7 +145,7 @@ export function MobileNav({ categories }: MobileNavProps) {
             </div>
             <a
               href={SITE_CONTACT.phoneHref}
-              className="mt-3 flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 mt-4 flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold"
             >
               <Phone className="size-4" />
               {SITE_CONTACT.phoneDisplay}

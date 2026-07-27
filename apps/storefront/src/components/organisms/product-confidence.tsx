@@ -17,10 +17,10 @@ export function ConfidenceMeter({
   reasons: string[];
 }) {
   return (
-    <div className="clip-corner-cut-lg mx-auto max-w-[520px] bg-card p-6 ring-1 ring-border small:p-8">
+    <div className="clip-corner-cut-lg bg-card ring-border small:p-8 mx-auto max-w-[520px] p-6 ring-1">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h3 className="font-display text-lg font-bold text-foreground">
+          <h3 className="font-display text-foreground text-lg font-bold">
             {name}
           </h3>
           <span className="mt-1 inline-flex items-center gap-0.5">
@@ -38,23 +38,23 @@ export function ConfidenceMeter({
           </span>
         </div>
         <div className="text-right">
-          <span className="font-display text-3xl font-extrabold text-success">
+          <span className="font-display text-success text-3xl font-extrabold">
             {confidence}%
           </span>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-success">
+          <p className="text-success text-xs font-semibold tracking-[0.14em] uppercase">
             {verdict}
           </p>
         </div>
       </div>
 
-      <div className="mt-5 border-t border-border pt-4">
-        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <div className="border-border mt-6 border-t pt-4">
+        <span className="text-muted-foreground text-xs font-semibold tracking-[0.16em] uppercase">
           De ce o recomandăm
         </span>
-        <ul className="mt-3 space-y-2">
+        <ul className="mt-4 space-y-2">
           {reasons.map((reason) => (
             <li key={reason} className="flex items-start gap-2 text-sm">
-              <Check className="mt-0.5 size-4 shrink-0 text-success" />
+              <Check className="text-success mt-0.5 size-4 shrink-0" />
               <span className="text-foreground">{reason}</span>
             </li>
           ))}
@@ -81,24 +81,24 @@ export function CompareInline({
   rows: CompareRow[];
 }) {
   return (
-    <div className="clip-corner-cut-lg mx-auto max-w-[640px] overflow-hidden bg-card ring-1 ring-border">
-      <div className="grid grid-cols-[1.2fr_1fr_1fr] gap-2 border-b border-border bg-surface-subtle p-4 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+    <div className="clip-corner-cut-lg bg-card ring-border mx-auto max-w-[640px] overflow-hidden ring-1">
+      <div className="border-border bg-surface-subtle text-muted-foreground grid grid-cols-[1.2fr_1fr_1fr] gap-2 border-b p-4 text-xs font-semibold tracking-[0.12em] uppercase">
         <span>Comparație</span>
         <span className="text-foreground">{currentName}</span>
         <span>{alternativeName}</span>
       </div>
-      <div className="divide-y divide-border">
+      <div className="divide-border divide-y">
         {rows.map((row) => (
           <div
             key={row.label}
-            className="grid grid-cols-[1.2fr_1fr_1fr] gap-2 px-4 py-3 text-sm"
+            className="grid grid-cols-[1.2fr_1fr_1fr] gap-2 px-4 py-4 text-sm"
           >
             <span className="text-muted-foreground">{row.label}</span>
             <span
               className={cn(
                 "font-medium",
                 row.better === "current"
-                  ? "font-bold text-success"
+                  ? "text-success font-bold"
                   : "text-foreground"
               )}
             >
@@ -107,7 +107,7 @@ export function CompareInline({
             <span
               className={cn(
                 row.better === "alternative"
-                  ? "font-bold text-success"
+                  ? "text-success font-bold"
                   : "text-foreground"
               )}
             >
@@ -137,27 +137,27 @@ export function CompatibilityGraph({
   nodes: CompatNode[];
 }) {
   return (
-    <div className="clip-corner-cut-lg mx-auto max-w-[720px] bg-card p-6 ring-1 ring-border small:p-8">
+    <div className="clip-corner-cut-lg bg-card ring-border small:p-8 mx-auto max-w-[720px] p-6 ring-1">
       <div className="flex flex-col items-center">
-        <span className="clip-corner-cut-sm bg-foreground px-4 py-2 text-sm font-bold text-background">
+        <span className="clip-corner-cut-sm bg-foreground text-background px-4 py-2 text-sm font-bold">
           {root}
         </span>
-        <span aria-hidden className="h-6 w-px bg-border" />
-        <span aria-hidden className="h-px w-2/3 bg-border" />
+        <span aria-hidden className="bg-border h-6 w-px" />
+        <span aria-hidden className="bg-border h-px w-2/3" />
 
-        <div className="mt-6 grid w-full grid-cols-2 gap-3 small:grid-cols-4">
+        <div className="small:grid-cols-4 mt-6 grid w-full grid-cols-2 gap-4">
           {nodes.map((node) => {
             const style = STATUS_STYLE[node.status];
             return (
               <div
                 key={node.id}
                 className={cn(
-                  "clip-corner-cut-sm flex flex-col items-center gap-2 bg-background p-3 text-center ring-1",
+                  "clip-corner-cut-sm bg-background flex flex-col items-center gap-2 p-4 text-center ring-1",
                   style.ring
                 )}
               >
                 <span className={cn("size-2.5 rounded-full", style.dot)} />
-                <span className="text-sm font-medium text-foreground">
+                <span className="text-foreground text-sm font-medium">
                   {node.label}
                 </span>
               </div>
@@ -166,16 +166,16 @@ export function CompatibilityGraph({
         </div>
       </div>
 
-      <div className="mt-6 flex flex-wrap justify-center gap-4 border-t border-border pt-4 text-xs text-muted-foreground">
+      <div className="border-border text-muted-foreground mt-6 flex flex-wrap justify-center gap-4 border-t pt-4 text-xs">
         <span className="flex items-center gap-1.5">
-          <span className="size-2.5 rounded-full bg-success" /> Compatibil
+          <span className="bg-success size-2.5 rounded-full" /> Compatibil
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="size-2.5 rounded-full bg-warning" /> Funcționează,
+          <span className="bg-warning size-2.5 rounded-full" /> Funcționează,
           dar nu ideal
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="size-2.5 rounded-full bg-destructive" /> Incompatibil
+          <span className="bg-destructive size-2.5 rounded-full" /> Incompatibil
         </span>
       </div>
     </div>

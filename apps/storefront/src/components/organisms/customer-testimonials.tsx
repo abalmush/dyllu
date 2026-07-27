@@ -23,14 +23,14 @@ export function CustomerTestimonials({
   if (!testimonials.length) return null;
 
   return (
-    <section className="py-12 small:py-20">
+    <section className="small:py-20 py-12">
       <Container>
         {title && (
-          <h2 className="mb-8 text-center font-display text-2xl font-extrabold uppercase tracking-tight text-foreground small:mb-12 small:text-3xl medium:text-4xl">
+          <h2 className="font-display text-foreground small:mb-12 small:text-3xl medium:text-4xl mb-8 text-center text-2xl font-extrabold tracking-tight uppercase">
             {title}
           </h2>
         )}
-        <div className="grid grid-cols-1 gap-5 medium:grid-cols-3 medium:gap-6">
+        <div className="medium:grid-cols-3 medium:gap-6 grid grid-cols-1 gap-6">
           {testimonials.map((t, i) => (
             <TestimonialCard key={`${t.author}-${i}`} testimonial={t} />
           ))}
@@ -42,8 +42,8 @@ export function CustomerTestimonials({
 
 function TestimonialCard({ testimonial }: { testimonial: TestimonialData }) {
   return (
-    <article className="clip-corner-cut-md flex flex-col overflow-hidden bg-foreground text-background">
-      <div className="relative aspect-[4/3] w-full overflow-hidden">
+    <article className="clip-corner-cut-md bg-foreground text-background flex flex-col overflow-hidden">
+      <div className="relative aspect-4/3 w-full overflow-hidden">
         <Image
           src={testimonial.image.src}
           alt={testimonial.image.alt}
@@ -52,15 +52,15 @@ function TestimonialCard({ testimonial }: { testimonial: TestimonialData }) {
           className="object-cover object-center"
         />
       </div>
-      <div className="flex flex-1 flex-col gap-5 p-6 small:p-8">
-        <h3 className="font-display text-base font-extrabold uppercase leading-snug tracking-tight small:text-lg">
+      <div className="small:p-8 flex flex-1 flex-col gap-6 p-6">
+        <h3 className="font-display small:text-lg text-base leading-snug font-extrabold tracking-tight uppercase">
           <span className="text-primary">{testimonial.heading}</span>{" "}
           <span className="text-background">{testimonial.productName}</span>
         </h3>
-        <p className="text-sm leading-relaxed text-background/85 small:text-base">
+        <p className="text-background/85 small:text-base text-sm leading-relaxed">
           &ldquo;{testimonial.quote}&rdquo;
         </p>
-        <p className="mt-auto pt-2 text-right text-xs font-medium text-background/60 small:text-sm">
+        <p className="text-background/60 small:text-sm mt-auto pt-2 text-right text-xs font-medium">
           — {testimonial.author}
         </p>
       </div>

@@ -1,38 +1,67 @@
 import * as React from "react";
 
-import { listProducts } from "@lib/data/products";
+import { listProductsWithSort } from "@lib/data/products";
+import { getCollectionByHandle } from "@lib/data/collections";
 import { getRegion } from "@lib/data/regions";
+import { type CategoryNode } from "@lib/data/categories";
 import { getProductPrice } from "@lib/util/get-product-price";
+import { getProductImageUrl } from "@lib/util/product-visibility";
 
-import { Container } from "@/components/atoms/container";
 import { ProductCard } from "@/components/molecules/product-card";
 import { AnatomyShowcase } from "@/components/organisms/anatomy-showcase";
-import { CustomerProjects } from "@/components/organisms/customer-projects";
 import { GuidesGrid } from "@/components/organisms/guides-grid";
 import { NewsletterBand } from "@/components/organisms/newsletter-band";
 import { ProductRailSection } from "@/components/organisms/product-rail-section";
 import { PromoMosaic } from "@/components/organisms/promo-mosaic";
 import { ToolFamiliesStrip } from "@/components/organisms/tool-families-strip";
 import { TrustBand } from "@/components/organisms/trust-band";
+import { ShopStories } from "@/components/organisms/shop-stories";
 import { ANATOMY_ITEMS } from "@/lib/data/anatomy-items";
+import { selectDiverseProducts } from "@/lib/homepage/product-selection";
 import type { HomepageBlock, ProductRailSource } from "@/lib/homepage/types";
 
-export function HomepageRenderer({ blocks }: { blocks: HomepageBlock[] }) {
+const flattenCategories = (categories: CategoryNode[]): CategoryNode[] =>
+  categories.flatMap((category) => [
+    category,
+    ...flattenCategories(category.children),
+  ]);
+
+export function HomepageRenderer({
+  blocks,
+  categories,
+}: {
+  blocks: HomepageBlock[];
+  categories: CategoryNode[];
+}) {
   return (
     <>
       {blocks.map((block) => (
-        <BlockSlot key={block.id} block={block} />
+        <BlockSlot key={block.id} block={block} categories={categories} />
       ))}
     </>
   );
 }
 
-function BlockSlot({ block }: { block: HomepageBlock }) {
+function BlockSlot({
+  block,
+  categories,
+}: {
+  block: HomepageBlock;
+  categories: CategoryNode[];
+}) {
   switch (block.type) {
-    case "promo-mosaic":
-      return <PromoMosaic promos={block.promos} />;
+    case "promo-mosaic": {
+      const categoryHandles = new Set(
+        flattenCategories(categories).map((category) => category.handle)
+      );
+      const promos = block.promos.filter(
+        (promo) =>
+          !promo.categoryHandle || categoryHandles.has(promo.categoryHandle)
+      );
+      return <PromoMosaic promos={promos} />;
+    }
     case "tool-families":
-      return <ToolFamiliesStrip />;
+      return <ToolFamiliesStrip categories={categories} />;
     case "product-rail":
       return (
         <ProductRailBlock
@@ -56,8 +85,8 @@ function BlockSlot({ block }: { block: HomepageBlock }) {
       );
     case "guides-grid":
       return <GuidesGrid />;
-    case "customer-projects":
-      return <CustomerProjects />;
+    case "shop-stories":
+      return <ShopStories categories={categories} />;
     case "newsletter-band":
       return <NewsletterBand />;
   }
@@ -79,31 +108,32 @@ async function ProductRailBlock({
   const region = await getRegion();
   if (!region) return null;
 
-  const limit = source.kind === "bestsellers" ? (source.limit ?? 8) : 8;
+  const limit = source.limit ?? 8;
+  const collection =
+    source.kind === "collection"
+      ? await getCollectionByHandle(source.collectionHandle).catch(
+          () => undefined
+        )
+      : undefined;
+  if (source.kind === "collection" && !collection) return null;
   const {
     response: { products },
-  } = await listProducts({
-    regionId: region.id,
+  } = await listProductsWithSort({
+    fetchAll: true,
     queryParams: {
-      limit,
+      limit: 100,
       fields: "*variants.calculated_price",
       ...(source.kind === "collection"
-        ? { collection_id: source.collectionId }
+        ? { collection_id: collection?.id }
         : {}),
     },
   });
 
-  if (!products?.length) {
-    return (
-      <Container className="py-16">
-        <div className="clip-corner-cut-md bg-surface-subtle/60 p-12 text-center">
-          <p className="text-sm text-muted-foreground">
-            Adaugă produse din panoul de administrare ca să populezi acest rând.
-          </p>
-        </div>
-      </Container>
-    );
-  }
+  if (!products?.length) return null;
+  const displayedProducts =
+    source.kind === "collection" && source.selection === "diverse-random"
+      ? selectDiverseProducts(products, limit)
+      : products.slice(0, limit);
 
   return (
     <ProductRailSection
@@ -112,18 +142,18 @@ async function ProductRailBlock({
       viewAllHref={viewAllHref}
       viewAllLabel={viewAllLabel}
     >
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 medium:grid-cols-4 medium:gap-6">
-        {products.slice(0, limit).map((product) => {
+      <div className="small:grid-cols-3 medium:grid-cols-4 medium:gap-4 large:grid-cols-6 grid grid-cols-2 gap-3">
+        {displayedProducts.map((product) => {
           const { cheapestPrice } = getProductPrice({ product });
           return (
             <ProductCard
               key={product.id}
               href={`/products/${product.handle}`}
               title={product.title}
-              thumbnail={product.thumbnail}
+              thumbnail={getProductImageUrl(product)}
               imageAlt={product.title}
               price={cheapestPrice ?? null}
-              isFeatured
+              compact
             />
           );
         })}

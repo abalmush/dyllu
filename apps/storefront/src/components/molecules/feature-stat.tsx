@@ -18,17 +18,17 @@ export function FeatureStat({
   return (
     <div
       className={cn(
-        "clip-corner-cut-sm flex items-start gap-4 bg-card p-5 transition-colors hover:bg-surface-subtle",
+        "clip-corner-cut-sm bg-card hover:bg-surface-subtle flex items-start gap-4 p-6 transition-colors",
         className
       )}
     >
-      <div className="grid size-11 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+      <div className="bg-primary/10 text-primary grid size-11 shrink-0 place-items-center rounded-full">
         {icon}
       </div>
       <div className="flex min-w-0 flex-col">
-        <p className="font-semibold tracking-tight text-foreground">{title}</p>
+        <p className="text-foreground font-semibold tracking-tight">{title}</p>
         {description && (
-          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
             {description}
           </p>
         )}

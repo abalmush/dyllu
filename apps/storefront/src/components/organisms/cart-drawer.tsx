@@ -66,7 +66,7 @@ export function CartDrawer({ cart, trigger }: Props) {
             <div className="relative">
               <ShoppingBag className="size-5" />
               {totalItems > 0 && (
-                <span className="absolute -right-2 -top-2 grid size-5 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                <span className="bg-primary text-2xs text-primary-foreground absolute -top-2 -right-2 grid size-5 place-items-center rounded-full font-bold">
                   {totalItems > 99 ? "99+" : totalItems}
                 </span>
               )}
@@ -75,9 +75,9 @@ export function CartDrawer({ cart, trigger }: Props) {
         )}
       </SheetTrigger>
       <SheetContent className="flex w-full max-w-md flex-col p-0 sm:max-w-lg">
-        <SheetHeader className="border-b border-border px-6 py-5">
+        <SheetHeader className="border-border border-b px-6 py-6">
           <SheetTitle className="flex items-center gap-2 text-base">
-            <ShoppingBag className="size-4 text-primary" />
+            <ShoppingBag className="text-primary size-4" />
             Coșul tău · {totalItems} {totalItems === 1 ? "produs" : "produse"}
           </SheetTitle>
           <SheetDescription className="sr-only">
@@ -89,7 +89,7 @@ export function CartDrawer({ cart, trigger }: Props) {
         {cart?.items && cart.items.length > 0 ? (
           <>
             <ScrollArea className="flex-1">
-              <ul className="divide-y divide-border">
+              <ul className="divide-border divide-y">
                 {cart.items
                   .slice()
                   .sort((a, b) =>
@@ -98,13 +98,13 @@ export function CartDrawer({ cart, trigger }: Props) {
                   .map((item) => (
                     <li
                       key={item.id}
-                      className="grid grid-cols-[88px_1fr] gap-4 px-6 py-5"
+                      className="grid grid-cols-[88px_1fr] gap-4 px-6 py-6"
                       data-testid="cart-item"
                     >
                       <Link
                         href={`/products/${item.product_handle}`}
                         onClick={() => setOpen(false)}
-                        className="group relative aspect-square overflow-hidden rounded-lg bg-surface-subtle"
+                        className="group bg-surface-subtle relative aspect-square overflow-hidden rounded-lg"
                       >
                         {item.thumbnail ? (
                           <Image
@@ -120,26 +120,26 @@ export function CartDrawer({ cart, trigger }: Props) {
                         <Link
                           href={`/products/${item.product_handle}`}
                           onClick={() => setOpen(false)}
-                          className="line-clamp-2 text-sm font-semibold tracking-tight text-foreground hover:text-primary"
+                          className="text-foreground hover:text-primary line-clamp-2 text-sm font-semibold tracking-tight"
                           data-testid="product-link"
                         >
                           {item.title}
                         </Link>
                         {item.variant?.title && (
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-muted-foreground text-xs">
                             {item.variant.title}
                           </p>
                         )}
                         <div className="mt-auto flex items-center justify-between">
                           <span
-                            className="text-xs text-muted-foreground"
+                            className="text-muted-foreground text-xs"
                             data-testid="cart-item-quantity"
                             data-value={item.quantity}
                           >
                             Cantitate · {item.quantity}
                           </span>
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm font-semibold text-foreground">
+                          <div className="flex items-center gap-4">
+                            <span className="text-foreground text-sm font-semibold">
                               {convertToLocale({
                                 amount: item.total ?? 0,
                                 currency_code: currencyCode,
@@ -151,7 +151,7 @@ export function CartDrawer({ cart, trigger }: Props) {
                               disabled={deletingId === item.id}
                               aria-label="Șterge produsul"
                               data-testid="cart-item-remove-button"
-                              className="text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
+                              className="text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
                             >
                               <Trash2 className="size-4" />
                             </button>
@@ -162,13 +162,13 @@ export function CartDrawer({ cart, trigger }: Props) {
                   ))}
               </ul>
             </ScrollArea>
-            <div className="border-t border-border bg-surface-subtle px-6 py-5">
+            <div className="border-border bg-surface-subtle border-t px-6 py-6">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">
                   Subtotal <span className="text-xs">(fără livrare)</span>
                 </span>
                 <span
-                  className="text-base font-bold tracking-tight text-foreground"
+                  className="text-foreground text-base font-bold tracking-tight"
                   data-testid="cart-subtotal"
                   data-value={subtotal}
                 >
@@ -209,12 +209,12 @@ export function CartDrawer({ cart, trigger }: Props) {
           </>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-            <div className="grid size-16 place-items-center rounded-full bg-muted text-muted-foreground">
+            <div className="bg-muted text-muted-foreground grid size-16 place-items-center rounded-full">
               <ShoppingBag className="size-7" />
             </div>
             <div>
-              <p className="font-semibold text-foreground">Coșul este gol</p>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="text-foreground font-semibold">Coșul este gol</p>
+              <p className="text-muted-foreground mt-1 text-sm">
                 Descoperă scule, echipamente și accesorii pentru orice proiect.
               </p>
             </div>

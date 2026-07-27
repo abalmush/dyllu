@@ -94,8 +94,8 @@ const ShippingAddress = ({
   return (
     <>
       {customer && (addressesInRegion?.length || 0) > 0 && (
-        <Container className="clip-corner-cut-md mb-6 flex flex-col gap-y-4 bg-surface-subtle/60 p-5 ring-1 ring-border">
-          <p className="text-sm text-muted-foreground">
+        <Container className="clip-corner-cut-md bg-surface-subtle/60 ring-border mb-6 flex flex-col gap-y-4 p-6 ring-1">
+          <p className="text-muted-foreground text-sm">
             {`Salut${customer.first_name ? `, ${customer.first_name}` : ""}. Poți porni de la una dintre adresele salvate.`}
           </p>
           <AddressSelect
@@ -109,7 +109,7 @@ const ShippingAddress = ({
           />
         </Container>
       )}
-      <div className="grid grid-cols-1 gap-4 small:grid-cols-2">
+      <div className="small:grid-cols-2 grid grid-cols-1 gap-4">
         <Input
           label="Prenume"
           name="shipping_address.first_name"
@@ -156,15 +156,34 @@ const ShippingAddress = ({
           title={MD_POSTAL_CODE_TITLE}
           data-testid="shipping-postal-code-input"
         />
-        <Input
-          label="Oraș"
-          name="shipping_address.city"
-          autoComplete="address-level2"
-          value={formData["shipping_address.city"]}
-          onChange={handleChange}
-          required
-          data-testid="shipping-city-input"
-        />
+        <div className="flex flex-col gap-2">
+          <Input
+            label="Oraș / Localitate"
+            name="shipping_address.city"
+            autoComplete="address-level2"
+            value={formData["shipping_address.city"]}
+            onChange={handleChange}
+            required
+            list="moldova-delivery-localities"
+            aria-describedby="shipping-city-help"
+            data-testid="shipping-city-input"
+          />
+          <datalist id="moldova-delivery-localities">
+            <option value="Chișinău" />
+            <option value="Botanica" />
+            <option value="Buiucani" />
+            <option value="Centru" />
+            <option value="Ciocana" />
+            <option value="sector Rîșcani" />
+          </datalist>
+          <p
+            id="shipping-city-help"
+            className="text-muted-foreground text-xs leading-relaxed"
+          >
+            Pentru livrare în orașul Chișinău poți indica Chișinău sau sectorul.
+            Suburbiile municipiului sunt considerate livrare în țară.
+          </p>
+        </div>
         <CountrySelect
           name="shipping_address.country_code"
           autoComplete="country"
@@ -192,7 +211,7 @@ const ShippingAddress = ({
           data-testid="billing-address-checkbox"
         />
       </div>
-      <div className="mb-4 grid grid-cols-1 gap-4 small:grid-cols-2">
+      <div className="small:grid-cols-2 mb-4 grid grid-cols-1 gap-4">
         <Input
           label="Email"
           name="email"

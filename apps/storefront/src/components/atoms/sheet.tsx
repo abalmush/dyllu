@@ -19,7 +19,7 @@ const SheetOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-foreground/40 backdrop-blur-[3px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "bg-foreground/40 undefined-state-open:animate-in undefined-state-closed:animate-out undefined-state-closed:fade-out-0 undefined-state-open:fade-in-0 fixed inset-0 z-50 backdrop-blur-[3px]",
       className
     )}
     {...props}
@@ -28,16 +28,16 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
-  "fixed z-50 gap-6 overflow-y-auto overscroll-contain bg-background p-6 shadow-2xl transition-[transform,opacity] ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-400 data-[state=open]:animate-in data-[state=closed]:animate-out",
+  "fixed z-50 gap-6 overflow-y-auto overscroll-contain bg-background p-6 shadow-2xl transition-[transform,opacity] ease-in-out undefined-state-closed:duration-300 undefined-state-open:duration-400 undefined-state-open:animate-in undefined-state-closed:animate-out",
   {
     variants: {
       side: {
-        top: "inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
+        top: "inset-x-0 top-0 border-b undefined-state-closed:slide-out-to-top undefined-state-open:slide-in-from-top",
         bottom:
-          "inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
-        left: "inset-y-0 left-0 h-full w-full max-w-md border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left",
+          "inset-x-0 bottom-0 border-t undefined-state-closed:slide-out-to-bottom undefined-state-open:slide-in-from-bottom",
+        left: "inset-y-0 left-0 h-full w-full max-w-md border-r undefined-state-closed:slide-out-to-left undefined-state-open:slide-in-from-left",
         right:
-          "inset-y-0 right-0 h-full w-full max-w-md border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
+          "inset-y-0 right-0 h-full w-full max-w-md border-l undefined-state-closed:slide-out-to-right undefined-state-open:slide-in-from-right",
       },
     },
     defaultVariants: { side: "right" },
@@ -61,7 +61,7 @@ export const SheetContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-2 top-2 grid size-11 place-items-center rounded-md text-muted-foreground transition-[background-color,color,opacity] hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none">
+      <DialogPrimitive.Close className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring absolute top-2 right-2 grid size-11 place-items-center rounded-md transition-[background-color,color,opacity] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none">
         <X aria-hidden="true" className="size-5" />
         <span className="sr-only">Închide</span>
       </DialogPrimitive.Close>
@@ -105,7 +105,7 @@ export const SheetTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-balance pr-10 text-xl font-semibold leading-tight tracking-tight text-foreground",
+      "text-foreground pr-12 text-xl leading-tight font-semibold tracking-tight text-balance",
       className
     )}
     {...props}
@@ -119,7 +119,7 @@ export const SheetDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-base leading-relaxed text-muted-foreground", className)}
+    className={cn("text-muted-foreground text-base leading-relaxed", className)}
     {...props}
   />
 ));

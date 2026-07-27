@@ -117,25 +117,25 @@ export function PdpHero({ product, eyebrow }: Props) {
   return (
     <section
       aria-label="Prezentare produs"
-      className="relative isolate -mt-px overflow-hidden bg-foreground"
+      className="bg-foreground relative isolate -mt-px overflow-hidden"
     >
       {/* Red side rails — DYLLU brand frame */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 left-0 w-[14px] bg-primary small:w-[20px] medium:w-[28px]"
+        className="bg-primary small:w-[20px] medium:w-[28px] pointer-events-none absolute inset-y-0 left-0 w-[14px]"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 right-0 w-[14px] bg-primary small:w-[20px] medium:w-[28px]"
+        className="bg-primary small:w-[20px] medium:w-[28px] pointer-events-none absolute inset-y-0 right-0 w-[14px]"
       />
 
-      <div className="relative px-[14px] small:px-[20px] medium:px-[28px]">
+      <div className="small:px-[20px] medium:px-[28px] relative px-[14px]">
         {/* Image carousel — background layer */}
-        <div className="relative aspect-[16/9] w-full bg-surface-subtle small:aspect-[16/8] medium:aspect-[21/9]">
+        <div className="bg-surface-subtle small:aspect-16/8 medium:aspect-21/9 relative aspect-video w-full">
           <div ref={emblaRef} className="h-full overflow-hidden">
             <div className="flex h-full">
               {images.length === 0 ? (
-                <div className="relative h-full min-w-full bg-muted" />
+                <div className="bg-muted relative h-full min-w-full" />
               ) : (
                 images.map((img, i) => (
                   <div
@@ -162,7 +162,7 @@ export function PdpHero({ product, eyebrow }: Props) {
                 type="button"
                 onClick={() => emblaApi?.scrollPrev()}
                 aria-label="Imaginea anterioară"
-                className="absolute left-4 top-1/2 z-[1] grid size-10 -translate-y-1/2 place-items-center rounded-full border border-background/20 bg-background/80 text-foreground backdrop-blur transition-all hover:scale-105 hover:bg-background small:left-6"
+                className="border-background/20 bg-background/80 text-foreground hover:bg-background small:left-6 absolute top-1/2 left-4 z-1 grid size-10 -translate-y-1/2 place-items-center rounded-full border backdrop-blur-sm transition-all hover:scale-105"
               >
                 <ChevronLeft className="size-5" />
               </button>
@@ -170,11 +170,11 @@ export function PdpHero({ product, eyebrow }: Props) {
                 type="button"
                 onClick={() => emblaApi?.scrollNext()}
                 aria-label="Imaginea următoare"
-                className="absolute right-4 top-1/2 z-[1] grid size-10 -translate-y-1/2 place-items-center rounded-full border border-background/20 bg-background/80 text-foreground backdrop-blur transition-all hover:scale-105 hover:bg-background small:right-6"
+                className="border-background/20 bg-background/80 text-foreground hover:bg-background small:right-6 absolute top-1/2 right-4 z-1 grid size-10 -translate-y-1/2 place-items-center rounded-full border backdrop-blur-sm transition-all hover:scale-105"
               >
                 <ChevronRight className="size-5" />
               </button>
-              <div className="absolute bottom-[136px] left-1/2 z-[1] flex -translate-x-1/2 gap-1.5 small:bottom-[148px]">
+              <div className="small:bottom-[148px] absolute bottom-[136px] left-1/2 z-1 flex -translate-x-1/2 gap-1.5">
                 {images.map((_, i) => (
                   <button
                     key={i}
@@ -184,8 +184,8 @@ export function PdpHero({ product, eyebrow }: Props) {
                     className={cn(
                       "h-1.5 rounded-full transition-all",
                       i === selectedIndex
-                        ? "w-6 bg-foreground"
-                        : "w-1.5 bg-foreground/40 hover:bg-foreground/60"
+                        ? "bg-foreground w-6"
+                        : "bg-foreground/40 hover:bg-foreground/60 w-1.5"
                     )}
                   />
                 ))}
@@ -195,38 +195,38 @@ export function PdpHero({ product, eyebrow }: Props) {
         </div>
 
         {/* Floating white card — overlaps the carousel at top edge */}
-        <div className="relative z-[2] mx-auto -mt-20 mb-8 max-w-[1280px] small:-mt-24 medium:-mt-32">
-          <div className="clip-corner-cut-md clip-shadow-lg grid gap-6 bg-card p-6 ring-1 ring-border small:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] small:gap-10 small:p-8 medium:p-10">
-            <div className="space-y-3 small:space-y-4">
+        <div className="small:-mt-24 medium:-mt-32 relative z-2 mx-auto -mt-20 mb-8 max-w-[1280px]">
+          <div className="clip-corner-cut-md clip-shadow-lg bg-card ring-border small:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] small:gap-12 small:p-8 medium:p-12 grid gap-6 p-6 ring-1">
+            <div className="small:space-y-4 space-y-4">
               {eyebrow && (
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-800">
+                <span className="text-2xs text-brand-800 block font-semibold tracking-[0.18em] uppercase">
                   {eyebrow}
                 </span>
               )}
-              <h1 className="font-display text-2xl font-extrabold leading-[1.05] tracking-tight text-foreground small:text-3xl medium:text-4xl">
+              <h1 className="font-display text-foreground small:text-3xl medium:text-4xl text-2xl leading-[1.05] font-extrabold tracking-tight">
                 {product.title}
               </h1>
               <div className="flex items-baseline gap-2 pt-1">
                 {showFromPrefix && (
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  <span className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
                     de la
                   </span>
                 )}
-                <span className="font-display text-2xl font-bold tracking-tight text-foreground small:text-3xl">
+                <span className="font-display text-foreground small:text-3xl text-2xl font-bold tracking-tight">
                   {priceLabel}
                 </span>
               </div>
             </div>
 
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-6">
               {isMultiVariant && primaryOption && optionValues.length > 0 && (
                 <div className="space-y-2">
                   <div className="flex items-baseline justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    <span className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
                       {primaryOption.title}
                     </span>
                     {options[primaryOption.id ?? ""] && (
-                      <span className="text-sm font-semibold tracking-tight text-foreground">
+                      <span className="text-foreground text-sm font-semibold tracking-tight">
                         {options[primaryOption.id ?? ""]}
                       </span>
                     )}
@@ -246,7 +246,7 @@ export function PdpHero({ product, eyebrow }: Props) {
                           aria-checked={selected}
                           onClick={() => onSelectOption(v)}
                           className={cn(
-                            "min-w-[52px] rounded-full border px-3 py-1.5 text-xs font-medium tracking-tight transition-colors",
+                            "min-w-[52px] rounded-full border px-4 py-1.5 text-xs font-medium tracking-tight transition-colors",
                             selected
                               ? "border-foreground bg-foreground text-background"
                               : "border-border bg-card text-foreground hover:border-foreground/40 hover:bg-muted"
@@ -257,7 +257,7 @@ export function PdpHero({ product, eyebrow }: Props) {
                       );
                     })}
                     {optionValues.length > 12 && (
-                      <span className="grid place-items-center px-3 text-xs text-muted-foreground">
+                      <span className="text-muted-foreground grid place-items-center px-4 text-xs">
                         +{optionValues.length - 12}
                       </span>
                     )}
@@ -265,7 +265,7 @@ export function PdpHero({ product, eyebrow }: Props) {
                 </div>
               )}
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <Button
                   type="button"
                   onClick={onAddToCart}
@@ -282,7 +282,7 @@ export function PdpHero({ product, eyebrow }: Props) {
         </div>
 
         {/* Bottom red strip — closes the frame */}
-        <div aria-hidden className="h-3 bg-primary small:h-4 medium:h-5" />
+        <div aria-hidden className="bg-primary small:h-4 medium:h-5 h-3" />
       </div>
     </section>
   );

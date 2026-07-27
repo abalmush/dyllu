@@ -37,13 +37,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex w-full flex-col gap-2">
         {topLabel && (
-          <span className="text-sm font-semibold tracking-wide text-muted-foreground">
+          <span className="text-muted-foreground text-sm font-semibold tracking-wide">
             {topLabel}
           </span>
         )}
         <Label
           htmlFor={inputId}
-          className="text-sm font-medium tracking-tight text-foreground"
+          className="text-foreground text-sm font-medium tracking-tight"
         >
           {label}
           {required && (
@@ -61,7 +61,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             placeholder={props.placeholder}
             required={required}
             className={cn(
-              "mt-0 block h-12 w-full appearance-none rounded-md border border-input bg-background px-4 text-base text-foreground shadow-sm transition-[border-color,box-shadow,background-color,color] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              "border-input bg-background text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring mt-0 block h-12 w-full appearance-none rounded-md border px-4 text-base shadow-xs transition-[border-color,box-shadow,background-color,color] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden",
               type === "password" && "pr-12",
               className
             )}
@@ -74,7 +74,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? "Ascunde parola" : "Afișează parola"}
               aria-pressed={showPassword}
-              className="absolute right-0 top-0 grid size-12 place-items-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring absolute top-0 right-0 grid size-12 place-items-center rounded-md transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-hidden"
             >
               {showPassword ? <Eye /> : <EyeOff />}
             </button>

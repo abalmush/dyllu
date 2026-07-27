@@ -106,7 +106,7 @@ export function PageHero({
         {eyebrow && (
           <div
             className={cn(
-              "clip-corner-cut-sm inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider",
+              "clip-corner-cut-sm inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold tracking-wider uppercase",
               tokens.eyebrow
             )}
           >
@@ -117,7 +117,7 @@ export function PageHero({
 
         <h1
           className={cn(
-            "mt-5 font-display text-4xl font-bold leading-tight tracking-tight md:text-5xl",
+            "font-display text-display-sm md:text-display-md mt-6 leading-tight font-bold tracking-tight",
             tokens.title
           )}
         >
@@ -125,7 +125,7 @@ export function PageHero({
         </h1>
 
         {lede && (
-          <p className={cn("mt-3 max-w-xl text-base", tokens.lede)}>{lede}</p>
+          <p className={cn("mt-4 max-w-xl text-base", tokens.lede)}>{lede}</p>
         )}
 
         {stats && stats.length > 0 && (
@@ -138,7 +138,7 @@ export function PageHero({
               >
                 <dt
                   className={cn(
-                    "text-xs font-semibold uppercase tracking-wider",
+                    "text-xs font-semibold tracking-wider uppercase",
                     tokens.statLabel
                   )}
                 >
@@ -146,7 +146,7 @@ export function PageHero({
                 </dt>
                 <dd
                   className={cn(
-                    "mt-1 font-display text-2xl font-bold tracking-tight",
+                    "font-display mt-1 text-2xl font-bold tracking-tight",
                     tokens.statValue
                   )}
                 >

@@ -42,22 +42,22 @@ const TRUST_ITEMS: TrustItem[] = [
 
 export function DeliveryTrust() {
   return (
-    <section className="bg-background py-12 small:py-16">
+    <section className="bg-background small:py-16 py-12">
       <Container>
-        <div className="grid gap-4 small:grid-cols-2 medium:grid-cols-3">
+        <div className="small:grid-cols-2 medium:grid-cols-3 grid gap-4">
           {TRUST_ITEMS.map((item) => (
             <div
               key={item.title}
-              className="clip-corner-cut-md flex items-start gap-3 bg-card p-4 ring-1 ring-border"
+              className="clip-corner-cut-md bg-card ring-border flex items-start gap-4 p-4 ring-1"
             >
-              <span className="clip-corner-cut-xs grid size-10 shrink-0 place-items-center bg-primary/10 text-primary">
+              <span className="clip-corner-cut-xs bg-primary/10 text-primary grid size-10 shrink-0 place-items-center">
                 <item.icon className="size-5" />
               </span>
               <div>
-                <p className="text-sm font-semibold text-foreground">
+                <p className="text-foreground text-sm font-semibold">
                   {item.title}
                 </p>
-                <p className="text-xs leading-relaxed text-muted-foreground">
+                <p className="text-muted-foreground text-xs leading-relaxed">
                   {item.detail}
                 </p>
               </div>

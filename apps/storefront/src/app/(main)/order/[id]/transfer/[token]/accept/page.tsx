@@ -12,7 +12,7 @@ export default async function TransferPage({
   const { success, error } = await acceptTransferRequest(id, token);
 
   return (
-    <div className="mx-auto mb-20 mt-10 flex w-2/5 flex-col items-start gap-y-4">
+    <div className="mx-auto mt-12 mb-20 flex w-2/5 flex-col items-start gap-y-4">
       <TransferImage />
       <div className="flex flex-col gap-y-6">
         {success && (

@@ -15,19 +15,19 @@ export function PlpToolbar({ resultCount }: { resultCount: number }) {
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
-      <p className="text-sm text-muted-foreground">
-        <span className="font-semibold text-foreground">{resultCount}</span>{" "}
+      <p className="text-muted-foreground text-sm">
+        <span className="text-foreground font-semibold">{resultCount}</span>{" "}
         produse
       </p>
 
       <label className="flex items-center gap-2 text-sm">
         <span className="text-muted-foreground">Sortează</span>
-        <span className="clip-corner-cut-xs relative inline-flex items-center border border-border bg-card">
+        <span className="clip-corner-cut-xs border-border bg-card relative inline-flex items-center border">
           <select
             name="sort"
             value={sort}
             onChange={(e) => setSort(e.target.value)}
-            className="appearance-none bg-transparent py-2 pl-3 pr-8 text-sm font-medium text-foreground focus:outline-none"
+            className="text-foreground appearance-none bg-transparent py-2 pr-8 pl-4 text-sm font-medium focus:outline-hidden"
           >
             {SORT_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -37,7 +37,7 @@ export function PlpToolbar({ resultCount }: { resultCount: number }) {
           </select>
           <ChevronDown
             aria-hidden="true"
-            className="pointer-events-none absolute right-2 size-5 text-muted-foreground"
+            className="text-muted-foreground pointer-events-none absolute right-2 size-5"
           />
         </span>
       </label>

@@ -30,10 +30,10 @@ export function CartLineItem({ item }: { item: CartLineItemData }) {
   const [quantity, setQuantity] = React.useState(item.quantity);
 
   return (
-    <div className="flex gap-4 border-b border-border py-5 last:border-0">
+    <div className="border-border flex gap-4 border-b py-6 last:border-0">
       <Link
         href={item.href}
-        className="clip-corner-cut-md relative size-24 shrink-0 overflow-hidden bg-surface-subtle ring-1 ring-border"
+        className="clip-corner-cut-md bg-surface-subtle ring-border relative size-24 shrink-0 overflow-hidden ring-1"
       >
         {item.thumbnail && (
           <Image
@@ -57,12 +57,12 @@ export function CartLineItem({ item }: { item: CartLineItemData }) {
         )}
         <Link
           href={item.href}
-          className="line-clamp-2 text-sm font-semibold text-foreground transition-colors hover:text-primary"
+          className="text-foreground hover:text-primary line-clamp-2 text-sm font-semibold transition-colors"
         >
           {item.title}
         </Link>
         {item.variantLabel && (
-          <span className="text-xs text-muted-foreground">
+          <span className="text-muted-foreground text-xs">
             {item.variantLabel}
           </span>
         )}
@@ -71,20 +71,20 @@ export function CartLineItem({ item }: { item: CartLineItemData }) {
             {item.includes.map((entry) => (
               <li
                 key={entry}
-                className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                className="text-muted-foreground flex items-center gap-1.5 text-xs"
               >
-                <Check className="size-3 text-success" />
+                <Check className="text-success size-3" />
                 {entry}
               </li>
             ))}
           </ul>
         )}
 
-        <div className="mt-auto flex items-center gap-3 pt-2">
+        <div className="mt-auto flex items-center gap-4 pt-2">
           <QuantityStepper value={quantity} onChange={setQuantity} max={20} />
           <button
             type="button"
-            className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-destructive"
+            className="text-muted-foreground hover:text-destructive flex items-center gap-1.5 text-xs font-medium transition-colors"
           >
             <Trash2 className="size-3.5" />
             Elimină
@@ -93,11 +93,11 @@ export function CartLineItem({ item }: { item: CartLineItemData }) {
       </div>
 
       <div className="flex flex-col items-end gap-1 text-right">
-        <span className="font-display text-base font-bold text-foreground">
+        <span className="font-display text-foreground text-base font-bold">
           {item.unitPrice}
         </span>
         {item.originalUnitPrice && (
-          <span className="text-xs text-muted-foreground line-through">
+          <span className="text-muted-foreground text-xs line-through">
             {item.originalUnitPrice}
           </span>
         )}

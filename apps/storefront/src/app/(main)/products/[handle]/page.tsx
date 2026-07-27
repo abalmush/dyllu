@@ -1,10 +1,16 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { listProducts } from "@lib/data/products";
 import { getRegion } from "@lib/data/regions";
 import { buildSocialMetadata, getProductSocialImage } from "@/lib/seo/metadata";
 import ProductTemplate from "@modules/products/templates";
-import { HttpTypes } from "@medusajs/types";
+import {
+  getSelectedVariant,
+  getVariantDescription,
+  getVariantDisplayTitle,
+  getVariantImages,
+  getVariantImageUrl,
+} from "@modules/products/lib/product-presentation";
 
 type Props = {
   params: Promise<{ handle: string }>;
@@ -12,25 +18,6 @@ type Props = {
 };
 
 export const dynamic = "force-dynamic";
-
-function getImagesForVariant(
-  product: HttpTypes.StoreProduct,
-  selectedVariantId?: string
-): HttpTypes.StoreProductImage[] {
-  if (!selectedVariantId || !product.variants) {
-    return product.images ?? [];
-  }
-
-  const variant = product.variants.find((v) => v.id === selectedVariantId);
-  if (!variant?.images?.length) {
-    return product.images ?? [];
-  }
-
-  const imageIdsMap = new Map(variant.images.map((i) => [i.id, true]));
-  return (
-    product.images?.filter((i) => imageIdsMap.has(i.id)) ?? product.images ?? []
-  );
-}
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
@@ -49,22 +36,29 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound();
   }
 
+  const selectedVariant = getSelectedVariant(product);
+  const title = getVariantDisplayTitle(product, selectedVariant);
+  const description = getVariantDescription(product, selectedVariant);
+  const image = getVariantImageUrl(product, selectedVariant);
+  const productPath = `/products/${handle}`;
+
   return buildSocialMetadata({
-    title: product.title,
-    description: product.description,
-    fallbackDescription: `${product.title} disponibil la DYLLU. Comandă online cu livrare rapidă în toată Moldova.`,
-    path: `/products/${handle}`,
-    image: getProductSocialImage(product),
-    imageAlt: `${product.title} — imagine produs`,
+    title,
+    description,
+    fallbackDescription: `${title} disponibil la DYLLU. Comandă online cu livrare rapidă în toată Moldova.`,
+    path: productPath,
+    image: image ?? getProductSocialImage(product),
+    imageAlt: `${title} — imagine produs`,
   });
 }
 
 export default async function ProductPage(props: Props) {
-  const params = await props.params;
-  const region = await getRegion();
-  const searchParams = await props.searchParams;
+  const [params, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
 
-  const selectedVariantId = searchParams.v_id;
+  const region = await getRegion();
 
   if (!region) {
     notFound();
@@ -78,9 +72,21 @@ export default async function ProductPage(props: Props) {
     notFound();
   }
 
-  const images = getImagesForVariant(pricedProduct, selectedVariantId);
+  const requestedVariantId =
+    typeof searchParams.v_id === "string" ? searchParams.v_id : undefined;
+  if (requestedVariantId && (pricedProduct.variants?.length ?? 0) <= 1) {
+    permanentRedirect(`/products/${params.handle}`);
+  }
+
+  const selectedVariant = getSelectedVariant(pricedProduct, requestedVariantId);
+  const images = getVariantImages(pricedProduct, selectedVariant);
 
   return (
-    <ProductTemplate product={pricedProduct} region={region} images={images} />
+    <ProductTemplate
+      product={pricedProduct}
+      region={region}
+      images={images}
+      selectedVariant={selectedVariant}
+    />
   );
 }

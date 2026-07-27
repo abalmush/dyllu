@@ -6,6 +6,7 @@ import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import { cn } from "@lib/utils";
 
 type Props = {
+  product: HttpTypes.StoreProduct;
   option: HttpTypes.StoreProductOption;
   current: string | undefined;
   updateOption: (title: string, value: string) => void;
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export default function OptionSelect({
+  product,
   option,
   current,
   updateOption,
@@ -22,16 +24,30 @@ export default function OptionSelect({
   disabled,
   "data-testid": dataTestId,
 }: Props) {
-  const values = option.values?.map((v) => v.value) ?? [];
+  const values = Array.from(
+    new Set(
+      [
+        ...(option.values?.map((value) => value.value) ?? []),
+        ...(product.variants?.flatMap((variant) =>
+          variant.options
+            ?.filter((value) => value.option_id === option.id)
+            .map((value) => value.value)
+        ) ?? []),
+      ].filter(
+        (value): value is string =>
+          typeof value === "string" && value.length > 0
+      )
+    )
+  );
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <div className="flex items-baseline justify-between">
-        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        <span className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
           {title}
         </span>
         {current && (
-          <span className="text-sm font-semibold tracking-tight text-foreground">
+          <span className="text-foreground text-sm font-semibold tracking-tight">
             {current}
           </span>
         )}
@@ -56,7 +72,7 @@ export default function OptionSelect({
                 "min-w-[72px] rounded-full border px-4 py-2.5 text-sm font-medium tracking-tight transition-[background-color,border-color,color,box-shadow] duration-200",
                 "disabled:pointer-events-none disabled:opacity-40",
                 selected
-                  ? "border-foreground bg-foreground text-background shadow-sm"
+                  ? "border-foreground bg-foreground text-background shadow-xs"
                   : "border-border bg-card text-foreground hover:border-foreground/40 hover:bg-muted"
               )}
             >

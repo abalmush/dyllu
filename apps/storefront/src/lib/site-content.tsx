@@ -22,7 +22,7 @@ export const SHOWROOMS = [
     address: "str. Calea Ieșilor 10",
     schedule: "L–S 08:00–18:00 · D 09:00–14:00",
     phone: "+373 79 979 888",
-    note: "Showroom DYLLU",
+    note: "Magazin DYLLU",
   },
   {
     city: "Chișinău",
@@ -68,16 +68,16 @@ export const INFO_PAGES: Record<
         title: "Cum alegi platforma potrivită",
         bullets: [
           "Pentru utilizare frecventă, alege gamele pe acumulator cu aceeași platformă, ca să refolosești bateriile și încărcătoarele.",
-          "Pentru lucrări grele sau repetitive, prioritizează produsele brushless și seturile complete.",
-          "Pentru intervenții ocazionale, single-product + accesorii compatibile este de obicei cea mai eficientă alegere.",
+          "Pentru lucrări grele sau repetitive, alege scule cu motor fără perii și seturi complete.",
+          "Pentru lucrări ocazionale, un produs separat și accesoriile compatibile sunt de obicei alegerea cea mai practică.",
         ],
       },
       {
-        title: "Seturi, kituri și produse individuale",
+        title: "Seturi și produse separate",
         bullets: [
-          "Seturile sunt gândite pentru lansare rapidă în lucru și includ combinații validate.",
-          "Kiturile pun accent pe platforma comună de acumulatori și pe compatibilitate.",
-          "Produsele individuale sunt potrivite atunci când completezi un sistem existent sau adaugi accesorii dedicate.",
+          "Seturile includ mai multe produse compatibile și sunt gata de lucru.",
+          "Seturile pe acumulator folosesc același sistem de baterii și încărcătoare.",
+          "Produsele separate sunt potrivite când completezi un sistem existent sau adaugi accesorii dedicate.",
         ],
       },
       {
@@ -107,14 +107,14 @@ export const INFO_PAGES: Record<
         bullets: [
           "Pentru comenzile peste 1.000 MDL în Chișinău se aplică pragul de livrare gratuită afișat pe site.",
           "Pentru alte localități sau servicii speciale, costul final de livrare este confirmat înainte de expediere.",
-          "La checkout vezi opțiunile disponibile pentru coșul curent, iar costul se actualizează în sumar.",
+          "La finalizarea comenzii vezi opțiunile disponibile, iar costul se actualizează în total.",
         ],
       },
       {
         title: "Plată și confirmare",
         paragraphs: [
-          "În stadiul actual al storefront-ului, comanda se plasează online, iar modalitatea finală de plată se confirmă împreună cu echipa DYLLU.",
-          "Pentru comenzi corporate putem pregăti factură și detalii suplimentare la confirmare.",
+          "Comanda se plasează online, iar modalitatea finală de plată se confirmă împreună cu echipa DYLLU.",
+          "Pentru comenzi pe firmă putem pregăti factura și detaliile necesare.",
         ],
       },
       {
@@ -143,7 +143,7 @@ export const INFO_PAGES: Record<
         title: "Produse care necesită verificare",
         bullets: [
           "Consumabilele desigilate sau produsele folosite pot necesita validare suplimentară înainte de aprobarea returului.",
-          "Seturile, kiturile și produsele cu accesorii incluse trebuie returnate complet.",
+          "Seturile și produsele cu mai multe piese trebuie returnate complet.",
           "Dacă produsul a fost livrat cu defect sau incomplet, anunță-ne imediat pentru prioritate la soluționare.",
         ],
       },
@@ -166,7 +166,7 @@ export const INFO_PAGES: Record<
   },
   termeni: {
     eyebrow: "Termeni și condiții",
-    title: "Condițiile de utilizare ale storefront-ului DYLLU",
+    title: "Condițiile de utilizare ale magazinului online DYLLU",
     description:
       "Această pagină rezumă modul în care funcționează comenzile, informațiile comerciale și utilizarea generală a site-ului.",
     sections: [
@@ -188,8 +188,8 @@ export const INFO_PAGES: Record<
       {
         title: "Livrare, retur și garanție",
         paragraphs: [
-          "Livrarea, retururile și garanțiile sunt guvernate de paginile dedicate din acest storefront și de confirmările comunicate la procesarea comenzii.",
-          "Pentru comenzi corporate sau cerințe speciale pot exista condiții comerciale suplimentare comunicate separat.",
+          "Condițiile de livrare, retur și garanție sunt descrise în paginile dedicate și confirmate la procesarea comenzii.",
+          "Pentru comenzi pe firmă sau cerințe speciale pot exista condiții comerciale suplimentare, comunicate separat.",
         ],
       },
       {
@@ -217,7 +217,7 @@ export const INFO_PAGES: Record<
         title: "Ce date colectăm",
         bullets: [
           "Date de identificare și contact: nume, email, telefon, adresă de livrare sau facturare.",
-          "Date despre comenzi, produse vizualizate și interacțiuni necesare funcționării coșului și checkout-ului.",
+          "Date despre comenzi, produse vizualizate și acțiuni necesare funcționării coșului și finalizării comenzii.",
           "Date tehnice de bază necesare pentru securitate, performanță și diagnosticare.",
         ],
       },
@@ -226,7 +226,7 @@ export const INFO_PAGES: Record<
         bullets: [
           "Pentru creare cont, autentificare și administrarea profilului tău.",
           "Pentru procesarea comenzilor, confirmarea livrării, suport și service.",
-          "Pentru îmbunătățirea experienței din storefront și pentru comunicări solicitate de tine.",
+          "Pentru îmbunătățirea experienței în magazinul online și pentru comunicările solicitate de tine.",
         ],
       },
       {
@@ -247,7 +247,7 @@ export const INFO_PAGES: Record<
       {
         title: "Contact pentru date personale",
         paragraphs: [
-          "Dacă ai întrebări despre confidențialitate sau despre modul în care sunt prelucrate datele tale, scrie-ne folosind datele de contact publicate în storefront.",
+          "Dacă ai întrebări despre confidențialitate sau despre modul în care sunt prelucrate datele tale, folosește datele de pe pagina de contact.",
         ],
       },
     ],

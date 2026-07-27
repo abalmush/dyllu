@@ -128,14 +128,14 @@ const SAMPLE_PROMO_2: PromoCardData = {
   title: "Pregătește grădina",
   description: "Inventar de grădină gata de lucru, în stoc.",
   ctaLabel: "Vezi accesoriile",
-  href: "/categories/gradinarit",
+  href: "/categories/gradina-si-agricultura",
   variant: "primary",
 };
 
 const SAMPLE_PROMO_3: PromoCardData = {
   eyebrow: "Pachet contractor",
   title: "EIP la preț de volum",
-  description: "Discounturi pentru companii și ateliere.",
+  description: "Prețuri speciale pentru companii și ateliere.",
   ctaLabel: "Solicită ofertă",
   href: "/contact",
   variant: "dark",
@@ -146,7 +146,7 @@ const SAMPLE_PROMO_4: PromoCardData = {
   title: "Burghie SDS+ Pro Series",
   description: "Performanță extremă pe beton armat.",
   ctaLabel: "Vezi noutățile",
-  href: "/categories/burghie-beton",
+  href: "/categories/accesorii-si-consumabile",
   variant: "muted",
 };
 
@@ -159,8 +159,8 @@ const SAMPLE_SYSTEM_TILES: SystemTileData[] = [
     },
     headline: (
       <>
-        <span className="block text-6xl text-primary medium:text-7xl">20V</span>
-        <span className="mt-1 block text-xl medium:text-2xl">Max System</span>
+        <span className="text-primary medium:text-7xl block text-6xl">20V</span>
+        <span className="medium:text-2xl mt-1 block text-xl">Max System</span>
       </>
     ),
     subtitle: "12+ produse compatibile",
@@ -175,8 +175,8 @@ const SAMPLE_SYSTEM_TILES: SystemTileData[] = [
     },
     headline: (
       <>
-        <span className="block text-5xl medium:text-6xl">Pro</span>
-        <span className="mt-1 block text-xl medium:text-2xl">Series</span>
+        <span className="medium:text-6xl block text-5xl">Pro</span>
+        <span className="medium:text-2xl mt-1 block text-xl">Series</span>
       </>
     ),
     subtitle: "Performanță reinventată",
@@ -187,10 +187,10 @@ const SAMPLE_SYSTEM_TILES: SystemTileData[] = [
     background: {
       type: "image",
       src: "/images/dyllu-grinder-thermal.png",
-      alt: "Motor brushless DYLLU vizualizat termic",
+      alt: "Motor fără perii DYLLU, vizualizat termic",
     },
     headline: (
-      <span className="text-2xl medium:text-3xl">
+      <span className="medium:text-3xl text-2xl">
         <span className="text-primary">Brushless</span> Motor
       </span>
     ),
@@ -206,12 +206,12 @@ const SAMPLE_SYSTEM_TILES: SystemTileData[] = [
     },
     headline: (
       <>
-        <span className="block text-3xl text-primary medium:text-4xl">EIP</span>
-        <span className="mt-1 block text-sm medium:text-base">Certificat</span>
+        <span className="text-primary medium:text-4xl block text-3xl">EIP</span>
+        <span className="medium:text-base mt-1 block text-sm">Certificat</span>
       </>
     ),
     ctaLabel: "Vezi EIP",
-    href: "/categories/echipament-de-protectie",
+    href: "/categories/echipamente-de-protectie",
   },
   {
     background: {
@@ -221,16 +221,16 @@ const SAMPLE_SYSTEM_TILES: SystemTileData[] = [
     },
     headline: (
       <>
-        <span className="block text-3xl text-primary medium:text-4xl">
+        <span className="text-primary medium:text-4xl block text-3xl">
           Consumabile
         </span>
-        <span className="mt-1 block text-sm medium:text-base">
+        <span className="medium:text-base mt-1 block text-sm">
           Burghie, discuri
         </span>
       </>
     ),
     ctaLabel: "Vezi consumabilele",
-    href: "/categories/consumabile-si-accesorii",
+    href: "/categories/accesorii-si-consumabile",
   },
 ];
 
@@ -245,8 +245,8 @@ const SAMPLE_SYSTEM_TILES_WITH_VIDEO: SystemTileData[] = [
     },
     headline: (
       <>
-        <span className="block text-6xl text-primary medium:text-7xl">20V</span>
-        <span className="mt-1 block text-xl medium:text-2xl">Max System</span>
+        <span className="text-primary medium:text-7xl block text-6xl">20V</span>
+        <span className="medium:text-2xl mt-1 block text-xl">Max System</span>
       </>
     ),
     subtitle: "Background video — loop autoplay",
@@ -285,9 +285,9 @@ const SAMPLE_TESTIMONIALS: TestimonialData[] = [
       alt: "Polizor DYLLU în acțiune, taie metal cu scântei",
     },
     heading: "Rezultate profi:",
-    productName: "DYLLU 20V Multi-tool brushless",
+    productName: "Unealtă multifuncțională DYLLU 20V cu motor fără perii",
     quote:
-      "Putere brushless excelentă, taie metal și lemn cu ușurință. L-am folosit zile întregi pe șantier fără probleme.",
+      "Motorul fără perii are putere excelentă și taie ușor metalul și lemnul. L-am folosit zile întregi pe șantier fără probleme.",
     author: "Mihai T., Orhei",
   },
 ];
@@ -317,7 +317,7 @@ const SAMPLE_TILES: PromoTileData[] = [
   {
     title: "Protecție la lucru",
     ctaLabel: "Vezi EIP",
-    href: "/categories/echipament-de-protectie",
+    href: "/categories/echipamente-de-protectie",
     titlePosition: "bottom-center",
     image: {
       src: "/images/dyllu-safety-gear.png",
@@ -769,26 +769,26 @@ const CATALOG: { group: string; items: CatalogItem[] }[] = [
 
 function PreviewHeader() {
   return (
-    <section className="border-b border-border bg-surface-subtle py-16 small:py-24">
+    <section className="border-border bg-surface-subtle small:py-24 border-b py-16">
       <Container>
         <div className="flex flex-col gap-6">
-          <span className="inline-flex w-fit items-center gap-2 rounded-full bg-primary/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+          <span className="bg-primary/15 text-2xs text-primary inline-flex w-fit items-center gap-2 rounded-full px-4 py-1.5 font-semibold tracking-[0.18em] uppercase">
             Catalog componente
           </span>
-          <h1 className="font-display text-display-md font-extrabold tracking-tight text-foreground small:text-display-lg">
+          <h1 className="font-display text-display-md text-foreground small:text-display-lg font-extrabold tracking-tight">
             Previzualizare
           </h1>
-          <p className="max-w-2xl text-base text-muted-foreground small:text-lg">
+          <p className="text-muted-foreground small:text-lg max-w-2xl text-base">
             Toate organismele storefront-ului, grupate pe rol. Folosește-le ca
             referință când compui pagini noi sau când evaluezi alternative.
           </p>
           <nav
             aria-label="Catalog"
-            className="mt-4 grid gap-6 small:grid-cols-2 medium:grid-cols-3"
+            className="small:grid-cols-2 medium:grid-cols-3 mt-4 grid gap-6"
           >
             {CATALOG.map((group) => (
               <div key={group.group} className="flex flex-col gap-2">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground">
+                <span className="text-2xs text-foreground font-semibold tracking-[0.18em] uppercase">
                   {group.group}
                 </span>
                 <ul className="flex flex-col gap-1.5">
@@ -796,7 +796,7 @@ function PreviewHeader() {
                     <li key={item.anchor}>
                       <a
                         href={`#${item.anchor}`}
-                        className="text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+                        className="text-muted-foreground hover:text-foreground text-sm underline-offset-4 transition-colors hover:underline"
                       >
                         {item.name}
                       </a>
@@ -815,7 +815,7 @@ function PreviewHeader() {
 function GroupHeader({ title }: { title: string }) {
   return (
     <div className="bg-foreground text-background">
-      <Container className="py-8 small:py-10">
+      <Container className="small:py-12 py-8">
         <span className="font-display text-display-sm font-extrabold tracking-tight">
           {title}
         </span>
@@ -828,14 +828,14 @@ function ComponentLabel({ anchor, name, role, used }: CatalogItem) {
   return (
     <div
       id={anchor}
-      className="scroll-mt-24 border-y border-border bg-muted/40"
+      className="border-border bg-muted/40 scroll-mt-24 border-y"
     >
-      <Container className="flex flex-col gap-1 py-4 medium:flex-row medium:items-baseline medium:gap-6">
-        <span className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-foreground">
+      <Container className="medium:flex-row medium:items-baseline medium:gap-6 flex flex-col gap-1 py-4">
+        <span className="text-foreground font-mono text-xs font-semibold tracking-[0.18em] uppercase">
           {name}
         </span>
-        <span className="text-xs text-muted-foreground">{role}</span>
-        <span className="ml-auto text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80">
+        <span className="text-muted-foreground text-xs">{role}</span>
+        <span className="text-2xs text-muted-foreground/80 ml-auto font-semibold tracking-[0.18em] uppercase">
           {used}
         </span>
       </Container>
@@ -870,7 +870,7 @@ async function PreviewBestSellersRail({
     return (
       <Container className="py-16">
         <div className="clip-corner-cut-md bg-surface-subtle/60 p-12 text-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Adaugă produse pentru a vedea ProductRailSection în acțiune.
           </p>
         </div>
@@ -885,7 +885,7 @@ async function PreviewBestSellersRail({
       viewAllHref="/store"
       viewAllLabel="Vezi toate produsele"
     >
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 medium:grid-cols-4 medium:gap-6">
+      <div className="medium:grid-cols-4 medium:gap-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
         {products.slice(0, 8).map((product) => {
           const { cheapestPrice } = getProductPrice({ product });
           return (
@@ -1048,7 +1048,7 @@ const MOCK_COMBO_PRODUCT: HttpTypes.StoreProduct = (() => {
     title: "Fierăstrău cu lanț fără fir 20V — combo cu 2 acumulatori",
     handle: "fierastrau-cu-lant-combo-dtclp5121",
     description:
-      "Set complet DYLLU 20V: fierăstrău cu lanț brushless de 12″, doi acumulatori Li-Ion de 5.0Ah pentru autonomie extinsă și un lanț de rezervă de 18″. Gata de lucru din cutie.",
+      "Set complet DYLLU 20V: fierăstrău cu lanț de 12″ și motor fără perii, doi acumulatori Li-Ion de 5.0 Ah și un lanț de rezervă de 18″. Gata de lucru.",
     thumbnail: `${COMBO_IMAGE_BASE}/DTCLP5121.png`,
     images: [
       `${COMBO_IMAGE_BASE}/DTCLP5121.png`,
@@ -1184,8 +1184,8 @@ function PreviewLinkedProducts({
 
 function PreviewProductTypeBadges() {
   return (
-    <div className="bg-background px-4 py-10 small:px-8 medium:px-12">
-      <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-3">
+    <div className="bg-background small:px-8 medium:px-12 px-4 py-12">
+      <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-4">
         <ProductTypeBadge type="single" />
         <ProductTypeBadge type="set" count={62} />
         <ProductTypeBadge type="kit" />
@@ -1226,7 +1226,7 @@ const SAMPLE_REVIEWS: Review[] = [
     author: "Andrei P.",
     rating: 5,
     date: "12 iunie 2026",
-    body: "Taie fără efort lemn de până la 25 cm. Bateriile țin surprinzător de mult, iar motorul brushless e silențios.",
+    body: "Taie fără efort lemn de până la 25 cm. Acumulatorii țin surprinzător de mult, iar motorul fără perii este silențios.",
   },
   {
     id: "r2",
@@ -1367,8 +1367,8 @@ const PLP_FILTER_GROUPS: FilterGroup[] = [
 
 function PreviewPlp() {
   return (
-    <div className="bg-background px-4 py-12 small:px-8 medium:px-12">
-      <div className="mx-auto grid max-w-[1320px] gap-8 medium:grid-cols-[240px_1fr]">
+    <div className="bg-background small:px-8 medium:px-12 px-4 py-12">
+      <div className="medium:grid-cols-[240px_1fr] mx-auto grid max-w-[1320px] gap-8">
         <PlpFilters
           groups={PLP_FILTER_GROUPS}
           priceRange={{ min: 0, max: 8000 }}
@@ -1376,7 +1376,7 @@ function PreviewPlp() {
         <div className="flex flex-col gap-6">
           <PlpToolbar resultCount={PLP_PRODUCTS.length} />
           <ActiveFilterChips filters={["Scule electrice", "În stoc", "20V"]} />
-          <div className="grid grid-cols-2 gap-4 medium:grid-cols-3">
+          <div className="medium:grid-cols-3 grid grid-cols-2 gap-4">
             {PLP_PRODUCTS.map((product) => (
               <PlpProductCard key={product.id} product={product} />
             ))}
@@ -1389,7 +1389,7 @@ function PreviewPlp() {
 
 function PreviewPlpEmpty() {
   return (
-    <div className="bg-background px-4 py-12 small:px-8 medium:px-12">
+    <div className="bg-background small:px-8 medium:px-12 px-4 py-12">
       <div className="mx-auto max-w-[720px]">
         <EmptyState
           icon={SearchX}
@@ -1445,10 +1445,10 @@ const CART_SUMMARY_LINES: SummaryLine[] = [
 
 function PreviewCart() {
   return (
-    <div className="bg-surface-subtle px-4 py-12 small:px-8 medium:px-12">
-      <div className="mx-auto grid max-w-[1200px] gap-8 medium:grid-cols-[1fr_360px] medium:items-start">
-        <div className="clip-corner-cut-lg bg-card p-6 ring-1 ring-border">
-          <h2 className="mb-2 font-display text-xl font-bold text-foreground">
+    <div className="bg-surface-subtle small:px-8 medium:px-12 px-4 py-12">
+      <div className="medium:grid-cols-[1fr_360px] medium:items-start mx-auto grid max-w-[1200px] gap-8">
+        <div className="clip-corner-cut-lg bg-card ring-border p-6 ring-1">
+          <h2 className="font-display text-foreground mb-2 text-xl font-bold">
             Coșul tău · {CART_ITEMS.length} produse
           </h2>
           {CART_ITEMS.map((item) => (
@@ -1462,11 +1462,11 @@ function PreviewCart() {
         />
       </div>
 
-      <div className="mx-auto mt-10 max-w-[1200px]">
-        <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <div className="mx-auto mt-12 max-w-[1200px]">
+        <h3 className="text-muted-foreground mb-4 text-sm font-semibold tracking-[0.16em] uppercase">
           Se cumpără des împreună
         </h3>
-        <div className="grid grid-cols-2 gap-4 small:grid-cols-3">
+        <div className="small:grid-cols-3 grid grid-cols-2 gap-4">
           {PLP_PRODUCTS.filter((p) =>
             ["DTZY1418", "VAC", "SAFETY"].includes(p.id)
           ).map((product) => (
@@ -1480,7 +1480,7 @@ function PreviewCart() {
 
 function PreviewCartEmpty() {
   return (
-    <div className="bg-background px-4 py-12 small:px-8 medium:px-12">
+    <div className="bg-background small:px-8 medium:px-12 px-4 py-12">
       <div className="mx-auto max-w-[720px]">
         <EmptyState
           icon={ShoppingBag}
@@ -1495,10 +1495,10 @@ function PreviewCartEmpty() {
 
 function PreviewCheckout() {
   return (
-    <div className="bg-surface-subtle px-4 py-12 small:px-8 medium:px-12">
+    <div className="bg-surface-subtle small:px-8 medium:px-12 px-4 py-12">
       <div className="mx-auto max-w-[1200px]">
         <CheckoutSteps current={2} />
-        <div className="mt-8 grid gap-8 medium:grid-cols-[1fr_360px] medium:items-start">
+        <div className="medium:grid-cols-[1fr_360px] medium:items-start mt-8 grid gap-8">
           <div className="space-y-6">
             <CheckoutAddressForm />
             <ShippingMethodPicker />
@@ -1518,7 +1518,7 @@ function PreviewCheckout() {
 
 function PreviewCheckoutConfirmation() {
   return (
-    <div className="bg-background px-4 py-12 small:px-8 medium:px-12">
+    <div className="bg-background small:px-8 medium:px-12 px-4 py-12">
       <div className="mx-auto max-w-[720px]">
         <OrderConfirmation orderNumber="DYL-100482" />
       </div>
@@ -1528,7 +1528,7 @@ function PreviewCheckoutConfirmation() {
 
 function AiPad({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-background px-4 py-12 small:px-8 medium:px-12">
+    <div className="bg-background small:px-8 medium:px-12 px-4 py-12">
       {children}
     </div>
   );
@@ -1768,7 +1768,7 @@ export async function PreviewTemplate() {
         primaryCta={{ label: "Vezi ofertele", href: "/store" }}
         secondaryCta={{
           label: "Compară modele",
-          href: "/categories/scule-manuale",
+          href: "/categories/scule-de-mana",
         }}
         image={{
           src: "/images/dyllu-dyllu-cordless-2-pieces-combo-kit-dtck20273-power-tool-combo-kit-1209174688.webp",
@@ -1854,14 +1854,11 @@ export async function PreviewTemplate() {
       <PreviewProductTypeBadges />
 
       <ComponentLabel {...find("pdp-set-breakdown")} />
-      <SetBreakdown
-        pieceCount={62}
-        pieces={SET_PIECES}
-      />
+      <SetBreakdown pieceCount={62} pieces={SET_PIECES} />
 
       <ComponentLabel {...find("pdp-specs")} />
       <ProductSpecs
-        description="Fierăstrău cu lanț fără fir DYLLU 20V, motor brushless și ghidaj de 12″. Ideal pentru tăieri în grădină și lucrări forestiere ușoare. Livrat cu doi acumulatori de 4.0Ah pentru autonomie extinsă."
+        description="Fierăstrău cu lanț DYLLU 20V, motor fără perii și lamă de 12″. Potrivit pentru tăieri în grădină și lucrări forestiere ușoare. Livrat cu doi acumulatori de 4.0 Ah."
         specs={CHAINSAW_SPECS}
       />
 
@@ -2016,9 +2013,9 @@ export async function PreviewTemplate() {
 
 function EyebrowShowcase() {
   return (
-    <section className="py-12 small:py-16">
+    <section className="small:py-16 py-12">
       <Container>
-        <div className="grid gap-8 small:grid-cols-2">
+        <div className="small:grid-cols-2 grid gap-8">
           <EyebrowSwatch label="dark (default)" bg="light">
             <Eyebrow variant="dark">Cele mai vândute</Eyebrow>
           </EyebrowSwatch>
@@ -2067,7 +2064,7 @@ function EyebrowSwatch({
     >
       <span
         className={cn(
-          "font-mono text-[11px] uppercase tracking-[0.18em]",
+          "text-2xs font-mono tracking-[0.18em] uppercase",
           bg === "light" ? "text-muted-foreground" : "text-background/60"
         )}
       >
@@ -2076,7 +2073,7 @@ function EyebrowSwatch({
       {children}
       <p
         className={cn(
-          "mt-2 font-display text-xl font-extrabold tracking-tight",
+          "font-display mt-2 text-xl font-extrabold tracking-tight",
           bg === "light" ? "text-foreground" : "text-background"
         )}
       >

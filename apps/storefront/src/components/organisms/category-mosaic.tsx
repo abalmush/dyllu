@@ -16,25 +16,25 @@ const MOSAIC_SPANS: { className: string; emphasized: boolean }[] = [
 
 export function CategoryMosaic() {
   return (
-    <section className="py-16 small:py-24">
+    <section className="small:py-24 py-16">
       <Container>
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+            <span className="text-2xs text-primary font-semibold tracking-[0.18em] uppercase">
               Categorii populare
             </span>
-            <h2 className="mt-2 font-display text-display-sm font-extrabold tracking-tight text-foreground sm:text-display-md">
+            <h2 className="font-display text-display-sm text-foreground sm:text-display-md mt-2 font-extrabold tracking-tight">
               Tot ce ai nevoie
               <span className="text-primary"> pentru următorul proiect.</span>
             </h2>
           </div>
-          <p className="max-w-md text-sm text-muted-foreground sm:text-right">
+          <p className="text-muted-foreground max-w-md text-sm sm:text-right">
             De la atelier la grădină — produse selectate de profesioniști pentru
             profesioniști.
           </p>
         </div>
 
-        <div className="mt-10 grid gap-4 sm:auto-rows-[300px] sm:grid-cols-12">
+        <div className="mt-12 grid gap-4 sm:auto-rows-[300px] sm:grid-cols-12">
           {categoriesTree.map((cat, idx) => {
             const visual = getCategoryVisual(cat.handle);
             const productCount = cat.children.reduce(

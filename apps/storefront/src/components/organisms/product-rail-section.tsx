@@ -30,20 +30,20 @@ export function ProductRailSection({
   return (
     <section
       className={cn(
-        "py-14 small:py-20",
+        "small:py-20 py-16",
         background === "subtle" && "bg-surface-subtle/60",
         className
       )}
     >
       <Container>
-        <div className="flex flex-col items-start justify-between gap-6 small:flex-row small:items-end">
+        <div className="small:flex-row small:items-end flex flex-col items-start justify-between gap-6">
           <div>
             {eyebrow && <Eyebrow variant="dark">{eyebrow}</Eyebrow>}
-            <h2 className="mt-3 font-display text-2xl font-extrabold tracking-tight text-foreground small:text-display-sm">
+            <h2 className="font-display text-foreground small:text-display-sm mt-4 text-2xl font-extrabold tracking-tight">
               {title}
             </h2>
             {description && (
-              <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-2 max-w-xl text-sm">
                 {description}
               </p>
             )}
@@ -51,14 +51,14 @@ export function ProductRailSection({
           {viewAllHref && (
             <Link
               href={viewAllHref}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-colors hover:text-primary"
+              className="text-foreground hover:text-primary inline-flex items-center gap-2 text-sm font-semibold transition-colors"
             >
               {viewAllLabel}
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
             </Link>
           )}
         </div>
-        <div className="mt-10">{children}</div>
+        <div className="mt-12">{children}</div>
       </Container>
     </section>
   );

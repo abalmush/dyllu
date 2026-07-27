@@ -1,0 +1,56 @@
+[
+  {
+    "sku": "DTLSS1520",
+    "power_source": "replaceable_battery",
+    "battery_voltage": "20",
+    "battery_included": "no",
+    "charger_included": "no",
+    "requires_battery": true,
+    "evidence": "Full Catalog: compatible with DYLLU 20V batteries; no battery or charger listed as included"
+  },
+  {
+    "sku": "DTQE15801",
+    "power_source": "replaceable_battery",
+    "battery_voltage": "20",
+    "battery_included": "no",
+    "charger_included": "no",
+    "requires_battery": true,
+    "evidence": "Full Catalog: operates with a 20V battery; only the auger bit is listed as included"
+  },
+  {
+    "sku": "DTLM1516",
+    "power_source": "replaceable_battery",
+    "battery_voltage": "20",
+    "battery_included": "no",
+    "charger_included": "no",
+    "requires_battery": true,
+    "evidence": "Full Catalog: charger sold separately; reviewed existing catalogue classifies it as DYLLU 20V"
+  },
+  {
+    "sku": "DTAAM572",
+    "power_source": "integrated_rechargeable_battery",
+    "battery_voltage": "8",
+    "battery_included": "yes",
+    "charger_included": "no",
+    "requires_battery": false,
+    "evidence": "Full Catalog: 8V cordless product with USB Type-C charging port and included charging cable"
+  },
+  {
+    "sku": "DTCV4415",
+    "power_source": "integrated_rechargeable_battery",
+    "battery_voltage": "4",
+    "battery_included": "yes",
+    "charger_included": "no",
+    "requires_battery": false,
+    "evidence": "Full Catalog: 4V cordless screwdriver charged through USB Type-C; cable sold separately"
+  },
+  {
+    "sku": "DTCV4628",
+    "power_source": "integrated_rechargeable_battery",
+    "battery_voltage": "4",
+    "battery_included": "yes",
+    "charger_included": "no",
+    "requires_battery": false,
+    "evidence": "Full Catalog: 4V cordless screwdriver charged through USB Type-C; cable sold separately"
+  }
+]

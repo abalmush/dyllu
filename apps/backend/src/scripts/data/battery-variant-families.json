@@ -1,0 +1,65 @@
+[
+  {
+    "family_id": "DTKH1501",
+    "members": [
+      { "sku": "DTKH1501", "configuration": "Fără acumulator" },
+      { "sku": "DTKH1B012", "configuration": "Cu acumulator + încărcător" }
+    ]
+  },
+  {
+    "family_id": "DTSU3066",
+    "members": [
+      { "sku": "DTSU3066", "configuration": "Fără acumulator" },
+      { "sku": "DTSU30662", "configuration": "Cu acumulator + încărcător" }
+    ]
+  },
+  {
+    "family_id": "DTBJ1305",
+    "members": [
+      { "sku": "DTBJ1305", "configuration": "Fără acumulator" },
+      { "sku": "DTBJ1308", "configuration": "Cu acumulator + încărcător" }
+    ]
+  },
+  {
+    "family_id": "DTTVM1D12",
+    "members": [
+      { "sku": "DTTVM1D12", "configuration": "Fără acumulator" },
+      { "sku": "DTTVM1D128", "configuration": "Cu acumulator + încărcător" }
+    ]
+  },
+  {
+    "family_id": "DTDS204283",
+    "members": [
+      { "sku": "DTDS204283", "configuration": "Fără acumulator" },
+      { "sku": "DTDS204285", "configuration": "Cu acumulator + încărcător" }
+    ]
+  },
+  {
+    "family_id": "DTCLP560",
+    "members": [
+      { "sku": "DTCLP560", "configuration": "Fără acumulator" },
+      { "sku": "DTCLP562", "configuration": "Cu acumulator + încărcător" }
+    ]
+  },
+  {
+    "family_id": "DTBLP552",
+    "members": [
+      { "sku": "DTBLP552", "configuration": "Fără acumulator" },
+      { "sku": "DTBLP5521", "configuration": "Cu acumulator + încărcător" }
+    ]
+  },
+  {
+    "family_id": "DTLSY2016",
+    "members": [
+      { "sku": "DTLSY2016", "configuration": "Fără acumulator" },
+      { "sku": "DTLSY20162", "configuration": "Cu acumulator + încărcător" }
+    ]
+  },
+  {
+    "family_id": "DTQX0120",
+    "members": [
+      { "sku": "DTQX0120", "configuration": "Fără acumulator" },
+      { "sku": "DTQX01203", "configuration": "Cu acumulator + încărcător" }
+    ]
+  }
+]

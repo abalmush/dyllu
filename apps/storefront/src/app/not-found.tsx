@@ -14,20 +14,20 @@ export default function NotFound() {
     <main
       id="main-content"
       tabIndex={-1}
-      className="flex min-h-[calc(100vh-12rem)] flex-col items-center justify-center gap-6 px-6 text-center outline-none"
+      className="flex min-h-[calc(100vh-12rem)] flex-col items-center justify-center gap-6 px-6 text-center outline-hidden"
     >
-      <span className="rounded-full bg-primary/15 px-4 py-1 text-sm font-semibold tracking-wide text-brand-900">
+      <span className="bg-primary/15 text-brand-900 rounded-full px-4 py-1 text-sm font-semibold tracking-wide">
         Eroare 404
       </span>
-      <h1 className="font-display text-display-md font-extrabold tracking-tight text-foreground sm:text-display-lg">
+      <h1 className="font-display text-display-md text-foreground sm:text-display-lg font-extrabold tracking-tight">
         Pagina nu a fost
-        <span className="block text-brand-800">găsită.</span>
+        <span className="text-brand-800 block">găsită.</span>
       </h1>
-      <p className="max-w-md text-sm text-muted-foreground sm:text-base">
+      <p className="text-muted-foreground max-w-md text-sm sm:text-base">
         Linkul pe care l-ai accesat nu există sau a fost mutat. Întoarce-te la
         pagina principală sau caută produsul direct.
       </p>
-      <div className="flex flex-wrap items-center justify-center gap-3">
+      <div className="flex flex-wrap items-center justify-center gap-4">
         <Button asChild size="lg" className="rounded-full">
           <Link href="/">
             <Home className="size-4" />

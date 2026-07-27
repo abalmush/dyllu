@@ -2,41 +2,43 @@ import { Suspense } from "react";
 import { HttpTypes } from "@medusajs/types";
 
 import { Badge } from "@/components/atoms/badge";
-import { Container } from "@/components/atoms/container";
-import { Breadcrumbs } from "@/components/molecules/breadcrumbs";
 import { LinkedProducts } from "@/components/organisms/linked-products";
-import { PdpHeroCombo } from "@/components/organisms/pdp-hero-combo";
 import { ProductTypeBadge } from "@/components/organisms/product-type-badge";
-import { SetBreakdown } from "@/components/organisms/set-breakdown";
 import { getCompatibleAccessories } from "@lib/data/compatible-accessories";
 import RelatedProducts from "@modules/products/components/related-products";
-import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta";
-import ProductTabs from "@modules/products/components/product-tabs";
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products";
+import SharedProductLayout from "./shared-product-layout";
 
 import {
-  buildProductBreadcrumbs,
   getEffectivePlatform,
   getPieceCount,
-  getProductEyebrow,
   getPrimaryArticleCode,
+  getVariantDescription,
   getVariantImage,
   parseKitItems,
   prettifyPlatform,
-  toComboItems,
   toLinkedProduct,
   toSetPieces,
 } from "../lib/product-presentation";
 
 type Props = {
   product: HttpTypes.StoreProduct;
+  region: HttpTypes.StoreRegion;
+  images: HttpTypes.StoreProductImage[];
+  selectedVariant?: HttpTypes.StoreProductVariant;
 };
 
-export default async function KitProductTemplate({ product }: Props) {
+export default async function KitProductTemplate({
+  product,
+  region,
+  images,
+  selectedVariant,
+}: Props) {
   const platform = getEffectivePlatform(product);
-  const parsedItems = parseKitItems(product.description);
+  const parsedItems = parseKitItems(
+    getVariantDescription(product, selectedVariant)
+  );
   const pieceCount = getPieceCount(parsedItems);
-  const eyebrow = getProductEyebrow(product);
   const includedCodes = new Set(
     parsedItems
       .map((item) => item.code)
@@ -73,68 +75,49 @@ export default async function KitProductTemplate({ product }: Props) {
     }
   }
 
-  const comboItems = toComboItems(parsedItems, imageByCode);
   const setPieces = toSetPieces(parsedItems, imageByCode);
-  const breadcrumbs = buildProductBreadcrumbs(product);
   const summary = platform.startsWith("dyllu-")
-    ? `Kit complet livrat ca un singur SKU, cu sculele și accesoriile incluse în pachet, pe platforma ${prettifyPlatform(platform)}.`
-    : "Kit complet livrat ca un singur SKU, cu sculele și accesoriile incluse în pachet.";
+    ? `Primești toate sculele și accesoriile afișate, compatibile cu sistemul de acumulatori ${prettifyPlatform(platform)}.`
+    : "Primești toate sculele și accesoriile afișate.";
 
   return (
     <>
-      <PdpHeroCombo
+      <SharedProductLayout
         product={product}
-        items={comboItems}
-        eyebrow={eyebrow}
-        layout="grid"
-        includedContent={
-          setPieces.length > 0 ? (
-            <SetBreakdown
-              pieceCount={pieceCount}
-              pieces={setPieces}
-              tone="dark"
-            />
-          ) : undefined
-        }
-        topContent={<Breadcrumbs items={breadcrumbs} />}
-        afterTitleContent={
-          <div className="flex flex-wrap items-center gap-2">
-            <ProductTypeBadge type="kit" />
-            {pieceCount > 0 && (
-              <Badge variant="secondary">{pieceCount} piese incluse</Badge>
-            )}
-            {platform.startsWith("dyllu-") && (
-              <Badge variant="outline">{prettifyPlatform(platform)}</Badge>
-            )}
+        region={region}
+        images={images}
+        selectedVariant={selectedVariant}
+        includedPieces={setPieces}
+        purchaseSupplement={
+          <div className="clip-corner-cut-lg clip-shadow-lg bg-card ring-border small:p-8 flex flex-col gap-4 p-6 ring-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <ProductTypeBadge type="kit" />
+              {pieceCount > 0 && (
+                <Badge variant="secondary">{pieceCount} piese incluse</Badge>
+              )}
+              {platform.startsWith("dyllu-") && (
+                <Badge variant="outline">{prettifyPlatform(platform)}</Badge>
+              )}
+            </div>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              {summary}
+            </p>
           </div>
-        }
-        descriptionContent={
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {summary}
-          </p>
         }
       />
 
-      <Container className="pb-24 pt-12 small:pb-32 small:pt-16">
-        <div className="mx-auto max-w-5xl space-y-8">
-          <ProductOnboardingCta />
-          <div className="clip-corner-cut-lg clip-shadow-lg bg-card p-6 ring-1 ring-border small:p-8">
-            <ProductTabs product={product} />
-          </div>
-        </div>
-      </Container>
-
       {linkedProducts.length > 0 && (
         <LinkedProducts
-          mainName={product.title ?? "Acest kit"}
+          mainName={product.title ?? "Acest set"}
           mainImage={getVariantImage(product)}
           mainPrice={
+            selectedVariant?.calculated_price?.calculated_amount ??
             product.variants?.[0]?.calculated_price?.calculated_amount ??
             undefined
           }
           products={linkedProducts}
           layout="compatible"
-          compatibilityNote={`Poți extinde acest kit cu baterii și încărcătoare compatibile pe aceeași platformă ${prettifyPlatform(platform)}.`}
+          compatibilityNote={`Poți completa setul cu acumulatori și încărcătoare din același sistem ${prettifyPlatform(platform)}.`}
         />
       )}
 

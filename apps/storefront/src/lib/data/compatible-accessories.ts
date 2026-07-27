@@ -37,7 +37,7 @@ export async function getCompatibleAccessories(
       query: { platform },
       headers,
       next,
-      cache: "force-cache",
+      cache: process.env.NODE_ENV === "production" ? "force-cache" : "no-store",
     }
   );
 
@@ -57,5 +57,15 @@ export async function getCompatibleAccessories(
     if (batterySet.has(p.handle ?? "")) batteries.push(p);
     else if (chargerSet.has(p.handle ?? "")) chargers.push(p);
   }
+  batteries.sort(
+    (left, right) =>
+      Number(left.metadata?.battery_capacity_ah ?? Number.MAX_SAFE_INTEGER) -
+      Number(right.metadata?.battery_capacity_ah ?? Number.MAX_SAFE_INTEGER)
+  );
+  chargers.sort(
+    (left, right) =>
+      Number(left.metadata?.charger_output_a ?? Number.MAX_SAFE_INTEGER) -
+      Number(right.metadata?.charger_output_a ?? Number.MAX_SAFE_INTEGER)
+  );
   return { batteries, chargers };
 }

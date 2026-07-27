@@ -45,7 +45,7 @@ const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
         onFocus={() => innerRef.current?.focus()}
         onBlur={() => innerRef.current?.blur()}
         className={clx(
-          "relative flex h-12 items-center rounded-md border border-border bg-background shadow-sm transition-colors focus-within:border-foreground focus-within:ring-2 focus-within:ring-ring/20 focus-within:ring-offset-0",
+          "border-border bg-background focus-within:border-foreground focus-within:ring-ring/20 relative flex h-12 items-center rounded-md border shadow-xs transition-colors focus-within:ring-2 focus-within:ring-offset-0",
           className,
           {
             "text-muted-foreground": isPlaceholder,
@@ -61,14 +61,14 @@ const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
             (props.name === "country_code" ? "Țară" : "Selectează o opțiune")
           }
           {...props}
-          className="h-full w-full appearance-none border-none bg-transparent px-4 pr-12 text-base outline-none transition-colors duration-150"
+          className="h-full w-full appearance-none border-none bg-transparent px-4 pr-12 text-base outline-hidden transition-colors duration-150"
         >
           <option disabled value="">
             {placeholder}
           </option>
           {children}
         </select>
-        <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-muted-foreground">
+        <span className="text-muted-foreground pointer-events-none absolute inset-y-0 right-4 flex items-center">
           <ChevronUpDown />
         </span>
       </div>

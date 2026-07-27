@@ -1,8 +1,8 @@
 const SkeletonOrderItems = () => {
   return (
-    <div className="flex flex-col gap-y-4 border-y border-gray-200 py-10">
+    <div className="flex flex-col gap-y-4 border-y border-gray-200 py-12">
       <div className="grid grid-cols-[122px_1fr] gap-x-4">
-        <div className="aspect-[29/34] w-full bg-gray-100"></div>
+        <div className="aspect-29/34 w-full bg-gray-100"></div>
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-y-2">
             <div className="h-6 w-48 bg-gray-100"></div>
@@ -14,7 +14,7 @@ const SkeletonOrderItems = () => {
       </div>
 
       <div className="grid grid-cols-[122px_1fr] gap-x-4">
-        <div className="aspect-[29/34] w-full bg-gray-100"></div>
+        <div className="aspect-29/34 w-full bg-gray-100"></div>
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-y-2">
             <div className="h-6 w-48 bg-gray-100"></div>
@@ -26,7 +26,7 @@ const SkeletonOrderItems = () => {
       </div>
 
       <div className="grid grid-cols-[122px_1fr] gap-x-4">
-        <div className="aspect-[29/34] w-full bg-gray-100"></div>
+        <div className="aspect-29/34 w-full bg-gray-100"></div>
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-y-2">
             <div className="h-6 w-48 bg-gray-100"></div>

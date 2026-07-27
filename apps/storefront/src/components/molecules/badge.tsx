@@ -27,8 +27,8 @@ export function Badge({
   return (
     <span
       className={cn(
-        "clip-corner-cut-sm inline-flex items-center gap-1.5 font-semibold uppercase tracking-wider",
-        size === "sm" ? "px-2.5 py-1 text-[10px]" : "px-3.5 py-1.5 text-xs",
+        "clip-corner-cut-sm inline-flex items-center gap-1.5 font-semibold tracking-wider uppercase",
+        size === "sm" ? "text-2xs px-2.5 py-1" : "px-3.5 py-1.5 text-xs",
         VARIANT[variant],
         className
       )}

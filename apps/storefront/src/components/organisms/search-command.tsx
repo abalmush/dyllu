@@ -13,7 +13,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/atoms/command";
-import { categoriesTree } from "@lib/data/categories-tree";
+import { type CategoryNode } from "@lib/data/categories";
 
 const QUICK_LINKS = [
   { label: "Produse noi", icon: Sparkles, href: "/store?sortBy=created_at" },
@@ -35,9 +35,14 @@ const RECENT_KEY = "dyllu_recent_search";
 export interface SearchCommandProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  categories: CategoryNode[];
 }
 
-export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
+export function SearchCommand({
+  open,
+  onOpenChange,
+  categories,
+}: SearchCommandProps) {
   const router = useRouter();
   const [query, setQuery] = React.useState("");
   const [recent, setRecent] = React.useState<string[]>([]);
@@ -100,9 +105,9 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
                     go(`/store?q=${encodeURIComponent(term)}`, term)
                   }
                 >
-                  <History className="size-4 text-muted-foreground" />
+                  <History className="text-muted-foreground size-4" />
                   <span>{term}</span>
-                  <ArrowRight className="ml-auto size-3 text-muted-foreground" />
+                  <ArrowRight className="text-muted-foreground ml-auto size-3" />
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -118,7 +123,7 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
                 value={link.label}
                 onSelect={() => go(link.href)}
               >
-                <Icon className="size-4 text-primary" />
+                <Icon className="text-primary size-4" />
                 <span>{link.label}</span>
               </CommandItem>
             );
@@ -132,20 +137,20 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
               value={term}
               onSelect={() => go(`/store?q=${encodeURIComponent(term)}`, term)}
             >
-              <Sparkles className="size-4 text-muted-foreground" />
+              <Sparkles className="text-muted-foreground size-4" />
               <span>{term}</span>
             </CommandItem>
           ))}
         </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading="Categorii">
-          {categoriesTree.map((c) => (
+          {categories.map((c) => (
             <CommandItem
               key={c.handle}
               value={c.name}
               onSelect={() => go(`/categories/${c.handle}`)}
             >
-              <Layers className="size-4 text-muted-foreground" />
+              <Layers className="text-muted-foreground size-4" />
               <span>{c.name}</span>
             </CommandItem>
           ))}

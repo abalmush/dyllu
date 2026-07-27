@@ -1,5 +1,6 @@
 import { getProductPrice } from "@lib/util/get-product-price";
 import { HttpTypes } from "@medusajs/types";
+import { getProductImageUrl } from "@lib/util/product-visibility";
 
 import { ProductCard } from "@/components/molecules/product-card";
 
@@ -16,7 +17,7 @@ export default async function ProductPreview({ product, isFeatured }: Props) {
     <ProductCard
       href={`/products/${product.handle}`}
       title={product.title}
-      thumbnail={product.thumbnail}
+      thumbnail={getProductImageUrl(product)}
       imageAlt={product.title}
       price={cheapestPrice ?? null}
       isFeatured={isFeatured}

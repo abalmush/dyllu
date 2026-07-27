@@ -16,6 +16,10 @@ import {
 } from "./cookies";
 import { getRegion } from "./regions";
 import { getLocale } from "@lib/data/locale-actions";
+import {
+  canonicalizeShippingAddress,
+  isShippingOptionAllowedForAddress,
+} from "@lib/shipping/delivery-area";
 
 async function updateTaggedCache(...tags: string[]) {
   const nextTags = new Set<string>();
@@ -93,7 +97,7 @@ function addressFromForm(formData: FormData, prefix: "shipping" | "billing") {
     throw new Error(`${prefix}_address.country_code is invalid`);
   }
 
-  return {
+  const address = {
     first_name: formString(formData, `${prefix}_address.first_name`, {
       required: true,
       max: 100,
@@ -120,6 +124,8 @@ function addressFromForm(formData: FormData, prefix: "shipping" | "billing") {
     province: formString(formData, `${prefix}_address.province`, { max: 100 }),
     phone: formString(formData, `${prefix}_address.phone`, { max: 40 }),
   };
+
+  return prefix === "shipping" ? canonicalizeShippingAddress(address) : address;
 }
 
 async function retrieveCartByCookie(fields?: string) {
@@ -149,6 +155,36 @@ async function retrieveCartByCookie(fields?: string) {
       if (errorStatus(error) === 404) return null;
       throw error;
     });
+}
+
+async function assertShippingOptionAvailableForCart({
+  cartId,
+  shippingOptionId,
+  shippingAddress,
+  headers,
+}: {
+  cartId: string;
+  shippingOptionId: string;
+  shippingAddress?: HttpTypes.StoreCartAddress | null;
+  headers: Record<string, string>;
+}) {
+  const { shipping_options: shippingOptions } = await sdk.client.fetch<{
+    shipping_options: HttpTypes.StoreCartShippingOption[];
+  }>("/store/shipping-options", {
+    query: { cart_id: cartId },
+    headers,
+    cache: "no-store",
+  });
+  const selectedOption = shippingOptions.find(
+    (option) => option.id === shippingOptionId
+  );
+
+  if (
+    !selectedOption ||
+    !isShippingOptionAllowedForAddress(selectedOption, shippingAddress)
+  ) {
+    throw new Error("Shipping method is not available for this cart");
+  }
 }
 
 export async function retrieveCart() {
@@ -250,6 +286,47 @@ export async function addToCart({
     .catch(medusaError);
 }
 
+export async function addItemsToCart({
+  items,
+}: {
+  items: Array<{ variantId: string; quantity: number }>;
+}) {
+  if (items.length === 0) {
+    throw new Error("No items provided when adding to cart");
+  }
+
+  for (const item of items) {
+    assertIdentifier(item.variantId, "variant ID");
+    assertQuantity(item.quantity);
+  }
+
+  const cart = await getOrSetCart();
+
+  if (!cart) {
+    throw new Error("Error retrieving or creating cart");
+  }
+
+  const headers = {
+    ...(await getAuthHeaders()),
+  };
+
+  for (const item of items) {
+    await sdk.store.cart
+      .createLineItem(
+        cart.id,
+        {
+          variant_id: item.variantId,
+          quantity: item.quantity,
+        },
+        {},
+        headers
+      )
+      .catch(medusaError);
+  }
+
+  await syncCartStorefront("fulfillment", "shippingOptions");
+}
+
 export async function updateLineItem({
   lineId,
   quantity,
@@ -316,16 +393,13 @@ export async function setShippingMethod(shippingMethodId: string) {
     ...(await getAuthHeaders()),
   };
 
-  const { shipping_options: shippingOptions } = await sdk.client.fetch<{
-    shipping_options: HttpTypes.StoreCartShippingOption[];
-  }>("/store/shipping-options", {
-    query: { cart_id: cartId },
+  const cart = await retrieveCartByCookie("id,*shipping_address");
+  await assertShippingOptionAvailableForCart({
+    cartId,
+    shippingOptionId: shippingMethodId,
+    shippingAddress: cart?.shipping_address,
     headers,
-    cache: "no-store",
   });
-  if (!shippingOptions.some((option) => option.id === shippingMethodId)) {
-    throw new Error("Shipping method is not available for this cart");
-  }
 
   return sdk.store.cart
     .addShippingMethod(cartId, { option_id: shippingMethodId }, {}, headers)
@@ -457,6 +531,20 @@ export async function placeOrder() {
   const headers = {
     ...(await getAuthHeaders()),
   };
+
+  const cart = await retrieveCartByCookie(
+    "id,*shipping_address,+shipping_methods.shipping_option_id"
+  );
+  const shippingOptionId = cart?.shipping_methods?.at(-1)?.shipping_option_id;
+  if (!cart || !shippingOptionId) {
+    throw new Error("No shipping method selected for this cart");
+  }
+  await assertShippingOptionAvailableForCart({
+    cartId: id,
+    shippingOptionId,
+    shippingAddress: cart.shipping_address,
+    headers,
+  });
 
   const cartRes = await sdk.store.cart
     .complete(id, {}, headers)

@@ -11,12 +11,12 @@ type Props = {
 export default function ItemsTemplate({ cart }: Props) {
   const items = cart?.items;
   return (
-    <section className="clip-corner-cut-lg clip-shadow-md bg-card p-3 ring-1 ring-border small:p-4">
-      <header className="flex flex-wrap items-baseline justify-between gap-3 border-b border-border px-4 pb-4 pt-3">
-        <h2 className="font-display text-xl font-bold tracking-tight text-foreground">
+    <section className="clip-corner-cut-lg clip-shadow-md bg-card ring-border small:p-4 p-4 ring-1">
+      <header className="border-border flex flex-wrap items-baseline justify-between gap-4 border-b px-4 pt-4 pb-4">
+        <h2 className="font-display text-foreground text-xl font-bold tracking-tight">
           Produsele tale
         </h2>
-        <span className="clip-corner-cut-xs bg-surface-subtle px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="clip-corner-cut-xs bg-surface-subtle text-muted-foreground px-4 py-1 text-xs font-semibold tracking-[0.16em] uppercase">
           {items?.length ?? 0} {items?.length === 1 ? "produs" : "produse"}
         </span>
       </header>

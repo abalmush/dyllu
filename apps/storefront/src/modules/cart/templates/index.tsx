@@ -19,23 +19,23 @@ export default function CartTemplate({ cart, customer }: Props) {
       className={cart?.items?.length ? "bg-surface-subtle" : undefined}
       data-testid="cart-container"
     >
-      <Container className="py-8 small:py-12">
+      <Container className="small:py-12 py-8">
         {cart?.items?.length ? (
           <>
-            <div className="mb-8 flex flex-col gap-3">
+            <div className="mb-8 flex flex-col gap-4">
               <Breadcrumbs
                 items={[{ label: "Acasă", href: "/" }, { label: "Coșul meu" }]}
               />
               <Eyebrow>Comandă DYLLU</Eyebrow>
-              <h1 className="font-display text-display-sm font-extrabold tracking-tight text-foreground small:text-display-md">
+              <h1 className="font-display text-display-sm text-foreground small:text-display-md font-extrabold tracking-tight">
                 Coșul tău
               </h1>
-              <p className="max-w-2xl text-sm text-muted-foreground">
+              <p className="text-muted-foreground max-w-2xl text-sm">
                 Verifică produsele, adaugă accesoriile utile și mergi mai
                 departe către finalizarea comenzii.
               </p>
             </div>
-            <div className="grid gap-8 small:grid-cols-[minmax(0,1fr)_minmax(0,360px)] small:gap-12">
+            <div className="small:grid-cols-[minmax(0,1fr)_minmax(0,360px)] small:gap-12 grid gap-8">
               <div className="flex flex-col gap-6">
                 {!customer && <SignInPrompt />}
                 <ItemsTemplate cart={cart} />

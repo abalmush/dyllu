@@ -22,7 +22,7 @@ const PROJECTS: Project[] = [
     height: 1000,
     handle: "@atelier_auto_md",
     city: "Chișinău",
-    caption: "Restaurare motor — DYLLU 20V combo kit.",
+    caption: "Restaurare motor — set complet DYLLU 20V.",
     spanClass: "small:col-span-2 small:row-span-2",
   },
   {
@@ -65,17 +65,17 @@ const PROJECTS: Project[] = [
 
 export function CustomerProjects() {
   return (
-    <section className="bg-foreground py-16 text-background small:py-24">
+    <section className="bg-foreground text-background small:py-24 py-16">
       <Container>
-        <header className="mb-10 flex flex-col items-start justify-between gap-6 small:flex-row small:items-end">
-          <div className="flex flex-col gap-3">
+        <header className="small:flex-row small:items-end mb-12 flex flex-col items-start justify-between gap-6">
+          <div className="flex flex-col gap-4">
             <Eyebrow icon={<Camera className="size-3.5" />}>
               Construit cu DYLLU
             </Eyebrow>
-            <h2 className="max-w-2xl font-display text-display-sm font-extrabold tracking-tight text-background small:text-display-md">
+            <h2 className="font-display text-display-sm text-background small:text-display-md max-w-2xl font-extrabold tracking-tight">
               Proiecte reale, din ateliere reale.
             </h2>
-            <p className="max-w-xl text-sm text-background/65 small:text-base">
+            <p className="text-background/65 small:text-base max-w-xl text-sm">
               Profesioniști și pasionați din toată Moldova folosesc DYLLU în
               fiecare zi. Iată câteva din proiectele lor.
             </p>
@@ -84,12 +84,12 @@ export function CustomerProjects() {
             href="https://instagram.com"
             target="_blank"
             rel="noreferrer noopener"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-primary underline-offset-4 hover:underline"
+            className="text-primary inline-flex items-center gap-2 text-sm font-semibold underline-offset-4 hover:underline"
           >
             #ConstruitCuDYLLU
           </a>
         </header>
-        <div className="grid grid-cols-2 gap-3 small:grid-cols-6 small:gap-4">
+        <div className="small:grid-cols-6 small:gap-4 grid grid-cols-2 gap-4">
           {PROJECTS.map((p) => (
             <ProjectCard key={`${p.handle}-${p.city}`} project={p} />
           ))}
@@ -102,7 +102,7 @@ export function CustomerProjects() {
 function ProjectCard({ project }: { project: Project }) {
   return (
     <figure
-      className={`clip-corner-cut-md group relative overflow-hidden bg-background/5 ${project.spanClass}`}
+      className={`clip-corner-cut-md group bg-background/5 relative overflow-hidden ${project.spanClass}`}
     >
       <Image
         src={project.src}
@@ -114,18 +114,18 @@ function ProjectCard({ project }: { project: Project }) {
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-foreground via-foreground/40 to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-100"
+        className="from-foreground via-foreground/40 pointer-events-none absolute inset-0 bg-linear-to-t to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-100"
       />
-      <figcaption className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-4 text-background small:p-5">
-        <span className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+      <figcaption className="text-background small:p-6 absolute inset-x-0 bottom-0 flex flex-col gap-1 p-4">
+        <span className="text-2xs text-primary flex items-center gap-2 font-semibold tracking-[0.18em] uppercase">
           {project.handle}
-          <span className="size-1 rounded-full bg-background/40" />
-          <span className="inline-flex items-center gap-1 text-background/70">
+          <span className="bg-background/40 size-1 rounded-full" />
+          <span className="text-background/70 inline-flex items-center gap-1">
             <MapPin className="size-3" />
             {project.city}
           </span>
         </span>
-        <p className="text-sm font-medium leading-snug text-background/90">
+        <p className="text-background/90 text-sm leading-snug font-medium">
           {project.caption}
         </p>
       </figcaption>

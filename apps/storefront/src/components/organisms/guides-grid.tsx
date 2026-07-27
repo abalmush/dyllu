@@ -42,26 +42,26 @@ const GUIDES: Guide[] = [
 
 export function GuidesGrid() {
   return (
-    <section className="py-16 small:py-24">
+    <section className="small:py-24 py-16">
       <Container>
-        <header className="mb-10 flex flex-col items-start justify-between gap-4 small:flex-row small:items-end">
+        <header className="small:flex-row small:items-end mb-12 flex flex-col items-start justify-between gap-4">
           <div>
             <Eyebrow icon={<BookOpen className="size-3.5" />}>
               Ghiduri și resurse
             </Eyebrow>
-            <h2 className="mt-3 max-w-2xl font-display text-display-sm font-extrabold tracking-tight text-foreground small:text-display-md">
+            <h2 className="font-display text-display-sm text-foreground small:text-display-md mt-4 max-w-2xl font-extrabold tracking-tight">
               Învață, compară, alege scula potrivită.
             </h2>
           </div>
           <Link
             href="/branduri"
-            className="group inline-flex items-center gap-2 text-sm font-semibold text-foreground underline-offset-4 hover:underline"
+            className="group text-foreground inline-flex items-center gap-2 text-sm font-semibold underline-offset-4 hover:underline"
           >
             Toate ghidurile
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </header>
-        <div className="grid gap-5 small:grid-cols-3">
+        <div className="small:grid-cols-3 grid gap-6">
           {GUIDES.map((g) => (
             <GuideCard key={g.title} {...g} />
           ))}
@@ -75,23 +75,23 @@ function GuideCard({ category, readTime, title, description, href }: Guide) {
   return (
     <Link
       href={href}
-      className="clip-corner-cut-md group relative flex flex-col gap-5 bg-card p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_30px_70px_-40px_rgba(15,23,42,0.45)] small:p-8"
+      className="clip-corner-cut-md group bg-card small:p-8 relative flex flex-col gap-6 p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_30px_70px_-40px_rgba(15,23,42,0.45)]"
     >
-      <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+      <div className="text-2xs text-muted-foreground flex items-center gap-4 font-semibold tracking-[0.18em] uppercase">
         <span className="text-foreground">{category}</span>
-        <span className="size-1 rounded-full bg-border" />
+        <span className="bg-border size-1 rounded-full" />
         <span className="inline-flex items-center gap-1.5">
           <Clock className="size-3" />
           {readTime}
         </span>
       </div>
-      <h3 className="font-display text-xl font-bold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary small:text-2xl">
+      <h3 className="font-display text-foreground group-hover:text-primary small:text-2xl text-xl leading-snug font-bold tracking-tight transition-colors">
         {title}
       </h3>
-      <p className="text-sm leading-relaxed text-muted-foreground">
+      <p className="text-muted-foreground text-sm leading-relaxed">
         {description}
       </p>
-      <span className="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+      <span className="text-foreground mt-auto inline-flex items-center gap-2 text-sm font-semibold">
         Citește ghidul
         <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
       </span>

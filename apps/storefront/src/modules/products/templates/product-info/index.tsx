@@ -12,7 +12,6 @@ export default function ProductInfo({ product }: Props) {
   const category = product.categories?.[0];
   const crumbs = [
     { label: "Acasă", href: "/" },
-    { label: "Magazin", href: "/store" },
     ...(category
       ? [{ label: category.name, href: `/categories/${category.handle}` }]
       : []),
@@ -20,28 +19,28 @@ export default function ProductInfo({ product }: Props) {
   ];
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <Breadcrumbs items={crumbs} />
       <div className="flex flex-wrap items-center gap-2">
         {collection && (
-          <span className="inline-flex items-center rounded-full bg-primary/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-900">
+          <span className="bg-primary/15 text-2xs text-brand-900 inline-flex items-center rounded-full px-2.5 py-1 font-semibold tracking-[0.18em] uppercase">
             {collection.title}
           </span>
         )}
         {product.material && (
-          <span className="inline-flex items-center rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+          <span className="border-border text-2xs text-muted-foreground inline-flex items-center rounded-full border px-2.5 py-1 font-medium">
             {product.material}
           </span>
         )}
       </div>
       <h1
-        className="font-display text-3xl font-extrabold leading-tight tracking-tight text-foreground small:text-display-md"
+        className="font-display text-foreground small:text-display-md text-3xl leading-tight font-extrabold tracking-tight"
         data-testid="product-title"
       >
         {product.title}
       </h1>
-      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-        <div className="flex items-center gap-0.5 text-warning">
+      <div className="text-muted-foreground flex items-center gap-4 text-sm">
+        <div className="text-warning flex items-center gap-0.5">
           {[0, 1, 2, 3, 4].map((i) => (
             <Star
               key={i}
@@ -52,13 +51,13 @@ export default function ProductInfo({ product }: Props) {
           ))}
         </div>
         <span>
-          <span className="font-semibold text-foreground">4.8</span>
+          <span className="text-foreground font-semibold">4.8</span>
           <span className="text-muted-foreground"> · 124 recenzii</span>
         </span>
       </div>
       {product.description && (
         <p
-          className="whitespace-pre-line text-base text-muted-foreground"
+          className="text-muted-foreground text-base whitespace-pre-line"
           data-testid="product-description"
         >
           {product.description}

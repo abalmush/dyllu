@@ -2,13 +2,32 @@ import "server-only";
 
 import { sdk } from "@lib/config";
 import { sortProducts } from "@lib/util/sort-products";
+import { normalizeProductBrand } from "@lib/util/catalog-brand";
+import { hasProductImage } from "@lib/util/product-visibility";
 import { HttpTypes } from "@medusajs/types";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
-import { getAuthHeaders, getCacheOptions } from "./cookies";
+import { getAuthHeaders } from "./cookies";
 import { getRegion, retrieveRegion } from "./regions";
 
 const CATALOG_FETCH_LIMIT = 100;
 const CATALOG_FETCH_CONCURRENCY = 4;
+const PRODUCT_FIELDS =
+  "*options,*variants,*variants.options,*variants.calculated_price,+variants.inventory_quantity,*variants.images,+variants.metadata,+metadata,+tags,*categories,thumbnail,*images";
+
+const withVisibilityFields = (fields?: string): string => {
+  const requested = fields?.split(",").filter(Boolean) ?? [];
+  const visibilityFields = [
+    "id",
+    "handle",
+    "title",
+    "thumbnail",
+    "*images",
+    "*variants.images",
+    "+variants.metadata",
+  ];
+
+  return [...new Set([...requested, ...visibilityFields])].join(",");
+};
 
 export const listProducts = async ({
   pageParam = 1,
@@ -40,10 +59,6 @@ export const listProducts = async ({
     ...(await getAuthHeaders()),
   };
 
-  const next = {
-    ...(await getCacheOptions("products")),
-  };
-
   return sdk.client
     .fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(
       `/store/products`,
@@ -53,21 +68,22 @@ export const listProducts = async ({
           limit,
           offset,
           region_id: region.id,
-          fields:
-            "*options,*variants.options,*variants.calculated_price,+variants.inventory_quantity,*variants.images,+variants.metadata,+metadata,+tags,",
           ...queryParams,
+          fields: withVisibilityFields(queryParams?.fields ?? PRODUCT_FIELDS),
         },
         headers,
-        next,
-        cache: "force-cache",
+        cache: "no-store",
       }
     )
     .then(({ products, count }) => {
+      const normalizedProducts = products
+        .map(normalizeProductBrand)
+        .filter(hasProductImage);
       const nextPage = count > offset + limit ? _pageParam + 1 : null;
 
       return {
         response: {
-          products,
+          products: normalizedProducts,
           count,
         },
         nextPage: nextPage,
@@ -81,11 +97,13 @@ export const listProductsWithSort = async ({
   queryParams,
   sortBy = "created_at",
   onlyOnSale = false,
+  fetchAll = false,
 }: {
   page?: number;
   queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams;
   sortBy?: SortOptions;
   onlyOnSale?: boolean;
+  fetchAll?: boolean;
 }): Promise<{
   response: { products: HttpTypes.StoreProduct[]; count: number };
   nextPage: number | null;
@@ -96,7 +114,7 @@ export const listProductsWithSort = async ({
     ? Math.max(1, Math.floor(page))
     : 1;
 
-  if (sortBy === "created_at" && !onlyOnSale) {
+  if (sortBy === "created_at" && !onlyOnSale && !fetchAll) {
     const pageResult = await listProducts({
       pageParam: normalizedPage,
       queryParams: {
@@ -168,22 +186,21 @@ export const listProductsWithSort = async ({
       )
     : sortedProducts;
 
-  const pageOffset = (normalizedPage - 1) * limit;
+  const pageOffset = fetchAll ? 0 : (normalizedPage - 1) * limit;
 
   const nextPage =
     filteredProducts.length > pageOffset + limit ? normalizedPage + 1 : null;
 
-  const paginatedProducts = filteredProducts.slice(
-    pageOffset,
-    pageOffset + limit
-  );
+  const paginatedProducts = fetchAll
+    ? filteredProducts
+    : filteredProducts.slice(pageOffset, pageOffset + limit);
 
   return {
     response: {
       products: paginatedProducts,
       count: filteredProducts.length,
     },
-    nextPage,
+    nextPage: fetchAll ? null : nextPage,
     queryParams,
   };
 };

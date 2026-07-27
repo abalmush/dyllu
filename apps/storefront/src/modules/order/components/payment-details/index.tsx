@@ -24,7 +24,7 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
   return (
     <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-8">
       <div className="flex flex-1 flex-col">
-        <Text className="txt-medium-plus mb-1 text-ui-fg-base">
+        <Text className="txt-medium-plus text-ui-fg-base mb-1">
           Metodă de plată
         </Text>
         <Text
@@ -34,12 +34,12 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
           {paymentInfo.title}
         </Text>
       </div>
-      <div className="flex flex-[2] flex-col">
-        <Text className="txt-medium-plus mb-1 text-ui-fg-base">
+      <div className="flex flex-2 flex-col">
+        <Text className="txt-medium-plus text-ui-fg-base mb-1">
           Detalii plată
         </Text>
-        <div className="txt-medium flex items-center gap-2 text-ui-fg-subtle">
-          <Container className="flex h-7 w-fit items-center bg-ui-button-neutral-hover p-2">
+        <div className="txt-medium text-ui-fg-subtle flex items-center gap-2">
+          <Container className="bg-ui-button-neutral-hover flex h-7 w-fit items-center p-2">
             {paymentInfo.icon}
           </Container>
           <Text data-testid="payment-amount">

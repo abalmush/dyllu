@@ -65,11 +65,11 @@ export function AnnouncementBar({
   return (
     <div
       className={cn(
-        "relative w-full overflow-hidden bg-secondary text-secondary-foreground",
+        "bg-secondary text-secondary-foreground relative w-full overflow-hidden",
         className
       )}
     >
-      <div className="content-container flex h-9 items-center justify-center gap-3 text-xs">
+      <div className="content-container flex h-9 items-center justify-center gap-4 text-xs">
         <div className="relative flex h-9 flex-1 items-center justify-center overflow-hidden">
           {messages.map((m, i) => (
             <div
@@ -82,7 +82,7 @@ export function AnnouncementBar({
               )}
               aria-hidden={i !== index}
             >
-              <span className="grid size-5 place-items-center rounded-full bg-primary/15 text-primary">
+              <span className="bg-primary/15 text-primary grid size-5 place-items-center rounded-full">
                 {m.icon}
               </span>
               <span className="font-medium tracking-tight">{m.text}</span>
@@ -93,7 +93,7 @@ export function AnnouncementBar({
           type="button"
           onClick={handleDismiss}
           aria-label="Închide bara de anunțuri"
-          className="rounded-full p-1 text-secondary-foreground/70 transition-colors hover:bg-background/10 hover:text-secondary-foreground"
+          className="text-secondary-foreground/70 hover:bg-background/10 hover:text-secondary-foreground rounded-full p-1 transition-colors"
         >
           <X className="size-3.5" />
         </button>

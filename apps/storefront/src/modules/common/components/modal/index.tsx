@@ -24,7 +24,7 @@ const Modal = ({
 }: ModalProps) => {
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-[75]" onClose={close}>
+      <Dialog as="div" className="relative z-75" onClose={close}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -34,7 +34,7 @@ const Modal = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 h-screen bg-foreground/60 backdrop-blur-md" />
+          <div className="bg-foreground/60 fixed inset-0 h-screen backdrop-blur-md" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto overscroll-contain">
@@ -65,7 +65,7 @@ const Modal = ({
                     "max-w-xl": size === "medium",
                     "max-w-3xl": size === "large",
                     "bg-transparent shadow-none": search,
-                    "rounded-rounded border border-border bg-background shadow-xl":
+                    "rounded-rounded border-border bg-background border shadow-xl":
                       !search,
                   }
                 )}
@@ -91,7 +91,7 @@ const Title: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           type="button"
           onClick={close}
           aria-label="Închide"
-          className="grid size-11 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring grid size-11 place-items-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-hidden"
           data-testid="close-modal-button"
         >
           <X size={20} />
@@ -103,7 +103,7 @@ const Title: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const Description: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <Dialog.Description className="text-small-regular flex h-full items-center justify-center pb-4 pt-2 text-ui-fg-base">
+    <Dialog.Description className="text-small-regular text-ui-fg-base flex h-full items-center justify-center pt-2 pb-4">
       {children}
     </Dialog.Description>
   );

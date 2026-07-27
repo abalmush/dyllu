@@ -3,12 +3,12 @@ import type { AnatomyItem } from "@/components/organisms/anatomy-showcase";
 export const ANATOMY_ITEMS: AnatomyItem[] = [
   {
     key: "motor-brushless",
-    label: "Motor brushless",
+    label: "Motor fără perii",
     description:
       "Fără perii — durabilitate cu 50% mai mare, consum redus și cuplu constant sub sarcină.",
     image: {
       src: "/images/dyllu-grinder-thermal.png",
-      alt: "Motor brushless DYLLU vizualizat termic",
+      alt: "Motor fără perii DYLLU, vizualizat termic",
     },
   },
   {
@@ -55,7 +55,7 @@ export const ANATOMY_ITEMS: AnatomyItem[] = [
     key: "siguranta",
     label: "Protecție",
     description:
-      "Mănuși cut-resistant și ochelari anti-impact certificate EN ISO — incluse cu pachetele Pro.",
+      "Mănuși rezistente la tăiere și ochelari anti-impact certificați EN ISO — incluse în seturile profesionale.",
     image: {
       src: "/images/dyllu-safety-gear.png",
       alt: "Protecție DYLLU",

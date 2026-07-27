@@ -5,8 +5,9 @@ import RefinementList from "@modules/store/components/refinement-list";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
 import PaginatedProducts from "@modules/store/templates/paginated-products";
 import { HttpTypes } from "@medusajs/types";
+import { getCategoryTree } from "@lib/data/categories";
 
-export default function CollectionTemplate({
+export default async function CollectionTemplate({
   sortBy,
   collection,
   page,
@@ -15,12 +16,13 @@ export default function CollectionTemplate({
   collection: HttpTypes.StoreCollection;
   page?: string;
 }) {
+  const categories = await getCategoryTree();
   const pageNumber = page ? parseInt(page) : 1;
   const sort = sortBy || "created_at";
 
   return (
-    <div className="content-container flex flex-col py-6 small:flex-row small:items-start">
-      <RefinementList sortBy={sort} />
+    <div className="content-container small:flex-row small:items-start flex flex-col py-6">
+      <RefinementList sortBy={sort} categories={categories} />
       <div className="w-full">
         <div className="text-2xl-semi mb-8">
           <h1>{collection.title}</h1>

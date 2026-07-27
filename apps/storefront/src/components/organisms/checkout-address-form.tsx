@@ -33,11 +33,11 @@ const FIELDS: Field[] = [
 
 export function CheckoutAddressForm() {
   return (
-    <section className="clip-corner-cut-lg bg-card p-6 ring-1 ring-border">
-      <h2 className="mb-5 font-display text-lg font-bold text-foreground">
+    <section className="clip-corner-cut-lg bg-card ring-border p-6 ring-1">
+      <h2 className="font-display text-foreground mb-6 text-lg font-bold">
         Adresă de livrare
       </h2>
-      <div className="grid gap-4 small:grid-cols-2">
+      <div className="small:grid-cols-2 grid gap-4">
         {FIELDS.map((field) => (
           <div
             key={field.id}

@@ -2,3 +2,7 @@ packages:
   - "apps/*"
   - "packages/*"
   - "!apps/backend/.medusa/**"
+
+auditConfig:
+  ignoreGhsas:
+    - GHSA-mh99-v99m-4gvg

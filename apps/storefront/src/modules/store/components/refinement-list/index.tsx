@@ -14,7 +14,7 @@ import {
 } from "@/components/atoms/accordion";
 import { Checkbox } from "@/components/atoms/checkbox";
 import { Label } from "@/components/atoms/label";
-import { categoriesTree } from "@lib/data/categories-tree";
+import { type CategoryNode } from "@lib/data/categories";
 
 import SortProducts, { type SortOptions } from "./sort-products";
 
@@ -23,6 +23,7 @@ type Props = {
   activeCategoryHandle?: string;
   hideSort?: boolean;
   className?: string;
+  categories: CategoryNode[];
   "data-testid"?: string;
 };
 
@@ -31,6 +32,7 @@ export default function RefinementList({
   activeCategoryHandle,
   hideSort,
   className,
+  categories,
   "data-testid": dataTestId,
 }: Props) {
   const router = useRouter();
@@ -50,14 +52,14 @@ export default function RefinementList({
   return (
     <aside
       className={cn(
-        "flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 small:sticky small:top-28 small:max-h-[calc(100vh-9rem)] small:overflow-y-auto",
+        "border-border bg-card small:sticky small:top-28 small:max-h-[calc(100vh-9rem)] small:overflow-y-auto flex flex-col gap-4 rounded-2xl border p-6",
         className
       )}
       data-testid={dataTestId}
     >
       {!hideSort && (
-        <div className="flex items-center justify-between gap-3 small:hidden">
-          <span className="text-sm font-semibold tracking-tight text-foreground">
+        <div className="small:hidden flex items-center justify-between gap-4">
+          <span className="text-foreground text-sm font-semibold tracking-tight">
             Sortează
           </span>
           <SortProducts
@@ -73,7 +75,7 @@ export default function RefinementList({
         <AccordionItem value="categorii">
           <AccordionTrigger className="text-sm font-semibold">
             <span className="flex items-center gap-2">
-              <Layers aria-hidden="true" className="size-5 text-brand-800" />{" "}
+              <Layers aria-hidden="true" className="text-brand-800 size-5" />{" "}
               Categorii
             </span>
           </AccordionTrigger>
@@ -83,24 +85,24 @@ export default function RefinementList({
                 <Link
                   href="/store"
                   className={cn(
-                    "flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium transition-colors hover:bg-muted",
+                    "hover:bg-muted flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium transition-colors",
                     !activeCategoryHandle && "bg-muted text-foreground"
                   )}
                 >
                   Toate produsele
-                  <ChevronRight className="size-3.5 text-muted-foreground" />
+                  <ChevronRight className="text-muted-foreground size-3.5" />
                 </Link>
               </li>
-              {categoriesTree.map((cat) => {
+              {categories.map((cat) => {
                 const active = cat.handle === activeCategoryHandle;
                 return (
                   <li key={cat.handle}>
                     <Link
                       href={`/categories/${cat.handle}`}
                       className={cn(
-                        "flex items-center justify-between rounded-md px-2 py-1.5 transition-colors hover:bg-muted",
+                        "hover:bg-muted flex items-center justify-between rounded-md px-2 py-1.5 transition-colors",
                         active
-                          ? "bg-primary/15 font-semibold text-brand-900"
+                          ? "bg-primary/15 text-brand-900 font-semibold"
                           : "text-muted-foreground"
                       )}
                     >
@@ -116,25 +118,25 @@ export default function RefinementList({
         <AccordionItem value="disponibilitate">
           <AccordionTrigger className="text-sm font-semibold">
             <span className="flex items-center gap-2">
-              <Tag aria-hidden="true" className="size-5 text-brand-800" />{" "}
+              <Tag aria-hidden="true" className="text-brand-800 size-5" />{" "}
               Disponibilitate
             </span>
           </AccordionTrigger>
           <AccordionContent>
             <div className="flex flex-col gap-2 text-sm">
-              <label className="flex min-h-11 cursor-pointer items-center gap-3">
+              <label className="flex min-h-11 cursor-pointer items-center gap-4">
                 <Checkbox id="filter-stock" />
                 <Label htmlFor="filter-stock" className="cursor-pointer">
                   În stoc
                 </Label>
               </label>
-              <label className="flex min-h-11 cursor-pointer items-center gap-3">
+              <label className="flex min-h-11 cursor-pointer items-center gap-4">
                 <Checkbox id="filter-sale" />
                 <Label htmlFor="filter-sale" className="cursor-pointer">
                   Cu reducere
                 </Label>
               </label>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Filtre suplimentare disponibile în curând.
               </p>
             </div>

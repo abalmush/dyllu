@@ -4,30 +4,40 @@ import * as React from "react";
 import { isEqual } from "lodash";
 import { ShoppingBag } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { addToCart } from "@lib/data/cart";
+import { addItemsToCart } from "@lib/data/cart";
+import type { CompatibleAccessories } from "@lib/data/compatible-accessories";
 import { useIntersection } from "@lib/hooks/use-in-view";
 import { cn } from "@lib/utils";
 import { Badge } from "@/components/atoms/badge";
 import { Button } from "@/components/atoms/button";
-import { PriceBlock } from "@/components/molecules/price-block";
-import { PurchaseTrustGrid } from "@/components/organisms/purchase-trust-grid";
-import { ProductTypeBadge } from "@/components/organisms/product-type-badge";
 import { QuantityStepper } from "@/components/molecules/quantity-stepper";
-import { getProductUiType } from "@modules/products/lib/product-presentation";
+import {
+  getProductPowerSupply,
+  getVariantDisplayTitle,
+} from "@modules/products/lib/product-presentation";
 
 import MobileActions from "./mobile-actions";
 import OptionSelect from "./option-select";
 import ConfigurationSelect from "./configuration-select";
+import { PowerSupplyConfigurator } from "./power-supply-configurator";
 import { getProductPrice } from "@lib/util/get-product-price";
 
 const isConfigurationOption = (title?: string | null) =>
   (title ?? "").trim().toLowerCase() === "configurație";
 
+const priceFormatter = new Intl.NumberFormat("ru-RU", {
+  maximumFractionDigits: 0,
+});
+const formatMdl = (amount: number, currency?: string) =>
+  `${priceFormatter.format(amount)} ${(currency ?? "mdl").toUpperCase()}`;
+
 type Props = {
   product: HttpTypes.StoreProduct;
   region: HttpTypes.StoreRegion;
+  initialVariantId?: string;
+  onVariantChange?: (variant: HttpTypes.StoreProductVariant) => void;
+  compatiblePowerAccessories?: CompatibleAccessories;
   disabled?: boolean;
 };
 
@@ -41,23 +51,30 @@ const optionsAsKeymap = (
     return acc;
   }, {}) ?? {};
 
-export default function ProductActions({ product, disabled }: Props) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
+export default function ProductActions({
+  product,
+  initialVariantId,
+  onVariantChange,
+  compatiblePowerAccessories = { batteries: [], chargers: [] },
+  disabled,
+}: Props) {
   const [options, setOptions] = React.useState<
     Record<string, string | undefined>
   >(() => {
-    if (product.variants?.[0]) {
-      return optionsAsKeymap(product.variants[0].options) ?? {};
+    const initialVariant =
+      product.variants?.find((variant) => variant.id === initialVariantId) ??
+      product.variants?.[0];
+
+    if (initialVariant) {
+      return optionsAsKeymap(initialVariant.options) ?? {};
     }
 
     return {};
   });
   const [quantity, setQuantity] = React.useState(1);
+  const [selectedBatteryId, setSelectedBatteryId] = React.useState<string>();
+  const [selectedChargerId, setSelectedChargerId] = React.useState<string>();
   const [isAdding, setIsAdding] = React.useState(false);
-  const productType = getProductUiType(product);
 
   const selectedVariant = React.useMemo(() => {
     if (!product.variants?.length) return undefined;
@@ -65,24 +82,12 @@ export default function ProductActions({ product, disabled }: Props) {
       isEqual(optionsAsKeymap(v.options), options)
     );
   }, [product.variants, options]);
-
-  const isValidVariant = React.useMemo(
-    () =>
-      product.variants?.some((v) =>
-        isEqual(optionsAsKeymap(v.options), options)
-      ),
-    [product.variants, options]
-  );
-
-  React.useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    const value = isValidVariant ? selectedVariant?.id : null;
-    if (params.get("v_id") === value) return;
-    if (value) params.set("v_id", value);
-    else params.delete("v_id");
-    router.replace(`${pathname}?${params.toString()}`);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedVariant, isValidVariant]);
+  const supply = getProductPowerSupply(product, selectedVariant);
+  const showPowerConfigurator =
+    (product.variants?.length ?? 0) <= 1 &&
+    supply?.powerSource === "cordless_battery" &&
+    supply.batteryIncluded === false &&
+    compatiblePowerAccessories.batteries.length > 0;
 
   const inStock = React.useMemo(() => {
     if (selectedVariant && !selectedVariant.manage_inventory) return true;
@@ -103,8 +108,12 @@ export default function ProductActions({ product, disabled }: Props) {
   const displayPrice = selectedVariant ? variantPrice : cheapestPrice;
   const badges: React.ReactNode[] = [];
 
-  if (productType === "needs-battery") {
-    badges.push(<ProductTypeBadge key="type" type={productType} />);
+  if ((product.variants?.length ?? 0) > 1) {
+    badges.push(
+      <Badge key="variants" variant="outline">
+        {product.variants?.length} variante
+      </Badge>
+    );
   }
 
   if (product.collection?.title) {
@@ -123,8 +132,15 @@ export default function ProductActions({ product, disabled }: Props) {
     );
   }
 
-  const setOptionValue = (id: string, value: string) =>
-    setOptions((prev) => ({ ...prev, [id]: value }));
+  const setOptionValue = (id: string, value: string) => {
+    const nextOptions = { ...options, [id]: value };
+    const nextVariant = product.variants?.find((variant) =>
+      isEqual(optionsAsKeymap(variant.options), nextOptions)
+    );
+
+    setOptions(nextOptions);
+    if (nextVariant) onVariantChange?.(nextVariant);
+  };
 
   const actionsRef = React.useRef<HTMLDivElement>(null);
   const inView = useIntersection(actionsRef, "0px");
@@ -133,126 +149,217 @@ export default function ProductActions({ product, disabled }: Props) {
     if (!selectedVariant?.id) return;
     setIsAdding(true);
     try {
-      await addToCart({ variantId: selectedVariant.id, quantity });
+      await addItemsToCart({
+        items: [
+          { variantId: selectedVariant.id, quantity },
+          ...(showPowerConfigurator && selectedBatteryId
+            ? [{ variantId: selectedBatteryId, quantity: 1 }]
+            : []),
+          ...(showPowerConfigurator && selectedChargerId
+            ? [{ variantId: selectedChargerId, quantity: 1 }]
+            : []),
+        ],
+      });
     } finally {
       setIsAdding(false);
     }
   };
 
+  const selectedAccessoryProducts = [
+    ...compatiblePowerAccessories.batteries,
+    ...compatiblePowerAccessories.chargers,
+  ].filter((accessory) =>
+    accessory.variants?.some(
+      (variant) =>
+        variant.id === selectedBatteryId || variant.id === selectedChargerId
+    )
+  );
+  const selectedAccessoryTotal = selectedAccessoryProducts.reduce(
+    (total, accessory) =>
+      total +
+      (accessory.variants?.find(
+        (variant) =>
+          variant.id === selectedBatteryId || variant.id === selectedChargerId
+      )?.calculated_price?.calculated_amount ?? 0),
+    0
+  );
+  const configuredTotal =
+    (displayPrice?.calculated_price_number ?? 0) * quantity +
+    selectedAccessoryTotal;
+  const selectedAccessoryCount =
+    Number(Boolean(showPowerConfigurator && selectedBatteryId)) +
+    Number(Boolean(showPowerConfigurator && selectedChargerId));
   const ctaLabel = !selectedVariant
     ? "Selectează varianta"
-    : !inStock || !isValidVariant
+    : !inStock
       ? "Stoc epuizat"
-      : "Adaugă în coș";
+      : selectedAccessoryCount > 0
+        ? `Adaugă ${selectedAccessoryCount + 1} produse · ${formatMdl(
+            configuredTotal,
+            displayPrice?.currency_code
+          )}`
+        : "Adaugă în coș";
+
+  const showFromPrefix = !selectedVariant;
+  const isSale = displayPrice?.price_type === "sale";
+  const priceLabel =
+    displayPrice?.calculated_price_number != null
+      ? formatMdl(
+          displayPrice.calculated_price_number,
+          displayPrice.currency_code
+        )
+      : "—";
+  const originalLabel =
+    isSale && displayPrice?.original_price_number != null
+      ? formatMdl(
+          displayPrice.original_price_number,
+          displayPrice.currency_code
+        )
+      : null;
+  const isActionable = inStock && !!selectedVariant && !disabled;
 
   return (
     <div
-      className="clip-corner-cut-lg clip-shadow-lg flex flex-col gap-4 bg-card p-6 ring-1 ring-border small:gap-5 small:p-7"
+      data-tmp-id="pdp-buy-card"
+      className="clip-corner-cut-lg clip-shadow-xl bg-card ring-border small:p-6 medium:p-7 large:p-8 flex flex-col gap-5 p-5 ring-1 md:p-6"
       ref={actionsRef}
     >
-      <div className="flex flex-col gap-2">
-        <PriceBlock
-          price={displayPrice}
-          prefix={!selectedVariant ? "de la" : undefined}
-          size="xl"
-          className="[&_span[data-testid='product-price']]:font-display [&_span[data-testid='product-price']]:text-[2.9rem] [&_span[data-testid='product-price']]:font-extrabold [&_span[data-testid='product-price']]:leading-none small:[&_span[data-testid='product-price']]:text-[3.2rem] medium:[&_span[data-testid='product-price']]:text-[3.35rem]"
-        />
+      <div className="grid gap-5">
+        <div className="small:grid small:grid-cols-[minmax(0,1fr)_auto] small:gap-x-5 small:gap-y-2 flex flex-col gap-2">
+          <h1
+            className="font-display text-foreground xsmall:text-2xl small:col-start-1 small:row-start-1 medium:text-[1.625rem] medium:leading-[1.15] max-w-[24ch] text-xl leading-snug font-bold tracking-tight text-balance"
+            data-testid="product-title"
+          >
+            {getVariantDisplayTitle(product, selectedVariant)}
+          </h1>
 
-        <span
-          className={cn(
-            "clip-corner-cut-xs inline-flex w-fit items-center gap-2 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]",
-            inStock
-              ? "bg-success/10 text-success"
-              : "bg-destructive/10 text-destructive"
-          )}
-        >
+          <div className="small:col-start-1 small:row-start-2 flex flex-wrap items-baseline gap-x-2 gap-y-2">
+            {showFromPrefix && (
+              <span className="text-muted-foreground text-sm font-medium">
+                de la
+              </span>
+            )}
+            <span
+              data-testid="product-price"
+              className={cn(
+                "clip-corner-cut-sm font-display xsmall:text-4xl medium:text-[2.5rem] inline-flex px-4 py-2.5 text-3xl leading-none font-bold tracking-tight",
+                isSale
+                  ? "bg-destructive text-destructive-foreground"
+                  : "bg-foreground text-background"
+              )}
+            >
+              {priceLabel}
+            </span>
+            {originalLabel && (
+              <span className="text-muted-foreground text-base line-through">
+                {originalLabel}
+              </span>
+            )}
+          </div>
+
           <span
             className={cn(
-              "size-1.5",
-              inStock ? "bg-success" : "bg-destructive"
+              "small:col-start-2 small:row-start-1 small:self-start small:justify-self-end inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium",
+              inStock
+                ? "border-success/20 bg-success/10 text-success"
+                : "border-destructive/20 bg-destructive/10 text-destructive"
             )}
-          />
-          {inStock ? "În stoc · 24–48h" : "Indisponibil"}
-        </span>
-      </div>
-
-      <div className="clip-corner-cut-md flex flex-col gap-4 bg-surface-subtle/70 p-4 ring-1 ring-border/70 small:p-5">
-        {badges.length > 0 && (
-          <div className="flex flex-wrap gap-2">{badges}</div>
-        )}
-
-        {(product.variants?.length ?? 0) > 1 && (
-          <div className="flex flex-col gap-4">
-            {(product.options || []).map((option) =>
-              isConfigurationOption(option.title) ? (
-                <ConfigurationSelect
-                  key={option.id}
-                  product={product}
-                  option={option}
-                  current={options[option.id]}
-                  updateOption={setOptionValue}
-                  data-testid="product-options"
-                  disabled={!!disabled || isAdding}
-                />
-              ) : (
-                <OptionSelect
-                  key={option.id}
-                  option={option}
-                  current={options[option.id]}
-                  updateOption={setOptionValue}
-                  title={option.title ?? ""}
-                  data-testid="product-options"
-                  disabled={!!disabled || isAdding}
-                />
-              )
-            )}
-          </div>
-        )}
-
-        <div className="grid gap-3 small:grid-cols-[132px_minmax(0,1fr)] small:items-end">
-          <div className="space-y-2">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Cantitate
-            </span>
-            <QuantityStepper
-              value={quantity}
-              onChange={setQuantity}
-              max={20}
-              className="w-full justify-between"
-            />
-          </div>
-
-          <Button
-            onClick={handleAddToCart}
-            disabled={
-              !inStock ||
-              !selectedVariant ||
-              !!disabled ||
-              isAdding ||
-              !isValidVariant
-            }
-            isLoading={isAdding}
-            size="xl"
-            variant="brand"
-            className="clip-corner-cut-sm min-h-14 rounded-none px-8 shadow-[0_20px_40px_-24px_rgba(201,255,46,0.95)]"
-            data-testid="add-product-button"
           >
-            <ShoppingBag className="size-4" />
-            {ctaLabel}
-          </Button>
+            <span
+              className={cn(
+                "size-1.5 rounded-full",
+                inStock ? "bg-success" : "bg-destructive"
+              )}
+            />
+            {inStock ? "În stoc" : "Indisponibil"}
+          </span>
+
+          {selectedVariant?.sku ? (
+            <div className="small:col-start-2 small:row-start-2 small:justify-self-end flex items-center gap-2 text-xs">
+              <span className="text-muted-foreground/60 font-medium tracking-wide uppercase">
+                SKU
+              </span>
+              <span className="text-muted-foreground font-medium">
+                {selectedVariant.sku}
+              </span>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <div className="bg-border/60 small:block h-px w-full md:hidden" />
+
+          <div className="flex flex-col gap-4">
+            {badges.length > 0 && (
+              <div className="flex flex-wrap gap-2">{badges}</div>
+            )}
+
+            {(product.variants?.length ?? 0) > 1 && (
+              <div className="flex flex-col gap-4">
+                {(product.options || []).map((option) =>
+                  isConfigurationOption(option.title) ? (
+                    <ConfigurationSelect
+                      key={option.id}
+                      product={product}
+                      option={option}
+                      current={options[option.id]}
+                      updateOption={setOptionValue}
+                      data-testid="product-options"
+                      disabled={!!disabled || isAdding}
+                    />
+                  ) : (
+                    <OptionSelect
+                      key={option.id}
+                      product={product}
+                      option={option}
+                      current={options[option.id]}
+                      updateOption={setOptionValue}
+                      title={option.title ?? ""}
+                      data-testid="product-options"
+                      disabled={!!disabled || isAdding}
+                    />
+                  )
+                )}
+              </div>
+            )}
+
+            {showPowerConfigurator ? (
+              <PowerSupplyConfigurator
+                batteries={compatiblePowerAccessories.batteries}
+                chargers={compatiblePowerAccessories.chargers}
+                selectedBatteryId={selectedBatteryId}
+                selectedChargerId={selectedChargerId}
+                onBatteryChange={setSelectedBatteryId}
+                onChargerChange={setSelectedChargerId}
+              />
+            ) : null}
+
+            <div className="xsmall:gap-4 flex items-stretch gap-2">
+              <QuantityStepper
+                value={quantity}
+                onChange={setQuantity}
+                max={20}
+                disabled={!inStock || !!disabled}
+              />
+
+              <Button
+                onClick={handleAddToCart}
+                disabled={!isActionable || isAdding}
+                isLoading={isAdding}
+                variant={isActionable ? "brand" : "secondary"}
+                className="xsmall:px-6 h-12 min-w-0 flex-1 rounded-md px-3"
+                data-testid="add-product-button"
+              >
+                {isActionable && <ShoppingBag className="size-4" />}
+                <span className="xsmall:hidden">
+                  {isActionable ? "Adaugă" : ctaLabel}
+                </span>
+                <span className="xsmall:inline hidden">{ctaLabel}</span>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
-
-      {product.description && (
-        <p
-          className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground"
-          data-testid="product-description"
-        >
-          {product.description}
-        </p>
-      )}
-
-      <PurchaseTrustGrid />
 
       <MobileActions
         product={product}

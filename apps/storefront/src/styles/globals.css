@@ -1,6 +1,304 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import "tailwindcss";
+
+@config "../../tailwind.config.ts";
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@utility ds-grid-bg {
+  background-image:
+    linear-gradient(hsl(var(--border) / 0.6) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--border) / 0.6) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+@utility ds-shimmer {
+  background-image: linear-gradient(
+    110deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted-foreground) / 0.12) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s linear infinite;
+}
+
+@utility clip-corner-cut-xs {
+  clip-path: polygon(
+    4px 0,
+    100% 0,
+    100% calc(100% - 4px),
+    calc(100% - 4px) 100%,
+    0 100%,
+    0 4px
+  );
+}
+
+@utility clip-corner-cut-sm {
+  clip-path: polygon(
+    8px 0,
+    100% 0,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    0 100%,
+    0 8px
+  );
+}
+
+@utility clip-corner-cut-md {
+  clip-path: polygon(
+    16px 0,
+    100% 0,
+    100% calc(100% - 16px),
+    calc(100% - 16px) 100%,
+    0 100%,
+    0 16px
+  );
+}
+
+@utility clip-corner-cut-lg {
+  clip-path: polygon(
+    28px 0,
+    100% 0,
+    100% calc(100% - 28px),
+    calc(100% - 28px) 100%,
+    0 100%,
+    0 28px
+  );
+}
+
+@utility clip-shadow-sm {
+  /* Shadow utilities that work with clip-path — uses CSS filter:
+     drop-shadow() which follows the cut-corner outline, unlike box-shadow
+     which gets clipped away. Layered two drops per level: a tight close-edge
+     shadow + a soft ambient one for depth. */
+  filter: drop-shadow(0 6px 12px rgba(15, 15, 15, 0.12))
+    drop-shadow(0 2px 4px rgba(15, 15, 15, 0.08));
+}
+
+@utility clip-shadow-md {
+  filter: drop-shadow(0 14px 22px rgba(15, 15, 15, 0.16))
+    drop-shadow(0 3px 6px rgba(15, 15, 15, 0.1));
+}
+
+@utility clip-shadow-lg {
+  filter: drop-shadow(0 24px 36px rgba(15, 15, 15, 0.2))
+    drop-shadow(0 4px 8px rgba(15, 15, 15, 0.12));
+}
+
+@utility clip-shadow-xl {
+  filter: drop-shadow(0 36px 56px rgba(15, 15, 15, 0.24))
+    drop-shadow(0 6px 12px rgba(15, 15, 15, 0.14));
+}
+
+@utility cc-v2-bracket {
+  /* ───────────────────────────────────────────────────────────────────
+     Corner-cut V2 — asymmetric engineered silhouettes, layered panel
+     depth via stacked drop-shadows, mechanical hover/press, matte
+     surface overlays. Drop-in replacement for clip-corner-cut-* — pair
+     a silhouette class with -surface-* and -depth-* for the full kit.
+
+     ┌─ Silhouettes ────────────────────────────────────────────────────
+     │  cc-v2-bracket   — big TL diagonal + small TR step notch
+     │  cc-v2-module    — bolder V1 (TL+BR) plus a TR service notch
+     │  cc-v2-chassis   — all 4 corners cut at varying sizes (connector)
+     └──────────────────────────────────────────────────────────────────
+  */
+  clip-path: polygon(
+    30px 0,
+    calc(100% - 20px) 0,
+    calc(100% - 20px) 8px,
+    calc(100% - 8px) 8px,
+    100% 8px,
+    100% 100%,
+    0 100%,
+    0 30px
+  );
+}
+
+@utility cc-v2-module {
+  clip-path: polygon(
+    24px 0,
+    calc(100% - 32px) 0,
+    calc(100% - 32px) 10px,
+    calc(100% - 14px) 10px,
+    100% 10px,
+    100% calc(100% - 24px),
+    calc(100% - 24px) 100%,
+    0 100%,
+    0 24px
+  );
+}
+
+@utility cc-v2-chassis {
+  clip-path: polygon(
+    28px 0,
+    calc(100% - 8px) 0,
+    100% 8px,
+    100% calc(100% - 20px),
+    calc(100% - 20px) 100%,
+    8px 100%,
+    0 calc(100% - 8px),
+    0 28px
+  );
+}
+
+@utility cc-v2-depth {
+  /* Depth: stacked sharp drop-shadows simulate two back panels, plus a
+     soft ambient. Hover lifts the front panel (offsets grow + transform
+     up-left). Press collapses the stack. */
+  filter: drop-shadow(3px 3px 0 hsl(0 0% 8% / 0.1))
+    drop-shadow(7px 7px 0 hsl(0 0% 8% / 0.06))
+    drop-shadow(0 10px 18px hsl(0 0% 8% / 0.14));
+  transition:
+    filter 220ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: transform, filter;
+
+  &:hover {
+    transform: translate(-1px, -2px);
+    filter: drop-shadow(4px 4px 0 hsl(0 0% 8% / 0.12))
+      drop-shadow(9px 9px 0 hsl(0 0% 8% / 0.08))
+      drop-shadow(0 16px 28px hsl(0 0% 8% / 0.18));
+  }
+
+  &:active {
+    transform: translate(1px, 1px);
+    transition-duration: 80ms;
+    filter: drop-shadow(1px 1px 0 hsl(0 0% 8% / 0.08))
+      drop-shadow(2px 2px 0 hsl(0 0% 8% / 0.05))
+      drop-shadow(0 4px 6px hsl(0 0% 8% / 0.1));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    transform: none;
+    transition: filter 220ms ease;
+    &:hover {
+      transform: none;
+      transition: filter 220ms ease;
+    }
+    &:active {
+      transform: none;
+      transition: filter 220ms ease;
+    }
+  }
+}
+
+@utility cc-v2-surface-matte {
+  /* Reduced motion: keep depth, drop the transform. */
+
+  /* Surface overlays — compose with the host's bg-color via background-blend.
+     Matte = subtle diagonal sheen + fine noise (metal feel).
+     Plastic = sheen only, no grain (smoother resin feel). */
+  background-image:
+    linear-gradient(
+      135deg,
+      hsl(0 0% 100% / 0.06) 0%,
+      transparent 32%,
+      hsl(0 0% 0% / 0.05) 100%
+    ),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.07 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-blend-mode: overlay, normal;
+}
+
+@utility cc-v2-surface-plastic {
+  background-image: linear-gradient(
+    135deg,
+    hsl(0 0% 100% / 0.08) 0%,
+    transparent 40%,
+    hsl(0 0% 0% / 0.04) 100%
+  );
+}
+
+@utility content-container {
+  @apply small:px-6 medium:px-10 mx-auto w-full max-w-[1440px] px-4;
+}
+
+@utility skip-link {
+  @apply bg-foreground text-background fixed top-4 left-4 z-100 -translate-y-24 rounded-md px-4 py-3 text-base font-semibold shadow-xl transition-transform duration-200 focus-visible:translate-y-0;
+}
+
+@utility contrast-btn {
+  @apply border-foreground hover:bg-foreground hover:text-background rounded-full border px-4 py-2 transition-colors duration-200 ease-in;
+}
+
+@utility text-xsmall-regular {
+  @apply text-xs font-normal;
+}
+
+@utility text-small-regular {
+  @apply text-xs font-normal;
+}
+
+@utility text-small-semi {
+  @apply text-xs font-semibold;
+}
+
+@utility text-base-regular {
+  @apply text-base font-normal;
+}
+
+@utility text-base-semi {
+  @apply text-base font-semibold;
+}
+
+@utility text-large-regular {
+  @apply text-base leading-6 font-normal;
+}
+
+@utility text-large-semi {
+  @apply text-base leading-6 font-semibold;
+}
+
+@utility text-xl-regular {
+  @apply text-xl leading-7 font-normal;
+}
+
+@utility text-xl-semi {
+  @apply text-xl leading-7 font-semibold;
+}
+
+@utility text-2xl-regular {
+  @apply text-2xl leading-8 font-normal;
+}
+
+@utility text-2xl-semi {
+  @apply text-2xl leading-8 font-semibold;
+}
+
+@utility text-3xl-regular {
+  @apply text-3xl leading-9 font-normal;
+}
+
+@utility text-3xl-semi {
+  @apply text-3xl leading-9 font-semibold;
+}
 
 @layer base {
   :root {
@@ -72,7 +370,7 @@
   }
 
   body {
-    @apply bg-background font-sans text-foreground;
+    @apply bg-background text-foreground font-sans;
     font-feature-settings: "ss01", "cv11";
     font-size: 1rem;
     line-height: 1.5;
@@ -105,7 +403,7 @@
     -webkit-tap-highlight-color: hsl(var(--primary) / 0.2);
   }
 
-  button,
+  button:not([role="checkbox"]):not([role="radio"]):not([role="switch"]),
   [role="button"] {
     min-height: 2.75rem;
     min-width: 2.75rem;
@@ -116,7 +414,7 @@
   }
 
   :focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+    @apply ring-ring ring-offset-background ring-2 ring-offset-2 outline-hidden;
   }
 
   ::placeholder {
@@ -125,28 +423,6 @@
 }
 
 @layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .no-scrollbar::-webkit-scrollbar-track {
-    background-color: transparent;
-  }
-
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  input:focus ~ label,
-  input:not(:placeholder-shown) ~ label {
-    @apply text-xsmall-regular -translate-y-2;
-  }
-
-  input:focus ~ label {
-    @apply left-0;
-  }
-
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
@@ -167,273 +443,6 @@
   input[type="search"]::-webkit-search-results-button,
   input[type="search"]::-webkit-search-results-decoration {
     -webkit-appearance: none;
-  }
-
-  .ds-grid-bg {
-    background-image:
-      linear-gradient(hsl(var(--border) / 0.6) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.6) 1px, transparent 1px);
-    background-size: 56px 56px;
-  }
-
-  .ds-shimmer {
-    background-image: linear-gradient(
-      110deg,
-      hsl(var(--muted)) 0%,
-      hsl(var(--muted-foreground) / 0.12) 50%,
-      hsl(var(--muted)) 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.8s linear infinite;
-  }
-
-  .clip-corner-cut-xs {
-    clip-path: polygon(
-      4px 0,
-      100% 0,
-      100% calc(100% - 4px),
-      calc(100% - 4px) 100%,
-      0 100%,
-      0 4px
-    );
-  }
-
-  .clip-corner-cut-sm {
-    clip-path: polygon(
-      8px 0,
-      100% 0,
-      100% calc(100% - 8px),
-      calc(100% - 8px) 100%,
-      0 100%,
-      0 8px
-    );
-  }
-
-  .clip-corner-cut-md {
-    clip-path: polygon(
-      16px 0,
-      100% 0,
-      100% calc(100% - 16px),
-      calc(100% - 16px) 100%,
-      0 100%,
-      0 16px
-    );
-  }
-
-  .clip-corner-cut-lg {
-    clip-path: polygon(
-      28px 0,
-      100% 0,
-      100% calc(100% - 28px),
-      calc(100% - 28px) 100%,
-      0 100%,
-      0 28px
-    );
-  }
-
-  /* Shadow utilities that work with clip-path — uses CSS filter:
-     drop-shadow() which follows the cut-corner outline, unlike box-shadow
-     which gets clipped away. Layered two drops per level: a tight close-edge
-     shadow + a soft ambient one for depth. */
-  .clip-shadow-sm {
-    filter: drop-shadow(0 6px 12px rgba(15, 15, 15, 0.12))
-      drop-shadow(0 2px 4px rgba(15, 15, 15, 0.08));
-  }
-
-  .clip-shadow-md {
-    filter: drop-shadow(0 14px 22px rgba(15, 15, 15, 0.16))
-      drop-shadow(0 3px 6px rgba(15, 15, 15, 0.1));
-  }
-
-  .clip-shadow-lg {
-    filter: drop-shadow(0 24px 36px rgba(15, 15, 15, 0.2))
-      drop-shadow(0 4px 8px rgba(15, 15, 15, 0.12));
-  }
-
-  .clip-shadow-xl {
-    filter: drop-shadow(0 36px 56px rgba(15, 15, 15, 0.24))
-      drop-shadow(0 6px 12px rgba(15, 15, 15, 0.14));
-  }
-
-  /* ───────────────────────────────────────────────────────────────────
-     Corner-cut V2 — asymmetric engineered silhouettes, layered panel
-     depth via stacked drop-shadows, mechanical hover/press, matte
-     surface overlays. Drop-in replacement for clip-corner-cut-* — pair
-     a silhouette class with -surface-* and -depth-* for the full kit.
-
-     ┌─ Silhouettes ────────────────────────────────────────────────────
-     │  cc-v2-bracket   — big TL diagonal + small TR step notch
-     │  cc-v2-module    — bolder V1 (TL+BR) plus a TR service notch
-     │  cc-v2-chassis   — all 4 corners cut at varying sizes (connector)
-     └──────────────────────────────────────────────────────────────────
-  */
-
-  .cc-v2-bracket {
-    clip-path: polygon(
-      30px 0,
-      calc(100% - 20px) 0,
-      calc(100% - 20px) 8px,
-      calc(100% - 8px) 8px,
-      100% 8px,
-      100% 100%,
-      0 100%,
-      0 30px
-    );
-  }
-
-  .cc-v2-module {
-    clip-path: polygon(
-      24px 0,
-      calc(100% - 32px) 0,
-      calc(100% - 32px) 10px,
-      calc(100% - 14px) 10px,
-      100% 10px,
-      100% calc(100% - 24px),
-      calc(100% - 24px) 100%,
-      0 100%,
-      0 24px
-    );
-  }
-
-  .cc-v2-chassis {
-    clip-path: polygon(
-      28px 0,
-      calc(100% - 8px) 0,
-      100% 8px,
-      100% calc(100% - 20px),
-      calc(100% - 20px) 100%,
-      8px 100%,
-      0 calc(100% - 8px),
-      0 28px
-    );
-  }
-
-  /* Depth: stacked sharp drop-shadows simulate two back panels, plus a
-     soft ambient. Hover lifts the front panel (offsets grow + transform
-     up-left). Press collapses the stack. */
-  .cc-v2-depth {
-    filter: drop-shadow(3px 3px 0 hsl(0 0% 8% / 0.1))
-      drop-shadow(7px 7px 0 hsl(0 0% 8% / 0.06))
-      drop-shadow(0 10px 18px hsl(0 0% 8% / 0.14));
-    transition:
-      filter 220ms cubic-bezier(0.2, 0.7, 0.2, 1),
-      transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
-    will-change: transform, filter;
-  }
-
-  .cc-v2-depth:hover {
-    transform: translate(-1px, -2px);
-    filter: drop-shadow(4px 4px 0 hsl(0 0% 8% / 0.12))
-      drop-shadow(9px 9px 0 hsl(0 0% 8% / 0.08))
-      drop-shadow(0 16px 28px hsl(0 0% 8% / 0.18));
-  }
-
-  .cc-v2-depth:active {
-    transform: translate(1px, 1px);
-    transition-duration: 80ms;
-    filter: drop-shadow(1px 1px 0 hsl(0 0% 8% / 0.08))
-      drop-shadow(2px 2px 0 hsl(0 0% 8% / 0.05))
-      drop-shadow(0 4px 6px hsl(0 0% 8% / 0.1));
-  }
-
-  /* Reduced motion: keep depth, drop the transform. */
-  @media (prefers-reduced-motion: reduce) {
-    .cc-v2-depth,
-    .cc-v2-depth:hover,
-    .cc-v2-depth:active {
-      transform: none;
-      transition: filter 220ms ease;
-    }
-  }
-
-  /* Surface overlays — compose with the host's bg-color via background-blend.
-     Matte = subtle diagonal sheen + fine noise (metal feel).
-     Plastic = sheen only, no grain (smoother resin feel). */
-  .cc-v2-surface-matte {
-    background-image:
-      linear-gradient(
-        135deg,
-        hsl(0 0% 100% / 0.06) 0%,
-        transparent 32%,
-        hsl(0 0% 0% / 0.05) 100%
-      ),
-      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.07 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-    background-blend-mode: overlay, normal;
-  }
-
-  .cc-v2-surface-plastic {
-    background-image: linear-gradient(
-      135deg,
-      hsl(0 0% 100% / 0.08) 0%,
-      transparent 40%,
-      hsl(0 0% 0% / 0.04) 100%
-    );
-  }
-}
-
-@layer components {
-  .content-container {
-    @apply mx-auto w-full max-w-[1440px] px-4 small:px-6 medium:px-10;
-  }
-
-  .skip-link {
-    @apply fixed left-4 top-4 z-[100] -translate-y-24 rounded-md bg-foreground px-4 py-3 text-base font-semibold text-background shadow-xl transition-transform duration-200 focus-visible:translate-y-0;
-  }
-
-  .contrast-btn {
-    @apply rounded-full border border-foreground px-4 py-2 transition-colors duration-200 ease-in hover:bg-foreground hover:text-background;
-  }
-
-  .text-xsmall-regular {
-    @apply text-xs font-normal;
-  }
-
-  .text-small-regular {
-    @apply text-xs font-normal;
-  }
-
-  .text-small-semi {
-    @apply text-xs font-semibold;
-  }
-
-  .text-base-regular {
-    @apply text-base font-normal;
-  }
-
-  .text-base-semi {
-    @apply text-base font-semibold;
-  }
-
-  .text-large-regular {
-    @apply text-base font-normal leading-6;
-  }
-
-  .text-large-semi {
-    @apply text-base font-semibold leading-6;
-  }
-
-  .text-xl-regular {
-    @apply text-2xl font-normal leading-[36px];
-  }
-
-  .text-xl-semi {
-    @apply text-2xl font-semibold leading-[36px];
-  }
-
-  .text-2xl-regular {
-    @apply text-[30px] font-normal leading-[48px];
-  }
-
-  .text-2xl-semi {
-    @apply text-[30px] font-semibold leading-[48px];
-  }
-
-  .text-3xl-regular {
-    @apply text-[32px] font-normal leading-[44px];
-  }
-
-  .text-3xl-semi {
-    @apply text-[32px] font-semibold leading-[44px];
   }
 }
 

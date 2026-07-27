@@ -1,98 +1,117 @@
 # DYLLU
 
-A custom Shopify headless storefront built with Next.js 16 (App Router) and deployed on Vercel.
+Headless e-commerce for **DYLLU** — a Moldova-based power-tools storefront
+(catalog sourced from INGCO; reference design `ryobitools.com`). A **Medusa v2**
+backend serves a **Next.js 16** storefront, with a separate internal tool for
+preparing and publishing the product catalog.
+
+## Documentation
+
+Start here — an AI- and human-friendly knowledge base lives at the repo root:
+
+| Doc                                            | Read it for                                                         |
+| ---------------------------------------------- | ------------------------------------------------------------------- |
+| [AI_CONTEXT.md](AI_CONTEXT.md)                 | Fastest orientation — concepts, patterns, do/don't, dangerous areas |
+| [PROJECT_MAP.md](PROJECT_MAP.md)               | Repo index: structure, entry points, routing, scripts               |
+| [ARCHITECTURE.md](ARCHITECTURE.md)             | Boundaries, rendering, state, caching, security, trade-offs         |
+| [COMPONENT_REGISTRY.md](COMPONENT_REGISTRY.md) | Storefront design system + feature components                       |
+| [DATA_FLOW.md](DATA_FLOW.md)                   | Read/write/publish/cache/event flows (diagrams)                     |
+| [API_MAP.md](API_MAP.md)                       | Every API surface (Store, Admin, route handlers)                    |
+| [CODING_CONVENTIONS.md](CODING_CONVENTIONS.md) | The rules actually used here                                        |
+| [DEPENDENCIES.md](DEPENDENCIES.md)             | Internal/external deps, rationale, upgrade cautions                 |
+
+Rules & agent instructions: [CLAUDE.md](CLAUDE.md) + [AGENTS.md](AGENTS.md).
+Product proposal: [PROPOSAL.md](PROPOSAL.md). Ops: `docs/DEPLOYMENT-STATE.md`,
+`docs/OPERATIONS.md`.
+
+## Monorepo (pnpm workspaces + Turborepo)
+
+| App                  | Package             | Stack                                                                                     | Port |
+| -------------------- | ------------------- | ----------------------------------------------------------------------------------------- | ---- |
+| `apps/backend`       | `@dyllu/backend`    | Medusa v2.17, Postgres, Redis; admin at `/backend`                                        | 9000 |
+| `apps/storefront`    | `@dyllu/storefront` | Next.js 16, React 19, Tailwind 3, Medusa JS SDK; deploys to Cloudflare Workers (OpenNext) | 4000 |
+| `apps/catalog-admin` | `catalog-admin`     | Next.js 16, SQLite + Drizzle; publishes to Medusa via its Admin API                       | 4100 |
+
+`packages/` is reserved for future shared code (currently empty).
 
 ## Stack
 
-- **Next.js 16** (App Router, React 19, Turbopack)
-- **Tailwind CSS 4**
-- **Shopify Storefront API** via `@shopify/storefront-api-client` + `@shopify/hydrogen-react`
-- **Zustand** (persisted) for cart state
-- **Vitest** (unit) + **Playwright** (e2e)
-- **GraphQL Codegen** for typed Storefront API queries
+- **Backend:** Medusa v2.17 (TypeScript), Postgres, Redis (prod), Jest.
+  Hosted on Hetzner + Coolify — live at `api.dyllu.md`.
+- **Storefront:** Next.js 16 (App Router, Turbopack), React 19, Tailwind CSS 3,
+  Zustand, Radix UI, Framer Motion. Deployed to Cloudflare Workers (R2 + D1 +
+  Durable Objects) — live at `dyllu.md`.
+- **catalog-admin:** Next.js 16 + SQLite (better-sqlite3/Drizzle), shadcn/Base UI,
+  Vitest + Playwright. Internal, local-only.
+- **Images:** Cloudflare R2 (`cdn.dyllu.md`).
+- **Payments:** MAIB Checkout API — custom Medusa provider, **deferred**.
 
-## Getting Started
+## Getting started
 
-### 1. Install dependencies
-
-```bash
-npm install
-```
-
-### 2. Configure environment
-
-Copy `.env.local.example` → `.env.local` and fill in:
-
-```
-NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
-NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN=your-storefront-access-token
-SHOPIFY_ADMIN_ACCESS_TOKEN=your-admin-access-token
-```
-
-### 3. Generate Shopify types
-
-After configuring credentials:
+**Prerequisites:** Node ≥ 22.12 (`.nvmrc` pins 22.22.0 — run `nvm use`), Docker
+(Postgres), pnpm 10+.
 
 ```bash
-npm run codegen
+pnpm install
+
+# Start Postgres (port 5433 to avoid conflicts)
+docker compose -f apps/backend/docker-compose.yml up -d
+
+# First-time: migrate + create an admin user
+pnpm -F @dyllu/backend db:migrate
+pnpm -F @dyllu/backend db:create-user -e admin@dyllu.local -p "<password>"
+
+# Storefront env: copy the template, then paste the Publishable API Key
+# from the admin (Settings) into NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
+cp apps/storefront/.env.local.example apps/storefront/.env.local
+
+pnpm dev          # all apps
+# or
+pnpm dev:store    # backend + storefront only (excludes catalog-admin)
 ```
 
-This populates `src/types/` with types derived from the live Storefront API schema.
+Admin: `http://localhost:9000/backend` · Storefront: `http://localhost:4000` ·
+catalog-admin: `http://localhost:4100`.
 
-### 4. Start the dev server
+## Scripts (run from repo root; Turborepo fans out)
 
-```bash
-npm run dev
-```
+| Command                                         | Effect                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------- |
+| `pnpm dev` / `pnpm dev:store`                   | All dev servers / backend + storefront only                         |
+| `pnpm -F <pkg> dev`                             | Single app (`@dyllu/backend`, `@dyllu/storefront`, `catalog-admin`) |
+| `pnpm build` / `lint` / `typecheck` / `test`    | Fan out across workspaces                                           |
+| `pnpm check`                                    | Lint + typecheck + test                                             |
+| `pnpm format` / `format:check`                  | Prettier                                                            |
+| `pnpm -F @dyllu/backend db:migrate`             | Migrations + seed scripts                                           |
+| `pnpm -F @dyllu/storefront deploy:cf`           | Build + deploy storefront to Cloudflare                             |
+| `pnpm -F catalog-admin db:migrate*` / `specs:*` | Catalog migrations / spec pipeline                                  |
 
-Open [http://localhost:4000](http://localhost:4000).
+Full script and workflow reference: [PROJECT_MAP.md](PROJECT_MAP.md).
 
-## Scripts
+## Environment variables
 
-| Script                 | Description                       |
-| ---------------------- | --------------------------------- |
-| `npm run dev`          | Start Next dev server (Turbopack) |
-| `npm run build`        | Production build                  |
-| `npm run start`        | Run production build locally      |
-| `npm run lint`         | ESLint                            |
-| `npm run typecheck`    | TypeScript type-check (no emit)   |
-| `npm run test`         | Vitest unit tests (run once)      |
-| `npm run test:watch`   | Vitest watch mode                 |
-| `npm run test:e2e`     | Playwright e2e suite              |
-| `npm run format`       | Prettier write                    |
-| `npm run format:check` | Prettier check                    |
-| `npm run codegen`      | Generate Shopify GraphQL types    |
-| `npm run check`        | Lint + typecheck + unit tests     |
+- `apps/backend/.env.example` — local backend dev
+- `apps/backend/.env.production.example` — documented production env
+- `apps/storefront/.env.local.example` — storefront
+- `apps/catalog-admin/.env.local.example` — catalog-admin (Medusa Admin publish)
 
-## Project Structure
-
-```
-src/
-  app/              Next.js App Router routes
-    products/       Product detail & listing
-    collections/    Collection pages
-    cart/           Cart page
-  components/
-    ui/             Shared UI primitives
-    cart/           Cart-related components
-    product/        Product cards, galleries, selectors
-    layout/         Header, footer, navigation
-  lib/
-    shopify/        Storefront client + GraphQL queries
-    hooks/          Custom hooks (e.g., useCart)
-    utils.ts        Formatting, class-name helpers
-  types/            Generated Shopify GraphQL types
-  test/             Vitest setup
-e2e/                Playwright specs
-```
+Backend env is Zod-validated (`apps/backend/src/config/environment.ts`) and rejects
+placeholder secrets. **Production env/config changes follow the hard rules in
+[AGENTS.md](AGENTS.md).**
 
 ## Deployment
 
-Hosted on **Vercel**. Every push gets a preview URL; `main` deploys to production. See `.claude/skills/deploy-to-vercel/` for the deployment workflow.
+- **Backend** → Hetzner + Coolify. See `apps/backend/DEPLOY.md`,
+  `docs/DEPLOYMENT-STATE.md`.
+- **Storefront** → Cloudflare Workers via OpenNext (`wrangler.jsonc`).
+- **catalog-admin** → local only; publishes catalog to Medusa (`apps/catalog-admin/PUBLISH.md`).
 
 ## Notes
 
-- **Next.js 16** has breaking changes vs. earlier versions. Consult `node_modules/next/dist/docs/` before writing Next-specific code.
-- Default to **Server Components**; reach for `"use client"` only when state, effects, or browser APIs are required.
-- Keep Shopify Storefront calls server-side where possible.
-- Run `npm run codegen` after editing anything in `src/lib/shopify/queries.ts`.
+- **Next.js 16** has breaking changes vs. training data — read
+  `apps/storefront/node_modules/next/dist/docs/` before writing Next-specific code.
+- **Server Components by default**; keep `"use client"` islands small.
+- Storefront data access goes **only** through `src/lib/data/*` over the Medusa SDK
+  (`src/lib/config.ts`) — no ad-hoc `fetch`.
+- Commits/PRs require a `DYLLU-000` ticket prefix (git hook). Run `pnpm check`
+  before committing.

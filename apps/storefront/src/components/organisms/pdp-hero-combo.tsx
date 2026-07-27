@@ -8,6 +8,7 @@ import { HttpTypes } from "@medusajs/types";
 import { cn } from "@lib/utils";
 import { Button } from "@/components/atoms/button";
 import { CutBorder } from "@/components/atoms/cut-border";
+import { PdpHeroShell } from "@/components/organisms/pdp-hero-shell";
 import {
   formatPrice,
   IMAGE_BG_NEUTRALIZE,
@@ -61,79 +62,60 @@ export function PdpHeroCombo({
   const card = useInfoCardController(product);
 
   return (
-    <section
-      aria-label={`Combo produs — layout ${layout}`}
-      className="relative isolate overflow-hidden"
-    >
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-gradient-to-br from-primary via-primary/80 to-foreground"
-      />
-      <div
-        aria-hidden
-        className="absolute inset-0 opacity-30"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.2) 1px, transparent 0)",
-          backgroundSize: "24px 24px",
-        }}
-      />
-
-      <div className="relative z-[1] px-4 py-16 small:px-8 small:py-20 medium:px-12 medium:py-24">
-        {layout === "tiles" && (
-          <ComboTiles
-            heroSrc={heroSrc}
-            product={product}
-            items={items}
-            eyebrow={eyebrow}
-            card={card}
-            topContent={topContent}
-            afterTitleContent={afterTitleContent}
-            descriptionContent={descriptionContent}
-            includedContent={includedContent}
-          />
-        )}
-        {layout === "row" && (
-          <ComboRow
-            heroSrc={heroSrc}
-            product={product}
-            items={items}
-            eyebrow={eyebrow}
-            card={card}
-            topContent={topContent}
-            afterTitleContent={afterTitleContent}
-            descriptionContent={descriptionContent}
-            includedContent={includedContent}
-          />
-        )}
-        {layout === "grid" && (
-          <ComboGrid
-            heroSrc={heroSrc}
-            product={product}
-            items={items}
-            eyebrow={eyebrow}
-            card={card}
-            topContent={topContent}
-            afterTitleContent={afterTitleContent}
-            descriptionContent={descriptionContent}
-            includedContent={includedContent}
-          />
-        )}
-        {layout === "addon" && (
-          <ComboAddon
-            heroSrc={heroSrc}
-            product={product}
-            items={items}
-            eyebrow={eyebrow}
-            card={card}
-            topContent={topContent}
-            afterTitleContent={afterTitleContent}
-            descriptionContent={descriptionContent}
-            includedContent={includedContent}
-          />
-        )}
-      </div>
-    </section>
+    <PdpHeroShell label="Prezentare produs și conținut inclus">
+      {layout === "tiles" && (
+        <ComboTiles
+          heroSrc={heroSrc}
+          product={product}
+          items={items}
+          eyebrow={eyebrow}
+          card={card}
+          topContent={topContent}
+          afterTitleContent={afterTitleContent}
+          descriptionContent={descriptionContent}
+          includedContent={includedContent}
+        />
+      )}
+      {layout === "row" && (
+        <ComboRow
+          heroSrc={heroSrc}
+          product={product}
+          items={items}
+          eyebrow={eyebrow}
+          card={card}
+          topContent={topContent}
+          afterTitleContent={afterTitleContent}
+          descriptionContent={descriptionContent}
+          includedContent={includedContent}
+        />
+      )}
+      {layout === "grid" && (
+        <ComboGrid
+          heroSrc={heroSrc}
+          product={product}
+          items={items}
+          eyebrow={eyebrow}
+          card={card}
+          topContent={topContent}
+          afterTitleContent={afterTitleContent}
+          descriptionContent={descriptionContent}
+          includedContent={includedContent}
+        />
+      )}
+      {layout === "addon" && (
+        <ComboAddon
+          heroSrc={heroSrc}
+          product={product}
+          items={items}
+          eyebrow={eyebrow}
+          card={card}
+          topContent={topContent}
+          afterTitleContent={afterTitleContent}
+          descriptionContent={descriptionContent}
+          includedContent={includedContent}
+        />
+      )}
+    </PdpHeroShell>
   );
 }
 
@@ -151,13 +133,13 @@ type LayoutProps = {
 
 function IncludedHeading({ label, count }: { label: string; count?: number }) {
   return (
-    <div className="mb-4 flex items-center gap-2 text-background">
+    <div className="text-background mb-4 flex items-center gap-2">
       <Package className="size-4" />
-      <span className="text-xs font-semibold uppercase tracking-[0.2em]">
+      <span className="text-xs font-semibold tracking-[0.2em] uppercase">
         {label}
       </span>
       {count != null && (
-        <span className="rounded-full bg-background/20 px-2 py-0.5 text-[10px] font-bold tracking-[0.12em]">
+        <span className="bg-background/20 text-2xs rounded-full px-2 py-0.5 font-bold tracking-[0.12em]">
           {count} piese
         </span>
       )}
@@ -206,34 +188,34 @@ function ComboTiles({
   const units = expandUnits(items);
 
   return (
-    <div className="mx-auto grid max-w-[1280px] gap-10 medium:grid-cols-[1.05fr_minmax(0,0.95fr)] medium:items-center">
+    <div className="medium:grid-cols-[1.05fr_minmax(0,0.95fr)] medium:items-center mx-auto grid max-w-[1280px] gap-12">
       <div className="space-y-4">
-        <IncludedHeading label="Inclus în combo" count={units.length + 1} />
-        <div className="grid aspect-[5/4] w-full grid-cols-[3fr_1fr] gap-3 medium:gap-4">
-          <div className="clip-corner-cut-lg clip-shadow-lg relative overflow-hidden bg-background ring-1 ring-foreground/10">
+        <IncludedHeading label="Ce este inclus" count={units.length + 1} />
+        <div className="medium:gap-4 grid aspect-5/4 w-full grid-cols-[3fr_1fr] gap-4">
+          <div className="clip-corner-cut-lg clip-shadow-lg bg-background ring-foreground/10 relative overflow-hidden ring-1">
             <ProductMedia
               src={heroSrc}
               alt={product.title ?? ""}
               priority
               padding="p-8"
             />
-            <span className="absolute left-3 top-3 rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-primary-foreground">
+            <span className="bg-primary text-2xs text-primary-foreground absolute top-3 left-3 rounded-full px-2.5 py-1 font-bold tracking-[0.14em] uppercase">
               Produs principal
             </span>
           </div>
 
-          <div className="grid grid-rows-3 gap-3 medium:gap-4">
+          <div className="medium:gap-4 grid grid-rows-3 gap-4">
             {units.map((unit) => (
               <div
                 key={unit.unitKey}
-                className="clip-corner-cut-md clip-shadow-lg relative flex flex-col justify-end overflow-hidden bg-background p-2 ring-1 ring-foreground/10"
+                className="clip-corner-cut-md clip-shadow-lg bg-background ring-foreground/10 relative flex flex-col justify-end overflow-hidden p-2 ring-1"
               >
-                <ProductMedia src={unit.image} alt={unit.name} padding="p-3" />
+                <ProductMedia src={unit.image} alt={unit.name} padding="p-4" />
                 <span
                   aria-hidden
-                  className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-foreground/80 to-transparent"
+                  className="from-foreground/80 absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t to-transparent"
                 />
-                <span className="relative z-[1] line-clamp-2 text-[11px] font-semibold leading-tight text-background">
+                <span className="text-2xs text-background relative z-1 line-clamp-2 leading-tight font-semibold">
                   {unit.name}
                 </span>
               </div>
@@ -274,14 +256,14 @@ function ComboRow({
       : undefined;
 
   return (
-    <div className="mx-auto grid max-w-[1280px] gap-6 medium:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)] medium:items-start">
+    <div className="medium:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)] medium:items-start mx-auto grid max-w-[1280px] gap-6">
       <div className="space-y-4">
         <ProductStage
           heroSrc={heroSrc}
           product={product}
           heading="Produs principal"
           includedBadge={includedBadge}
-          aspectClassName="aspect-[5/4] medium:min-h-[420px]"
+          aspectClassName="aspect-5/4 medium:min-h-[420px]"
         />
         {includedContent}
       </div>
@@ -316,12 +298,12 @@ function ComboGrid({
       : undefined;
 
   return (
-    <div className="mx-auto grid max-w-[1280px] gap-6 medium:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] medium:items-start">
+    <div className="medium:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] medium:items-start mx-auto grid max-w-[1280px] gap-6">
       <div className="space-y-4">
         <ProductStage
           heroSrc={heroSrc}
           product={product}
-          heading="Kit pregătit de lucru"
+          heading="Set gata de lucru"
           includedBadge={includedBadge}
           aspectClassName="aspect-square medium:min-h-[440px]"
         />
@@ -357,7 +339,7 @@ function ProductStage({
   return (
     <div
       className={cn(
-        "clip-corner-cut-lg clip-shadow-lg relative overflow-hidden bg-background shadow-[0_36px_80px_-50px_rgba(15,23,42,0.85)]",
+        "clip-corner-cut-lg clip-shadow-lg bg-background relative overflow-hidden shadow-[0_36px_80px_-50px_rgba(15,23,42,0.85)]",
         aspectClassName
       )}
     >
@@ -365,16 +347,16 @@ function ProductStage({
         src={heroSrc}
         alt={product.title ?? ""}
         priority
-        padding="p-8 small:p-10"
+        padding="p-8 small:p-12"
       />
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-foreground via-foreground/82 to-transparent p-5 text-background small:p-6">
+      <div className="from-foreground via-foreground/82 text-background small:p-6 absolute inset-x-0 bottom-0 bg-linear-to-t to-transparent p-6">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-primary-foreground">
+          <span className="bg-primary text-2xs text-primary-foreground inline-flex items-center gap-1.5 rounded-full px-4 py-1 font-bold tracking-[0.14em] uppercase">
             <Check className="size-3" />
             {heading}
           </span>
           {includedBadge && (
-            <span className="rounded-full bg-background/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-background/92">
+            <span className="bg-background/15 text-2xs text-background/92 rounded-full px-4 py-1 font-semibold tracking-[0.12em] uppercase">
               {includedBadge}
             </span>
           )}
@@ -395,23 +377,23 @@ function ComboAddon({
   descriptionContent,
 }: LayoutProps) {
   return (
-    <div className="mx-auto grid max-w-[1280px] gap-10 medium:grid-cols-[1.05fr_minmax(0,0.95fr)] medium:items-start">
+    <div className="medium:grid-cols-[1.05fr_minmax(0,0.95fr)] medium:items-start mx-auto grid max-w-[1280px] gap-12">
       <div className="space-y-4">
-        <div className="flex items-center gap-2 text-background">
+        <div className="text-background flex items-center gap-2">
           <Check className="size-4" />
-          <span className="text-xs font-semibold uppercase tracking-[0.2em]">
+          <span className="text-xs font-semibold tracking-[0.2em] uppercase">
             Produsul tău
           </span>
         </div>
 
-        <div className="clip-corner-cut-lg clip-shadow-lg relative aspect-[4/3] overflow-hidden bg-background ring-1 ring-foreground/10">
+        <div className="clip-corner-cut-lg clip-shadow-lg bg-background ring-foreground/10 relative aspect-4/3 overflow-hidden ring-1">
           <ProductMedia
             src={heroSrc}
             alt={product.title ?? ""}
             priority
             padding="p-8"
           />
-          <span className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full bg-success px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-background">
+          <span className="bg-success text-2xs text-background absolute top-4 left-4 flex items-center gap-1.5 rounded-full px-4 py-1 font-bold tracking-[0.14em] uppercase">
             <Check className="size-3" />
             Inclus
           </span>
@@ -422,21 +404,21 @@ function ComboAddon({
           width={2}
           borderClassName="bg-warning"
           fillClassName="bg-warning-subtle"
-          innerClassName="flex items-start gap-3 p-4"
+          innerClassName="flex items-start gap-4 p-4"
         >
-          <PackageX className="mt-0.5 size-5 shrink-0 text-warning" />
+          <PackageX className="text-warning mt-0.5 size-5 shrink-0" />
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.12em] text-foreground">
+            <p className="text-foreground text-sm font-bold tracking-[0.12em] uppercase">
               Nu sunt incluse în acest set
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Ai nevoie de accesoriile de mai jos ca să folosești produsul.
               Adaugă-le în coș dacă nu le ai deja.
             </p>
           </div>
         </CutBorder>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           {items.map((item) => (
             <CutBorder
               key={item.id}
@@ -448,21 +430,21 @@ function ComboAddon({
             >
               <div className="relative aspect-square">
                 <ProductMedia src={item.image} alt={item.name} padding="p-4" />
-                <span className="absolute right-2 top-2 rounded-full bg-warning px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-warning-foreground">
+                <span className="bg-warning text-2xs text-warning-foreground absolute top-2 right-2 rounded-full px-2 py-0.5 font-bold tracking-widest uppercase">
                   Nu e inclus
                 </span>
               </div>
-              <div className="flex flex-1 flex-col gap-2 p-3">
+              <div className="flex flex-1 flex-col gap-2 p-4">
                 <div className="flex-1">
-                  <p className="text-sm font-semibold leading-tight text-foreground">
+                  <p className="text-foreground text-sm leading-tight font-semibold">
                     {item.name}
                   </p>
                   {item.note && (
-                    <p className="text-xs text-muted-foreground">{item.note}</p>
+                    <p className="text-muted-foreground text-xs">{item.note}</p>
                   )}
                 </div>
                 {item.price != null && (
-                  <span className="font-display text-lg font-bold text-foreground">
+                  <span className="font-display text-foreground text-lg font-bold">
                     {formatPrice(item.price)}
                   </span>
                 )}

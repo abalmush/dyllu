@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@lib/utils";
 
 const iconButtonVariants = cva(
-  "inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full transition-[background-color,color,border-color,box-shadow,opacity] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55 [&_svg]:size-5",
+  "inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full transition-[background-color,color,border-color,box-shadow,opacity] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55 [&_svg]:size-5",
   {
     variants: {
       variant: {
@@ -45,7 +45,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
     >
       {children}
       {typeof badge === "number" && badge > 0 && (
-        <span className="absolute -right-0.5 -top-0.5 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-bold leading-none text-primary-foreground shadow">
+        <span className="bg-primary text-primary-foreground absolute -top-0.5 -right-0.5 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs leading-none font-bold shadow-sm">
           {badge > 99 ? "99+" : badge}
         </span>
       )}

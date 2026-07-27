@@ -1,6 +1,6 @@
 import * as React from "react";
 import Image from "next/image";
-import { Layers } from "lucide-react";
+import { BatteryFull, Layers, Plug } from "lucide-react";
 
 import { cn } from "@lib/utils";
 import { IMAGE_BG_NEUTRALIZE } from "@/components/organisms/pdp-hero-variants";
@@ -10,6 +10,8 @@ export type SetPiece = {
   label: string;
   image?: string;
   qty?: number;
+  kind?: "battery" | "charger";
+  sku?: string;
 };
 
 type Props = {
@@ -25,110 +27,157 @@ export function SetBreakdown({
   tone = "light",
   className,
 }: Props) {
-  const visualPieces = pieces.filter((piece) => piece.image);
-  const textPieces = pieces.filter((piece) => !piece.image);
+  const visualPieces = pieces.filter((piece) => piece.image || piece.kind);
+  const textPieces = pieces.filter((piece) => !piece.image && !piece.kind);
 
   if (pieces.length === 0) return null;
 
   return (
     <div
-      className={cn(
-        "space-y-4",
-        tone === "dark" &&
-          "clip-corner-cut-lg bg-foreground p-5 text-background ring-1 ring-background/15 small:p-6",
-        className
-      )}
+      className={cn(tone === "dark" ? "relative pt-7" : "space-y-4", className)}
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <span
-          className={cn(
-            "flex items-center gap-2 font-display text-xl font-bold tracking-tight",
-            tone === "dark" ? "text-background" : "text-foreground"
-          )}
-        >
-          <Layers className="size-4" />
-          Accesorii incluse în pachet
-        </span>
-        <span className="clip-corner-cut-sm bg-foreground px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-background">
-          {pieceCount} {pieceCount === 1 ? "piesă" : "piese"}
-        </span>
-      </div>
-
-      {visualPieces.length > 0 && (
+      {tone === "dark" && (
         <div
-          className="grid gap-3"
-          style={{
-            gridTemplateColumns: "repeat(auto-fit, minmax(128px, 1fr))",
-          }}
+          aria-hidden="true"
+          className="border-foreground absolute top-0 left-1/2 z-10 h-10 w-32 -translate-x-1/2 rounded-t-2xl border-[8px] border-b-0"
         >
-          {visualPieces.map((piece) => {
-            const quantity = piece.qty ?? 1;
-
-            return (
-              <article
-                key={piece.id}
-                className="clip-corner-cut-md clip-shadow-sm relative aspect-[1.02] overflow-hidden bg-background ring-1 ring-foreground/10"
-              >
-                <Image
-                  src={piece.image!}
-                  alt={piece.label}
-                  fill
-                  sizes="(min-width: 1024px) 220px, (min-width: 640px) 180px, 44vw"
-                  style={IMAGE_BG_NEUTRALIZE}
-                  className="object-contain p-4 small:p-5"
-                />
-                <span className="absolute right-2.5 top-2.5 shrink-0 bg-foreground px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-background">
-                  {quantity} {quantity === 1 ? "inclus" : "incluse"}
-                </span>
-              </article>
-            );
-          })}
+          <span className="bg-foreground absolute top-5 -left-5 h-5 w-8 rounded-t-md" />
+          <span className="bg-foreground absolute top-5 -right-5 h-5 w-8 rounded-t-md" />
         </div>
       )}
+      <div
+        className={cn(
+          "space-y-4",
+          tone === "dark" &&
+            "clip-corner-cut-lg bg-foreground text-background ring-background/15 small:p-6 p-6 ring-1"
+        )}
+      >
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <span
+            className={cn(
+              "font-display flex items-center gap-2 text-xl font-bold tracking-tight",
+              tone === "dark" ? "text-background" : "text-foreground"
+            )}
+          >
+            <Layers className="size-4" />
+            Ce este inclus
+          </span>
+          <span className="clip-corner-cut-sm bg-foreground text-2xs text-background px-4 py-1.5 font-bold tracking-[0.14em] uppercase">
+            {pieceCount} {pieceCount === 1 ? "piesă" : "piese"}
+          </span>
+        </div>
 
-      {textPieces.length > 0 && (
-        <div
-          className={cn(
-            "clip-corner-cut-md p-4 ring-1",
-            tone === "dark"
-              ? "bg-background/[0.08] ring-background/20"
-              : "bg-card ring-border/70"
-          )}
-        >
-          <div>
-            <p
-              className={cn(
-                "text-[11px] font-semibold uppercase tracking-[0.18em]",
-                tone === "dark" ? "text-background/70" : "text-muted-foreground"
-              )}
-            >
-              Alte accesorii incluse
-            </p>
-            <ul className="mt-3 space-y-2">
-              {textPieces.map((piece) => (
-                <li
-                  key={piece.id}
+        {visualPieces.length > 0 && (
+          <div
+            className="grid gap-4"
+            style={{
+              gridTemplateColumns: "repeat(auto-fit, minmax(128px, 1fr))",
+            }}
+          >
+            {visualPieces.map((piece, index) => {
+              const quantity = piece.qty ?? 1;
+              const visualKey = piece.id
+                ? `${piece.id}-${index}`
+                : `visual-${index}`;
+
+              return (
+                <article
+                  key={visualKey}
+                  data-testid={
+                    piece.kind
+                      ? `included-power-accessory-${piece.sku ?? piece.kind}`
+                      : undefined
+                  }
                   className={cn(
-                    "flex items-start gap-2 text-sm font-semibold leading-relaxed",
-                    tone === "dark" ? "text-background" : "text-foreground"
+                    "clip-corner-cut-md clip-shadow-sm relative aspect-[1.02] overflow-hidden ring-1",
+                    visualPieces.length === 1 && "w-full max-w-64",
+                    tone === "dark"
+                      ? "bg-background/10 ring-background/20"
+                      : "bg-background ring-foreground/10"
                   )}
                 >
-                  <span
-                    className={cn(
-                      "mt-2 size-1.5 shrink-0 rounded-full",
-                      tone === "dark" ? "bg-primary" : "bg-foreground"
-                    )}
-                  />
-                  <span>
-                    {piece.label}
-                    {piece.qty != null && piece.qty > 1 ? ` ×${piece.qty}` : ""}
-                  </span>
-                </li>
-              ))}
-            </ul>
+                  {piece.image ? (
+                    <Image
+                      src={piece.image}
+                      alt={piece.label}
+                      fill
+                      sizes="(min-width: 1024px) 220px, (min-width: 640px) 180px, 44vw"
+                      style={IMAGE_BG_NEUTRALIZE}
+                      className="small:p-6 object-contain p-4"
+                    />
+                  ) : (
+                    <div className="flex h-full flex-col items-center justify-center gap-4 p-5 text-center">
+                      <span className="bg-primary text-foreground grid size-14 place-items-center rounded-full">
+                        {piece.kind === "battery" ? (
+                          <BatteryFull className="size-7" aria-hidden="true" />
+                        ) : (
+                          <Plug className="size-7" aria-hidden="true" />
+                        )}
+                      </span>
+                      <p className="text-sm leading-snug font-bold">
+                        {piece.label}
+                      </p>
+                    </div>
+                  )}
+                  {quantity > 1 && (
+                    <span className="bg-primary text-foreground absolute top-2.5 right-2.5 rounded-md px-3 py-1.5 text-sm leading-none font-extrabold">
+                      {`×${quantity}`}
+                    </span>
+                  )}
+                </article>
+              );
+            })}
           </div>
-        </div>
-      )}
+        )}
+
+        {textPieces.length > 0 && (
+          <div
+            className={cn(
+              "clip-corner-cut-md p-4 ring-1",
+              tone === "dark"
+                ? "bg-background/10 ring-background/20"
+                : "bg-card ring-border/70"
+            )}
+          >
+            <div>
+              <p
+                className={cn(
+                  "text-2xs font-semibold tracking-[0.18em] uppercase",
+                  tone === "dark"
+                    ? "text-background/70"
+                    : "text-muted-foreground"
+                )}
+              >
+                În cutie mai găsești
+              </p>
+              <ul className="mt-4 space-y-2">
+                {textPieces.map((piece, index) => (
+                  <li
+                    key={piece.id ? `${piece.id}-${index}` : `text-${index}`}
+                    className={cn(
+                      "flex items-start gap-2 text-sm leading-relaxed font-semibold",
+                      tone === "dark" ? "text-background" : "text-foreground"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "mt-2 size-1.5 shrink-0 rounded-full",
+                        tone === "dark" ? "bg-primary" : "bg-foreground"
+                      )}
+                    />
+                    <span>
+                      {piece.label}
+                      {piece.qty != null && piece.qty > 1
+                        ? ` ×${piece.qty}`
+                        : ""}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

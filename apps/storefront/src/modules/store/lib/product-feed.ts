@@ -1,7 +1,7 @@
 import "server-only";
 
 import { listProductsWithSort } from "@lib/data/products";
-import { toPlpProduct } from "@modules/store/lib/to-plp-product";
+import { toPlpProducts } from "@modules/store/lib/to-plp-product";
 import {
   PRODUCT_LIMIT,
   normalizeProductFeedRequest,
@@ -48,8 +48,8 @@ function buildProductQueryParams(
     queryParams.collection_id = [request.collectionId];
   }
 
-  if (request.categoryId) {
-    queryParams.category_id = [request.categoryId];
+  if (request.categoryIds) {
+    queryParams.category_id = request.categoryIds;
   }
 
   if (request.tagId) {
@@ -75,18 +75,25 @@ async function fetchProductFeedPage(
   request: NormalizedProductFeedRequest
 ): Promise<ProductFeedResponse> {
   const {
-    response: { products, count },
+    response: { products },
   } = await listProductsWithSort({
-    page: request.page,
+    page: 1,
     queryParams: buildProductQueryParams(request),
     sortBy: request.sortBy,
-    onlyOnSale: request.onSale,
+    fetchAll: true,
   });
 
+  const expandedProducts = products.flatMap(toPlpProducts);
+  const filteredProducts = request.onSale
+    ? expandedProducts.filter((product) => product.price?.price_type === "sale")
+    : expandedProducts;
+  const sortedProducts = sortProductFeedItems(filteredProducts, request.sortBy);
+  const count = sortedProducts.length;
   const totalPages = count > 0 ? Math.ceil(count / PRODUCT_LIMIT) : 0;
+  const offset = (request.page - 1) * PRODUCT_LIMIT;
 
   return {
-    products: products.map(toPlpProduct),
+    products: sortedProducts.slice(offset, offset + PRODUCT_LIMIT),
     count,
     currentPage: request.page,
     nextPage:
@@ -94,4 +101,23 @@ async function fetchProductFeedPage(
     totalPages,
     pageSize: PRODUCT_LIMIT,
   };
+}
+
+function sortProductFeedItems(
+  products: ReturnType<typeof toPlpProducts>,
+  sortBy: NormalizedProductFeedRequest["sortBy"]
+) {
+  if (sortBy === "created_at") return products;
+
+  return products.toSorted((left, right) => {
+    const leftPrice = left.price?.calculated_price_number;
+    const rightPrice = right.price?.calculated_price_number;
+
+    if (typeof leftPrice !== "number") return 1;
+    if (typeof rightPrice !== "number") return -1;
+
+    return sortBy === "price_asc"
+      ? leftPrice - rightPrice
+      : rightPrice - leftPrice;
+  });
 }

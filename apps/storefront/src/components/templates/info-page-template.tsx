@@ -9,7 +9,7 @@ import { SITE_CONTACT, type InfoPageData } from "@lib/site-content";
 export function InfoPageTemplate({ page }: { page: InfoPageData }) {
   return (
     <div className="bg-surface-subtle">
-      <Container className="py-8 small:py-12">
+      <Container className="small:py-12 py-8">
         <PageHero
           eyebrow={{ label: page.eyebrow }}
           title={page.title}
@@ -17,19 +17,19 @@ export function InfoPageTemplate({ page }: { page: InfoPageData }) {
           surface="default"
         />
 
-        <div className="mt-8 grid gap-8 small:mt-10 large:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="space-y-5">
+        <div className="small:mt-12 large:grid-cols-[minmax(0,1fr)_320px] mt-8 grid gap-8">
+          <div className="space-y-6">
             {page.sections.map((section) => (
               <section
                 key={section.title}
-                className="clip-corner-cut-lg bg-card p-6 ring-1 ring-border small:p-8"
+                className="clip-corner-cut-lg bg-card ring-border small:p-8 p-6 ring-1"
               >
-                <h2 className="font-display text-2xl font-bold tracking-tight text-foreground">
+                <h2 className="font-display text-foreground text-2xl font-bold tracking-tight">
                   {section.title}
                 </h2>
 
                 {section.paragraphs?.length ? (
-                  <div className="mt-4 space-y-3 text-sm leading-relaxed text-muted-foreground">
+                  <div className="text-muted-foreground mt-4 space-y-4 text-sm leading-relaxed">
                     {section.paragraphs.map((paragraph) => (
                       <p key={paragraph}>{paragraph}</p>
                     ))}
@@ -37,10 +37,10 @@ export function InfoPageTemplate({ page }: { page: InfoPageData }) {
                 ) : null}
 
                 {section.bullets?.length ? (
-                  <ul className="mt-4 space-y-2 text-sm leading-relaxed text-muted-foreground">
+                  <ul className="text-muted-foreground mt-4 space-y-2 text-sm leading-relaxed">
                     {section.bullets.map((bullet) => (
-                      <li key={bullet} className="flex gap-3">
-                        <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
+                      <li key={bullet} className="flex gap-4">
+                        <span className="bg-primary mt-2 size-1.5 shrink-0 rounded-full" />
                         <span>{bullet}</span>
                       </li>
                     ))}
@@ -48,7 +48,7 @@ export function InfoPageTemplate({ page }: { page: InfoPageData }) {
                 ) : null}
 
                 {section.note ? (
-                  <div className="clip-corner-cut-md mt-5 bg-surface-subtle/70 p-4 text-sm text-foreground ring-1 ring-border/70">
+                  <div className="clip-corner-cut-md bg-surface-subtle/70 text-foreground ring-border/70 mt-6 p-4 text-sm ring-1">
                     {section.note}
                   </div>
                 ) : null}
@@ -56,37 +56,37 @@ export function InfoPageTemplate({ page }: { page: InfoPageData }) {
             ))}
           </div>
 
-          <aside className="flex flex-col gap-5">
-            <div className="clip-corner-cut-lg bg-card p-6 ring-1 ring-border small:sticky small:top-28">
-              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <aside className="flex flex-col gap-6">
+            <div className="clip-corner-cut-lg bg-card ring-border small:sticky small:top-28 p-6 ring-1">
+              <span className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
                 Suport DYLLU
               </span>
-              <h2 className="mt-2 font-display text-2xl font-bold tracking-tight text-foreground">
+              <h2 className="font-display text-foreground mt-2 text-2xl font-bold tracking-tight">
                 Ai nevoie de ajutor?
               </h2>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
                 Echipa noastră te poate ajuta cu selecția produselor,
                 confirmarea comenzilor, service și întrebări despre livrare.
               </p>
 
-              <div className="mt-5 space-y-3">
+              <div className="mt-6 space-y-4">
                 <a
                   href={SITE_CONTACT.phoneHref}
-                  className="flex items-center gap-3 rounded-2xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-foreground/30"
+                  className="border-border bg-background text-foreground hover:border-foreground/30 flex items-center gap-4 rounded-2xl border px-4 py-4 text-sm font-medium transition-colors"
                 >
-                  <Phone className="size-4 text-primary" />
+                  <Phone className="text-primary size-4" />
                   {SITE_CONTACT.phoneDisplay}
                 </a>
                 <a
                   href={SITE_CONTACT.emailHref}
-                  className="flex items-center gap-3 rounded-2xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-foreground/30"
+                  className="border-border bg-background text-foreground hover:border-foreground/30 flex items-center gap-4 rounded-2xl border px-4 py-4 text-sm font-medium transition-colors"
                 >
-                  <Mail className="size-4 text-primary" />
+                  <Mail className="text-primary size-4" />
                   {SITE_CONTACT.email}
                 </a>
               </div>
 
-              <p className="mt-4 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-4 text-xs">
                 Program general: {SITE_CONTACT.hoursShort}
               </p>
 

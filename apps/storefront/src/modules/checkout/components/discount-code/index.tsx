@@ -49,14 +49,14 @@ export default function DiscountCode({ cart }: Props) {
   };
 
   return (
-    <div className="flex w-full flex-col gap-3">
+    <div className="flex w-full flex-col gap-4">
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
         data-testid="add-discount-button"
-        className="inline-flex items-center gap-2 self-start text-xs font-semibold uppercase tracking-[0.16em] text-foreground transition-colors hover:text-primary"
+        className="text-foreground hover:text-primary inline-flex items-center gap-2 self-start text-xs font-semibold tracking-[0.16em] uppercase transition-colors"
       >
-        <Tag className="size-4 text-primary" />
+        <Tag className="text-primary size-4" />
         Ai un cod promoțional?
       </button>
 
@@ -72,7 +72,7 @@ export default function DiscountCode({ cart }: Props) {
               type="text"
               placeholder="Introdu codul"
               data-testid="discount-input"
-              className="clip-corner-cut-sm h-11 flex-1 rounded-none border-border bg-background"
+              className="clip-corner-cut-sm border-border bg-background h-11 flex-1 rounded-none"
             />
             <SubmitButton
               variant="secondary"
@@ -105,7 +105,7 @@ export default function DiscountCode({ cart }: Props) {
             return (
               <li
                 key={p.id}
-                className="clip-corner-cut-sm flex items-center justify-between border border-success/30 bg-success/10 px-3 py-2 text-xs"
+                className="clip-corner-cut-sm border-success/30 bg-success/10 flex items-center justify-between border px-4 py-2 text-xs"
                 data-testid="discount-row"
               >
                 <span className="flex items-center gap-2">
@@ -120,7 +120,7 @@ export default function DiscountCode({ cart }: Props) {
                     onClick={() => p.code && removePromotionCode(p.code)}
                     data-testid="remove-discount-button"
                     aria-label="Șterge codul promoțional"
-                    className="text-success/70 transition-colors hover:text-success"
+                    className="text-success/70 hover:text-success transition-colors"
                   >
                     <X className="size-4" />
                   </button>

@@ -12,8 +12,8 @@ const FEATURES = [
   },
   {
     icon: <Repeat2 className="size-5" />,
-    title: "Returnare 30 de zile",
-    description: "Schimbă produsul fără bătăi de cap.",
+    title: "Retur în 14 zile",
+    description: "Pentru produse neutilizate, complete și ambalate original.",
   },
   {
     icon: <CreditCard className="size-5" />,
@@ -29,9 +29,9 @@ const FEATURES = [
 
 export function TrustBand() {
   return (
-    <section className="border-y border-border bg-surface-subtle/60 py-10">
+    <section className="border-border bg-surface-subtle/60 border-y py-12">
       <Container>
-        <div className="grid gap-3 small:grid-cols-2 medium:grid-cols-4">
+        <div className="small:grid-cols-2 medium:grid-cols-4 grid gap-4">
           {FEATURES.map((f) => (
             <FeatureStat key={f.title} {...f} />
           ))}

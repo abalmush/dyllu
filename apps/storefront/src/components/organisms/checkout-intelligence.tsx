@@ -44,19 +44,19 @@ export function DeliveryTimeline({
   steps?: TimelineStep[];
 }) {
   return (
-    <div className="clip-corner-cut-lg mx-auto max-w-[560px] bg-card p-6 ring-1 ring-border small:p-8">
-      <div className="mb-6 flex items-center gap-2 text-primary">
+    <div className="clip-corner-cut-lg bg-card ring-border small:p-8 mx-auto max-w-[560px] p-6 ring-1">
+      <div className="text-primary mb-6 flex items-center gap-2">
         <CloudSun className="size-4" />
-        <span className="text-xs font-semibold uppercase tracking-[0.2em]">
+        <span className="text-xs font-semibold tracking-[0.2em] uppercase">
           Povestea comenzii tale
         </span>
       </div>
-      <ol className="relative space-y-6 before:absolute before:left-[15px] before:top-2 before:h-[calc(100%-1rem)] before:w-px before:bg-border">
+      <ol className="before:bg-border relative space-y-6 before:absolute before:top-2 before:left-[15px] before:h-[calc(100%-1rem)] before:w-px">
         {steps.map((step) => (
           <li key={step.day} className="relative flex gap-4">
             <span
               className={cn(
-                "relative z-[1] grid size-8 shrink-0 place-items-center rounded-full ring-4 ring-card",
+                "ring-card relative z-1 grid size-8 shrink-0 place-items-center rounded-full ring-4",
                 step.highlight
                   ? "bg-success text-background"
                   : "bg-muted text-foreground"
@@ -66,11 +66,11 @@ export function DeliveryTimeline({
             </span>
             <div className="pt-1">
               <div className="flex items-baseline gap-2">
-                <span className="text-sm font-bold text-foreground">
+                <span className="text-foreground text-sm font-bold">
                   {step.day}
                 </span>
                 {step.time && (
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-muted-foreground text-xs">
                     {step.time}
                   </span>
                 )}
@@ -79,14 +79,14 @@ export function DeliveryTimeline({
                 className={cn(
                   "text-sm",
                   step.highlight
-                    ? "font-semibold text-foreground"
+                    ? "text-foreground font-semibold"
                     : "text-muted-foreground"
                 )}
               >
                 {step.title}
               </p>
               {step.detail && (
-                <p className="mt-0.5 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-0.5 text-xs">
                   {step.detail}
                 </p>
               )}
@@ -113,12 +113,12 @@ export function CostBreakdown({
   total: string;
 }) {
   return (
-    <div className="clip-corner-cut-lg mx-auto max-w-[560px] bg-card p-6 ring-1 ring-border small:p-8">
+    <div className="clip-corner-cut-lg bg-card ring-border small:p-8 mx-auto max-w-[560px] p-6 ring-1">
       <div className="flex items-baseline justify-between">
-        <h3 className="font-display text-lg font-bold text-foreground">
+        <h3 className="font-display text-foreground text-lg font-bold">
           Din ce se compune prețul
         </h3>
-        <span className="font-display text-xl font-bold text-foreground">
+        <span className="font-display text-foreground text-xl font-bold">
           {total}
         </span>
       </div>
@@ -134,17 +134,17 @@ export function CostBreakdown({
         ))}
       </div>
 
-      <ul className="mt-5 space-y-2.5">
+      <ul className="mt-6 space-y-2.5">
         {segments.map((segment) => (
           <li
             key={segment.label}
             className="flex items-center justify-between text-sm"
           >
-            <span className="flex items-center gap-2 text-foreground">
+            <span className="text-foreground flex items-center gap-2">
               <span className={cn("size-3 rounded-sm", segment.color)} />
               {segment.label}
             </span>
-            <span className="font-medium text-muted-foreground">
+            <span className="text-muted-foreground font-medium">
               {segment.amount}
             </span>
           </li>
@@ -162,25 +162,25 @@ export function CheckoutHealthScore({
   items: string[];
 }) {
   return (
-    <div className="clip-corner-cut-lg mx-auto max-w-[480px] bg-card p-6 ring-1 ring-border small:p-8">
+    <div className="clip-corner-cut-lg bg-card ring-border small:p-8 mx-auto max-w-[480px] p-6 ring-1">
       <div className="flex items-center gap-4">
-        <span className="grid size-16 shrink-0 place-items-center rounded-full bg-success/15 font-display text-xl font-extrabold text-success">
+        <span className="bg-success/15 font-display text-success grid size-16 shrink-0 place-items-center rounded-full text-xl font-extrabold">
           {score}%
         </span>
         <div>
-          <h3 className="font-display text-lg font-bold text-foreground">
+          <h3 className="font-display text-foreground text-lg font-bold">
             Comandă verificată
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Totul este pregătit pentru plasare
           </p>
         </div>
       </div>
 
-      <ul className="mt-5 grid gap-2 small:grid-cols-2">
+      <ul className="small:grid-cols-2 mt-6 grid gap-2">
         {items.map((item) => (
           <li key={item} className="flex items-center gap-2 text-sm">
-            <Check className="size-4 shrink-0 text-success" />
+            <Check className="text-success size-4 shrink-0" />
             <span className="text-foreground">{item}</span>
           </li>
         ))}
@@ -197,7 +197,7 @@ export function EmotionCta({
   completion: string;
 }) {
   return (
-    <div className="clip-corner-cut-lg relative mx-auto max-w-[640px] overflow-hidden bg-foreground p-8 text-center text-background small:p-12">
+    <div className="clip-corner-cut-lg bg-foreground text-background small:p-12 relative mx-auto max-w-[640px] overflow-hidden p-8 text-center">
       <div
         aria-hidden
         className="absolute inset-0 opacity-20"
@@ -208,11 +208,11 @@ export function EmotionCta({
         }}
       />
       <div className="relative">
-        <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-background/70">
+        <span className="text-background/70 inline-flex items-center gap-2 text-xs font-semibold tracking-[0.2em] uppercase">
           <Sparkles className="size-4" />
           Ești gata
         </span>
-        <h3 className="mt-3 font-display text-2xl font-extrabold small:text-3xl">
+        <h3 className="font-display small:text-3xl mt-4 text-2xl font-extrabold">
           Tot ce ai nevoie este inclus
         </h3>
         <div className="mt-6 flex items-center justify-center gap-8">
@@ -220,14 +220,14 @@ export function EmotionCta({
             <p className="font-display text-4xl font-extrabold">
               {successPercent}%
             </p>
-            <p className="text-xs uppercase tracking-[0.16em] text-background/60">
+            <p className="text-background/60 text-xs tracking-[0.16em] uppercase">
               Șanse de reușită
             </p>
           </div>
-          <div className="h-10 w-px bg-background/20" />
+          <div className="bg-background/20 h-10 w-px" />
           <div>
             <p className="font-display text-lg font-bold">{completion}</p>
-            <p className="text-xs uppercase tracking-[0.16em] text-background/60">
+            <p className="text-background/60 text-xs tracking-[0.16em] uppercase">
               Finalizare estimată
             </p>
           </div>

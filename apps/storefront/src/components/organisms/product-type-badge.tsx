@@ -15,12 +15,12 @@ const TYPE_CONFIG: Record<
   ProductType,
   { label: string; icon: LucideIcon; variant: BadgeProps["variant"] }
 > = {
-  single: { label: "Produs individual", icon: Package, variant: "outline" },
+  single: { label: "Produs separat", icon: Package, variant: "outline" },
   set: { label: "Set", icon: Layers, variant: "secondary" },
-  kit: { label: "Kit complet", icon: Boxes, variant: "soft" },
-  combo: { label: "Combo cu acumulatori", icon: Boxes, variant: "soft" },
+  kit: { label: "Set complet", icon: Boxes, variant: "soft" },
+  combo: { label: "Set cu acumulatori", icon: Boxes, variant: "soft" },
   "needs-battery": {
-    label: "Necesită acumulator",
+    label: "Acumulator neinclus",
     icon: BatteryCharging,
     variant: "warning",
   },

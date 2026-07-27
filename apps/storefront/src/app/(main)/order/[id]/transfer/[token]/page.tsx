@@ -10,7 +10,7 @@ export default async function TransferPage({
   const { id, token } = params;
 
   return (
-    <div className="mx-auto mb-20 mt-10 flex w-2/5 flex-col items-start gap-y-4">
+    <div className="mx-auto mt-12 mb-20 flex w-2/5 flex-col items-start gap-y-4">
       <TransferImage />
       <div className="flex flex-col gap-y-6">
         <Heading level="h1" className="text-xl text-zinc-900">
