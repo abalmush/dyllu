@@ -24,11 +24,6 @@ if (process.env.NODE_ENV === "production") {
       description:
         "The shared backend revalidation secret of at least 32 characters.",
     },
-    {
-      key: "ORDER_ACCESS_SECRET",
-      description:
-        "A unique secret of at least 32 characters used to sign guest order access tokens.",
-    }
   );
 }
 

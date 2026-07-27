@@ -99,7 +99,7 @@ jobs:
     env:
       NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
       REVALIDATE_SECRET: ${{ secrets.MEDUSA_REVALIDATE_SECRET }}
-      ORDER_ACCESS_SECRET: ${{ secrets.ORDER_ACCESS_SECRET }}
+      ORDER_ACCESS_SECRET: ${{ secrets.ORDER_ACCESS_SECRET || secrets.MEDUSA_REVALIDATE_SECRET }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
