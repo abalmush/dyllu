@@ -79,6 +79,7 @@ jobs:
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         run: >-
           pnpm --filter @dyllu/storefront exec playwright test
+          --project=chromium
           e2e/cart-sync.spec.ts
           e2e/security.spec.ts
           e2e/shipping-area.spec.ts
