@@ -160,7 +160,8 @@ export const setOrderConfirmationId = async (orderId: string) => {
 };
 
 function getOrderAccessSecret() {
-  const secret = process.env.ORDER_ACCESS_SECRET;
+  const secret =
+    process.env.ORDER_ACCESS_SECRET || process.env.REVALIDATE_SECRET;
   return secret && secret.length >= 32 ? secret : undefined;
 }
 

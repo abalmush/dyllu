@@ -109,7 +109,7 @@ Where secrets live:
 
 - **Admin password:** whatever was set via `medusa user` (ask the owner / password manager).
 - **Coolify env** (`DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `S3_*`, `REVALIDATE_SECRET`): Coolify → dyllu-backend → Environment Variables.
-- **Cloudflare Worker secrets** (`REVALIDATE_SECRET`, `ORDER_ACCESS_SECRET`): configure with Wrangler; generate distinct values with `openssl rand -hex 32`.
+- **Cloudflare Worker secrets**: `REVALIDATE_SECRET` is required. `ORDER_ACCESS_SECRET` is optional during the compatible rollout and falls back to `REVALIDATE_SECRET`; configure a distinct 32-byte value later.
 - **CI secrets:** `gh secret list --repo abalmush/dyllu` (values are write-only).
 - **R2 S3 keys:** Cloudflare dash → R2 → Manage R2 API Tokens (scoped to `dyllu-media`).
 
