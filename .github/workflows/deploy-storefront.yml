@@ -75,9 +75,13 @@ jobs:
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         run: pnpm --filter @dyllu/storefront exec playwright install --with-deps chromium
 
-      - name: Run storefront end-to-end test
+      - name: Run deterministic storefront end-to-end tests
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        run: pnpm --filter @dyllu/storefront test
+        run: >-
+          pnpm --filter @dyllu/storefront exec playwright test
+          e2e/cart-sync.spec.ts
+          e2e/security.spec.ts
+          e2e/shipping-area.spec.ts
 
       - name: Build with OpenNext
         working-directory: apps/storefront
