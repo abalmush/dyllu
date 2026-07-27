@@ -11,7 +11,7 @@ import { SHOWROOMS, SITE_CONTACT } from "@lib/site-content";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Date de contact, showroomuri și canale rapide pentru suportul DYLLU în Moldova.",
+    "Date de contact, magazine și canale rapide pentru suportul DYLLU în Moldova.",
 };
 
 const NETWORK_CITIES = [
@@ -27,7 +27,7 @@ const NETWORK_CITIES = [
 export default function ContactPage() {
   return (
     <div className="bg-surface-subtle">
-      <Container className="py-8 small:py-12">
+      <Container className="small:py-12 py-8">
         <PageHero
           eyebrow={{ label: "Contact DYLLU" }}
           title="Suntem aproape de proiectul tău"
@@ -46,49 +46,49 @@ export default function ContactPage() {
             description="Pentru solicitări comerciale, suport tehnic și confirmarea comenzilor."
           />
 
-          <div className="mt-6 grid gap-4 medium:grid-cols-2 xlarge:grid-cols-4">
+          <div className="medium:grid-cols-2 xlarge:grid-cols-4 mt-6 grid gap-4">
             <a
               href={SITE_CONTACT.phoneHref}
-              className="clip-corner-cut-lg bg-card p-5 ring-1 ring-border transition-colors hover:border-foreground/25"
+              className="clip-corner-cut-lg bg-card ring-border hover:border-foreground/25 p-6 ring-1 transition-colors"
             >
-              <Phone className="size-5 text-primary" />
-              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <Phone className="text-primary size-5" />
+              <p className="text-muted-foreground mt-4 text-xs font-semibold tracking-[0.18em] uppercase">
                 Telefon
               </p>
-              <p className="mt-2 font-display text-2xl font-bold tracking-tight text-foreground">
+              <p className="font-display text-foreground mt-2 text-2xl font-bold tracking-tight">
                 {SITE_CONTACT.phoneDisplay}
               </p>
             </a>
 
             <a
               href={SITE_CONTACT.emailHref}
-              className="clip-corner-cut-lg bg-card p-5 ring-1 ring-border transition-colors hover:border-foreground/25"
+              className="clip-corner-cut-lg bg-card ring-border hover:border-foreground/25 p-6 ring-1 transition-colors"
             >
-              <Mail className="size-5 text-primary" />
-              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <Mail className="text-primary size-5" />
+              <p className="text-muted-foreground mt-4 text-xs font-semibold tracking-[0.18em] uppercase">
                 Email
               </p>
-              <p className="mt-2 text-sm font-semibold text-foreground">
+              <p className="text-foreground mt-2 text-sm font-semibold">
                 {SITE_CONTACT.email}
               </p>
             </a>
 
-            <div className="clip-corner-cut-lg bg-card p-5 ring-1 ring-border">
-              <MapPin className="size-5 text-primary" />
-              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <div className="clip-corner-cut-lg bg-card ring-border p-6 ring-1">
+              <MapPin className="text-primary size-5" />
+              <p className="text-muted-foreground mt-4 text-xs font-semibold tracking-[0.18em] uppercase">
                 Rețea magazine
               </p>
-              <p className="mt-2 text-sm font-semibold text-foreground">
+              <p className="text-foreground mt-2 text-sm font-semibold">
                 {SITE_CONTACT.citiesSummary}
               </p>
             </div>
 
-            <div className="clip-corner-cut-lg bg-card p-5 ring-1 ring-border">
-              <Phone className="size-5 text-primary" />
-              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <div className="clip-corner-cut-lg bg-card ring-border p-6 ring-1">
+              <Phone className="text-primary size-5" />
+              <p className="text-muted-foreground mt-4 text-xs font-semibold tracking-[0.18em] uppercase">
                 Program
               </p>
-              <p className="mt-2 text-sm font-semibold text-foreground">
+              <p className="text-foreground mt-2 text-sm font-semibold">
                 {SITE_CONTACT.hoursShort}
               </p>
             </div>
@@ -97,31 +97,31 @@ export default function ContactPage() {
 
         <section className="mt-12">
           <SectionHeading
-            eyebrow="Showroomuri"
+            eyebrow="Magazine DYLLU"
             title="Puncte principale în Chișinău"
             description="Pentru vizitare, ridicare și discuții despre produse sau service."
           />
 
-          <div className="mt-6 grid gap-4 medium:grid-cols-3">
+          <div className="medium:grid-cols-3 mt-6 grid gap-4">
             {SHOWROOMS.map((showroom) => (
               <article
                 key={`${showroom.city}-${showroom.address}`}
-                className="clip-corner-cut-lg bg-card p-5 ring-1 ring-border"
+                className="clip-corner-cut-lg bg-card ring-border p-6 ring-1"
               >
-                <MapPin className="size-5 text-primary" />
-                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <MapPin className="text-primary size-5" />
+                <p className="text-muted-foreground mt-4 text-xs font-semibold tracking-[0.18em] uppercase">
                   {showroom.city}
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-bold tracking-tight text-foreground">
+                <h2 className="font-display text-foreground mt-2 text-2xl font-bold tracking-tight">
                   {showroom.address}
                 </h2>
-                <p className="mt-3 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-4 text-sm">
                   {showroom.note}
                 </p>
-                <p className="mt-4 text-sm font-medium text-foreground">
+                <p className="text-foreground mt-4 text-sm font-medium">
                   {showroom.schedule}
                 </p>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-sm">
                   {showroom.phone}
                 </p>
               </article>
@@ -136,18 +136,18 @@ export default function ContactPage() {
             description="Extindem constant rețeaua DYLLU, iar informațiile de stoc și transfer între magazine se confirmă prin echipa comercială."
           />
 
-          <div className="clip-corner-cut-lg mt-6 bg-card p-6 ring-1 ring-border">
-            <div className="flex flex-wrap gap-3">
+          <div className="clip-corner-cut-lg bg-card ring-border mt-6 p-6 ring-1">
+            <div className="flex flex-wrap gap-4">
               {NETWORK_CITIES.map((city) => (
                 <span
                   key={city}
-                  className="rounded-full border border-border bg-surface-subtle px-4 py-2 text-sm font-medium text-foreground"
+                  className="border-border bg-surface-subtle text-foreground rounded-full border px-4 py-2 text-sm font-medium"
                 >
                   {city}
                 </span>
               ))}
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-4 text-sm">
               Pentru confirmarea unui punct de lucru, verificarea stocului sau
               coordonarea unei ridicări, contactează-ne telefonic sau pe email.
             </p>
@@ -155,13 +155,13 @@ export default function ContactPage() {
         </section>
 
         <section className="mt-12">
-          <div className="clip-corner-cut-lg bg-card p-6 ring-1 ring-border small:p-8">
+          <div className="clip-corner-cut-lg bg-card ring-border small:p-8 p-6 ring-1">
             <SectionHeading
               eyebrow="Următorul pas"
               title="Ai nevoie de ofertă sau consultanță?"
-              description="Trimite-ne cerința și revenim cu recomandarea potrivită pentru produs, set, kit sau accesorii compatibile."
+              description="Spune-ne de ce ai nevoie și îți recomandăm produsul, setul sau accesoriile potrivite."
             />
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-wrap gap-4">
               <Button
                 asChild
                 size="lg"

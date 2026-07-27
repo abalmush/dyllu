@@ -8,7 +8,7 @@ export type ProductFeedRequest = {
   page?: number;
   sortBy?: ProductFeedSort;
   collectionId?: string;
-  categoryId?: string;
+  categoryIds?: string[];
   tagId?: string;
   productsIds?: string[];
   query?: string;
@@ -19,7 +19,7 @@ export type NormalizedProductFeedRequest = {
   page: number;
   sortBy: ProductFeedSort;
   collectionId?: string;
-  categoryId?: string;
+  categoryIds?: string[];
   tagId?: string;
   productsIds?: string[];
   query?: string;
@@ -41,6 +41,7 @@ const DEFAULT_SORT: ProductFeedSort = "created_at";
 const MAX_PAGE = 10_000;
 const MAX_QUERY_LENGTH = 120;
 const MAX_PRODUCT_IDS = 50;
+const MAX_CATEGORY_IDS = 100;
 const IDENTIFIER_PATTERN = /^[A-Za-z0-9_:-]{1,128}$/;
 
 export function normalizeProductFeedRequest(
@@ -53,17 +54,21 @@ export function normalizeProductFeedRequest(
     ? request.sortBy
     : DEFAULT_SORT;
   const query = request.query?.trim().slice(0, MAX_QUERY_LENGTH) || undefined;
+  const identifier = (value: string | undefined) =>
+    value && IDENTIFIER_PATTERN.test(value) ? value : undefined;
   const productsIds = request.productsIds
     ?.filter((id) => IDENTIFIER_PATTERN.test(id))
     .slice(0, MAX_PRODUCT_IDS);
-  const identifier = (value: string | undefined) =>
-    value && IDENTIFIER_PATTERN.test(value) ? value : undefined;
+  const categoryIds = request.categoryIds
+    ?.filter((id) => IDENTIFIER_PATTERN.test(id))
+    .slice(0, MAX_CATEGORY_IDS);
 
   return {
     page,
     sortBy,
     collectionId: identifier(request.collectionId),
-    categoryId: identifier(request.categoryId),
+    categoryIds:
+      categoryIds && categoryIds.length > 0 ? categoryIds : undefined,
     tagId: identifier(request.tagId),
     productsIds:
       productsIds && productsIds.length > 0 ? productsIds : undefined,
@@ -86,7 +91,7 @@ export function parseProductFeedRequest(
     page: Number.isFinite(page) ? page : 1,
     sortBy: isProductFeedSort(sortBy) ? sortBy : undefined,
     collectionId: searchParams.get("collectionId") || undefined,
-    categoryId: searchParams.get("categoryId") || undefined,
+    categoryIds: searchParams.getAll("categoryId").filter(Boolean),
     tagId: searchParams.get("tagId") || undefined,
     productsIds: productsIds.length > 0 ? productsIds : undefined,
     query: searchParams.get("q") || undefined,
@@ -110,8 +115,8 @@ export function toProductFeedSearchParams(
     params.set("collectionId", normalizedRequest.collectionId);
   }
 
-  if (normalizedRequest.categoryId) {
-    params.set("categoryId", normalizedRequest.categoryId);
+  for (const categoryId of normalizedRequest.categoryIds ?? []) {
+    params.append("categoryId", categoryId);
   }
 
   if (normalizedRequest.tagId) {

@@ -11,7 +11,7 @@ const Radio = ({
       role="radio"
       aria-checked={checked}
       data-state={checked ? "checked" : "unchecked"}
-      className="group relative grid size-5 place-items-center outline-none"
+      className="group relative grid size-5 min-h-0 min-w-0 place-items-center outline-hidden"
       data-testid={dataTestId || "radio-button"}
     >
       <span

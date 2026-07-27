@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import { HomeTemplate } from "@/components/templates/home-template";
-import { PromoBanner } from "@/components/organisms/promo-banner";
 import {
   buildSocialMetadata,
   DEFAULT_DESCRIPTION,
@@ -17,10 +16,5 @@ export const metadata: Metadata = buildSocialMetadata({
 });
 
 export default function Home() {
-  return (
-    <>
-      <HomeTemplate />
-      <PromoBanner />
-    </>
-  );
+  return <HomeTemplate />;
 }

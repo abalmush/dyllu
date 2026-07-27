@@ -1,82 +1,61 @@
-import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
-import {
-  Drill,
-  Flame,
-  Hammer,
-  HardHat,
-  PackageOpen,
-  Sprout,
-} from "lucide-react";
 
 import { Container } from "@/components/atoms/container";
 import { Eyebrow } from "@/components/molecules/eyebrow";
+import { type CategoryNode } from "@lib/data/categories";
 
-type Family = {
-  label: string;
-  href: string;
-  icon: React.ReactNode;
-};
+const getRepresentativeImage = (category: CategoryNode): string | undefined =>
+  category.navThumbnailUrl ??
+  category.children
+    .map(getRepresentativeImage)
+    .find((image): image is string => Boolean(image));
 
-const FAMILIES: Family[] = [
-  {
-    label: "Scule electrice",
-    href: "/categories/scule-electrice",
-    icon: <Drill className="size-6" strokeWidth={1.75} />,
-  },
-  {
-    label: "Sudură",
-    href: "/categories/aparat-de-sudura",
-    icon: <Flame className="size-6" strokeWidth={1.75} />,
-  },
-  {
-    label: "Grădinărit",
-    href: "/categories/gradinarit",
-    icon: <Sprout className="size-6" strokeWidth={1.75} />,
-  },
-  {
-    label: "Scule manuale",
-    href: "/categories/scule-manuale",
-    icon: <Hammer className="size-6" strokeWidth={1.75} />,
-  },
-  {
-    label: "Protecție",
-    href: "/categories/echipament-de-protectie",
-    icon: <HardHat className="size-6" strokeWidth={1.75} />,
-  },
-  {
-    label: "Consumabile",
-    href: "/categories/consumabile-si-accesorii",
-    icon: <PackageOpen className="size-6" strokeWidth={1.75} />,
-  },
-];
+export function ToolFamiliesStrip({
+  categories = [],
+}: {
+  categories?: CategoryNode[];
+}) {
+  const families = categories.slice(0, 6);
+  if (families.length === 0) return null;
 
-export function ToolFamiliesStrip() {
   return (
-    <section className="border-y border-border bg-background py-10 small:py-14">
+    <section className="border-border bg-background small:py-16 border-y py-12">
       <Container>
-        <header className="mb-8 flex flex-col items-start gap-3">
+        <header className="mb-8 flex flex-col items-start gap-4">
           <Eyebrow>Tot ce produce DYLLU</Eyebrow>
-          <h2 className="font-display text-2xl font-bold tracking-tight text-foreground small:text-3xl">
+          <h2 className="font-display text-foreground small:text-3xl text-2xl font-bold tracking-tight">
             Alege după tipul sculei.
           </h2>
         </header>
-        <ul className="grid grid-cols-3 gap-3 small:grid-cols-6 small:gap-4">
-          {FAMILIES.map((f) => (
-            <li key={f.label}>
-              <Link
-                href={f.href}
-                className="clip-corner-cut-md group flex h-full flex-col items-center justify-center gap-4 bg-foreground p-5 text-center transition-all duration-300 hover:-translate-y-1"
-              >
-                <span className="grid size-14 place-items-center rounded-full bg-primary/15 text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
-                  {f.icon}
-                </span>
-                <span className="text-sm font-semibold tracking-tight text-background">
-                  {f.label}
-                </span>
-              </Link>
-            </li>
-          ))}
+        <ul className="small:grid-cols-6 small:gap-4 grid grid-cols-3 gap-4">
+          {families.map((family) => {
+            const image = getRepresentativeImage(family);
+
+            return (
+              <li key={family.handle}>
+                <Link
+                  href={`/categories/${family.handle}`}
+                  className="clip-corner-cut-md group bg-foreground flex h-full min-h-52 flex-col items-center justify-end overflow-hidden p-5 text-center"
+                >
+                  {image && (
+                    <span className="relative mb-2 block h-28 w-full">
+                      <Image
+                        src={image}
+                        alt=""
+                        fill
+                        sizes="(max-width: 767px) 33vw, 16vw"
+                        className="object-contain transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </span>
+                  )}
+                  <span className="text-background relative z-10 text-sm font-semibold tracking-tight">
+                    {family.name}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </Container>
     </section>

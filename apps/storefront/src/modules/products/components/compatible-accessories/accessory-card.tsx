@@ -41,10 +41,10 @@ export function AccessoryCard({ product, kind }: Props) {
   };
 
   return (
-    <div className="clip-corner-cut-md flex gap-4 bg-card p-4 transition-shadow hover:shadow-md small:gap-5 small:p-5">
+    <div className="clip-corner-cut-md bg-card small:gap-6 small:p-6 flex gap-4 p-4 transition-shadow hover:shadow-md">
       <Link
         href={`/products/${product.handle}`}
-        className="relative aspect-square w-20 shrink-0 overflow-hidden rounded-md bg-surface-subtle small:w-24"
+        className="bg-surface-subtle small:w-24 relative aspect-square w-20 shrink-0 overflow-hidden rounded-md"
       >
         {image && (
           <Image
@@ -60,7 +60,7 @@ export function AccessoryCard({ product, kind }: Props) {
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <Link
           href={`/products/${product.handle}`}
-          className="line-clamp-2 text-sm font-semibold leading-tight text-foreground transition-colors hover:text-primary"
+          className="text-foreground hover:text-primary line-clamp-2 text-sm leading-tight font-semibold transition-colors"
         >
           {product.title}
         </Link>
@@ -75,7 +75,7 @@ export function AccessoryCard({ product, kind }: Props) {
                   type="button"
                   onClick={() => setSelectedId(v.id)}
                   className={cn(
-                    "rounded-full border px-2.5 py-0.5 text-[11px] font-semibold transition-colors",
+                    "text-2xs rounded-full border px-2.5 py-0.5 font-semibold transition-colors",
                     isActive
                       ? "border-foreground bg-foreground text-background"
                       : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
@@ -88,8 +88,8 @@ export function AccessoryCard({ product, kind }: Props) {
           </div>
         )}
 
-        <div className="mt-auto flex items-center justify-between gap-3">
-          <span className="font-display text-lg font-bold tracking-tight text-foreground">
+        <div className="mt-auto flex items-center justify-between gap-4">
+          <span className="font-display text-foreground text-lg font-bold tracking-tight">
             {price != null
               ? `${Number(price).toLocaleString("ro-MD")} MDL`
               : "—"}

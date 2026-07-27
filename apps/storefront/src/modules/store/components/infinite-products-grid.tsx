@@ -116,7 +116,7 @@ export default function InfiniteProductsGrid({
   return (
     <div>
       <ul
-        className="grid w-full grid-cols-2 gap-4 small:grid-cols-3 medium:grid-cols-4"
+        className="small:grid-cols-3 medium:grid-cols-4 grid w-full grid-cols-2 gap-4"
         data-testid="products-list"
       >
         {products.map((product, index) => (
@@ -132,7 +132,7 @@ export default function InfiniteProductsGrid({
         )}
 
         {isLoading && (
-          <ul className="grid w-full grid-cols-2 gap-4 small:grid-cols-3 medium:grid-cols-4">
+          <ul className="small:grid-cols-3 medium:grid-cols-4 grid w-full grid-cols-2 gap-4">
             {Array.from({ length: 4 }, (_, index) => (
               <li key={index}>
                 <SkeletonProductPreview />
@@ -142,16 +142,16 @@ export default function InfiniteProductsGrid({
         )}
 
         {error && (
-          <div className="rounded-2xl border border-dashed border-border bg-muted/30 px-5 py-6 text-center">
-            <div className="mx-auto flex max-w-md flex-col items-center gap-3">
-              <div className="grid size-11 place-items-center rounded-full bg-destructive/10 text-destructive">
+          <div className="border-border bg-muted/30 rounded-2xl border border-dashed px-6 py-6 text-center">
+            <div className="mx-auto flex max-w-md flex-col items-center gap-4">
+              <div className="bg-destructive/10 text-destructive grid size-11 place-items-center rounded-full">
                 <AlertCircle className="size-5" />
               </div>
               <div className="space-y-1">
-                <p className="font-semibold tracking-tight text-foreground">
+                <p className="text-foreground font-semibold tracking-tight">
                   Încărcarea s-a întrerupt
                 </p>
-                <p className="text-sm text-muted-foreground">{error}</p>
+                <p className="text-muted-foreground text-sm">{error}</p>
               </div>
               <Button
                 type="button"
@@ -165,7 +165,7 @@ export default function InfiniteProductsGrid({
         )}
 
         {!nextPage && !isLoading && products.length > 0 && (
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-center text-sm">
             Ai ajuns la finalul selecției. {totalCount} produse disponibile.
           </p>
         )}

@@ -29,7 +29,8 @@ sdk.client.fetch = async <T>(
     ...localeHeader,
     ...headers,
   };
-  const timeoutSignal = AbortSignal.timeout(12_000);
+  const TIMEOUT_MS = 12_000;
+  const timeoutSignal = AbortSignal.timeout(TIMEOUT_MS);
   const signal = init?.signal
     ? AbortSignal.any([init.signal, timeoutSignal])
     : timeoutSignal;
@@ -39,5 +40,24 @@ sdk.client.fetch = async <T>(
     headers: newHeaders,
     signal,
   };
-  return originalFetch(input, init);
+
+  try {
+    return await originalFetch<T>(input, init);
+  } catch (error) {
+    // AbortSignal.timeout throws a getter-only DOMException (TimeoutError).
+    // If it propagates unwrapped, downstream code that reassigns `.message`
+    // crashes with "Cannot set property message", masking the real cause.
+    // Re-throw as a plain Error with a clear, debuggable message so a slow or
+    // unreachable Medusa backend surfaces honestly instead of an opaque 500.
+    if (
+      error instanceof DOMException &&
+      (error.name === "TimeoutError" || error.name === "AbortError")
+    ) {
+      const path = typeof input === "string" ? input : String(input);
+      throw new Error(
+        `Medusa request timed out after ${TIMEOUT_MS}ms (backend slow or unreachable): ${path}`
+      );
+    }
+    throw error;
+  }
 };

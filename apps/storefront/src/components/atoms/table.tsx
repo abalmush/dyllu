@@ -43,7 +43,7 @@ export const TableFooter = React.forwardRef<
   <tfoot
     ref={ref}
     className={cn(
-      "border-t bg-muted/40 font-medium [&>tr]:last:border-b-0",
+      "bg-muted/40 border-t font-medium last:[&>tr]:border-b-0",
       className
     )}
     {...props}
@@ -58,7 +58,7 @@ export const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "border-b border-border transition-colors hover:bg-muted/40 data-[state=selected]:bg-muted",
+      "border-border hover:bg-muted/40 data-[state=selected]:bg-muted border-b transition-colors",
       className
     )}
     {...props}
@@ -73,7 +73,7 @@ export const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 text-left align-middle text-sm font-semibold tracking-wide text-muted-foreground [&:has([role=checkbox])]:pr-0",
+      "text-muted-foreground h-12 px-4 text-left align-middle text-sm font-semibold tracking-wide has-[[role=checkbox]]:pr-0",
       className
     )}
     {...props}
@@ -87,7 +87,7 @@ export const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn("p-4 align-middle [&:has([role=checkbox])]:pr-0", className)}
+    className={cn("p-4 align-middle has-[[role=checkbox]]:pr-0", className)}
     {...props}
   />
 ));
@@ -99,7 +99,7 @@ export const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-base text-muted-foreground", className)}
+    className={cn("text-muted-foreground mt-4 text-base", className)}
     {...props}
   />
 ));

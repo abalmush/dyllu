@@ -66,7 +66,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
     <>
       <div
         className={clx(
-          "flex h-full min-h-[220px] w-full flex-col justify-between rounded-rounded border p-5 transition-colors",
+          "rounded-rounded flex h-full min-h-[220px] w-full flex-col justify-between border p-6 transition-colors",
           {
             "border-gray-900": isActive,
           }
@@ -104,7 +104,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
         </div>
         <div className="flex items-center gap-x-4">
           <button
-            className="text-small-regular flex items-center gap-x-2 text-ui-fg-base"
+            className="text-small-regular text-ui-fg-base flex items-center gap-x-2"
             onClick={open}
             data-testid="address-edit-button"
           >
@@ -112,7 +112,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
             Editează
           </button>
           <button
-            className="text-small-regular flex items-center gap-x-2 text-ui-fg-base"
+            className="text-small-regular text-ui-fg-base flex items-center gap-x-2"
             onClick={removeAddress}
             data-testid="address-delete-button"
           >
@@ -220,7 +220,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
             )}
           </Modal.Body>
           <Modal.Footer>
-            <div className="mt-6 flex gap-3">
+            <div className="mt-6 flex gap-4">
               <Button
                 type="reset"
                 variant="secondary"

@@ -17,9 +17,9 @@ export interface CategoryCardProps {
 
 const accentMap = {
   primary:
-    "bg-primary text-primary-foreground [&_[data-arrow]]:bg-primary-foreground [&_[data-arrow]]:text-primary",
+    "bg-primary text-primary-foreground **:data-arrow:bg-primary-foreground **:data-arrow:text-primary",
   neutral: "bg-card text-foreground",
-  dark: "bg-secondary text-secondary-foreground [&_[data-arrow]]:bg-primary [&_[data-arrow]]:text-primary-foreground",
+  dark: "bg-secondary text-secondary-foreground **:data-arrow:bg-primary **:data-arrow:text-primary-foreground",
 };
 
 export const CategoryCard = React.forwardRef<
@@ -43,7 +43,7 @@ export const CategoryCard = React.forwardRef<
       ref={ref}
       href={href}
       className={cn(
-        "clip-corner-cut-md group relative flex h-full min-h-[260px] flex-col overflow-hidden border border-border p-6 transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1 hover:border-foreground/20 hover:shadow-[0_30px_70px_-40px_rgba(15,23,42,0.4)]",
+        "clip-corner-cut-md group border-border hover:border-foreground/20 relative flex h-full min-h-[260px] flex-col overflow-hidden border p-6 transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1 hover:shadow-[0_30px_70px_-40px_rgba(15,23,42,0.4)]",
         accentMap[accent],
         className
       )}
@@ -58,14 +58,14 @@ export const CategoryCard = React.forwardRef<
       {imageUrl && (
         <span
           aria-hidden
-          className="absolute inset-0 z-[1] bg-gradient-to-t from-foreground/85 via-foreground/35 to-transparent"
+          className="from-foreground/85 via-foreground/35 absolute inset-0 z-1 bg-linear-to-t to-transparent"
         />
       )}
-      <div className="relative z-[2] flex flex-1 flex-col">
-        <div className="flex items-start justify-between gap-3">
+      <div className="relative z-2 flex flex-1 flex-col">
+        <div className="flex items-start justify-between gap-4">
           <h3
             className={cn(
-              "font-display font-bold leading-tight tracking-tight",
+              "font-display leading-tight font-bold tracking-tight",
               emphasized ? "text-2xl sm:text-3xl" : "text-xl",
               imageUrl ? "text-background" : ""
             )}
@@ -74,7 +74,7 @@ export const CategoryCard = React.forwardRef<
           </h3>
           <span
             data-arrow
-            className="grid size-9 shrink-0 place-items-center rounded-full bg-foreground text-background transition-transform duration-300 group-hover:rotate-[-45deg]"
+            className="bg-foreground text-background grid size-9 shrink-0 place-items-center rounded-full transition-transform duration-300 group-hover:-rotate-45"
           >
             <ArrowRight aria-hidden="true" className="size-4" />
           </span>
@@ -82,7 +82,7 @@ export const CategoryCard = React.forwardRef<
         {description && (
           <p
             className={cn(
-              "mt-3 text-base leading-relaxed",
+              "mt-4 text-base leading-relaxed",
               imageUrl ? "text-background/85" : "text-muted-foreground"
             )}
           >
@@ -93,9 +93,9 @@ export const CategoryCard = React.forwardRef<
           {typeof productCount === "number" && (
             <span
               className={cn(
-                "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider",
+                "text-2xs inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-semibold tracking-wider uppercase",
                 imageUrl
-                  ? "bg-background/15 text-background backdrop-blur"
+                  ? "bg-background/15 text-background backdrop-blur-sm"
                   : "bg-foreground/5 text-muted-foreground"
               )}
             >

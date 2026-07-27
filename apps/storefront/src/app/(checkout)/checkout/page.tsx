@@ -41,8 +41,8 @@ export default async function Checkout(props: Props) {
 
   return (
     <div className="bg-surface-subtle">
-      <Container className="py-8 small:py-12">
-        <div className="mb-8 flex flex-col gap-3">
+      <Container className="small:py-12 py-8">
+        <div className="mb-8 flex flex-col gap-4">
           <Breadcrumbs
             items={[
               { label: "Acasă", href: "/" },
@@ -51,20 +51,20 @@ export default async function Checkout(props: Props) {
             ]}
           />
           <Eyebrow>Pas final</Eyebrow>
-          <h1 className="font-display text-display-sm font-extrabold tracking-tight text-foreground small:text-display-md">
+          <h1 className="font-display text-display-sm text-foreground small:text-display-md font-extrabold tracking-tight">
             Finalizează comanda
           </h1>
-          <p className="max-w-2xl text-sm text-muted-foreground">
+          <p className="text-muted-foreground max-w-2xl text-sm">
             Confirmă datele de livrare, alege plata și verifică întreaga comandă
             înainte de plasare.
           </p>
         </div>
 
-        <div className="clip-corner-cut-lg clip-shadow-sm mb-8 bg-card p-4 ring-1 ring-border small:p-6">
+        <div className="clip-corner-cut-lg clip-shadow-sm bg-card ring-border small:p-6 mb-8 p-4 ring-1">
           <CheckoutSteps current={getCheckoutStepIndex(activeStep)} />
         </div>
 
-        <div className="grid grid-cols-1 gap-8 small:grid-cols-[minmax(0,1fr)_380px] small:gap-12">
+        <div className="small:grid-cols-[minmax(0,1fr)_380px] small:gap-12 grid grid-cols-1 gap-8">
           <PaymentWrapper cart={cart}>
             <CheckoutForm
               cart={cart}

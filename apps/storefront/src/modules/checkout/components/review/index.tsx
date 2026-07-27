@@ -28,25 +28,25 @@ const Review = ({
     hasReadyPayment(cart);
 
   return (
-    <section className="clip-corner-cut-lg clip-shadow-md bg-card p-6 ring-1 ring-border small:p-8">
+    <section className="clip-corner-cut-lg clip-shadow-md bg-card ring-border small:p-8 p-6 ring-1">
       <div className="mb-6 flex flex-row items-center justify-between">
         <div className="space-y-2">
-          <Text className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          <Text className="text-muted-foreground text-xs font-semibold tracking-[0.16em] uppercase">
             Pasul 4
           </Text>
           <Heading
             level="h2"
             className={clx(
-              "flex flex-row items-baseline gap-x-2 font-display text-xl font-bold tracking-tight text-foreground",
+              "font-display text-foreground flex flex-row items-baseline gap-x-2 text-xl font-bold tracking-tight",
               {
-                "pointer-events-none select-none opacity-50": !isOpen,
+                "pointer-events-none opacity-50 select-none": !isOpen,
               }
             )}
           >
             Verificare finală
           </Heading>
           {isOpen && (
-            <Text className="text-sm text-muted-foreground">
+            <Text className="text-muted-foreground text-sm">
               Ultimul pas: confirmă că detaliile comenzii sunt corecte și
               plasează comanda.
             </Text>
@@ -55,9 +55,9 @@ const Review = ({
       </div>
       {isOpen && previousStepsCompleted && (
         <>
-          <div className="clip-corner-cut-md mb-6 bg-surface-subtle/60 p-5 ring-1 ring-border/70">
+          <div className="clip-corner-cut-md bg-surface-subtle/60 ring-border/70 mb-6 p-6 ring-1">
             <div className="w-full">
-              <Text className="mb-1 text-sm text-muted-foreground">
+              <Text className="text-muted-foreground mb-1 text-sm">
                 Prin apăsarea butonului de plasare confirmi că datele comenzii
                 sunt corecte și că accepți termenii de vânzare, politica de
                 retur și prelucrarea datelor necesare pentru livrare și

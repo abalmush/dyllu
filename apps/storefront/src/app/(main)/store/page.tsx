@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 
 import { buildSocialMetadata } from "@/lib/seo/metadata";
+import { getCategoryTree } from "@lib/data/categories";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
 import StoreTemplate from "@modules/store/templates";
 
@@ -22,7 +23,10 @@ type Params = {
 };
 
 export default async function StorePage(props: Params) {
-  const searchParams = await props.searchParams;
+  const [searchParams, categories] = await Promise.all([
+    props.searchParams,
+    getCategoryTree(),
+  ]);
   const { sortBy, page, q, on_sale } = searchParams;
 
   return (
@@ -31,6 +35,7 @@ export default async function StorePage(props: Params) {
       page={page}
       query={q}
       onSale={on_sale === "true"}
+      categories={categories}
     />
   );
 }

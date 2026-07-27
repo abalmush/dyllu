@@ -5,6 +5,7 @@ import { Sparkles } from "lucide-react";
 
 import { getPromoBySlug } from "@lib/promos";
 import { getProductTagByValue } from "@lib/data/product-tags";
+import { getCategoryTree } from "@lib/data/categories";
 import { buildSocialMetadata } from "@/lib/seo/metadata";
 import PlpShell from "@modules/store/components/plp-shell";
 import PaginatedProducts from "@modules/store/templates/paginated-products";
@@ -43,7 +44,10 @@ export default async function PromoPage(props: Props) {
     notFound();
   }
 
-  const tag = await getProductTagByValue(promo.tag).catch(() => undefined);
+  const [tag, categories] = await Promise.all([
+    getProductTagByValue(promo.tag).catch(() => undefined),
+    getCategoryTree(),
+  ]);
   const pageNumber = page ? parseInt(page) : 1;
   const sort = sortBy || "created_at";
 
@@ -59,21 +63,22 @@ export default async function PromoPage(props: Props) {
       description={promo.subtitle ?? undefined}
       crumbs={crumbs}
       sortBy={sort}
+      categories={categories}
     >
       {tag ? (
         <Suspense fallback={<SkeletonProductGrid />}>
           <PaginatedProducts sortBy={sort} page={pageNumber} tagId={tag.id} />
         </Suspense>
       ) : (
-        <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-16 text-center">
-          <div className="grid size-14 place-items-center rounded-full bg-primary/10 text-primary">
+        <div className="border-border bg-muted/30 flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed px-6 py-16 text-center">
+          <div className="bg-primary/10 text-primary grid size-14 place-items-center rounded-full">
             <Sparkles className="size-6" />
           </div>
           <div className="space-y-1">
             <h2 className="font-display text-xl font-semibold">
               Selecția „{promo.title}” se pregătește
             </h2>
-            <p className="max-w-md text-sm text-muted-foreground">
+            <p className="text-muted-foreground max-w-md text-sm">
               Adăugăm în curând produse marcate pentru această colecție. Revino
               curând sau explorează întreaga gamă.
             </p>

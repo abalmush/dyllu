@@ -30,7 +30,21 @@ export default function ConfigurationSelect({
   disabled,
   "data-testid": dataTestId,
 }: Props) {
-  const values = option.values?.map((v) => v.value) ?? [];
+  const values = Array.from(
+    new Set(
+      [
+        ...(option.values?.map((value) => value.value) ?? []),
+        ...(product.variants?.flatMap((variant) =>
+          variant.options
+            ?.filter((value) => value.option_id === option.id)
+            .map((value) => value.value)
+        ) ?? []),
+      ].filter(
+        (value): value is string =>
+          typeof value === "string" && value.length > 0
+      )
+    )
+  );
 
   const variantForValue = (value: string) =>
     product.variants?.find((v) =>
@@ -49,7 +63,7 @@ export default function ConfigurationSelect({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+      <span className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
         {option.title}
       </span>
       <RadioGroupPrimitive.Root
@@ -76,10 +90,10 @@ export default function ConfigurationSelect({
               disabled={disabled}
               data-testid="configuration-option"
               className={cn(
-                "clip-corner-cut-sm group flex items-start gap-3 border p-4 text-left transition-[background-color,border-color,box-shadow] duration-200",
+                "clip-corner-cut-sm group flex items-start gap-4 border p-4 text-left transition-[background-color,border-color,box-shadow] duration-200",
                 "disabled:pointer-events-none disabled:opacity-40",
                 selected
-                  ? "border-primary bg-primary/[0.06] shadow-sm ring-1 ring-primary"
+                  ? "border-primary bg-primary/6 ring-primary shadow-xs ring-1"
                   : "border-border bg-card hover:border-foreground/40 hover:bg-muted"
               )}
             >
@@ -88,7 +102,7 @@ export default function ConfigurationSelect({
                   "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors",
                   selected
                     ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-card text-transparent group-hover:border-foreground/40"
+                    : "border-border bg-card group-hover:border-foreground/40 text-transparent"
                 )}
               >
                 <Check className="size-3" strokeWidth={3} />
@@ -97,15 +111,15 @@ export default function ConfigurationSelect({
               <span className="flex min-w-0 flex-1 flex-col gap-1">
                 <span className="flex items-center gap-2">
                   {withBattery ? (
-                    <BatteryFull className="size-4 shrink-0 text-primary" />
+                    <BatteryFull className="text-primary size-4 shrink-0" />
                   ) : (
-                    <Zap className="size-4 shrink-0 text-muted-foreground" />
+                    <Zap className="text-muted-foreground size-4 shrink-0" />
                   )}
-                  <span className="text-sm font-semibold tracking-tight text-foreground">
+                  <span className="text-foreground text-sm font-semibold tracking-tight">
                     {v}
                   </span>
                 </span>
-                <span className="text-xs leading-relaxed text-muted-foreground">
+                <span className="text-muted-foreground text-xs leading-relaxed">
                   {withBattery
                     ? "Gata de utilizare — include acumulatorul și încărcătorul."
                     : "Doar aparatul. Compatibil cu acumulatoarele DYLLU 20V (vândute separat)."}
@@ -114,12 +128,12 @@ export default function ConfigurationSelect({
 
               <span className="flex shrink-0 flex-col items-end gap-1">
                 {price && (
-                  <span className="text-sm font-bold tracking-tight text-foreground">
+                  <span className="text-foreground text-sm font-bold tracking-tight">
                     {price.calculated_price}
                   </span>
                 )}
                 {delta != null && delta > 0 && (
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                  <span className="text-2xs text-muted-foreground font-semibold tracking-widest uppercase">
                     +{delta.toLocaleString("ro-MD")} MDL
                   </span>
                 )}

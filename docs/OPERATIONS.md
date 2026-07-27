@@ -240,6 +240,31 @@ R2 S3 credentials: Cloudflare dash → R2 → **Manage R2 API Tokens** (scope to
 `dyllu-media`), or reuse the backend's `S3_ACCESS_KEY_ID`/`S3_SECRET_ACCESS_KEY`
 from Coolify. Endpoint: `https://592732e1a9ae45cfe9cafce4228ebe2d.r2.cloudflarestorage.com`.
 
+Bulk original catalog images use the fail-closed manifest workflow. It preserves
+transparent thumbnails and adds the SKU-matched original as the second PDP image:
+
+```bash
+# validate all source files and generate deterministic SKU-contenthash URLs
+python tools/sync_original_images.py
+
+# upload only missing content hashes to R2 original/
+set -a; source apps/backend/.env; set +a
+python tools/sync_original_images.py --apply-upload
+
+# inspect the local Medusa mapping, then apply explicitly
+pnpm --dir apps/backend exec medusa exec \
+  ./src/scripts/dyllu-sync-original-images.ts \
+  source="$PWD/tools/original-manifest.json"
+pnpm --dir apps/backend exec medusa exec \
+  ./src/scripts/dyllu-sync-original-images.ts \
+  source="$PWD/tools/original-manifest.json" \
+  confirm=SYNC_ORIGINAL_IMAGES
+```
+
+Single-variant products receive a real second product image. Multi-variant
+products keep the original URL on variant metadata so the PDP shows the correct
+second image for the selected variant.
+
 Alternatives: Admin UI (product → Media) uploads through Medusa (adds a ULID suffix
 instead of a content hash). Bulk sync of many files: `aws s3 sync <dir>/
 s3://dyllu-media/products/ --endpoint-url <R2_ENDPOINT> --content-type image/png

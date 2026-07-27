@@ -50,7 +50,7 @@ const AddAddress = ({
   return (
     <>
       <button
-        className="flex h-full min-h-[220px] w-full flex-col justify-between rounded-rounded border border-ui-border-base p-5"
+        className="rounded-rounded border-ui-border-base flex h-full min-h-[220px] w-full flex-col justify-between border p-6"
         onClick={open}
         data-testid="add-address-button"
       >
@@ -148,7 +148,7 @@ const AddAddress = ({
             )}
           </Modal.Body>
           <Modal.Footer>
-            <div className="mt-6 flex gap-3">
+            <div className="mt-6 flex gap-4">
               <Button
                 type="reset"
                 variant="secondary"

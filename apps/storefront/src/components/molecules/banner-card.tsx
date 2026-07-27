@@ -1,4 +1,5 @@
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -15,6 +16,7 @@ export interface BannerCardProps {
   className?: string;
   align?: "left" | "center";
   headingLevel?: "h1" | "h2" | "h3";
+  imagePriority?: boolean;
 }
 
 const variantMap = {
@@ -42,6 +44,7 @@ export function BannerCard({
   className,
   align = "left",
   headingLevel = "h3",
+  imagePriority = false,
 }: BannerCardProps) {
   const HeadingTag = headingLevel;
 
@@ -49,37 +52,40 @@ export function BannerCard({
     <Link
       href={href}
       className={cn(
-        "clip-corner-cut-lg group relative flex min-h-[260px] overflow-hidden border border-transparent transition-all duration-300 hover:-translate-y-0.5 small:min-h-[280px]",
+        "clip-corner-cut-lg group small:min-h-[280px] relative flex min-h-[260px] overflow-hidden border border-transparent transition-all duration-300 hover:-translate-y-0.5",
         variantMap[variant],
         className
       )}
     >
       {imageUrl && (
-        <span
-          aria-hidden
-          className="absolute inset-0 bg-cover bg-center opacity-70 transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-          style={{ backgroundImage: `url(${imageUrl})` }}
+        <Image
+          src={imageUrl}
+          alt=""
+          fill
+          priority={imagePriority}
+          sizes="(min-width: 1024px) 66vw, 100vw"
+          className="object-cover object-center opacity-75 transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
       )}
       {imageUrl && (
         <span
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/40 to-foreground/10"
+          className="from-foreground/80 via-foreground/40 to-foreground/10 absolute inset-0 bg-linear-to-r"
         />
       )}
       <div
         className={cn(
-          "relative z-[1] flex w-full flex-col justify-between gap-6 p-8 sm:p-10",
+          "small:p-10 small:pb-16 medium:p-12 medium:pb-16 relative z-1 flex w-full flex-col justify-between gap-6 p-8 pb-16",
           align === "center" && "items-center text-center"
         )}
       >
-        <div className="flex max-w-md flex-col gap-3">
+        <div className="flex max-w-md flex-col gap-4">
           {eyebrow && (
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">
+            <span className="text-2xs font-semibold tracking-[0.18em] uppercase opacity-80">
               {eyebrow}
             </span>
           )}
-          <HeadingTag className="font-display text-2xl font-bold leading-tight tracking-tight sm:text-3xl">
+          <HeadingTag className="font-display text-2xl leading-tight font-bold tracking-tight sm:text-3xl">
             {title}
           </HeadingTag>
           {description && (
@@ -88,7 +94,7 @@ export function BannerCard({
         </div>
         <span
           className={cn(
-            "clip-corner-cut-sm inline-flex items-center gap-2 self-start px-5 py-2.5 text-sm font-semibold transition-colors",
+            "clip-corner-cut-sm mt-2 inline-flex shrink-0 items-center gap-2 self-start px-6 py-2.5 text-sm font-semibold transition-colors",
             ctaMap[variant]
           )}
         >

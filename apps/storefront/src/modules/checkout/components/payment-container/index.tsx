@@ -30,9 +30,9 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
       value={paymentProviderId}
       disabled={disabled}
       className={clx(
-        "mb-3 flex cursor-pointer flex-col gap-y-3 rounded-2xl border border-border bg-background px-5 py-4 transition-colors hover:border-foreground/30 hover:bg-surface-subtle",
+        "border-border bg-background hover:border-foreground/30 hover:bg-surface-subtle mb-4 flex cursor-pointer flex-col gap-y-4 rounded-2xl border px-6 py-4 transition-colors",
         {
-          "border-foreground bg-surface-subtle ring-1 ring-foreground/10":
+          "border-foreground bg-surface-subtle ring-foreground/10 ring-1":
             selectedPaymentOptionId === paymentProviderId,
         }
       )}
@@ -40,19 +40,19 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-x-4">
           <Radio checked={selectedPaymentOptionId === paymentProviderId} />
-          <Text className="text-sm font-semibold tracking-tight text-foreground">
+          <Text className="text-foreground text-sm font-semibold tracking-tight">
             {paymentInfoMap[paymentProviderId]?.title || paymentProviderId}
           </Text>
           {isManual(paymentProviderId) && isDevelopment && (
-            <PaymentTest className="hidden small:block" />
+            <PaymentTest className="small:block hidden" />
           )}
         </div>
-        <span className="grid size-10 place-items-center rounded-md bg-background text-foreground ring-1 ring-border">
+        <span className="bg-background text-foreground ring-border grid size-10 place-items-center rounded-md ring-1">
           {paymentInfoMap[paymentProviderId]?.icon}
         </span>
       </div>
       {isManual(paymentProviderId) && isDevelopment && (
-        <PaymentTest className="text-[10px] small:hidden" />
+        <PaymentTest className="text-2xs small:hidden" />
       )}
       {children}
     </RadioGroupOption>

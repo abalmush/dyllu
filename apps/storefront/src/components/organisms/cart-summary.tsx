@@ -25,8 +25,8 @@ export function CartSummary({
   const [promo, setPromo] = React.useState("");
 
   return (
-    <div className="clip-corner-cut-lg clip-shadow-md flex flex-col gap-5 bg-card p-6 ring-1 ring-border">
-      <h2 className="font-display text-lg font-bold text-foreground">
+    <div className="clip-corner-cut-lg clip-shadow-md bg-card ring-border flex flex-col gap-6 p-6 ring-1">
+      <h2 className="font-display text-foreground text-lg font-bold">
         Sumar comandă
       </h2>
 
@@ -34,8 +34,8 @@ export function CartSummary({
         <label htmlFor={promoId} className="sr-only">
           Cod promoțional
         </label>
-        <span className="clip-corner-cut-xs flex flex-1 items-center gap-2 border border-border bg-background px-3">
-          <Tag aria-hidden="true" className="size-5 text-muted-foreground" />
+        <span className="clip-corner-cut-xs border-border bg-background flex flex-1 items-center gap-2 border px-4">
+          <Tag aria-hidden="true" className="text-muted-foreground size-5" />
           <input
             id={promoId}
             name="promo_code"
@@ -43,7 +43,7 @@ export function CartSummary({
             value={promo}
             onChange={(e) => setPromo(e.target.value)}
             placeholder="Exemplu: DYLLU10…"
-            className="w-full bg-transparent py-3 text-base text-foreground focus-visible:outline-none"
+            className="text-foreground w-full bg-transparent py-4 text-base focus-visible:outline-hidden"
           />
         </span>
         <Button
@@ -55,13 +55,13 @@ export function CartSummary({
         </Button>
       </div>
 
-      <dl className="space-y-2.5 border-t border-border pt-5">
+      <dl className="border-border space-y-2.5 border-t pt-6">
         {lines.map((line) => (
           <div key={line.label} className="flex justify-between text-sm">
             <dt className="text-muted-foreground">{line.label}</dt>
             <dd
               className={
-                line.muted ? "text-success" : "font-medium text-foreground"
+                line.muted ? "text-success" : "text-foreground font-medium"
               }
             >
               {line.value}
@@ -70,11 +70,11 @@ export function CartSummary({
         ))}
       </dl>
 
-      <div className="flex items-baseline justify-between border-t border-border pt-5">
-        <span className="text-sm font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+      <div className="border-border flex items-baseline justify-between border-t pt-6">
+        <span className="text-muted-foreground text-sm font-semibold tracking-[0.14em] uppercase">
           Total
         </span>
-        <span className="font-display text-2xl font-bold text-foreground">
+        <span className="font-display text-foreground text-2xl font-bold">
           {total}
         </span>
       </div>
@@ -88,8 +88,8 @@ export function CartSummary({
       </Button>
 
       {note && (
-        <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
-          <ShieldCheck aria-hidden="true" className="size-4 text-success" />
+        <p className="text-muted-foreground flex items-center justify-center gap-1.5 text-center text-xs">
+          <ShieldCheck aria-hidden="true" className="text-success size-4" />
           {note}
         </p>
       )}

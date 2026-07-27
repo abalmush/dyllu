@@ -60,7 +60,7 @@ function Tile({
         "cc-v2-depth",
         surfaceClass,
         toneClass,
-        "relative flex min-h-[160px] w-full flex-col justify-between p-5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        "focus-visible:ring-ring relative flex min-h-[160px] w-full flex-col justify-between p-6 text-left focus:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2"
       )}
     >
       {body}
@@ -79,11 +79,11 @@ function TileBody({
 }) {
   return (
     <>
-      <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] opacity-70">
+      <span className="text-2xs font-mono font-semibold tracking-[0.22em] uppercase opacity-70">
         {eyebrow}
       </span>
       <div className="flex flex-col gap-1">
-        <span className="font-display text-lg font-extrabold leading-tight tracking-tight">
+        <span className="font-display text-lg leading-tight font-extrabold tracking-tight">
           {title}
         </span>
         <span className="text-xs opacity-75">{subtitle}</span>
@@ -94,7 +94,7 @@ function TileBody({
 
 function SilhouetteRow({ silhouette }: { silhouette: Silhouette }) {
   return (
-    <div className="grid gap-3 small:grid-cols-3">
+    <div className="small:grid-cols-3 grid gap-4">
       <Tile
         silhouette={silhouette.className}
         surface="none"
@@ -137,13 +137,13 @@ function SilhouetteRow({ silhouette }: { silhouette: Silhouette }) {
 
 function V1Comparison() {
   return (
-    <div className="grid gap-3 small:grid-cols-3">
-      <div className="clip-corner-cut-md clip-shadow-md flex min-h-[160px] flex-col justify-between bg-surface-strong p-5 text-foreground">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] opacity-70">
+    <div className="small:grid-cols-3 grid gap-4">
+      <div className="clip-corner-cut-md clip-shadow-md bg-surface-strong text-foreground flex min-h-[160px] flex-col justify-between p-6">
+        <span className="text-2xs font-mono font-semibold tracking-[0.22em] uppercase opacity-70">
           V1 · clip-corner-cut-md
         </span>
         <div className="flex flex-col gap-1">
-          <span className="font-display text-lg font-extrabold leading-tight tracking-tight">
+          <span className="font-display text-lg leading-tight font-extrabold tracking-tight">
             Simetric, fără surface
           </span>
           <span className="text-xs opacity-75">
@@ -151,23 +151,23 @@ function V1Comparison() {
           </span>
         </div>
       </div>
-      <div className="clip-corner-cut-md clip-shadow-md flex min-h-[160px] flex-col justify-between bg-foreground p-5 text-background">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] opacity-70">
+      <div className="clip-corner-cut-md clip-shadow-md bg-foreground text-background flex min-h-[160px] flex-col justify-between p-6">
+        <span className="text-2xs font-mono font-semibold tracking-[0.22em] uppercase opacity-70">
           V1 · dark
         </span>
         <div className="flex flex-col gap-1">
-          <span className="font-display text-lg font-extrabold leading-tight tracking-tight">
+          <span className="font-display text-lg leading-tight font-extrabold tracking-tight">
             Brushless Motor
           </span>
           <span className="text-xs opacity-75">Plat, fără interacțiune.</span>
         </div>
       </div>
-      <div className="clip-corner-cut-md clip-shadow-md flex min-h-[160px] flex-col justify-between bg-primary p-5 text-primary-foreground">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] opacity-70">
+      <div className="clip-corner-cut-md clip-shadow-md bg-primary text-primary-foreground flex min-h-[160px] flex-col justify-between p-6">
+        <span className="text-2xs font-mono font-semibold tracking-[0.22em] uppercase opacity-70">
           V1 · primary
         </span>
         <div className="flex flex-col gap-1">
-          <span className="font-display text-lg font-extrabold leading-tight tracking-tight">
+          <span className="font-display text-lg leading-tight font-extrabold tracking-tight">
             Pro Series
           </span>
           <span className="text-xs opacity-75">Singura sursă de adâncime.</span>
@@ -179,7 +179,7 @@ function V1Comparison() {
 
 function SizeRow() {
   return (
-    <div className="grid gap-3 small:grid-cols-3">
+    <div className="small:grid-cols-3 grid gap-4">
       {[
         { scale: "scale-[0.72]", label: "sm (-28%)" },
         { scale: "", label: "md (default)" },
@@ -187,7 +187,7 @@ function SizeRow() {
       ].map((s) => (
         <div
           key={s.label}
-          className="flex items-center justify-center bg-surface-subtle/40 p-6"
+          className="bg-surface-subtle/40 flex items-center justify-center p-6"
         >
           <div className={cn("w-full", s.scale)}>
             <Tile
@@ -220,29 +220,29 @@ function SectionTitle({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+      <span className="text-2xs text-muted-foreground font-mono font-semibold tracking-[0.22em] uppercase">
         {index}
       </span>
-      <h3 className="font-display text-xl font-extrabold tracking-tight text-foreground">
+      <h3 className="font-display text-foreground text-xl font-extrabold tracking-tight">
         {title}
       </h3>
-      <p className="max-w-2xl text-sm text-muted-foreground">{intent}</p>
+      <p className="text-muted-foreground max-w-2xl text-sm">{intent}</p>
     </div>
   );
 }
 
 export function CornerCutV2Showcase() {
   return (
-    <section className="bg-surface-subtle/40 py-16 small:py-20">
+    <section className="bg-surface-subtle/40 small:py-20 py-16">
       <Container className="flex flex-col gap-12">
-        <header className="flex flex-col gap-3">
-          <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
+        <header className="flex flex-col gap-4">
+          <span className="text-2xs text-primary font-mono font-semibold tracking-[0.22em] uppercase">
             Design system · V2
           </span>
-          <h2 className="font-display text-display-sm font-extrabold tracking-tight text-foreground">
+          <h2 className="font-display text-display-sm text-foreground font-extrabold tracking-tight">
             Corner-cut V2 — modular industrial
           </h2>
-          <p className="max-w-2xl text-base text-muted-foreground">
+          <p className="text-muted-foreground max-w-2xl text-base">
             Three engineered silhouettes — <strong>Bracket</strong>,{" "}
             <strong>Module</strong>, <strong>Chassis</strong> — paired with
             matte/plastic surface overlays, layered drop-shadows for stacked
@@ -280,9 +280,9 @@ export function CornerCutV2Showcase() {
           <V1Comparison />
         </div>
 
-        <div className="grid gap-3 rounded-md border border-border bg-background p-5 text-xs text-muted-foreground small:grid-cols-2">
+        <div className="border-border bg-background text-muted-foreground small:grid-cols-2 grid gap-4 rounded-md border p-6 text-xs">
           <div>
-            <span className="font-mono font-semibold uppercase tracking-[0.18em] text-foreground">
+            <span className="text-foreground font-mono font-semibold tracking-[0.18em] uppercase">
               Class kit
             </span>
             <ul className="mt-2 flex flex-col gap-1">
@@ -300,7 +300,7 @@ export function CornerCutV2Showcase() {
             </ul>
           </div>
           <div>
-            <span className="font-mono font-semibold uppercase tracking-[0.18em] text-foreground">
+            <span className="text-foreground font-mono font-semibold tracking-[0.18em] uppercase">
               Usage
             </span>
             <p className="mt-2">

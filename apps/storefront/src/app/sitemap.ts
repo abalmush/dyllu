@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { listCategories } from "@lib/data/categories";
+import { getCategoryTree, type CategoryNode } from "@lib/data/categories";
 import { listCollections } from "@lib/data/collections";
 import { listProducts } from "@lib/data/products";
 import { getBaseURL } from "@lib/util/env";
@@ -16,11 +16,17 @@ const STATIC_ROUTES = [
   "/branduri",
 ];
 
+const flattenCategories = (categories: CategoryNode[]): CategoryNode[] =>
+  categories.flatMap((category) => [
+    category,
+    ...flattenCategories(category.children),
+  ]);
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getBaseURL();
 
-  const [categories, collections, productsResponse] = await Promise.all([
-    listCategories().catch(() => []),
+  const [categoryTree, collections, productsResponse] = await Promise.all([
+    getCategoryTree().catch(() => []),
     listCollections({
       fields: "handle,updated_at,created_at",
       limit: "200",
@@ -39,11 +45,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === "/" ? 1 : 0.7,
   })) satisfies MetadataRoute.Sitemap;
 
-  const categoryEntries = categories
+  const categoryEntries = flattenCategories(categoryTree)
     .filter((category) => category.handle)
     .map((category) => ({
       url: `${baseUrl}/categories/${category.handle}`,
-      lastModified: category.updated_at ?? category.created_at,
       changeFrequency: "weekly" as const,
       priority: 0.8,
     }));

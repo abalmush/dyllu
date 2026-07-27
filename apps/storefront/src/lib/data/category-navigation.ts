@@ -2,27 +2,31 @@ import { type CategoryNode } from "@lib/data/categories";
 
 export const CATEGORY_NAV_ORDER = [
   "scule-electrice",
-  "scule-manuale",
-  "consumabile-si-accesorii",
-  "gradinarit",
-  "auto-si-moto",
-  "constructii",
-  "electrice",
-  "echipament-de-protectie",
-  "depozitare",
+  "scule-de-mana",
+  "accesorii-si-consumabile",
+  "gradina-si-agricultura",
+  "constructii-si-finisaje",
+  "energie-si-electricitate",
+  "auto-si-service",
+  "compresoare-si-pneumatice",
+  "sudura-si-lipire",
+  "pompe-si-instalatii",
+  "echipamente-de-protectie",
+  "atelier-depozitare-si-manipulare",
+  "curatenie-si-gospodarie",
+  "masurare-si-detectare",
 ] as const;
 
 export const PRIMARY_CATEGORY_NAV_HANDLES = [
   "scule-electrice",
-  "scule-manuale",
-  "consumabile-si-accesorii",
-  "gradinarit",
-  "constructii",
+  "scule-de-mana",
+  "accesorii-si-consumabile",
+  "gradina-si-agricultura",
 ] as const;
 
 const CATEGORY_NAV_LABELS: Record<string, string> = {
-  "consumabile-si-accesorii": "Consumabile",
-  "echipament-de-protectie": "Protecție",
+  "accesorii-si-consumabile": "Accesorii",
+  "echipamente-de-protectie": "Protecție",
 };
 
 const ORDER_INDEX = new Map<string, number>(
@@ -54,11 +58,4 @@ export const getPrimaryCategoriesForNavigation = (
 ): CategoryNode[] =>
   orderCategoriesForNavigation(categories).filter((category) =>
     PRIMARY_HANDLES.has(category.handle)
-  );
-
-export const getSecondaryCategoriesForNavigation = (
-  categories: CategoryNode[]
-): CategoryNode[] =>
-  orderCategoriesForNavigation(categories).filter(
-    (category) => !PRIMARY_HANDLES.has(category.handle)
   );

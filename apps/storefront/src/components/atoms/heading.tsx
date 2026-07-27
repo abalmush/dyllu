@@ -4,12 +4,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@lib/utils";
 
 const headingVariants = cva(
-  "break-words font-display tracking-tight text-foreground text-balance",
+  "wrap-break-word font-display tracking-tight text-foreground text-balance",
   {
     variants: {
       size: {
-        h1: "text-display-md sm:text-display-lg",
-        h2: "text-display-sm sm:text-display-md",
+        h1: "text-display-sm sm:text-display-md",
+        h2: "text-2xl sm:text-display-sm",
         h3: "text-2xl sm:text-3xl",
         h4: "text-xl sm:text-2xl",
         h5: "text-lg sm:text-xl",

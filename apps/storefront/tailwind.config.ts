@@ -122,30 +122,34 @@ const config: Config = {
         display: ["var(--font-display)", "Inter", "system-ui", "sans-serif"],
       },
       fontSize: {
-        xs: ["0.875rem", { lineHeight: "1.4" }],
-        sm: ["1rem", { lineHeight: "1.5" }],
-        base: ["1rem", { lineHeight: "1.5" }],
+        "2xs": ["0.6875rem", { lineHeight: "1.45" }],
+        xs: ["0.75rem", { lineHeight: "1.4" }],
+        sm: ["0.875rem", { lineHeight: "1.5" }],
+        base: ["1rem", { lineHeight: "1.55" }],
         lg: ["1.125rem", { lineHeight: "1.5" }],
-        "3xl": "2rem",
+        xl: ["1.25rem", { lineHeight: "1.4" }],
+        "2xl": ["1.5rem", { lineHeight: "1.3" }],
+        "3xl": ["1.875rem", { lineHeight: "1.2" }],
+        "4xl": ["2.25rem", { lineHeight: "1.15" }],
         "display-sm": [
-          "2.25rem",
-          { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" },
+          "1.875rem",
+          { lineHeight: "1.15", letterSpacing: "-0.02em", fontWeight: "700" },
         ],
         "display-md": [
-          "3rem",
-          { lineHeight: "1.05", letterSpacing: "-0.025em", fontWeight: "700" },
+          "2.25rem",
+          { lineHeight: "1.1", letterSpacing: "-0.025em", fontWeight: "700" },
         ],
         "display-lg": [
-          "3.75rem",
-          { lineHeight: "1", letterSpacing: "-0.03em", fontWeight: "800" },
+          "2.75rem",
+          { lineHeight: "1.05", letterSpacing: "-0.03em", fontWeight: "800" },
         ],
         "display-xl": [
-          "4.5rem",
+          "3.25rem",
           { lineHeight: "1", letterSpacing: "-0.035em", fontWeight: "800" },
         ],
         "display-2xl": [
-          "5.5rem",
-          { lineHeight: "0.95", letterSpacing: "-0.04em", fontWeight: "800" },
+          "3.75rem",
+          { lineHeight: "0.98", letterSpacing: "-0.04em", fontWeight: "800" },
         ],
       },
       maxWidth: {
@@ -258,7 +262,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [animate, radix({})],
+  plugins: [animate, radix({})] as Config["plugins"],
 };
 
 export default config;

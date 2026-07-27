@@ -1,6 +1,7 @@
 "use client";
 
 import { convertToLocale } from "@lib/util/money";
+import { isShippingOptionAllowedForAddress } from "@lib/shipping/delivery-area";
 import { CheckCircleSolid, XMark } from "@medusajs/icons";
 import {
   HttpTypes,
@@ -19,10 +20,18 @@ const computeTarget = (
 ) => {
   const priceRule = (price.price_rules || []).find(
     (pr) => pr.attribute === "item_total"
-  )!;
+  );
+
+  if (!priceRule) {
+    return null;
+  }
 
   const currentAmount = cart.item_total;
   const targetAmount = parseFloat(priceRule.value);
+
+  if (!Number.isFinite(targetAmount) || targetAmount <= 0) {
+    return null;
+  }
 
   if (priceRule.operator === "gt") {
     return {
@@ -31,16 +40,16 @@ const computeTarget = (
       target_reached: currentAmount > targetAmount,
       target_remaining:
         currentAmount > targetAmount ? 0 : targetAmount + 1 - currentAmount,
-      remaining_percentage: (currentAmount / targetAmount) * 100,
+      remaining_percentage: Math.min((currentAmount / targetAmount) * 100, 100),
     };
   } else if (priceRule.operator === "gte") {
     return {
       current_amount: currentAmount,
       target_amount: targetAmount,
-      target_reached: currentAmount > targetAmount,
+      target_reached: currentAmount >= targetAmount,
       target_remaining:
-        currentAmount > targetAmount ? 0 : targetAmount - currentAmount,
-      remaining_percentage: (currentAmount / targetAmount) * 100,
+        currentAmount >= targetAmount ? 0 : targetAmount - currentAmount,
+      remaining_percentage: Math.min((currentAmount / targetAmount) * 100, 100),
     };
   } else if (priceRule.operator === "lt") {
     return {
@@ -49,16 +58,16 @@ const computeTarget = (
       target_reached: targetAmount > currentAmount,
       target_remaining:
         targetAmount > currentAmount ? 0 : currentAmount + 1 - targetAmount,
-      remaining_percentage: (currentAmount / targetAmount) * 100,
+      remaining_percentage: Math.min((currentAmount / targetAmount) * 100, 100),
     };
   } else if (priceRule.operator === "lte") {
     return {
       current_amount: currentAmount,
       target_amount: targetAmount,
-      target_reached: targetAmount > currentAmount,
+      target_reached: targetAmount >= currentAmount,
       target_remaining:
-        targetAmount > currentAmount ? 0 : currentAmount - targetAmount,
-      remaining_percentage: (currentAmount / targetAmount) * 100,
+        targetAmount >= currentAmount ? 0 : currentAmount - targetAmount,
+      remaining_percentage: Math.min((currentAmount / targetAmount) * 100, 100),
     };
   } else {
     return {
@@ -67,7 +76,7 @@ const computeTarget = (
       target_reached: currentAmount === targetAmount,
       target_remaining:
         targetAmount > currentAmount ? 0 : targetAmount - currentAmount,
-      remaining_percentage: (currentAmount / targetAmount) * 100,
+      remaining_percentage: Math.min((currentAmount / targetAmount) * 100, 100),
     };
   }
 };
@@ -86,6 +95,9 @@ export default function ShippingPriceNudge({
   }
 
   const freeShippingPrice = shippingOptions
+    .filter((shippingOption) =>
+      isShippingOptionAllowedForAddress(shippingOption, cart.shipping_address)
+    )
     .map((shippingOption) => {
       const calculatedPrice = shippingOption.calculated_price;
 
@@ -102,15 +114,20 @@ export default function ShippingPriceNudge({
       );
 
       return validCurrencyPrices.map((price) => {
+        const target = computeTarget(cart, price);
+        if (!target) {
+          return;
+        }
+
         return {
           ...price,
           shipping_option_id: shippingOption.id,
-          ...computeTarget(cart, price),
+          ...target,
         };
       });
     })
     .flat(1)
-    .filter(Boolean)
+    .filter((price) => price !== undefined)
 
     .find((price) => price?.amount === 0);
 
@@ -169,14 +186,14 @@ function FreeShippingInline({
         <div className="flex justify-between gap-1">
           <div
             className={clx(
-              "h-1 max-w-full rounded-full bg-gradient-to-r from-zinc-400 to-zinc-500 duration-500 ease-in-out",
+              "h-1 max-w-full rounded-full bg-linear-to-r from-zinc-400 to-zinc-500 duration-500 ease-in-out",
               {
                 "from-green-400 to-green-500": price.target_reached,
               }
             )}
             style={{ width: `${price.remaining_percentage}%` }}
           ></div>
-          <div className="h-1 w-fit flex-grow rounded-full bg-neutral-300"></div>
+          <div className="h-1 w-fit grow rounded-full bg-neutral-300"></div>
         </div>
       </div>
     </div>
@@ -195,7 +212,7 @@ function FreeShippingPopup({
   return (
     <div
       className={clx(
-        "fixed bottom-5 right-5 z-10 flex flex-col items-end gap-2 transition-all duration-500 ease-in-out",
+        "fixed right-5 bottom-5 z-10 flex flex-col items-end gap-2 transition-all duration-500 ease-in-out",
         {
           "invisible opacity-0 delay-1000": price.target_reached,
           "invisible opacity-0": isClosed,
@@ -205,7 +222,7 @@ function FreeShippingPopup({
     >
       <div>
         <Button
-          className="rounded-full border-none bg-neutral-900 p-2 text-[15px] shadow-none outline-none"
+          className="rounded-full border-none bg-neutral-900 p-2 text-sm shadow-none outline-hidden"
           onClick={() => setIsClosed(true)}
         >
           <XMark />
@@ -214,8 +231,8 @@ function FreeShippingPopup({
 
       <div className="w-[400px] rounded-lg bg-black p-6 text-white">
         <div className="pb-4">
-          <div className="space-y-3">
-            <div className="flex justify-between text-[15px] text-neutral-400">
+          <div className="space-y-4">
+            <div className="flex justify-between text-sm text-neutral-400">
               <div>
                 {price.target_reached ? (
                   <div className="flex items-center gap-1.5">
@@ -245,28 +262,28 @@ function FreeShippingPopup({
             <div className="flex justify-between gap-1">
               <div
                 className={clx(
-                  "h-1.5 max-w-full rounded-full bg-gradient-to-r from-zinc-400 to-zinc-500 duration-500 ease-in-out",
+                  "h-1.5 max-w-full rounded-full bg-linear-to-r from-zinc-400 to-zinc-500 duration-500 ease-in-out",
                   {
                     "from-green-400 to-green-500": price.target_reached,
                   }
                 )}
                 style={{ width: `${price.remaining_percentage}%` }}
               ></div>
-              <div className="h-1.5 w-fit flex-grow rounded-full bg-zinc-600"></div>
+              <div className="h-1.5 w-fit grow rounded-full bg-zinc-600"></div>
             </div>
           </div>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-4">
           <LocalizedClientLink
-            className="rounded-2xl border-[1px] border-white bg-transparent px-4 py-2.5 text-[15px] shadow-none outline-none"
+            className="rounded-2xl border border-white bg-transparent px-4 py-2.5 text-sm shadow-none outline-hidden"
             href="/cart"
           >
             Vezi coșul
           </LocalizedClientLink>
 
           <LocalizedClientLink
-            className="flex-grow rounded-2xl border-[1px] border-white bg-white px-4 py-2.5 text-center text-[15px] text-neutral-950 shadow-none outline-none"
+            className="grow rounded-2xl border border-white bg-white px-4 py-2.5 text-center text-sm text-neutral-950 shadow-none outline-hidden"
             href="/store"
           >
             Vezi produsele

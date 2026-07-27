@@ -17,18 +17,17 @@ export interface EyebrowProps {
   children: React.ReactNode;
 }
 
-const base =
-  "text-[11px] font-semibold uppercase tracking-[0.18em] leading-none";
+const base = "text-2xs font-semibold uppercase tracking-[0.18em] leading-none";
 
 const variantStyles: Record<EyebrowVariant, string> = {
   "corner-cut":
     "inline-flex w-fit items-center gap-2 bg-foreground px-4 py-2 text-primary clip-corner-cut-sm",
-  dark: "inline-flex w-fit items-center gap-2 rounded-full bg-foreground px-3 py-2 text-primary",
+  dark: "inline-flex w-fit items-center gap-2 rounded-full bg-foreground px-4 py-2 text-primary",
   primary:
-    "inline-flex w-fit items-center gap-2 rounded-full bg-primary px-3 py-2 text-primary-foreground",
+    "inline-flex w-fit items-center gap-2 rounded-full bg-primary px-4 py-2 text-primary-foreground",
   outlined:
-    "inline-flex w-fit items-center gap-2 rounded-full border border-foreground/25 px-3 py-2 text-foreground",
-  tab: "inline-flex w-fit items-center gap-2 border-l-2 border-primary pl-3 py-1 text-foreground/85",
+    "inline-flex w-fit items-center gap-2 rounded-full border border-foreground/25 px-4 py-2 text-foreground",
+  tab: "inline-flex w-fit items-center gap-2 border-l-2 border-primary pl-4 py-1 text-foreground/85",
   bare: "text-primary",
 };
 

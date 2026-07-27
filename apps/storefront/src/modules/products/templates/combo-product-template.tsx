@@ -2,40 +2,43 @@ import { Suspense } from "react";
 import { HttpTypes } from "@medusajs/types";
 
 import { Badge } from "@/components/atoms/badge";
-import { Container } from "@/components/atoms/container";
-import { Breadcrumbs } from "@/components/molecules/breadcrumbs";
 import { LinkedProducts } from "@/components/organisms/linked-products";
-import { PdpHeroCombo } from "@/components/organisms/pdp-hero-combo";
 import { ProductTypeBadge } from "@/components/organisms/product-type-badge";
-import { SetBreakdown } from "@/components/organisms/set-breakdown";
 import { getCompatibleAccessories } from "@lib/data/compatible-accessories";
 import RelatedProducts from "@modules/products/components/related-products";
-import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta";
-import ProductTabs from "@modules/products/components/product-tabs";
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products";
+import SharedProductLayout from "./shared-product-layout";
 
 import {
-  buildProductBreadcrumbs,
   getEffectivePlatform,
   getPieceCount,
-  getProductEyebrow,
   getPrimaryArticleCode,
   getSetCount,
+  getVariantDescription,
   getVariantImage,
   parseKitItems,
   prettifyPlatform,
-  toComboItems,
   toLinkedProduct,
   toSetPieces,
 } from "../lib/product-presentation";
 
 type Props = {
   product: HttpTypes.StoreProduct;
+  region: HttpTypes.StoreRegion;
+  images: HttpTypes.StoreProductImage[];
+  selectedVariant?: HttpTypes.StoreProductVariant;
 };
 
-export default async function ComboProductTemplate({ product }: Props) {
+export default async function ComboProductTemplate({
+  product,
+  region,
+  images,
+  selectedVariant,
+}: Props) {
   const platform = getEffectivePlatform(product);
-  const parsedItems = parseKitItems(product.description);
+  const parsedItems = parseKitItems(
+    getVariantDescription(product, selectedVariant)
+  );
   const includedCodes = new Set(
     parsedItems
       .map((item) => item.code)
@@ -43,7 +46,6 @@ export default async function ComboProductTemplate({ product }: Props) {
         (code): code is string => typeof code === "string" && code.length > 0
       )
   );
-  const eyebrow = getProductEyebrow(product);
   const pieceCount =
     getSetCount(product, parsedItems) || getPieceCount(parsedItems);
   const linkedProducts = [];
@@ -75,62 +77,43 @@ export default async function ComboProductTemplate({ product }: Props) {
     }
   }
 
-  const comboItems = toComboItems(parsedItems, imageByCode);
   const setPieces = toSetPieces(parsedItems, imageByCode);
-  const breadcrumbs = buildProductBreadcrumbs(product);
   const summary = platform.startsWith("dyllu-")
-    ? `Produs principal livrat cu accesoriile incluse în pachet, pregătit pentru lucru și compatibil cu platforma ${prettifyPlatform(platform)}.`
-    : "Produs principal livrat cu accesoriile incluse în pachet, gata pentru folosire imediată.";
+    ? `Primești produsul și toate accesoriile afișate, compatibile cu sistemul de acumulatori ${prettifyPlatform(platform)}.`
+    : "Primești produsul și toate accesoriile afișate, gata de lucru.";
 
   return (
     <>
-      <PdpHeroCombo
+      <SharedProductLayout
         product={product}
-        items={comboItems}
-        eyebrow={eyebrow}
-        layout="row"
-        includedContent={
-          setPieces.length > 0 ? (
-            <SetBreakdown
-              pieceCount={pieceCount}
-              pieces={setPieces}
-              tone="dark"
-            />
-          ) : undefined
-        }
-        topContent={<Breadcrumbs items={breadcrumbs} />}
-        afterTitleContent={
-          <div className="flex flex-wrap items-center gap-2">
-            <ProductTypeBadge type="combo" />
-            {pieceCount > 0 && (
-              <Badge variant="secondary">{pieceCount} accesorii incluse</Badge>
-            )}
-            {platform.startsWith("dyllu-") && (
-              <Badge variant="outline">{prettifyPlatform(platform)}</Badge>
-            )}
+        region={region}
+        images={images}
+        selectedVariant={selectedVariant}
+        includedPieces={setPieces}
+        purchaseSupplement={
+          <div className="clip-corner-cut-lg clip-shadow-lg bg-card ring-border small:p-8 flex flex-col gap-4 p-6 ring-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <ProductTypeBadge type="combo" />
+              {pieceCount > 0 && (
+                <Badge variant="secondary">{pieceCount} piese incluse</Badge>
+              )}
+              {platform.startsWith("dyllu-") && (
+                <Badge variant="outline">{prettifyPlatform(platform)}</Badge>
+              )}
+            </div>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              {summary}
+            </p>
           </div>
-        }
-        descriptionContent={
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {summary}
-          </p>
         }
       />
-
-      <Container className="pb-24 pt-12 small:pb-32 small:pt-16">
-        <div className="mx-auto max-w-5xl space-y-8">
-          <ProductOnboardingCta />
-          <div className="clip-corner-cut-lg clip-shadow-lg bg-card p-6 ring-1 ring-border small:p-8">
-            <ProductTabs product={product} />
-          </div>
-        </div>
-      </Container>
 
       {linkedProducts.length > 0 && (
         <LinkedProducts
           mainName={product.title ?? "Acest produs"}
           mainImage={getVariantImage(product)}
           mainPrice={
+            selectedVariant?.calculated_price?.calculated_amount ??
             product.variants?.[0]?.calculated_price?.calculated_amount ??
             undefined
           }

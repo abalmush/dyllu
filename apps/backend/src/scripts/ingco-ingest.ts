@@ -217,13 +217,10 @@ function resolveCategoryHandle(p: ScrapedProduct): string | undefined {
 }
 
 function buildDescription(p: ScrapedProduct): string {
-  const parts: string[] = [];
-  if (p.descriptionText) parts.push(p.descriptionText);
-  if (p.attributes.length) {
-    const specs = p.attributes.map((a) => `${a.key}: ${a.value}`).join("\n");
-    parts.push(`\nSpecificații:\n${specs}`);
-  }
-  return parts.join("\n\n") || p.name;
+  const description = p.descriptionText
+    ?.replace(/(?:^|\n)\s*Specificații\s*:[\s\S]*$/i, "")
+    .trim();
+  return description || p.name;
 }
 
 function deriveHandle(p: ScrapedProduct): string {

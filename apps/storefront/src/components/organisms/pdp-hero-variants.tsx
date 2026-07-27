@@ -60,7 +60,7 @@ export function PdpHeroVariant({ product, eyebrow, variant }: Props) {
         alt={product.title ?? ""}
       />
 
-      <div className="relative z-[1] px-4 py-16 small:px-8 small:py-20 medium:px-12 medium:py-24">
+      <div className="small:px-8 small:py-20 medium:px-12 medium:py-24 relative z-1 px-4 py-16">
         {variant === "spotlight" && (
           <SpotlightLayout
             images={images}
@@ -115,7 +115,7 @@ function BackgroundLayer({
         </div>
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-b from-foreground/30 via-foreground/40 to-foreground/70"
+          className="from-foreground/30 via-foreground/40 to-foreground/70 absolute inset-0 bg-linear-to-b"
         />
       </>
     );
@@ -126,7 +126,7 @@ function BackgroundLayer({
       <>
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-br from-primary via-primary/80 to-foreground"
+          className="from-primary via-primary/80 to-foreground absolute inset-0 bg-linear-to-br"
         />
         <div
           aria-hidden
@@ -144,7 +144,7 @@ function BackgroundLayer({
   // staggered + staggered-mosaic: paper / concrete texture
   return (
     <>
-      <div className="absolute inset-0 bg-surface-subtle" />
+      <div className="bg-surface-subtle absolute inset-0" />
       <div
         aria-hidden
         className="absolute inset-0 opacity-[0.08] mix-blend-multiply"
@@ -155,7 +155,7 @@ function BackgroundLayer({
       />
       <div
         aria-hidden
-        className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-primary/10 to-transparent"
+        className="from-primary/10 absolute inset-y-0 left-0 w-1/3 bg-linear-to-r to-transparent"
       />
     </>
   );
@@ -183,7 +183,7 @@ function SpotlightLayout({ images, product, eyebrow, card }: LayoutProps) {
         <div ref={emblaRef} className="overflow-hidden">
           <div className="flex">
             {images.length === 0 ? (
-              <div className="aspect-square min-w-full rounded-3xl bg-background/10" />
+              <div className="bg-background/10 aspect-square min-w-full rounded-3xl" />
             ) : (
               images.map((img, i) => (
                 <div
@@ -215,8 +215,8 @@ function SpotlightLayout({ images, product, eyebrow, card }: LayoutProps) {
                 className={cn(
                   "h-1.5 rounded-full transition-all",
                   i === idx
-                    ? "w-6 bg-background"
-                    : "w-1.5 bg-background/40 hover:bg-background/70"
+                    ? "bg-background w-6"
+                    : "bg-background/40 hover:bg-background/70 w-1.5"
                 )}
               />
             ))}
@@ -262,16 +262,11 @@ function VariantTilesMarquee({
 }) {
   const variants = product.variants ?? [];
 
-  // Pull a per-variant image URL with sensible fallbacks
   const tileFor = (
     v: HttpTypes.StoreProductVariant,
     index: number
   ): { url: string | undefined; label: string } => {
-    const md = (v.metadata ?? {}) as Record<string, unknown>;
-    const variantImage =
-      typeof md.ingco_variant_image === "string"
-        ? (md.ingco_variant_image as string)
-        : undefined;
+    const variantImage = v.images?.find((image) => image.url)?.url;
     const positional = product.images?.[index]?.url;
     return {
       url: variantImage ?? positional ?? product.thumbnail ?? undefined,
@@ -280,9 +275,9 @@ function VariantTilesMarquee({
   };
 
   return (
-    <div className="mx-auto flex max-w-[1320px] flex-col gap-10">
-      <div className="-mx-4 overflow-x-auto px-4 small:-mx-8 small:px-8 medium:-mx-12 medium:px-12">
-        <div className="flex gap-4 pb-2 small:gap-5">
+    <div className="mx-auto flex max-w-[1320px] flex-col gap-12">
+      <div className="small:-mx-8 small:px-8 medium:-mx-12 medium:px-12 -mx-4 overflow-x-auto px-4">
+        <div className="small:gap-6 flex gap-4 pb-2">
           {variants.map((v, i) => {
             const { url, label } = tileFor(v, i);
             const primaryOptionId = card.primaryOption?.id ?? "";
@@ -303,10 +298,10 @@ function VariantTilesMarquee({
                   if (primaryOptionId) card.onSelectOption(variantValue);
                 }}
                 className={cn(
-                  "clip-corner-cut-md clip-shadow-lg group relative flex h-64 w-64 shrink-0 flex-col justify-end overflow-hidden bg-background p-4 text-left transition-all small:h-72 small:w-72 small:p-5",
+                  "clip-corner-cut-md clip-shadow-lg group bg-background small:h-72 small:w-72 small:p-6 relative flex h-64 w-64 shrink-0 flex-col justify-end overflow-hidden p-4 text-left transition-all",
                   isSelected
-                    ? "scale-[1.02] ring-2 ring-primary"
-                    : "ring-1 ring-foreground/10 hover:scale-[1.01] hover:ring-foreground/30"
+                    ? "ring-primary scale-[1.02] ring-2"
+                    : "ring-foreground/10 hover:ring-foreground/30 ring-1 hover:scale-[1.01]"
                 )}
               >
                 {url && (
@@ -325,27 +320,27 @@ function VariantTilesMarquee({
                 <span
                   aria-hidden
                   className={cn(
-                    "absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t to-transparent transition-opacity",
+                    "absolute inset-x-0 bottom-0 h-2/5 bg-linear-to-t to-transparent transition-opacity",
                     isSelected ? "from-foreground/85" : "from-foreground/70"
                   )}
                 />
 
                 {/* Top-right "selected" pill */}
                 {isSelected && (
-                  <span className="absolute right-3 top-3 rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-primary-foreground">
+                  <span className="bg-primary text-2xs text-primary-foreground absolute top-3 right-3 rounded-full px-2.5 py-1 font-bold tracking-[0.18em] uppercase">
                     Selectat
                   </span>
                 )}
 
-                <div className="relative z-[1] space-y-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-800">
+                <div className="relative z-1 space-y-1">
+                  <span className="text-2xs text-brand-800 font-semibold tracking-[0.18em] uppercase">
                     {card.primaryOption?.title ?? "Variantă"}
                   </span>
-                  <h3 className="font-display text-xl font-bold leading-tight text-background small:text-2xl">
+                  <h3 className="font-display text-background small:text-2xl text-xl leading-tight font-bold">
                     {variantValue}
                   </h3>
                   {price != null && (
-                    <span className="block text-sm font-semibold text-background/80">
+                    <span className="text-background/80 block text-sm font-semibold">
                       {formatPrice(price)}
                     </span>
                   )}
@@ -391,16 +386,16 @@ function ImageMarquee({ images, product, eyebrow, card }: LayoutProps) {
   );
 
   return (
-    <div className="mx-auto flex max-w-[1320px] flex-col gap-10">
+    <div className="mx-auto flex max-w-[1320px] flex-col gap-12">
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex gap-4 px-2 small:gap-5">
+        <div className="small:gap-6 flex gap-4 px-2">
           {slides.length === 0 ? (
-            <div className="clip-corner-cut-md h-64 w-64 shrink-0 bg-background/20 small:h-72 small:w-72" />
+            <div className="clip-corner-cut-md bg-background/20 small:h-72 small:w-72 h-64 w-64 shrink-0" />
           ) : (
             slides.map((img, i) => (
               <div
                 key={`${img.id ?? img.url}-${i}`}
-                className="clip-corner-cut-md clip-shadow-lg relative h-64 w-64 shrink-0 overflow-hidden bg-background ring-1 ring-foreground/10 small:h-72 small:w-72"
+                className="clip-corner-cut-md clip-shadow-lg bg-background ring-foreground/10 small:h-72 small:w-72 relative h-64 w-64 shrink-0 overflow-hidden ring-1"
               >
                 <Image
                   src={img.url}
@@ -437,10 +432,10 @@ function StaggeredLayout({ images, product, eyebrow, card }: LayoutProps) {
   }, [images]);
 
   return (
-    <div className="mx-auto grid max-w-[1280px] gap-10 medium:grid-cols-[1.05fr_minmax(0,0.95fr)] medium:items-center">
-      <div className="grid aspect-[5/4] w-full grid-cols-[3fr_1fr] gap-3 medium:gap-4">
+    <div className="medium:grid-cols-[1.05fr_minmax(0,0.95fr)] medium:items-center mx-auto grid max-w-[1280px] gap-12">
+      <div className="medium:gap-4 grid aspect-5/4 w-full grid-cols-[3fr_1fr] gap-4">
         {main && (
-          <div className="clip-corner-cut-lg clip-shadow-lg relative overflow-hidden bg-background ring-1 ring-foreground/10">
+          <div className="clip-corner-cut-lg clip-shadow-lg bg-background ring-foreground/10 relative overflow-hidden ring-1">
             <Image
               src={main.url}
               alt={product.title ?? ""}
@@ -453,11 +448,11 @@ function StaggeredLayout({ images, product, eyebrow, card }: LayoutProps) {
           </div>
         )}
 
-        <div className="grid grid-rows-3 gap-3 medium:gap-4">
+        <div className="medium:gap-4 grid grid-rows-3 gap-4">
           {satellites.map((img, i) => (
             <div
               key={`${img.id ?? img.url}-${i}`}
-              className="clip-corner-cut-md clip-shadow-lg relative overflow-hidden bg-background ring-1 ring-foreground/10 transition-transform hover:scale-[1.02]"
+              className="clip-corner-cut-md clip-shadow-lg bg-background ring-foreground/10 relative overflow-hidden ring-1 transition-transform hover:scale-[1.02]"
             >
               <Image
                 src={img.url}
@@ -465,7 +460,7 @@ function StaggeredLayout({ images, product, eyebrow, card }: LayoutProps) {
                 fill
                 sizes="(min-width: 768px) 180px, 25vw"
                 style={IMAGE_BG_NEUTRALIZE}
-                className="object-contain p-3"
+                className="object-contain p-4"
               />
             </div>
           ))}
@@ -530,60 +525,65 @@ export function InfoCard({
   return (
     <div
       className={cn(
-        "clip-corner-cut-lg clip-shadow-lg p-6 small:p-7 medium:p-8",
+        "clip-corner-cut-lg clip-shadow-lg small:p-8 medium:p-8 p-6",
         tone === "dark"
-          ? "bg-background/95 ring-1 ring-foreground/10 backdrop-blur"
-          : "bg-card ring-1 ring-border",
+          ? "bg-background/95 ring-foreground/10 ring-1 backdrop-blur-sm"
+          : "bg-card ring-border ring-1",
         className
       )}
     >
-      <div className="flex flex-col gap-4 small:gap-5">
+      <div className="small:gap-6 flex flex-col gap-4">
         {topContent}
         {eyebrow && (
-          <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-800">
+          <span className="text-2xs text-brand-800 block font-semibold tracking-[0.18em] uppercase">
             {eyebrow}
           </span>
         )}
 
-        <h1 className="font-display text-[2.35rem] font-extrabold leading-[0.96] tracking-tight text-foreground small:text-[2.7rem] medium:text-[3rem]">
+        <h1 className="font-display text-foreground small:text-display-lg medium:text-display-lg text-4xl leading-[0.96] font-extrabold tracking-tight">
           {product.title}
         </h1>
 
         <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
             {showFromPrefix && (
-              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <span className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
                 de la
               </span>
             )}
-            <span className="font-display text-[2.9rem] font-extrabold leading-none tracking-tight text-foreground small:text-[3.2rem] medium:text-[3.35rem]">
+            <span className="font-display text-display-lg text-foreground small:text-display-xl medium:text-display-xl leading-none font-extrabold tracking-tight">
               {formatPrice(displayPrice)}
             </span>
           </div>
           <span
             className={cn(
-              "clip-corner-cut-xs inline-flex w-fit items-center gap-2 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]",
+              "clip-corner-cut-xs text-2xs inline-flex w-fit items-center gap-2 px-4 py-1.5 font-semibold tracking-[0.14em] uppercase",
               inStock
                 ? "bg-success/10 text-success"
                 : "bg-destructive/10 text-destructive"
             )}
           >
-          <span className={cn("size-1.5", inStock ? "bg-success" : "bg-destructive")} />
-          {inStock ? "În stoc · 24–48h" : "Indisponibil"}
-        </span>
-      </div>
+            <span
+              className={cn(
+                "size-1.5",
+                inStock ? "bg-success" : "bg-destructive"
+              )}
+            />
+            {inStock ? "În stoc · 24–48h" : "Indisponibil"}
+          </span>
+        </div>
 
-        <div className="clip-corner-cut-md flex flex-col gap-4 bg-surface-subtle/70 p-4 ring-1 ring-border/70 small:p-5">
+        <div className="clip-corner-cut-md bg-surface-subtle/70 ring-border/70 small:p-6 flex flex-col gap-4 p-4 ring-1">
           {afterTitleContent}
 
           {isMultiVariant && primaryOption && optionValues.length > 0 && (
             <div className="space-y-2">
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <div className="flex items-baseline justify-between gap-4">
+                <span className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
                   {primaryOption.title}
                 </span>
                 {options[primaryOption.id ?? ""] && (
-                  <span className="text-sm font-semibold tracking-tight text-foreground">
+                  <span className="text-foreground text-sm font-semibold tracking-tight">
                     {options[primaryOption.id ?? ""]}
                   </span>
                 )}
@@ -603,7 +603,7 @@ export function InfoCard({
                       aria-checked={selected}
                       onClick={() => onSelectOption(v)}
                       className={cn(
-                        "clip-corner-cut-xs min-w-[52px] border px-3 py-1.5 text-xs font-medium tracking-tight transition-colors",
+                        "clip-corner-cut-xs min-w-[52px] border px-4 py-1.5 text-xs font-medium tracking-tight transition-colors",
                         selected
                           ? "border-foreground bg-foreground text-background"
                           : "border-border bg-card text-foreground hover:border-foreground/40 hover:bg-muted"
@@ -614,7 +614,7 @@ export function InfoCard({
                   );
                 })}
                 {optionValues.length > 12 && (
-                  <span className="grid place-items-center px-3 text-xs text-muted-foreground">
+                  <span className="text-muted-foreground grid place-items-center px-4 text-xs">
                     +{optionValues.length - 12}
                   </span>
                 )}
@@ -622,9 +622,9 @@ export function InfoCard({
             </div>
           )}
 
-          <div className="grid gap-3 small:grid-cols-[132px_minmax(0,1fr)] small:items-end">
+          <div className="small:grid-cols-[132px_minmax(0,1fr)] small:items-end grid gap-4">
             <div className="space-y-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <span className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
                 Cantitate
               </span>
               <QuantityStepper
@@ -650,7 +650,7 @@ export function InfoCard({
 
         {descriptionContent === undefined
           ? product.description && (
-              <p className="line-clamp-4 text-sm leading-relaxed text-muted-foreground">
+              <p className="text-muted-foreground line-clamp-4 text-sm leading-relaxed">
                 {product.description}
               </p>
             )

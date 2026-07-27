@@ -11,34 +11,34 @@ type Props = {
 
 export function ProductSpecs({ description, specs }: Props) {
   return (
-    <section className="bg-surface-subtle py-16 small:py-20">
+    <section className="bg-surface-subtle small:py-20 py-16">
       <Container>
-        <div className="grid gap-10 medium:grid-cols-[1fr_1fr] medium:gap-16">
+        <div className="medium:grid-cols-[1fr_1fr] medium:gap-16 grid gap-12">
           {description && (
             <div>
-              <h2 className="font-display text-2xl font-extrabold tracking-tight text-foreground small:text-3xl">
+              <h2 className="font-display text-foreground small:text-3xl text-2xl font-extrabold tracking-tight">
                 Descriere
               </h2>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground small:text-base">
+              <p className="text-muted-foreground small:text-base mt-4 text-sm leading-relaxed">
                 {description}
               </p>
             </div>
           )}
 
           <div>
-            <h2 className="font-display text-2xl font-extrabold tracking-tight text-foreground small:text-3xl">
+            <h2 className="font-display text-foreground small:text-3xl text-2xl font-extrabold tracking-tight">
               Specificații
             </h2>
-            <dl className="mt-4 divide-y divide-border border-y border-border">
+            <dl className="divide-border border-border mt-4 divide-y border-y">
               {specs.map((spec) => (
                 <div
                   key={spec.label}
-                  className="flex items-baseline justify-between gap-4 py-3"
+                  className="flex items-baseline justify-between gap-4 py-4"
                 >
-                  <dt className="text-sm text-muted-foreground">
+                  <dt className="text-muted-foreground text-sm">
                     {spec.label}
                   </dt>
-                  <dd className="text-right text-sm font-semibold text-foreground">
+                  <dd className="text-foreground text-right text-sm font-semibold">
                     {spec.value}
                   </dd>
                 </div>

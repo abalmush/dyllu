@@ -6,14 +6,21 @@ import PlpShell from "@modules/store/components/plp-shell";
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid";
 import PaginatedProducts from "@modules/store/templates/paginated-products";
 import { type SortOptions } from "@modules/store/components/refinement-list/sort-products";
+import { findCategoryInTree, type CategoryNode } from "@lib/data/categories";
 
 type Props = {
   category: HttpTypes.StoreProductCategory;
   sortBy?: SortOptions;
   page?: string;
+  categories: CategoryNode[];
 };
 
-export default function CategoryTemplate({ category, sortBy, page }: Props) {
+export default function CategoryTemplate({
+  category,
+  sortBy,
+  page,
+  categories,
+}: Props) {
   const pageNumber = page ? parseInt(page) : 1;
   const sort = sortBy || "created_at";
 
@@ -30,15 +37,19 @@ export default function CategoryTemplate({ category, sortBy, page }: Props) {
 
   const crumbs = [
     { label: "Acasă", href: "/" },
-    { label: "Magazin", href: "/store" },
     ...parents.map((p) => ({ label: p.name, href: `/categories/${p.handle}` })),
     { label: category.name },
   ];
 
-  const childrenLinks = category.category_children?.map((c) => ({
+  const visibleCategory = findCategoryInTree(categories, category.handle);
+  const childrenLinks = visibleCategory?.children.map((c) => ({
     name: c.name,
     handle: c.handle,
   }));
+  const categoryIds = [
+    category.id,
+    ...(category.category_children ?? []).map((child) => child.id),
+  ];
 
   return (
     <PlpShell
@@ -46,6 +57,7 @@ export default function CategoryTemplate({ category, sortBy, page }: Props) {
       description={category.description ?? undefined}
       crumbs={crumbs}
       sortBy={sort}
+      categories={categories}
       activeCategoryHandle={category.handle}
       childrenLinks={childrenLinks}
     >
@@ -59,7 +71,7 @@ export default function CategoryTemplate({ category, sortBy, page }: Props) {
         <PaginatedProducts
           sortBy={sort}
           page={pageNumber}
-          categoryId={category.id}
+          categoryIds={categoryIds}
         />
       </Suspense>
     </PlpShell>

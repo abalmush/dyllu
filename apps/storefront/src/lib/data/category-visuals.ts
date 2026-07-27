@@ -31,57 +31,57 @@ export const categoryVisuals: Record<string, CategoryVisual> = {
     image: local.comboKit,
     accent: "dark",
   },
-  "auto-si-moto": {
-    handle: "auto-si-moto",
+  "auto-si-service": {
+    handle: "auto-si-service",
     kicker: "Atelier auto",
     description: "Echipamente, canistre și accesorii pentru garaj.",
     image: local.workshopWorker,
     accent: "dark",
   },
-  "consumabile-si-accesorii": {
-    handle: "consumabile-si-accesorii",
+  "accesorii-si-consumabile": {
+    handle: "accesorii-si-consumabile",
     kicker: "Consumabile pro",
     description: "Burghie, discuri și accesorii pentru lucrări precise.",
     image: local.multiToolCloseup,
     accent: "neutral",
   },
-  "echipament-de-protectie": {
-    handle: "echipament-de-protectie",
+  "echipamente-de-protectie": {
+    handle: "echipamente-de-protectie",
     kicker: "Siguranță întâi",
     description: "EIP certificat — căști, mănuși, ochelari, măști.",
     image: local.grinderSparks,
     accent: "primary",
   },
-  constructii: {
-    handle: "constructii",
+  "constructii-si-finisaje": {
+    handle: "constructii-si-finisaje",
     kicker: "Șantier DYLLU",
     description: "Utilaje beton, sanitare și echipamente de finisaj.",
     image: u("photo-1503602642458-232111445657"),
     accent: "neutral",
   },
-  electrice: {
-    handle: "electrice",
+  "energie-si-electricitate": {
+    handle: "energie-si-electricitate",
     kicker: "Electric & iluminat",
     description: "Prelungitoare, testere și proiectoare pentru lucru sigur.",
     image: local.multiToolCloseup,
     accent: "neutral",
   },
-  gradinarit: {
-    handle: "gradinarit",
+  "gradina-si-agricultura": {
+    handle: "gradina-si-agricultura",
     kicker: "Sezon de grădină",
     description: "Inventar și accesorii pentru grădină.",
     image: u("photo-1416879595882-3373a0480b5b"),
     accent: "neutral",
   },
-  "scule-manuale": {
-    handle: "scule-manuale",
+  "scule-de-mana": {
+    handle: "scule-de-mana",
     kicker: "Atelier de încredere",
     description: "Ciocane, șurubelnițe, chei și seturi profesionale.",
     image: local.comboKit,
     accent: "dark",
   },
-  depozitare: {
-    handle: "depozitare",
+  "atelier-depozitare-si-manipulare": {
+    handle: "atelier-depozitare-si-manipulare",
     kicker: "Ordine în atelier",
     description: "Cutii, organizatoare și soluții practice de depozitare.",
     image: local.workshopWorker,

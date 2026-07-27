@@ -17,21 +17,21 @@ export default function AppError({
   }, [error]);
 
   return (
-    <main className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center gap-5 px-6 py-16 text-center">
-      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+    <main className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center gap-6 px-6 py-16 text-center">
+      <p className="text-muted-foreground text-sm font-semibold tracking-[0.18em] uppercase">
         Eroare temporară
       </p>
-      <h1 className="font-display text-3xl font-bold text-foreground">
+      <h1 className="font-display text-foreground text-3xl font-bold">
         Pagina nu a putut fi încărcată
       </h1>
-      <p className="max-w-xl text-muted-foreground">
+      <p className="text-muted-foreground max-w-xl">
         Te rugăm să încerci din nou. Dacă problema persistă, revino peste câteva
         minute.
       </p>
       <button
         type="button"
         onClick={reset}
-        className="min-h-11 bg-foreground px-6 py-3 font-semibold text-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
+        className="bg-foreground text-background min-h-11 px-6 py-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-solid"
       >
         Încearcă din nou
       </button>

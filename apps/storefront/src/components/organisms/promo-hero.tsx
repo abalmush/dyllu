@@ -27,23 +27,23 @@ export function PromoHero({
   image,
 }: PromoHeroProps) {
   return (
-    <section className="relative overflow-hidden bg-surface-subtle">
+    <section className="bg-surface-subtle relative overflow-hidden">
       <span aria-hidden className="ds-grid-bg absolute inset-0 opacity-30" />
       <span
         aria-hidden
-        className="absolute -right-32 top-1/2 size-[640px] -translate-y-1/2 rounded-full bg-primary/15 blur-3xl"
+        className="bg-primary/15 absolute top-1/2 -right-32 size-[640px] -translate-y-1/2 rounded-full blur-3xl"
       />
       <Container className="relative">
-        <div className="grid items-center gap-12 py-14 medium:grid-cols-[1.1fr_1fr] medium:gap-16 medium:py-24">
-          <div className="flex flex-col gap-7">
+        <div className="medium:grid-cols-[1.1fr_1fr] medium:gap-16 medium:py-24 grid items-center gap-12 py-16">
+          <div className="flex flex-col gap-8">
             {eyebrow && (
               <Eyebrow icon={<Zap className="size-3.5" />}>{eyebrow}</Eyebrow>
             )}
-            <h1 className="font-display text-display-md font-extrabold leading-[1.02] tracking-tight text-foreground small:text-display-lg medium:text-display-xl">
+            <h1 className="font-display text-display-md text-foreground small:text-display-lg medium:text-display-xl leading-[1.02] font-extrabold tracking-tight">
               {headline}
             </h1>
             {description && (
-              <p className="max-w-xl text-base text-muted-foreground small:text-lg">
+              <p className="text-muted-foreground small:text-lg max-w-xl text-base">
                 {description}
               </p>
             )}
@@ -57,7 +57,7 @@ export function PromoHero({
               {secondaryCta && (
                 <Link
                   href={secondaryCta.href}
-                  className="group inline-flex items-center gap-2 text-sm font-semibold text-foreground underline-offset-4 hover:underline"
+                  className="group text-foreground inline-flex items-center gap-2 text-sm font-semibold underline-offset-4 hover:underline"
                 >
                   {secondaryCta.label}
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
@@ -68,9 +68,9 @@ export function PromoHero({
           <div className="relative">
             <span
               aria-hidden
-              className="absolute inset-x-8 bottom-6 h-10 rounded-full bg-foreground/30 blur-2xl"
+              className="bg-foreground/30 absolute inset-x-8 bottom-6 h-10 rounded-full blur-2xl"
             />
-            <div className="clip-corner-cut-lg relative aspect-square w-full overflow-hidden bg-background shadow-[0_60px_120px_-50px_rgba(15,23,42,0.45)]">
+            <div className="clip-corner-cut-lg bg-background relative aspect-square w-full overflow-hidden shadow-[0_60px_120px_-50px_rgba(15,23,42,0.45)]">
               <Image
                 src={image.src}
                 alt={image.alt}
@@ -78,11 +78,11 @@ export function PromoHero({
                 height={image.height ?? 900}
                 priority
                 sizes="(min-width: 1024px) 540px, (min-width: 640px) 80vw, 92vw"
-                className="size-full object-contain p-6 medium:p-10"
+                className="medium:p-12 size-full object-contain p-6"
               />
               {badge && (
-                <span className="absolute left-5 top-5 inline-flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-background shadow-md">
-                  <span className="size-1.5 rounded-full bg-primary" />
+                <span className="bg-foreground text-2xs text-background absolute top-5 left-5 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-semibold tracking-[0.18em] uppercase shadow-md">
+                  <span className="bg-primary size-1.5 rounded-full" />
                   {badge}
                 </span>
               )}

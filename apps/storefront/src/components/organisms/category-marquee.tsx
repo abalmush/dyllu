@@ -32,12 +32,12 @@ export function CategoryMarquee() {
 
 function MarqueeMobile({ items }: { items: Item[] }) {
   return (
-    <div className="py-12 medium:hidden">
+    <div className="medium:hidden py-12">
       <Container>
-        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+        <span className="text-2xs text-primary font-semibold tracking-[0.18em] uppercase">
           Marquee
         </span>
-        <h2 className="mt-2 font-display text-display-sm font-extrabold tracking-tight">
+        <h2 className="font-display text-display-sm mt-2 font-extrabold tracking-tight">
           Categorii populare
         </h2>
       </Container>
@@ -49,7 +49,7 @@ function MarqueeMobile({ items }: { items: Item[] }) {
               <Link
                 key={cat.handle}
                 href={`/categories/${cat.handle}`}
-                className="clip-corner-cut-md relative flex h-72 w-72 shrink-0 flex-col justify-end overflow-hidden p-5"
+                className="clip-corner-cut-md relative flex h-72 w-72 shrink-0 flex-col justify-end overflow-hidden p-6"
                 style={{
                   backgroundImage: `url(${visual.image})`,
                   backgroundSize: "cover",
@@ -58,13 +58,13 @@ function MarqueeMobile({ items }: { items: Item[] }) {
               >
                 <span
                   aria-hidden
-                  className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-foreground/30 to-transparent"
+                  className="from-foreground/85 via-foreground/30 absolute inset-0 bg-linear-to-t to-transparent"
                 />
-                <div className="relative z-[1]">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">
+                <div className="relative z-1">
+                  <span className="text-2xs text-primary font-semibold tracking-[0.18em] uppercase">
                     {visual.kicker}
                   </span>
-                  <h3 className="mt-1 font-display text-xl font-bold leading-tight text-background">
+                  <h3 className="font-display text-background mt-1 text-xl leading-tight font-bold">
                     {cat.name}
                   </h3>
                 </div>
@@ -138,14 +138,14 @@ function MarqueeDesktop({ items }: { items: Item[] }) {
     <div
       ref={wrapperRef}
       style={{ height: `${items.length * 100}vh` }}
-      className="relative hidden medium:block"
+      className="medium:block relative hidden"
     >
-      <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden bg-foreground text-background">
-        <div className="content-container pb-10 pt-12">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+      <div className="bg-foreground text-background sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
+        <div className="content-container pt-12 pb-12">
+          <span className="text-2xs text-primary font-semibold tracking-[0.18em] uppercase">
             Marquee
           </span>
-          <h2 className="mt-2 font-display text-display-md font-extrabold tracking-tight">
+          <h2 className="font-display text-display-md mt-2 font-extrabold tracking-tight">
             Categorii populare
           </h2>
         </div>
@@ -162,7 +162,7 @@ function MarqueeDesktop({ items }: { items: Item[] }) {
                   key={cat.handle}
                   href={`/categories/${cat.handle}`}
                   className={cn(
-                    "clip-corner-cut-lg group relative flex h-[60vh] w-[90vw] shrink-0 flex-col justify-end overflow-hidden p-10",
+                    "clip-corner-cut-lg group relative flex h-[60vh] w-[90vw] shrink-0 flex-col justify-end overflow-hidden p-12",
                     "medium:w-[55vw] large:w-[45vw]"
                   )}
                   style={{
@@ -173,19 +173,19 @@ function MarqueeDesktop({ items }: { items: Item[] }) {
                 >
                   <span
                     aria-hidden
-                    className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/40 to-transparent transition-opacity duration-300 group-hover:opacity-95"
+                    className="from-foreground/90 via-foreground/40 absolute inset-0 bg-linear-to-t to-transparent transition-opacity duration-300 group-hover:opacity-95"
                   />
-                  <div className="relative z-[1] flex flex-col gap-3">
-                    <span className="inline-flex w-fit rounded-full bg-primary/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+                  <div className="relative z-1 flex flex-col gap-4">
+                    <span className="bg-primary/20 text-2xs text-primary inline-flex w-fit rounded-full px-4 py-1 font-semibold tracking-[0.18em] uppercase">
                       {visual.kicker}
                     </span>
-                    <h3 className="font-display text-display-sm font-extrabold leading-tight text-background">
+                    <h3 className="font-display text-display-sm text-background leading-tight font-extrabold">
                       {cat.name}
                     </h3>
-                    <p className="max-w-md text-sm text-background/75">
+                    <p className="text-background/75 max-w-md text-sm">
                       {visual.description}
                     </p>
-                    <span className="mt-3 inline-flex w-fit items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform group-hover:scale-[1.03]">
+                    <span className="bg-primary text-primary-foreground mt-4 inline-flex w-fit items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-transform group-hover:scale-[1.03]">
                       Vezi categoria
                       <ArrowRight className="size-4" />
                     </span>
@@ -195,7 +195,7 @@ function MarqueeDesktop({ items }: { items: Item[] }) {
             })}
           </motion.div>
         </div>
-        <p className="content-container pb-10 pt-4 text-center font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-background/50">
+        <p className="content-container text-2xs text-background/50 pt-4 pb-12 text-center font-mono font-semibold tracking-[0.18em] uppercase">
           Glisează pentru următoarea categorie
         </p>
       </div>

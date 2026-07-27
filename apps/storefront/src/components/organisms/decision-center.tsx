@@ -30,21 +30,21 @@ export function DecisionCenterCart({
   problems: DecisionProblem[];
 }) {
   return (
-    <div className="clip-corner-cut-lg clip-shadow-md mx-auto max-w-[720px] bg-card p-6 ring-1 ring-border small:p-8">
-      <div className="flex items-center gap-2 text-primary">
+    <div className="clip-corner-cut-lg clip-shadow-md bg-card ring-border small:p-8 mx-auto max-w-[720px] p-6 ring-1">
+      <div className="text-primary flex items-center gap-2">
         <Sparkles className="size-4" />
-        <span className="text-xs font-semibold uppercase tracking-[0.2em]">
+        <span className="text-xs font-semibold tracking-[0.2em] uppercase">
           Centru de decizie
         </span>
       </div>
-      <h3 className="mt-2 font-display text-xl font-bold text-foreground small:text-2xl">
+      <h3 className="font-display text-foreground small:text-2xl mt-2 text-xl font-bold">
         {project}
       </h3>
 
-      <ul className="mt-5 grid gap-2 small:grid-cols-2">
+      <ul className="small:grid-cols-2 mt-6 grid gap-2">
         {checks.map((check) => (
           <li key={check} className="flex items-center gap-2 text-sm">
-            <span className="grid size-5 shrink-0 place-items-center rounded-full bg-success text-background">
+            <span className="bg-success text-background grid size-5 shrink-0 place-items-center rounded-full">
               <Check className="size-3.5" />
             </span>
             <span className="text-foreground">{check}</span>
@@ -52,34 +52,34 @@ export function DecisionCenterCart({
         ))}
       </ul>
 
-      <div className="mt-5 flex items-baseline justify-between border-t border-border pt-4">
-        <span className="text-sm font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+      <div className="border-border mt-6 flex items-baseline justify-between border-t pt-4">
+        <span className="text-muted-foreground text-sm font-semibold tracking-[0.14em] uppercase">
           Total
         </span>
-        <span className="font-display text-2xl font-bold text-foreground">
+        <span className="font-display text-foreground text-2xl font-bold">
           {total}
         </span>
       </div>
 
       <div className="mt-6">
-        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-warning-foreground">
+        <span className="text-warning-foreground text-xs font-semibold tracking-[0.18em] uppercase">
           Potențiale probleme
         </span>
-        <ul className="mt-3 space-y-2">
+        <ul className="mt-4 space-y-2">
           {problems.map((problem) => (
             <li
               key={problem.text}
               className={cn(
-                "clip-corner-cut-sm flex items-start gap-2.5 border-l-2 p-3 text-sm",
+                "clip-corner-cut-sm flex items-start gap-2.5 border-l-2 p-4 text-sm",
                 problem.severity === "critical"
                   ? "border-destructive bg-destructive/5 text-foreground"
                   : "border-warning bg-warning/10 text-foreground"
               )}
             >
               {problem.severity === "critical" ? (
-                <TriangleAlert className="mt-0.5 size-4 shrink-0 text-destructive" />
+                <TriangleAlert className="text-destructive mt-0.5 size-4 shrink-0" />
               ) : (
-                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+                <AlertTriangle className="text-warning mt-0.5 size-4 shrink-0" />
               )}
               {problem.text}
             </li>
@@ -100,40 +100,40 @@ export function ProjectReadiness({
   successLabel: string;
 }) {
   return (
-    <div className="clip-corner-cut-lg mx-auto max-w-[560px] bg-card p-6 ring-1 ring-border small:p-8">
+    <div className="clip-corner-cut-lg bg-card ring-border small:p-8 mx-auto max-w-[560px] p-6 ring-1">
       <div className="flex items-baseline justify-between">
-        <span className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        <span className="text-muted-foreground text-sm font-semibold tracking-[0.18em] uppercase">
           Pregătire proiect
         </span>
-        <span className="font-display text-3xl font-extrabold text-foreground">
+        <span className="font-display text-foreground text-3xl font-extrabold">
           {percent}%
         </span>
       </div>
 
-      <div className="mt-3 h-3 overflow-hidden rounded-full bg-muted">
+      <div className="bg-muted mt-4 h-3 overflow-hidden rounded-full">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-primary to-success transition-all"
+          className="from-primary to-success h-full rounded-full bg-linear-to-r transition-all"
           style={{ width: `${percent}%` }}
         />
       </div>
 
       <div className="mt-6">
-        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="text-muted-foreground text-xs font-semibold tracking-[0.16em] uppercase">
           Lipsește
         </span>
-        <ul className="mt-3 space-y-2">
+        <ul className="mt-4 space-y-2">
           {missing.map((item) => (
             <li
               key={item}
-              className="flex items-center justify-between gap-3 text-sm"
+              className="flex items-center justify-between gap-4 text-sm"
             >
-              <span className="flex items-center gap-2 text-foreground">
-                <span className="size-1.5 rounded-full bg-warning" />
+              <span className="text-foreground flex items-center gap-2">
+                <span className="bg-warning size-1.5 rounded-full" />
                 {item}
               </span>
               <button
                 type="button"
-                className="clip-corner-cut-xs inline-flex items-center gap-1 bg-foreground px-2.5 py-1 text-xs font-semibold text-background transition-colors hover:bg-foreground/90"
+                className="clip-corner-cut-xs bg-foreground text-background hover:bg-foreground/90 inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold transition-colors"
               >
                 <Plus className="size-3" />
                 Adaugă
@@ -143,9 +143,9 @@ export function ProjectReadiness({
         </ul>
       </div>
 
-      <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
-        <span className="text-sm text-muted-foreground">Șanse de reușită</span>
-        <span className="clip-corner-cut-xs bg-success/15 px-3 py-1 text-sm font-bold text-success">
+      <div className="border-border mt-6 flex items-center justify-between border-t pt-4">
+        <span className="text-muted-foreground text-sm">Șanse de reușită</span>
+        <span className="clip-corner-cut-xs bg-success/15 text-success px-4 py-1 text-sm font-bold">
           {successLabel}
         </span>
       </div>
@@ -171,15 +171,15 @@ export function RiskAlert({
       className="mx-auto max-w-[720px]"
       innerClassName="flex flex-col gap-4 p-6 small:flex-row small:items-center"
     >
-      <span className="grid size-12 shrink-0 place-items-center rounded-full bg-destructive/10 text-destructive">
+      <span className="bg-destructive/10 text-destructive grid size-12 shrink-0 place-items-center rounded-full">
         <TriangleAlert className="size-6" />
       </span>
       <div className="flex-1">
-        <p className="font-display text-lg font-bold text-foreground">
+        <p className="font-display text-foreground text-lg font-bold">
           {message}
         </p>
         {detail && (
-          <p className="mt-1 text-sm text-muted-foreground">{detail}</p>
+          <p className="text-muted-foreground mt-1 text-sm">{detail}</p>
         )}
       </div>
       <Button

@@ -7,33 +7,33 @@ import { Container } from "@/components/atoms/container";
 
 export function UtilityBar() {
   return (
-    <div className="hidden border-b border-border bg-surface-subtle text-muted-foreground medium:block">
+    <div className="border-border bg-surface-subtle text-muted-foreground medium:block hidden border-b">
       <Container>
         <div className="flex min-h-11 items-center justify-between text-sm">
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-6">
             <a
               href={SITE_CONTACT.phoneHref}
-              className="inline-flex items-center gap-1.5 font-medium tracking-tight transition-colors hover:text-foreground"
+              className="hover:text-foreground inline-flex items-center gap-1.5 font-medium tracking-tight transition-colors"
             >
               <Phone aria-hidden="true" className="size-4" />
               {SITE_CONTACT.phoneDisplay}
             </a>
-            <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+            <span className="text-muted-foreground inline-flex items-center gap-1.5">
               <Clock aria-hidden="true" className="size-4" />
               {SITE_CONTACT.hoursShort}
             </span>
           </div>
-          <nav aria-label="Linkuri utile" className="flex items-center gap-5">
+          <nav aria-label="Linkuri utile" className="flex items-center gap-6">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+              className="hover:text-foreground inline-flex items-center gap-1.5 transition-colors"
             >
               <MapPin aria-hidden="true" className="size-4" />
               Magazine DYLLU
             </Link>
             <Link
               href="/returnari"
-              className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+              className="hover:text-foreground inline-flex items-center gap-1.5 transition-colors"
             >
               <Wrench aria-hidden="true" className="size-4" />
               Service și piese de schimb

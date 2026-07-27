@@ -5,6 +5,7 @@ import { Filter } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { cn } from "@lib/utils";
+import { type CategoryNode } from "@lib/data/categories";
 import { Button } from "@/components/atoms/button";
 import {
   Sheet,
@@ -13,7 +14,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/atoms/sheet";
-import { Breadcrumbs, type BreadcrumbItem } from "@/components/molecules/breadcrumbs";
+import {
+  Breadcrumbs,
+  type BreadcrumbItem,
+} from "@/components/molecules/breadcrumbs";
 import RefinementList from "@modules/store/components/refinement-list";
 import SortProducts, {
   type SortOptions,
@@ -26,6 +30,7 @@ type Props = {
   sortBy: SortOptions;
   activeCategoryHandle?: string;
   childrenLinks?: { name: string; handle: string }[];
+  categories: CategoryNode[];
   children: React.ReactNode;
 };
 
@@ -36,6 +41,7 @@ export default function PlpShell({
   sortBy,
   activeCategoryHandle,
   childrenLinks,
+  categories,
   children,
 }: Props) {
   const router = useRouter();
@@ -54,38 +60,49 @@ export default function PlpShell({
   );
 
   return (
-    <div className="content-container py-8 small:py-12">
-      <div className="flex flex-col gap-3">
+    <div className="content-container small:py-12 py-8">
+      <div className="flex flex-col gap-4">
         <Breadcrumbs items={crumbs} />
-        <div className="flex flex-col gap-3 small:flex-row small:items-end small:justify-between">
+        <div className="small:flex-row small:items-end small:justify-between flex flex-col gap-4">
           <div>
             <h1
-              className="font-display text-display-sm font-extrabold tracking-tight text-foreground small:text-display-md"
-              data-testid={activeCategoryHandle ? "category-page-title" : "store-page-title"}
+              className="font-display text-display-sm text-foreground small:text-display-md font-extrabold tracking-tight"
+              data-testid={
+                activeCategoryHandle
+                  ? "category-page-title"
+                  : "store-page-title"
+              }
             >
               {title}
             </h1>
             {description && (
-              <p className="mt-2 max-w-2xl text-sm text-muted-foreground small:text-base">
+              <p className="text-muted-foreground small:text-base mt-2 max-w-2xl text-sm">
                 {description}
               </p>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <SortProducts sortBy={sortBy} setQueryParams={(_, v) => setQueryParams("sortBy", v)} />
+            <SortProducts
+              sortBy={sortBy}
+              setQueryParams={(_, v) => setQueryParams("sortBy", v)}
+            />
             <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" className="rounded-full small:hidden">
+                <Button variant="outline" className="small:hidden rounded-full">
                   <Filter className="size-4" /> Filtre
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="flex w-full max-w-sm flex-col gap-4 p-0">
-                <SheetHeader className="border-b border-border px-6 py-5">
+              <SheetContent
+                side="left"
+                className="flex w-full max-w-sm flex-col gap-4 p-0"
+              >
+                <SheetHeader className="border-border border-b px-6 py-6">
                   <SheetTitle>Filtre</SheetTitle>
                 </SheetHeader>
                 <div className="flex-1 overflow-y-auto p-6">
                   <RefinementList
                     sortBy={sortBy}
+                    categories={categories}
                     activeCategoryHandle={activeCategoryHandle}
                     className="static border-0 p-0 shadow-none"
                   />
@@ -95,13 +112,13 @@ export default function PlpShell({
           </div>
         </div>
         {childrenLinks && childrenLinks.length > 0 && (
-          <div className="-mx-1 mt-3 flex flex-wrap gap-1.5">
+          <div className="-mx-1 mt-4 flex flex-wrap gap-1.5">
             {childrenLinks.map((c) => (
               <a
                 key={c.handle}
                 href={`/categories/${c.handle}`}
                 className={cn(
-                  "rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/30 hover:bg-muted hover:text-foreground"
+                  "border-border bg-card text-muted-foreground hover:border-foreground/30 hover:bg-muted hover:text-foreground rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors"
                 )}
               >
                 {c.name}
@@ -111,10 +128,11 @@ export default function PlpShell({
         )}
       </div>
 
-      <div className="mt-8 grid gap-8 small:grid-cols-[260px_minmax(0,1fr)] small:gap-10">
-        <div className="hidden small:block">
+      <div className="small:grid-cols-[260px_minmax(0,1fr)] small:gap-12 mt-8 grid gap-8">
+        <div className="small:block hidden">
           <RefinementList
             sortBy={sortBy}
+            categories={categories}
             activeCategoryHandle={activeCategoryHandle}
             hideSort
           />

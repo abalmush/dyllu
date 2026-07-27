@@ -22,13 +22,15 @@ export async function GET(
     const products: Array<{
       id: string;
       handle: string;
-      metadata: Record<string, unknown> | null;
+      variants: Array<{
+        metadata: Record<string, unknown> | null;
+      }>;
     }> = [];
     const pageSize = 200;
     for (let skip = 0; ; skip += pageSize) {
       const { data } = await query.graph({
         entity: "product",
-        fields: ["id", "handle", "metadata"],
+        fields: ["id", "handle", "variants.metadata"],
         filters: { status: "published" },
         pagination: { skip, take: pageSize },
       });
@@ -41,11 +43,14 @@ export async function GET(
       charger: [],
     };
     for (const product of products) {
-      const metadata = product.metadata ?? {};
-      const parsedKind = AccessoryKindSchema.safeParse(metadata.accessory_kind);
-      if (!parsedKind.success || !types.includes(parsedKind.data)) continue;
-      if (metadata.platform !== platform) continue;
-      grouped[parsedKind.data].push(product.handle);
+      const kind = product.variants.flatMap((variant) => {
+        const metadata = variant.metadata ?? {};
+        if (metadata.platform !== platform) return [];
+        const parsedKind = AccessoryKindSchema.safeParse(metadata.power_source);
+        return parsedKind.success ? [parsedKind.data] : [];
+      })[0];
+      if (!kind || !types.includes(kind)) continue;
+      grouped[kind].push(product.handle);
     }
 
     res.setHeader(

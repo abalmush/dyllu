@@ -3,6 +3,8 @@
 import { sdk } from "@lib/config";
 import { HttpTypes } from "@medusajs/types";
 import { getAuthHeaders, getCartId } from "./cookies";
+import { retrieveCart } from "./cart";
+import { isShippingOptionAllowedForAddress } from "@lib/shipping/delivery-area";
 
 export const listCartShippingMethods = async () => {
   const cartId = await getCartId();
@@ -12,8 +14,8 @@ export const listCartShippingMethods = async () => {
     ...(await getAuthHeaders()),
   };
 
-  return sdk.client
-    .fetch<HttpTypes.StoreShippingOptionListResponse>(
+  const [response, cart] = await Promise.all([
+    sdk.client.fetch<HttpTypes.StoreShippingOptionListResponse>(
       `/store/shipping-options`,
       {
         method: "GET",
@@ -23,8 +25,13 @@ export const listCartShippingMethods = async () => {
         headers,
         cache: "no-store",
       }
-    )
-    .then(({ shipping_options }) => shipping_options);
+    ),
+    retrieveCart(),
+  ]);
+
+  return response.shipping_options.filter((option) =>
+    isShippingOptionAllowedForAddress(option, cart?.shipping_address)
+  );
 };
 
 export const calculatePriceForShippingOption = async (optionId: string) => {

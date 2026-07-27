@@ -86,18 +86,18 @@ export default function CartItemRow({
   return (
     <li
       className={cn(
-        "grid gap-4 border-b border-border py-5 last:border-b-0",
+        "border-border grid gap-4 border-b py-6 last:border-b-0",
         isPreview
           ? "grid-cols-[64px_1fr_auto]"
-          : "grid-cols-[88px_1fr] small:grid-cols-[120px_1fr_auto]"
+          : "small:grid-cols-[120px_1fr_auto] grid-cols-[88px_1fr]"
       )}
       data-testid="product-row"
     >
       <Link
         href={`/products/${item.product_handle}`}
         className={cn(
-          "clip-corner-cut-md relative aspect-square overflow-hidden bg-surface-subtle ring-1 ring-border",
-          isPreview ? "size-16" : "size-[88px] small:size-[120px]"
+          "clip-corner-cut-md bg-surface-subtle ring-border relative aspect-square overflow-hidden ring-1",
+          isPreview ? "size-16" : "small:size-[120px] size-[88px]"
         )}
       >
         {item.thumbnail && (
@@ -114,21 +114,21 @@ export default function CartItemRow({
       <div className="flex min-w-0 flex-col gap-1.5">
         <Link
           href={`/products/${item.product_handle}`}
-          className="line-clamp-2 text-sm font-semibold tracking-tight text-foreground hover:text-primary small:text-base"
+          className="text-foreground hover:text-primary small:text-base line-clamp-2 text-sm font-semibold tracking-tight"
           data-testid="product-title"
         >
           {item.product_title}
         </Link>
         {item.variant?.title && (
           <p
-            className="text-xs text-muted-foreground"
+            className="text-muted-foreground text-xs"
             data-testid="product-variant"
           >
             Variantă: {item.variant.title}
           </p>
         )}
         {!isPreview && (
-          <div className="mt-2 flex flex-wrap items-center gap-3">
+          <div className="mt-2 flex flex-wrap items-center gap-4">
             <QuantityStepper
               value={quantity}
               onChange={handleQty}
@@ -141,7 +141,7 @@ export default function CartItemRow({
               onClick={handleRemove}
               disabled={removing || updating}
               data-testid="product-delete-button"
-              className="inline-flex items-center gap-1.5 px-0 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
+              className="text-muted-foreground hover:text-destructive inline-flex items-center gap-1.5 px-0 py-1.5 text-xs font-medium transition-colors disabled:opacity-50"
             >
               {removing ? (
                 <Loader2 className="size-3.5 animate-spin" />
@@ -151,7 +151,7 @@ export default function CartItemRow({
               Șterge
             </button>
             {updating && !removing && (
-              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+              <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
                 <Loader2 className="size-3 animate-spin" />
                 actualizez
               </span>
@@ -165,11 +165,11 @@ export default function CartItemRow({
       <div
         className={cn(
           "flex flex-col items-end justify-center gap-1 text-right",
-          isPreview ? "" : "col-span-2 small:col-span-1"
+          isPreview ? "" : "small:col-span-1 col-span-2"
         )}
       >
         {isPreview ? (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {item.quantity}×{" "}
             {convertToLocale({
               amount: unitPrice,
@@ -179,7 +179,7 @@ export default function CartItemRow({
         ) : null}
         {onSale && (
           <p
-            className="text-xs text-muted-foreground line-through"
+            className="text-muted-foreground text-xs line-through"
             data-testid="product-original-price"
           >
             {convertToLocale({ amount: original, currency_code: currencyCode })}

@@ -73,7 +73,7 @@ export function NewsletterForm({ className, invert }: NewsletterFormProps) {
           if (error) setError("");
         }}
         className={cn(
-          "h-12 w-full rounded-full border-2 px-5",
+          "h-12 w-full rounded-full border-2 px-6",
           invert &&
             "border-background/30 bg-background/10 text-background placeholder:text-background/60 focus-visible:ring-background"
         )}

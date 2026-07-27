@@ -18,7 +18,7 @@ export function PromoBanner() {
         </h2>
         <Link
           href="/store"
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground text-sm"
         >
           Vezi tot
         </Link>
@@ -28,19 +28,19 @@ export function PromoBanner() {
           <Link
             key={promo.slug}
             href={`/c/${promo.slug}`}
-            className="group flex flex-col justify-between gap-6 rounded-2xl border border-border bg-muted/30 p-5 transition-colors hover:border-primary/50 hover:bg-muted/60"
+            className="group border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/60 flex flex-col justify-between gap-6 rounded-2xl border p-6 transition-colors"
           >
             <div className="space-y-1">
               <h3 className="font-display text-lg font-semibold">
                 {promo.title}
               </h3>
               {promo.subtitle && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {promo.subtitle}
                 </p>
               )}
             </div>
-            <span className="inline-flex items-center gap-1.5 text-base font-semibold text-brand-800">
+            <span className="text-brand-800 inline-flex items-center gap-1.5 text-base font-semibold">
               Explorează
               <ArrowRight
                 aria-hidden="true"

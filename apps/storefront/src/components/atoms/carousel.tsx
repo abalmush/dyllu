@@ -182,10 +182,10 @@ export const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute size-10 rounded-full shadow-md backdrop-blur",
+        "absolute size-10 rounded-full shadow-md backdrop-blur-sm",
         orientation === "horizontal"
-          ? "left-4 top-1/2 -translate-y-1/2"
-          : "left-1/2 top-4 -translate-x-1/2 rotate-90",
+          ? "top-1/2 left-4 -translate-y-1/2"
+          : "top-4 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
       disabled={!canScrollPrev}
@@ -193,7 +193,7 @@ export const CarouselPrevious = React.forwardRef<
       {...props}
     >
       <ArrowLeft className="size-4" />
-      <span className="sr-only">Previous slide</span>
+      <span className="sr-only">Imaginea precedentă</span>
     </Button>
   );
 });
@@ -210,9 +210,9 @@ export const CarouselNext = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute size-10 rounded-full shadow-md backdrop-blur",
+        "absolute size-10 rounded-full shadow-md backdrop-blur-sm",
         orientation === "horizontal"
-          ? "right-4 top-1/2 -translate-y-1/2"
+          ? "top-1/2 right-4 -translate-y-1/2"
           : "bottom-4 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
@@ -221,7 +221,7 @@ export const CarouselNext = React.forwardRef<
       {...props}
     >
       <ArrowRight className="size-4" />
-      <span className="sr-only">Next slide</span>
+      <span className="sr-only">Imaginea următoare</span>
     </Button>
   );
 });
@@ -231,38 +231,38 @@ type CarouselDotsProps = React.HTMLAttributes<HTMLDivElement> & {
   tone?: "light" | "dark";
 };
 
-export const CarouselDots = React.forwardRef<
-  HTMLDivElement,
-  CarouselDotsProps
->(({ className, tone = "light", ...props }, ref) => {
-  const { scrollSnaps, selectedIndex, scrollTo } = useCarousel();
-  const activeClass =
-    tone === "dark" ? "bg-background" : "bg-foreground";
-  const inactiveClass =
-    tone === "dark"
-      ? "bg-background/30 hover:bg-background/60"
-      : "bg-foreground/20 hover:bg-foreground/40";
-  return (
-    <div
-      ref={ref}
-      className={cn("flex items-center justify-center gap-2", className)}
-      {...props}
-    >
-      {scrollSnaps.map((_, index) => (
-        <button
-          key={index}
-          type="button"
-          aria-label={`Go to slide ${index + 1}`}
-          onClick={() => scrollTo(index)}
-          className={cn(
-            "h-2 rounded-full transition-all duration-300",
-            index === selectedIndex ? `w-8 ${activeClass}` : `w-2 ${inactiveClass}`
-          )}
-        />
-      ))}
-    </div>
-  );
-});
+export const CarouselDots = React.forwardRef<HTMLDivElement, CarouselDotsProps>(
+  ({ className, tone = "light", ...props }, ref) => {
+    const { scrollSnaps, selectedIndex, scrollTo } = useCarousel();
+    const activeClass = tone === "dark" ? "bg-background" : "bg-foreground";
+    const inactiveClass =
+      tone === "dark"
+        ? "bg-background/30 hover:bg-background/60"
+        : "bg-foreground/20 hover:bg-foreground/40";
+    return (
+      <div
+        ref={ref}
+        className={cn("flex items-center justify-center gap-2", className)}
+        {...props}
+      >
+        {scrollSnaps.map((_, index) => (
+          <button
+            key={index}
+            type="button"
+            aria-label={`Mergi la imaginea ${index + 1}`}
+            onClick={() => scrollTo(index)}
+            className={cn(
+              "h-2 rounded-full transition-all duration-300",
+              index === selectedIndex
+                ? `w-8 ${activeClass}`
+                : `w-2 ${inactiveClass}`
+            )}
+          />
+        ))}
+      </div>
+    );
+  }
+);
 CarouselDots.displayName = "CarouselDots";
 
 export type { CarouselApi };

@@ -19,9 +19,9 @@ const CheckboxWithLabel: React.FC<CheckboxProps> = ({
   const id = React.useId();
 
   return (
-    <div className="clip-corner-cut-sm flex items-start gap-3 bg-surface-subtle/60 p-4 ring-1 ring-border">
+    <div className="clip-corner-cut-sm bg-surface-subtle/60 ring-border flex items-center gap-4 p-4 ring-1">
       <Checkbox
-        className="mt-0.5 rounded-none"
+        className="rounded-none"
         id={id}
         role="checkbox"
         type="button"
@@ -33,7 +33,7 @@ const CheckboxWithLabel: React.FC<CheckboxProps> = ({
       />
       <Label
         htmlFor={id}
-        className="text-sm font-medium leading-5 tracking-tight text-foreground"
+        className="text-foreground text-sm leading-5 font-medium tracking-tight"
         size="large"
       >
         {label}

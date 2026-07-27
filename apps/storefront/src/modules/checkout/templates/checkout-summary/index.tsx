@@ -22,59 +22,57 @@ const CheckoutSummary = ({
     activeStep === "review" && (cart.shipping_methods?.length ?? 0) > 0;
 
   return (
-    <aside className="clip-corner-cut-lg clip-shadow-md sticky top-28 flex flex-col gap-6 bg-card p-6 ring-1 ring-border">
+    <aside className="clip-corner-cut-lg clip-shadow-md bg-card ring-border sticky top-28 flex flex-col gap-6 p-6 ring-1">
       <div className="space-y-2">
-        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="text-muted-foreground text-xs font-semibold tracking-[0.16em] uppercase">
           Comandă DYLLU
         </span>
-        <h2 className="font-display text-xl font-bold tracking-tight text-foreground">
+        <h2 className="font-display text-foreground text-xl font-bold tracking-tight">
           {isReview ? "Sumar final" : "Comanda ta"}
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {isReview
             ? "Revizuiește totalurile finale și aplică un cod promoțional dacă este cazul."
             : "Verifică produsele și totalurile înainte să plasezi comanda."}
         </p>
       </div>
 
-      {!isReview && (
-        <div className="clip-corner-cut-md bg-surface-subtle/60 p-4 ring-1 ring-border/70">
-          <div className="mb-4 flex items-baseline justify-between gap-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Produse în comandă
-            </span>
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              {items?.length ?? 0} {items?.length === 1 ? "produs" : "produse"}
-            </span>
-          </div>
-          <ul>
-            {items?.map((item) => (
-              <Item
-                key={item.id}
-                item={item}
-                type="preview"
-                currencyCode={cart.currency_code}
-              />
-            ))}
-          </ul>
+      <div className="clip-corner-cut-md bg-surface-subtle/60 ring-border/70 p-4 ring-1">
+        <div className="mb-4 flex items-baseline justify-between gap-4">
+          <span className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
+            Produse în comandă
+          </span>
+          <span className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
+            {items?.length ?? 0} {items?.length === 1 ? "produs" : "produse"}
+          </span>
         </div>
-      )}
+        <ul>
+          {items?.map((item) => (
+            <Item
+              key={item.id}
+              item={item}
+              type="preview"
+              currencyCode={cart.currency_code}
+            />
+          ))}
+        </ul>
+      </div>
 
-      <div className="clip-corner-cut-md bg-background/80 p-4 ring-1 ring-border/70">
+      <div className="clip-corner-cut-md bg-background/80 ring-border/70 p-4 ring-1">
         <CartTotals totals={cart} />
       </div>
 
-      <div className="clip-corner-cut-md bg-surface-subtle/60 p-4 ring-1 ring-border/70">
+      <div className="clip-corner-cut-md bg-surface-subtle/60 ring-border/70 p-4 ring-1">
         <DiscountCode cart={cart} />
       </div>
 
-      <ul className="clip-corner-cut-md flex flex-col gap-3 bg-surface-subtle/60 p-4 text-xs text-muted-foreground ring-1 ring-border/70">
+      <ul className="clip-corner-cut-md bg-surface-subtle/60 text-muted-foreground ring-border/70 flex flex-col gap-4 p-4 text-xs ring-1">
         <li className="flex items-center gap-2">
-          <ShieldCheck className="size-3.5 text-success" />
+          <ShieldCheck className="text-success size-3.5" />
           Detaliile de plată se confirmă împreună cu echipa DYLLU
         </li>
         <li className="flex items-center gap-2">
-          <Truck className="size-3.5 text-primary" />
+          <Truck className="text-primary size-3.5" />
           Livrare în toată Moldova · costul final se confirmă la pasul de
           livrare
         </li>

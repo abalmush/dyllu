@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getCategoryByHandle } from "@lib/data/categories";
+import { getCategoryByHandle, getCategoryTree } from "@lib/data/categories";
 import { listProducts } from "@lib/data/products";
 import { buildSocialMetadata, getProductSocialImage } from "@/lib/seo/metadata";
 import CategoryTemplate from "@modules/categories/templates";
@@ -57,15 +57,21 @@ export default async function CategoryPage(props: Props) {
   const params = await props.params;
   const { sortBy, page } = searchParams;
 
-  const productCategory = await getCategoryByHandle(params.category).catch(
-    () => null
-  );
+  const [productCategory, categories] = await Promise.all([
+    getCategoryByHandle(params.category).catch(() => null),
+    getCategoryTree(),
+  ]);
 
   if (!productCategory) {
     notFound();
   }
 
   return (
-    <CategoryTemplate category={productCategory} sortBy={sortBy} page={page} />
+    <CategoryTemplate
+      category={productCategory}
+      sortBy={sortBy}
+      page={page}
+      categories={categories}
+    />
   );
 }

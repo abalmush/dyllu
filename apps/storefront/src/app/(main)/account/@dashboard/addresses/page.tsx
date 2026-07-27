@@ -25,7 +25,7 @@ export default async function Addresses() {
         <h1 className="text-2xl-semi">Adrese de livrare</h1>
         <p className="text-base-regular">
           Vezi și actualizează adresele de livrare. Poți salva mai multe adrese,
-          iar acestea vor fi disponibile automat la checkout.
+          iar acestea vor fi disponibile automat la finalizarea comenzii.
         </p>
       </div>
       <AddressBook customer={customer} region={region} />

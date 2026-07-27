@@ -22,18 +22,18 @@ const CONVERSATION: ChatTurn[] = [
 
 export function CheckoutCopilot() {
   return (
-    <div className="clip-corner-cut-lg mx-auto flex max-w-[560px] flex-col bg-card ring-1 ring-border">
-      <div className="flex items-center gap-2 border-b border-border p-4">
-        <span className="grid size-8 place-items-center rounded-full bg-primary/10 text-primary">
+    <div className="clip-corner-cut-lg bg-card ring-border mx-auto flex max-w-[560px] flex-col ring-1">
+      <div className="border-border flex items-center gap-2 border-b p-4">
+        <span className="bg-primary/10 text-primary grid size-8 place-items-center rounded-full">
           <Sparkles className="size-4" />
         </span>
         <div>
-          <p className="text-sm font-bold text-foreground">Copilot DYLLU</p>
-          <p className="text-xs text-success">Online · răspunde imediat</p>
+          <p className="text-foreground text-sm font-bold">Copilot DYLLU</p>
+          <p className="text-success text-xs">Online · răspunde imediat</p>
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 p-4">
+      <div className="flex flex-col gap-4 p-4">
         {CONVERSATION.map((turn, i) => (
           <div
             key={i}
@@ -60,18 +60,18 @@ export function CheckoutCopilot() {
         {SUGGESTIONS.map((suggestion) => (
           <span
             key={suggestion}
-            className="clip-corner-cut-xs border border-border px-3 py-1.5 text-xs font-medium text-foreground"
+            className="clip-corner-cut-xs border-border text-foreground border px-4 py-1.5 text-xs font-medium"
           >
             {suggestion}
           </span>
         ))}
       </div>
 
-      <div className="m-4 flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2">
-        <span className="flex-1 text-sm text-muted-foreground">
+      <div className="border-border bg-background m-4 flex items-center gap-2 rounded-full border px-4 py-2">
+        <span className="text-muted-foreground flex-1 text-sm">
           Întreabă orice despre proiectul tău…
         </span>
-        <span className="grid size-8 place-items-center rounded-full bg-foreground text-background">
+        <span className="bg-foreground text-background grid size-8 place-items-center rounded-full">
           <ArrowUp className="size-4" />
         </span>
       </div>

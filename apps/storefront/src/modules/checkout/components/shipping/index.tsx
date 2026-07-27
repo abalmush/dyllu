@@ -13,6 +13,20 @@ import MedusaRadio from "@modules/common/components/radio";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+function getFreeShippingThreshold(option: HttpTypes.StoreCartShippingOption) {
+  const freePrice = option.prices.find(
+    (price) =>
+      price.amount === 0 &&
+      price.price_rules?.some((rule) => rule.attribute === "item_total")
+  );
+  const rule = freePrice?.price_rules?.find(
+    (priceRule) => priceRule.attribute === "item_total"
+  );
+  const threshold = Number(rule?.value);
+
+  return Number.isFinite(threshold) ? threshold : null;
+}
+
 const PICKUP_OPTION_ON = "__PICKUP_ON";
 const PICKUP_OPTION_OFF = "__PICKUP_OFF";
 const EMPTY_CALCULATED_PRICES: Record<string, number> = {};
@@ -196,18 +210,18 @@ const Shipping: React.FC<ShippingProps> = ({
   }
 
   return (
-    <section className="clip-corner-cut-lg clip-shadow-md bg-card p-6 ring-1 ring-border small:p-8">
+    <section className="clip-corner-cut-lg clip-shadow-md bg-card ring-border small:p-8 p-6 ring-1">
       <div className="mb-6 flex flex-row items-center justify-between gap-4">
         <div className="space-y-2">
-          <Text className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          <Text className="text-muted-foreground text-xs font-semibold tracking-[0.16em] uppercase">
             Pasul 2
           </Text>
           <Heading
             level="h2"
             className={clx(
-              "flex flex-row items-baseline gap-x-2 font-display text-xl font-bold tracking-tight text-foreground",
+              "font-display text-foreground flex flex-row items-baseline gap-x-2 text-xl font-bold tracking-tight",
               {
-                "pointer-events-none select-none opacity-50":
+                "pointer-events-none opacity-50 select-none":
                   !isOpen && cart.shipping_methods?.length === 0,
               }
             )}
@@ -218,7 +232,7 @@ const Shipping: React.FC<ShippingProps> = ({
             )}
           </Heading>
           {isOpen && (
-            <Text className="text-sm text-muted-foreground">
+            <Text className="text-muted-foreground text-sm">
               Alege varianta de livrare sau ridicare care se potrivește cel mai
               bine comenzii tale.
             </Text>
@@ -231,7 +245,7 @@ const Shipping: React.FC<ShippingProps> = ({
             <Text>
               <button
                 onClick={handleEdit}
-                className="text-sm font-semibold text-primary transition-colors hover:text-primary/80"
+                className="text-primary hover:text-primary/80 text-sm font-semibold transition-colors"
                 data-testid="edit-delivery-button"
               >
                 Editează
@@ -242,11 +256,11 @@ const Shipping: React.FC<ShippingProps> = ({
       {isOpen ? (
         <>
           <div className="grid gap-4">
-            <div className="clip-corner-cut-md flex flex-col bg-surface-subtle/60 p-4 ring-1 ring-border/70">
-              <span className="text-sm font-semibold tracking-tight text-foreground">
+            <div className="clip-corner-cut-md bg-surface-subtle/60 ring-border/70 flex flex-col p-4 ring-1">
+              <span className="text-foreground text-sm font-semibold tracking-tight">
                 Metodă de livrare
               </span>
-              <span className="mt-1 text-sm text-muted-foreground">
+              <span className="text-muted-foreground mt-1 text-sm">
                 Alege cum vrei să primești comanda.
               </span>
             </div>
@@ -269,9 +283,9 @@ const Shipping: React.FC<ShippingProps> = ({
                       value={PICKUP_OPTION_ON}
                       data-testid="delivery-option-radio"
                       className={clx(
-                        "mb-3 flex cursor-pointer items-center justify-between rounded-2xl border border-border bg-background px-5 py-4 transition-colors hover:border-foreground/30 hover:bg-surface-subtle",
+                        "border-border bg-background hover:border-foreground/30 hover:bg-surface-subtle mb-4 flex cursor-pointer items-center justify-between rounded-2xl border px-6 py-4 transition-colors",
                         {
-                          "border-foreground bg-surface-subtle ring-1 ring-foreground/10":
+                          "border-foreground bg-surface-subtle ring-foreground/10 ring-1":
                             showPickupOptions === PICKUP_OPTION_ON,
                         }
                       )}
@@ -280,11 +294,11 @@ const Shipping: React.FC<ShippingProps> = ({
                         <MedusaRadio
                           checked={showPickupOptions === PICKUP_OPTION_ON}
                         />
-                        <span className="text-sm font-semibold tracking-tight text-foreground">
+                        <span className="text-foreground text-sm font-semibold tracking-tight">
                           Ridicare din showroom
                         </span>
                       </div>
-                      <span className="text-sm font-semibold text-foreground">
+                      <span className="text-foreground text-sm font-semibold">
                         -
                       </span>
                     </Radio>
@@ -303,6 +317,8 @@ const Shipping: React.FC<ShippingProps> = ({
                       option.price_type === "calculated" &&
                       !isLoadingPrices &&
                       typeof calculatedPricesMap[option.id] !== "number";
+                    const freeShippingThreshold =
+                      getFreeShippingThreshold(option);
 
                     return (
                       <Radio
@@ -311,24 +327,35 @@ const Shipping: React.FC<ShippingProps> = ({
                         data-testid="delivery-option-radio"
                         disabled={isDisabled}
                         className={clx(
-                          "mb-3 flex cursor-pointer items-center justify-between rounded-2xl border border-border bg-background px-5 py-4 transition-colors hover:border-foreground/30 hover:bg-surface-subtle",
+                          "border-border bg-background hover:border-foreground/30 hover:bg-surface-subtle mb-4 flex cursor-pointer items-center justify-between rounded-2xl border px-6 py-4 transition-colors",
                           {
-                            "border-foreground bg-surface-subtle ring-1 ring-foreground/10":
+                            "border-foreground bg-surface-subtle ring-foreground/10 ring-1":
                               option.id === shippingMethodId,
-                            "cursor-not-allowed opacity-60 hover:border-border hover:bg-background":
+                            "hover:border-border hover:bg-background cursor-not-allowed opacity-60":
                               isDisabled,
                           }
                         )}
                       >
-                        <div className="flex items-center gap-x-4">
+                        <div className="flex items-start gap-x-4">
                           <MedusaRadio
                             checked={option.id === shippingMethodId}
                           />
-                          <span className="text-sm font-semibold tracking-tight text-foreground">
-                            {option.name}
+                          <span className="flex flex-col">
+                            <span className="text-foreground text-sm font-semibold tracking-tight">
+                              {option.name}
+                            </span>
+                            {freeShippingThreshold !== null && (
+                              <span className="text-muted-foreground mt-1 text-xs">
+                                Gratuit de la{" "}
+                                {convertToLocale({
+                                  amount: freeShippingThreshold,
+                                  currency_code: cart.currency_code,
+                                })}
+                              </span>
+                            )}
                           </span>
                         </div>
-                        <span className="text-sm font-semibold text-foreground">
+                        <span className="text-foreground text-sm font-semibold">
                           {option.price_type === "flat" ? (
                             convertToLocale({
                               amount: option.amount!,
@@ -356,11 +383,11 @@ const Shipping: React.FC<ShippingProps> = ({
 
           {showPickupOptions === PICKUP_OPTION_ON && (
             <div className="grid gap-4">
-              <div className="clip-corner-cut-md flex flex-col bg-surface-subtle/60 p-4 ring-1 ring-border/70">
-                <span className="text-sm font-semibold tracking-tight text-foreground">
+              <div className="clip-corner-cut-md bg-surface-subtle/60 ring-border/70 flex flex-col p-4 ring-1">
+                <span className="text-foreground text-sm font-semibold tracking-tight">
                   Magazin
                 </span>
-                <span className="mt-1 text-sm text-muted-foreground">
+                <span className="text-muted-foreground mt-1 text-sm">
                   Alege punctul de ridicare cel mai convenabil.
                 </span>
               </div>
@@ -382,11 +409,11 @@ const Shipping: React.FC<ShippingProps> = ({
                           disabled={option.insufficient_inventory}
                           data-testid="delivery-option-radio"
                           className={clx(
-                            "mb-3 flex cursor-pointer items-center justify-between rounded-2xl border border-border bg-background px-5 py-4 transition-colors hover:border-foreground/30 hover:bg-surface-subtle",
+                            "border-border bg-background hover:border-foreground/30 hover:bg-surface-subtle mb-4 flex cursor-pointer items-center justify-between rounded-2xl border px-6 py-4 transition-colors",
                             {
-                              "border-foreground bg-surface-subtle ring-1 ring-foreground/10":
+                              "border-foreground bg-surface-subtle ring-foreground/10 ring-1":
                                 option.id === shippingMethodId,
-                              "cursor-not-allowed opacity-60 hover:border-border hover:bg-background":
+                              "hover:border-border hover:bg-background cursor-not-allowed opacity-60":
                                 option.insufficient_inventory,
                             }
                           )}
@@ -396,15 +423,15 @@ const Shipping: React.FC<ShippingProps> = ({
                               checked={option.id === shippingMethodId}
                             />
                             <div className="flex flex-col">
-                              <span className="text-sm font-semibold tracking-tight text-foreground">
+                              <span className="text-foreground text-sm font-semibold tracking-tight">
                                 {option.name}
                               </span>
-                              <span className="text-sm text-muted-foreground">
+                              <span className="text-muted-foreground text-sm">
                                 {formatAddress(getPickupAddress(option))}
                               </span>
                             </div>
                           </div>
-                          <span className="text-sm font-semibold text-foreground">
+                          <span className="text-foreground text-sm font-semibold">
                             {convertToLocale({
                               amount: option.amount!,
                               currency_code: cart?.currency_code,
@@ -437,14 +464,14 @@ const Shipping: React.FC<ShippingProps> = ({
           </div>
         </>
       ) : (
-        <div className="clip-corner-cut-md bg-surface-subtle/60 p-5 ring-1 ring-border/70">
+        <div className="clip-corner-cut-md bg-surface-subtle/60 ring-border/70 p-6 ring-1">
           <div className="text-sm">
             {cart && (cart.shipping_methods?.length ?? 0) > 0 && (
               <div className="flex flex-col">
-                <Text className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <Text className="text-muted-foreground mb-1 text-xs font-semibold tracking-[0.18em] uppercase">
                   Metodă selectată
                 </Text>
-                <Text className="text-sm text-foreground">
+                <Text className="text-foreground text-sm">
                   {cart.shipping_methods!.at(-1)!.name}{" "}
                   {convertToLocale({
                     amount: cart.shipping_methods!.at(-1)!.amount!,

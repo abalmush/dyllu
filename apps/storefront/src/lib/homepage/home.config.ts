@@ -1,49 +1,52 @@
 import type { HomepageBlock, PromoCardData } from "@/lib/homepage/types";
 
-const SPRING_PROMOS: PromoCardData[] = [
+const HOMEPAGE_PROMOS: PromoCardData[] = [
   {
-    eyebrow: "Săptămâna sculelor electrice",
-    title: "Până la −30% la scule electrice profesionale",
+    eyebrow: "Platforma DYLLU cu acumulator",
+    title: "Scule fără cablu, gata de lucru",
     description:
-      "Bormașini, polizoare, multi-tool. Garanție 2 ani, livrare în toată Moldova.",
-    ctaLabel: "Vezi ofertele",
-    href: "/store",
+      "Descoperă toate sculele cu acumulator pentru atelier, șantier, grădină sau casă.",
+    ctaLabel: "Vezi sculele cu acumulator",
+    href: "/collections/scule-cu-acumulator",
     variant: "image",
-    imageUrl:
-      "/images/dyllu-dyllu-cordless-2-pieces-combo-kit-dtck20273-power-tool-combo-kit-1209174688.webp",
+    imageUrl: "/images/home/hero-combo-kit.webp",
   },
   {
-    eyebrow: "Sezon de primăvară",
-    title: "Pregătește grădina",
-    description: "Inventar de grădină gata de lucru, în stoc.",
-    ctaLabel: "Vezi accesoriile",
-    href: "/categories/gradinarit",
-    variant: "primary",
+    eyebrow: "Atelier de lemn",
+    title: "Taie, ajustează, finisează",
+    ctaLabel: "Vezi sculele",
+    href: "/categories/scule-pentru-lemn",
+    variant: "image",
+    imageUrl: "/images/home/story-woodworking.webp",
   },
   {
-    eyebrow: "Pachet contractor",
-    title: "EIP la preț de volum",
-    description: "Discounturi pentru companii și ateliere.",
-    ctaLabel: "Solicită ofertă",
-    href: "/contact",
-    variant: "dark",
+    eyebrow: "Prelucrarea metalului",
+    title: "Taie, șlefuiește, sudează",
+    ctaLabel: "Vezi sculele pentru metal",
+    href: "/categories/scule-pentru-metal",
+    variant: "image",
+    imageUrl: "/images/home/story-auto-service.webp",
   },
 ];
 
 export const homeBlocks: HomepageBlock[] = [
-  { id: "hero", type: "promo-mosaic", promos: SPRING_PROMOS },
+  { id: "hero", type: "promo-mosaic", promos: HOMEPAGE_PROMOS },
   { id: "families", type: "tool-families" },
   {
     id: "bestsellers",
     type: "product-rail",
-    source: { kind: "bestsellers", limit: 8 },
-    eyebrow: "Cele mai vândute",
-    title: "Alese de profesioniști",
-    viewAllHref: "/store",
-    viewAllLabel: "Vezi toate produsele",
+    source: {
+      kind: "collection",
+      collectionHandle: "scule-cu-acumulator",
+      limit: 6,
+      selection: "diverse-random",
+    },
+    eyebrow: "Scule cu acumulator",
+    title: "Descoperă gama DYLLU",
+    viewAllHref: "/collections/scule-cu-acumulator",
+    viewAllLabel: "Vezi toate sculele",
   },
   { id: "trust", type: "trust-band" },
-  { id: "guides", type: "guides-grid" },
-  { id: "customers", type: "customer-projects" },
+  { id: "stories", type: "shop-stories" },
   { id: "newsletter", type: "newsletter-band" },
 ];

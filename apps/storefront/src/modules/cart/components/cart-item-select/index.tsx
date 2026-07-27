@@ -40,7 +40,7 @@ const CartItemSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
           onFocus={() => innerRef.current?.focus()}
           onBlur={() => innerRef.current?.blur()}
           className={clx(
-            "group txt-compact-small relative flex items-center border text-ui-fg-base",
+            "group txt-compact-small text-ui-fg-base relative flex items-center border",
             className,
             {
               "text-ui-fg-subtle": isPlaceholder,
@@ -51,7 +51,7 @@ const CartItemSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
             ref={innerRef}
             aria-label={props["aria-label"] ?? "Cantitate"}
             {...props}
-            className="h-16 w-16 appearance-none items-center justify-center border-none bg-transparent px-4 outline-none transition-colors duration-150 focus:border-gray-700"
+            className="h-16 w-16 appearance-none items-center justify-center border-none bg-transparent px-4 outline-hidden transition-colors duration-150 focus:border-gray-700"
           >
             <option disabled value="">
               {placeholder}

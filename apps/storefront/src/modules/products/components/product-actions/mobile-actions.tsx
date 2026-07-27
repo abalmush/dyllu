@@ -15,6 +15,7 @@ import {
   SheetTitle,
 } from "@/components/atoms/sheet";
 import { PriceBlock } from "@/components/molecules/price-block";
+import { getVariantDisplayTitle } from "@modules/products/lib/product-presentation";
 
 import OptionSelect from "./option-select";
 import ConfigurationSelect from "./configuration-select";
@@ -59,18 +60,18 @@ export default function MobileActions({
     <>
       <div
         className={cn(
-          "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 shadow-[0_-12px_30px_-15px_rgba(15,23,42,0.25)] backdrop-blur transition-transform duration-300 small:hidden",
+          "border-border bg-background/95 small:hidden fixed inset-x-0 bottom-0 z-40 border-t px-4 pt-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] shadow-[0_-12px_30px_-15px_rgba(15,23,42,0.25)] backdrop-blur-sm transition-transform duration-300",
           show ? "translate-y-0" : "pointer-events-none translate-y-full"
         )}
         data-testid="mobile-actions"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <div className="min-w-0 flex-1">
             <p
-              className="line-clamp-1 text-xs font-medium text-muted-foreground"
+              className="text-muted-foreground line-clamp-1 text-xs font-medium"
               data-testid="mobile-title"
             >
-              {product.title}
+              {getVariantDisplayTitle(product, variant)}
             </p>
             {price && <PriceBlock price={price} size="md" />}
           </div>
@@ -135,6 +136,7 @@ export default function MobileActions({
               ) : (
                 <OptionSelect
                   key={option.id}
+                  product={product}
                   option={option}
                   current={options[option.id]}
                   updateOption={updateOptions}

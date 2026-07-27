@@ -29,21 +29,21 @@ function CinematicMobile({ items }: { items: Item[] }) {
   return (
     <div className="medium:hidden">
       <div className="content-container py-12">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+        <span className="text-2xs text-primary font-semibold tracking-[0.18em] uppercase">
           Cinematic
         </span>
-        <h2 className="mt-2 font-display text-display-sm font-extrabold tracking-tight">
+        <h2 className="font-display text-display-sm mt-2 font-extrabold tracking-tight">
           Categorii populare
         </h2>
       </div>
-      <div className="flex flex-col gap-3 px-4 pb-12">
+      <div className="flex flex-col gap-4 px-4 pb-12">
         {items.map((cat) => {
           const visual = getCategoryVisual(cat.handle);
           return (
             <Link
               key={cat.handle}
               href={`/categories/${cat.handle}`}
-              className="clip-corner-cut-md relative flex h-64 flex-col justify-end overflow-hidden p-5"
+              className="clip-corner-cut-md relative flex h-64 flex-col justify-end overflow-hidden p-6"
               style={{
                 backgroundImage: `url(${visual.image})`,
                 backgroundSize: "cover",
@@ -52,18 +52,18 @@ function CinematicMobile({ items }: { items: Item[] }) {
             >
               <span
                 aria-hidden
-                className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-foreground/40 to-transparent"
+                className="from-foreground/85 via-foreground/40 absolute inset-0 bg-linear-to-t to-transparent"
               />
-              <div className="relative z-[1] flex items-end justify-between gap-3">
+              <div className="relative z-1 flex items-end justify-between gap-4">
                 <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">
+                  <span className="text-2xs text-primary font-semibold tracking-[0.18em] uppercase">
                     {visual.kicker}
                   </span>
-                  <h3 className="mt-1 font-display text-2xl font-bold leading-tight">
+                  <h3 className="font-display mt-1 text-2xl leading-tight font-bold">
                     {cat.name}
                   </h3>
                 </div>
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
+                <span className="bg-primary text-primary-foreground grid size-9 shrink-0 place-items-center rounded-full">
                   <ArrowRight className="size-4" />
                 </span>
               </div>
@@ -99,7 +99,7 @@ function CinematicDesktop({ items }: { items: Item[] }) {
 
   return (
     <div
-      className="relative hidden h-screen w-full overflow-hidden medium:block"
+      className="medium:block relative hidden h-screen w-full overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -124,22 +124,22 @@ function CinematicDesktop({ items }: { items: Item[] }) {
           >
             <span
               aria-hidden
-              className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/45 to-transparent"
+              className="from-foreground/90 via-foreground/45 absolute inset-0 bg-linear-to-t to-transparent"
             />
-            <div className="content-container relative z-[1] flex h-full items-end pb-24">
+            <div className="content-container relative z-1 flex h-full items-end pb-24">
               <div className="flex max-w-2xl flex-col gap-4">
-                <span className="inline-flex w-fit rounded-full bg-primary/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+                <span className="bg-primary/20 text-2xs text-primary inline-flex w-fit rounded-full px-4 py-1 font-semibold tracking-[0.18em] uppercase">
                   {visual.kicker}
                 </span>
-                <h2 className="font-display text-display-lg font-extrabold leading-[0.95] tracking-tight">
+                <h2 className="font-display text-display-lg leading-[0.95] font-extrabold tracking-tight">
                   {cat.name}
                 </h2>
-                <p className="max-w-md text-base text-background/75">
+                <p className="text-background/75 max-w-md text-base">
                   {visual.description}
                 </p>
                 <Link
                   href={`/categories/${cat.handle}`}
-                  className="mt-2 inline-flex w-fit items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.02]"
+                  className="bg-primary text-primary-foreground mt-2 inline-flex w-fit items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-transform hover:scale-[1.02]"
                 >
                   Vezi categoria
                   <ArrowRight className="size-4" />
@@ -150,7 +150,7 @@ function CinematicDesktop({ items }: { items: Item[] }) {
         );
       })}
 
-      <div className="absolute bottom-8 left-1/2 z-[2] flex -translate-x-1/2 items-center gap-2">
+      <div className="absolute bottom-8 left-1/2 z-2 flex -translate-x-1/2 items-center gap-2">
         {items.map((cat, idx) => {
           const isActive = idx === active;
           return (
@@ -162,7 +162,7 @@ function CinematicDesktop({ items }: { items: Item[] }) {
               onClick={() => setActive(idx)}
               className={cn(
                 "relative h-1.5 overflow-hidden rounded-full transition-all duration-500",
-                isActive ? "w-12 bg-background/25" : "w-5 bg-background/30"
+                isActive ? "bg-background/25 w-12" : "bg-background/30 w-5"
               )}
             >
               {isActive && !reducedMotion && (
@@ -174,7 +174,7 @@ function CinematicDesktop({ items }: { items: Item[] }) {
                     duration: SLIDE_DURATION_MS / 1000,
                     ease: "linear",
                   }}
-                  className="absolute inset-y-0 left-0 bg-primary"
+                  className="bg-primary absolute inset-y-0 left-0"
                   style={{
                     animationPlayState: isPaused ? "paused" : "running",
                   }}

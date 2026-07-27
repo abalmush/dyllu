@@ -52,14 +52,14 @@ function ShowcaseHeader({
   intro,
 }: Pick<AnatomyShowcaseProps, "eyebrow" | "title" | "intro">) {
   return (
-    <header className="flex flex-col gap-3">
+    <header className="flex flex-col gap-4">
       {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-      <div className="flex flex-col gap-3 small:flex-row small:items-end small:justify-between">
-        <h2 className="font-display text-display-sm font-extrabold tracking-tight text-background small:text-display-md">
+      <div className="small:flex-row small:items-end small:justify-between flex flex-col gap-4">
+        <h2 className="font-display text-display-sm text-background small:text-display-md font-extrabold tracking-tight">
           {title}
         </h2>
         {intro && (
-          <p className="max-w-md text-sm text-background/65 small:text-base">
+          <p className="text-background/65 small:text-base max-w-md text-sm">
             {intro}
           </p>
         )}
@@ -121,12 +121,12 @@ function MobileShowcase({
   };
 
   return (
-    <div className="content-container relative flex flex-col gap-6 py-12 medium:hidden">
+    <div className="content-container medium:hidden relative flex flex-col gap-6 py-12">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-brand-radial opacity-50"
+        className="bg-brand-radial pointer-events-none absolute inset-0 opacity-50"
       />
-      <div className="relative z-[1]">
+      <div className="relative z-1">
         <ShowcaseHeader eyebrow={eyebrow} title={title} intro={intro} />
       </div>
 
@@ -140,9 +140,9 @@ function MobileShowcase({
             key={item.key}
             data-anatomy-card
             data-anatomy-index={idx}
-            className="clip-corner-cut-md relative w-[82vw] max-w-sm shrink-0 snap-center overflow-hidden bg-secondary/40"
+            className="clip-corner-cut-md bg-secondary/40 relative w-[82vw] max-w-sm shrink-0 snap-center overflow-hidden"
           >
-            <div className="relative aspect-[4/5] w-full">
+            <div className="relative aspect-4/5 w-full">
               <Image
                 src={item.image.src}
                 alt={item.image.alt}
@@ -152,26 +152,26 @@ function MobileShowcase({
               />
               <div
                 aria-hidden
-                className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/30 to-transparent"
+                className="from-foreground/80 via-foreground/30 absolute inset-0 bg-linear-to-t to-transparent"
               />
-              <div className="absolute inset-x-0 bottom-0 p-5">
-                <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+              <div className="absolute inset-x-0 bottom-0 p-6">
+                <span className="text-2xs text-primary block font-semibold tracking-[0.22em] uppercase">
                   {String(idx + 1).padStart(2, "0")} /{" "}
                   {String(items.length).padStart(2, "0")}
                 </span>
-                <h3 className="mt-1 font-display text-xl font-bold tracking-tight">
+                <h3 className="font-display mt-1 text-xl font-bold tracking-tight">
                   {item.label}
                 </h3>
               </div>
             </div>
-            <p className="px-5 py-4 text-sm leading-relaxed text-background/75">
+            <p className="text-background/75 px-6 py-4 text-sm leading-relaxed">
               {item.description}
             </p>
           </article>
         ))}
       </div>
 
-      <div className="relative z-[1] flex items-center justify-center gap-2">
+      <div className="relative z-1 flex items-center justify-center gap-2">
         {items.map((item, idx) => (
           <button
             key={item.key}
@@ -182,14 +182,14 @@ function MobileShowcase({
             className={cn(
               "h-1.5 rounded-full transition-all duration-300",
               idx === active
-                ? "w-8 bg-primary"
-                : "w-1.5 bg-background/30 hover:bg-background/50"
+                ? "bg-primary w-8"
+                : "bg-background/30 hover:bg-background/50 w-1.5"
             )}
           />
         ))}
       </div>
 
-      <p className="relative z-[1] text-center font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-background/50">
+      <p className="text-2xs text-background/50 relative z-1 text-center font-mono font-semibold tracking-[0.18em] uppercase">
         Glisează pentru următoarea piesă
       </p>
     </div>
@@ -260,19 +260,19 @@ function DesktopShowcase({
     <div
       ref={wrapperRef}
       style={{ height: totalHeight }}
-      className="relative hidden medium:block"
+      className="medium:block relative hidden"
     >
       <div className="sticky top-0 flex h-screen w-full flex-col overflow-hidden">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-brand-radial opacity-60"
+          className="bg-brand-radial pointer-events-none absolute inset-0 opacity-60"
         />
         <div
           aria-hidden
           className="ds-grid-bg pointer-events-none absolute inset-0 opacity-10"
         />
 
-        <div className="content-container relative z-[1] flex h-full flex-col gap-10 py-16">
+        <div className="content-container relative z-1 flex h-full flex-col gap-12 py-16">
           <ShowcaseHeader eyebrow={eyebrow} title={title} intro={intro} />
 
           <div className="grid flex-1 grid-cols-[minmax(0,360px)_minmax(0,1fr)] gap-12 overflow-hidden">
@@ -286,7 +286,7 @@ function DesktopShowcase({
                       onClick={() => handleJumpTo(idx)}
                       aria-current={isActive ? "true" : undefined}
                       className={cn(
-                        "group relative flex w-full items-start gap-4 rounded-xl border border-transparent px-4 py-3 text-left transition-all duration-300",
+                        "group relative flex w-full items-start gap-4 rounded-xl border border-transparent px-4 py-4 text-left transition-all duration-300",
                         isActive
                           ? "border-primary/40 bg-primary/10 text-background"
                           : "text-background/55 hover:bg-background/5 hover:text-background/80"
@@ -294,7 +294,7 @@ function DesktopShowcase({
                     >
                       <span
                         className={cn(
-                          "mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-semibold transition-colors",
+                          "text-2xs mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full font-mono font-semibold transition-colors",
                           isActive
                             ? "bg-primary text-primary-foreground"
                             : "bg-background/10 text-background/60 group-hover:bg-background/20"
@@ -303,12 +303,12 @@ function DesktopShowcase({
                         {String(idx + 1).padStart(2, "0")}
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block font-display text-lg font-bold tracking-tight">
+                        <span className="font-display block text-lg font-bold tracking-tight">
                           {item.label}
                         </span>
                         <span
                           className={cn(
-                            "mt-1 block overflow-hidden text-[13px] leading-relaxed text-background/65 transition-[max-height,opacity] duration-300",
+                            "text-background/65 mt-1 block overflow-hidden text-xs leading-relaxed transition-[max-height,opacity] duration-300",
                             isActive
                               ? "max-h-32 opacity-100"
                               : "max-h-0 opacity-0"
@@ -323,7 +323,7 @@ function DesktopShowcase({
               })}
             </ol>
 
-            <div className="clip-corner-cut-lg relative isolate overflow-hidden bg-secondary/40">
+            <div className="clip-corner-cut-lg bg-secondary/40 relative isolate overflow-hidden">
               {items.map((item, idx) => {
                 const isActive = idx === active;
                 return (
@@ -347,18 +347,18 @@ function DesktopShowcase({
                     />
                     <div
                       aria-hidden
-                      className="absolute inset-0 bg-gradient-to-tr from-foreground/70 via-foreground/10 to-transparent"
+                      className="from-foreground/70 via-foreground/10 absolute inset-0 bg-linear-to-tr to-transparent"
                     />
                   </div>
                 );
               })}
-              <div className="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between gap-4 p-8">
+              <div className="absolute inset-x-0 bottom-0 z-2 flex items-end justify-between gap-4 p-8">
                 <div className="max-w-md">
-                  <span className="block text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
+                  <span className="text-2xs text-primary block font-semibold tracking-[0.22em] uppercase">
                     {String(active + 1).padStart(2, "0")} /{" "}
                     {String(total).padStart(2, "0")}
                   </span>
-                  <h3 className="mt-2 font-display text-3xl font-bold tracking-tight">
+                  <h3 className="font-display mt-2 text-3xl font-bold tracking-tight">
                     {items[active]?.label}
                   </h3>
                 </div>
@@ -366,13 +366,13 @@ function DesktopShowcase({
             </div>
           </div>
 
-          <div className="relative z-[1] mt-auto flex items-center gap-4">
-            <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-background/55">
+          <div className="relative z-1 mt-auto flex items-center gap-4">
+            <span className="text-background/55 font-mono text-xs font-semibold tracking-[0.2em] uppercase">
               Scroll pentru următoarea piesă
             </span>
-            <div className="relative h-px flex-1 overflow-hidden bg-background/15">
+            <div className="bg-background/15 relative h-px flex-1 overflow-hidden">
               <div
-                className="absolute inset-y-0 left-0 bg-primary"
+                className="bg-primary absolute inset-y-0 left-0"
                 style={{
                   width: `${Math.round(progress * 100)}%`,
                   transition: "width 0.1s linear",

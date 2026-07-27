@@ -6,12 +6,12 @@ import { Container } from "@/components/atoms/container";
 
 export function ProductSpotlight() {
   return (
-    <section className="bg-foreground py-16 small:py-24">
+    <section className="bg-foreground small:py-24 py-16">
       <Container>
         <Link
           href="/products/dyllu-p20s-vacuum"
           aria-label="DYLLU P20S — aspirator portabil 20V Max Lithium"
-          className="clip-corner-cut-lg group relative mx-auto block w-full max-w-3xl overflow-hidden shadow-[0_40px_120px_-40px_rgba(0,0,0,0.6)] transition-transform duration-500 hover:scale-[1.01] focus-visible:outline-none"
+          className="clip-corner-cut-lg group relative mx-auto block w-full max-w-3xl overflow-hidden shadow-[0_40px_120px_-40px_rgba(0,0,0,0.6)] transition-transform duration-500 hover:scale-[1.01] focus-visible:outline-hidden"
         >
           <Image
             src="/images/dyllu-vacuum-p20s.png"

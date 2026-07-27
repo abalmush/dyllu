@@ -14,7 +14,7 @@ export default async function PaginatedProducts({
   sortBy,
   page,
   collectionId,
-  categoryId,
+  categoryIds,
   tagId,
   productsIds,
   query,
@@ -23,7 +23,7 @@ export default async function PaginatedProducts({
   sortBy?: SortOptions;
   page: number;
   collectionId?: string;
-  categoryId?: string;
+  categoryIds?: string[];
   tagId?: string;
   productsIds?: string[];
   query?: string;
@@ -33,7 +33,7 @@ export default async function PaginatedProducts({
     sortBy,
     page,
     collectionId,
-    categoryId,
+    categoryIds,
     tagId,
     productsIds,
     query,
@@ -56,17 +56,17 @@ export default async function PaginatedProducts({
         : "Stocul se actualizează constant. Între timp, descoperă restul gamei sau contactează-ne pentru o cotație personalizată.";
 
     return (
-      <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-16 text-center">
-        <div className="grid size-14 place-items-center rounded-full bg-primary/10 text-primary">
+      <div className="border-border bg-muted/30 flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed px-6 py-16 text-center">
+        <div className="bg-primary/10 text-primary grid size-14 place-items-center rounded-full">
           <PackageSearch className="size-6" />
         </div>
         <div className="space-y-1">
           <h2 className="font-display text-xl font-semibold">{emptyTitle}</h2>
-          <p className="max-w-md text-sm text-muted-foreground">
+          <p className="text-muted-foreground max-w-md text-sm">
             {emptyDescription}
           </p>
         </div>
-        <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-4">
           <Button asChild>
             <Link href="/store">Vezi toate produsele</Link>
           </Button>
@@ -87,7 +87,7 @@ export default async function PaginatedProducts({
       request={{
         sortBy,
         collectionId,
-        categoryId,
+        categoryIds,
         tagId,
         productsIds,
         query,

@@ -5,20 +5,21 @@ import { Button, Container, Text } from "@lib/ui-compat";
 
 const OnboardingCta = ({ orderId }: { orderId: string }) => {
   return (
-    <Container className="h-full w-full max-w-4xl bg-ui-bg-subtle">
+    <Container className="bg-ui-bg-subtle h-full w-full max-w-4xl">
       <div className="center flex flex-col gap-y-4 p-4 md:items-center">
-        <Text className="text-xl text-ui-fg-base">
-          Your test order was successfully created! 🎉
+        <Text className="text-ui-fg-base text-xl">
+          Comanda de test a fost creată cu succes! 🎉
         </Text>
         <Text className="text-small-regular text-ui-fg-subtle">
-          You can now complete setting up your store in the admin.
+          Acum poți finaliza configurarea magazinului din panoul de
+          administrare.
         </Text>
         <Button
           className="w-fit"
           size="xlarge"
           onClick={() => resetOnboardingState(orderId)}
         >
-          Complete setup in admin
+          Finalizează configurarea
         </Button>
       </div>
     </Container>

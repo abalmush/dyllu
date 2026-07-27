@@ -56,9 +56,11 @@ export function PlpProductCard({
     }
   };
 
+  if (!product.thumbnail) return null;
+
   return (
-    <article className="clip-corner-cut-md group relative flex flex-col overflow-hidden bg-card ring-1 ring-border transition-[box-shadow,transform] duration-300 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:-translate-y-1 hover:shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)]">
-      <div className="relative aspect-square w-full overflow-hidden bg-surface-subtle">
+    <article className="clip-corner-cut-md group bg-card ring-border focus-within:ring-ring relative flex flex-col overflow-hidden ring-1 focus-within:ring-2 focus-within:ring-offset-2">
+      <div className="bg-surface-subtle relative aspect-square w-full overflow-hidden">
         <Link
           href={product.href}
           aria-label={product.title}
@@ -74,14 +76,14 @@ export function PlpProductCard({
               className="object-contain p-6 transition-transform duration-500 ease-out group-hover:scale-[1.04]"
             />
           ) : (
-            <div className="absolute inset-0 grid place-items-center text-xs text-muted-foreground">
+            <div className="text-muted-foreground absolute inset-0 grid place-items-center text-xs">
               Fără imagine
             </div>
           )}
         </Link>
 
-        {product.productType && (
-          <div className="absolute left-3 top-3">
+        {product.productType && product.productType !== "single" && (
+          <div className="absolute top-3 left-3">
             <ProductTypeBadge
               type={product.productType}
               count={product.setCount}
@@ -90,14 +92,14 @@ export function PlpProductCard({
         )}
 
         {isSale && product.price?.percentage_diff != null && (
-          <Badge variant="destructive" className="absolute right-3 top-3">
+          <Badge variant="destructive" className="absolute top-3 right-3">
             −{product.price.percentage_diff}%
           </Badge>
         )}
 
         {soldOut && (
-          <div className="absolute inset-0 grid place-items-center bg-background/60">
-            <span className="clip-corner-cut-xs bg-foreground px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-background">
+          <div className="bg-background/60 absolute inset-0 grid place-items-center">
+            <span className="clip-corner-cut-xs bg-foreground text-background px-4 py-1 text-xs font-bold tracking-[0.14em] uppercase">
               Stoc epuizat
             </span>
           </div>
@@ -106,22 +108,22 @@ export function PlpProductCard({
 
       <div className="flex flex-1 flex-col gap-2 p-4">
         {product.category && (
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="text-2xs text-muted-foreground font-semibold tracking-[0.18em] uppercase">
             {product.category}
           </span>
         )}
         <Link
           href={product.href}
-          className="line-clamp-2 text-base font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-brand-800"
+          className="text-foreground group-hover:text-brand-800 line-clamp-2 text-base leading-snug font-semibold tracking-tight transition-colors"
         >
           {product.title}
         </Link>
 
         {product.rating != null && (
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+          <span className="text-muted-foreground flex items-center gap-1 text-xs">
             <Star
               aria-hidden="true"
-              className="size-4 fill-warning text-warning-foreground"
+              className="fill-warning text-warning-foreground size-4"
             />
             {product.rating.toFixed(1)}
             {product.reviewCount != null && (
@@ -137,7 +139,7 @@ export function PlpProductCard({
             aria-label={`Adaugă ${product.title} în coș`}
             disabled={soldOut || !product.variantId || isAdding}
             onClick={handleAdd}
-            className="clip-corner-cut-xs grid size-11 shrink-0 place-items-center bg-foreground text-background transition-colors hover:bg-foreground/90 disabled:opacity-55"
+            className="clip-corner-cut-xs bg-foreground text-background hover:bg-foreground/90 grid size-11 shrink-0 place-items-center transition-colors disabled:opacity-55"
           >
             {justAdded ? (
               <Check aria-hidden="true" className="size-5" />

@@ -1,21 +1,26 @@
 import "server-only";
 
+import { cache } from "react";
 import { sdk } from "@lib/config";
+import { listProductsWithSort } from "@lib/data/products";
 import { HttpTypes } from "@medusajs/types";
-import { getCacheOptions } from "./cookies";
 
 export type CategoryNode = {
   id: string;
   name: string;
   handle: string;
+  navThumbnailUrl?: string;
   children: CategoryNode[];
 };
 
-export const listCategories = async (query?: Record<string, any>) => {
-  const next = {
-    ...(await getCacheOptions("categories")),
-  };
+const REPRESENTATIVE_PRODUCT_SKUS: Record<string, string> = {
+  "accesorii-si-consumabile": "DTHD6B06",
+  "atelier-depozitare-si-manipulare": "DTCS5A05",
+  "compresoare-si-pneumatice": "DTAP4A13",
+  "constructii-si-finisaje": "DTCM2A160",
+};
 
+export const listCategories = async (query?: Record<string, any>) => {
   const limit = query?.limit || 100;
 
   return sdk.client
@@ -28,54 +33,130 @@ export const listCategories = async (query?: Record<string, any>) => {
           limit,
           ...query,
         },
-        next,
-        cache: "force-cache",
+        cache: "no-store",
       }
     )
     .then(({ product_categories }) => product_categories);
 };
 
-const toNode = (category: HttpTypes.StoreProductCategory): CategoryNode => {
-  const children = [...(category.category_children ?? [])].sort(
-    (a, b) => (a.rank ?? 0) - (b.rank ?? 0)
-  );
+const toVisibleNode = (
+  category: HttpTypes.StoreProductCategory,
+  visibleCategoryIds: Set<string>,
+  representativeImages: Map<string, string>,
+  pinnedImages: Map<string, string>
+): CategoryNode | null => {
+  if (category.metadata?.navigation_hidden === true) return null;
+
+  const children = [...(category.category_children ?? [])]
+    .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
+    .flatMap((child) => {
+      const node = toVisibleNode(
+        child,
+        visibleCategoryIds,
+        representativeImages,
+        pinnedImages
+      );
+      return node ? [node] : [];
+    });
+
+  if (!visibleCategoryIds.has(category.id) && children.length === 0) {
+    return null;
+  }
+
+  const navThumbnailUrl = category.metadata?.nav_thumbnail_url;
+  const representativeImage =
+    pinnedImages.get(category.handle) ??
+    representativeImages.get(category.id) ??
+    children.find((child) => child.navThumbnailUrl)?.navThumbnailUrl;
+
   return {
     id: category.id,
     name: category.name,
     handle: category.handle,
-    children: children.map(toNode),
+    navThumbnailUrl:
+      typeof navThumbnailUrl === "string"
+        ? navThumbnailUrl
+        : representativeImage,
+    children,
   };
 };
 
-export const getCategoryTree = async (): Promise<CategoryNode[]> => {
-  const next = {
-    ...(await getCacheOptions("categories")),
-  };
+export const getCategoryTree = cache(async (): Promise<CategoryNode[]> => {
+  const [{ product_categories }, productsResult] = await Promise.all([
+    sdk.client.fetch<{
+      product_categories: HttpTypes.StoreProductCategory[];
+    }>("/store/product-categories", {
+      query: {
+        fields:
+          "id,name,handle,rank,metadata,*category_children,category_children.metadata",
+        parent_category_id: "null",
+        include_descendants_tree: true,
+        limit: 200,
+      },
+      cache: "no-store",
+    }),
+    listProductsWithSort({
+      fetchAll: true,
+      queryParams: {
+        limit: 100,
+        fields: "id,thumbnail,*categories,variants.sku",
+      },
+    }),
+  ]);
 
-  const { product_categories } = await sdk.client.fetch<{
-    product_categories: HttpTypes.StoreProductCategory[];
-  }>("/store/product-categories", {
-    query: {
-      fields: "id,name,handle,rank,*category_children",
-      parent_category_id: "null",
-      include_descendants_tree: true,
-      limit: 200,
-    },
-    next,
-    cache: "force-cache",
-  });
+  const visibleCategoryIds = new Set(
+    productsResult.response.products.flatMap(
+      (product) => product.categories?.map((category) => category.id) ?? []
+    )
+  );
+  const representativeImages = new Map<string, string>();
+  const pinnedImages = new Map<string, string>();
+  for (const product of productsResult.response.products) {
+    if (!product.thumbnail) continue;
+    const productSkus = new Set(
+      product.variants?.flatMap((variant) =>
+        variant.sku ? [variant.sku.toUpperCase()] : []
+      ) ?? []
+    );
+    for (const [handle, sku] of Object.entries(REPRESENTATIVE_PRODUCT_SKUS)) {
+      if (productSkus.has(sku)) pinnedImages.set(handle, product.thumbnail);
+    }
+    for (const category of product.categories ?? []) {
+      if (!representativeImages.has(category.id)) {
+        representativeImages.set(category.id, product.thumbnail);
+      }
+    }
+  }
 
   return [...product_categories]
     .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
-    .map(toNode);
+    .flatMap((category) => {
+      const node = toVisibleNode(
+        category,
+        visibleCategoryIds,
+        representativeImages,
+        pinnedImages
+      );
+      return node ? [node] : [];
+    });
+});
+
+export const findCategoryInTree = (
+  categories: CategoryNode[],
+  handle: string
+): CategoryNode | undefined => {
+  for (const category of categories) {
+    if (category.handle === handle) return category;
+
+    const match = findCategoryInTree(category.children, handle);
+    if (match) return match;
+  }
+
+  return undefined;
 };
 
 export const getCategoryByHandle = async (categoryHandle: string[]) => {
   const handle = `${categoryHandle.join("/")}`;
-
-  const next = {
-    ...(await getCacheOptions("categories")),
-  };
 
   return sdk.client
     .fetch<HttpTypes.StoreProductCategoryListResponse>(
@@ -85,8 +166,7 @@ export const getCategoryByHandle = async (categoryHandle: string[]) => {
           fields: "*category_children",
           handle,
         },
-        next,
-        cache: "force-cache",
+        cache: "no-store",
       }
     )
     .then(({ product_categories }) => product_categories[0]);

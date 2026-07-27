@@ -32,7 +32,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="bg-background flex min-h-screen flex-col">
       <AnnouncementBar />
       <UtilityBar />
       <SiteHeader cart={cart} categories={categories} />
@@ -46,10 +46,10 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
           shippingOptions={shippingOptions}
         />
       )}
-      <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
+      <main id="main-content" tabIndex={-1} className="flex-1 outline-hidden">
         {props.children}
       </main>
-      <SiteFooter />
+      <SiteFooter categories={categories} />
     </div>
   );
 }

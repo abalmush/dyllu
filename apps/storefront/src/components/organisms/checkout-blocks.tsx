@@ -52,7 +52,7 @@ export function CheckoutSteps({ current }: { current: number }) {
             {i < STEPS.length - 1 && (
               <span
                 aria-hidden="true"
-                className="mx-1 hidden h-px flex-1 bg-border small:block"
+                className="bg-border small:block mx-1 hidden h-px flex-1"
               />
             )}
           </li>
@@ -97,11 +97,11 @@ const SHIPPING_OPTIONS: ShippingOption[] = [
 export function ShippingMethodPicker() {
   const [selected, setSelected] = React.useState("standard");
   return (
-    <section className="clip-corner-cut-lg bg-card p-6 ring-1 ring-border">
-      <h2 className="mb-5 font-display text-lg font-bold text-foreground">
+    <section className="clip-corner-cut-lg bg-card ring-border p-6 ring-1">
+      <h2 className="font-display text-foreground mb-6 text-lg font-bold">
         Metodă de livrare
       </h2>
-      <div className="space-y-3">
+      <div className="space-y-4">
         {SHIPPING_OPTIONS.map((option) => {
           const active = selected === option.id;
           return (
@@ -119,18 +119,18 @@ export function ShippingMethodPicker() {
                 name="shipping"
                 checked={active}
                 onChange={() => setSelected(option.id)}
-                className="size-4 accent-primary"
+                className="accent-primary size-4"
               />
-              <option.icon className="size-5 shrink-0 text-primary" />
+              <option.icon className="text-primary size-5 shrink-0" />
               <span className="flex-1">
-                <span className="block text-sm font-semibold text-foreground">
+                <span className="text-foreground block text-sm font-semibold">
                   {option.label}
                 </span>
-                <span className="block text-xs text-muted-foreground">
+                <span className="text-muted-foreground block text-xs">
                   {option.detail}
                 </span>
               </span>
-              <span className="text-sm font-semibold text-foreground">
+              <span className="text-foreground text-sm font-semibold">
                 {option.price}
               </span>
             </label>
@@ -159,11 +159,11 @@ const PAYMENT_OPTIONS = [
 export function PaymentMethodPicker() {
   const [selected, setSelected] = React.useState("maib");
   return (
-    <section className="clip-corner-cut-lg bg-card p-6 ring-1 ring-border">
-      <h2 className="mb-5 font-display text-lg font-bold text-foreground">
+    <section className="clip-corner-cut-lg bg-card ring-border p-6 ring-1">
+      <h2 className="font-display text-foreground mb-6 text-lg font-bold">
         Metodă de plată
       </h2>
-      <div className="space-y-3">
+      <div className="space-y-4">
         {PAYMENT_OPTIONS.map((option) => {
           const active = selected === option.id;
           return (
@@ -181,14 +181,14 @@ export function PaymentMethodPicker() {
                 name="payment"
                 checked={active}
                 onChange={() => setSelected(option.id)}
-                className="size-4 accent-primary"
+                className="accent-primary size-4"
               />
-              <option.icon className="size-5 shrink-0 text-primary" />
+              <option.icon className="text-primary size-5 shrink-0" />
               <span className="flex-1">
-                <span className="block text-sm font-semibold text-foreground">
+                <span className="text-foreground block text-sm font-semibold">
                   {option.label}
                 </span>
-                <span className="block text-xs text-muted-foreground">
+                <span className="text-muted-foreground block text-xs">
                   {option.detail}
                 </span>
               </span>
@@ -196,8 +196,8 @@ export function PaymentMethodPicker() {
           );
         })}
       </div>
-      <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-        <ShieldCheck className="size-4 text-success" />
+      <p className="text-muted-foreground mt-4 flex items-center gap-2 text-xs">
+        <ShieldCheck className="text-success size-4" />
         Plățile cu cardul sunt procesate securizat prin MAIB. DYLLU nu stochează
         datele cardului.
       </p>
@@ -207,17 +207,17 @@ export function PaymentMethodPicker() {
 
 export function OrderConfirmation({ orderNumber }: { orderNumber: string }) {
   return (
-    <div className="clip-corner-cut-lg flex flex-col items-center gap-4 bg-card px-6 py-16 text-center ring-1 ring-border">
-      <span className="grid size-16 place-items-center rounded-full bg-success text-background">
+    <div className="clip-corner-cut-lg bg-card ring-border flex flex-col items-center gap-4 px-6 py-16 text-center ring-1">
+      <span className="bg-success text-background grid size-16 place-items-center rounded-full">
         <Check className="size-8" />
       </span>
       <div className="max-w-md space-y-1.5">
-        <h2 className="font-display text-2xl font-bold text-foreground">
+        <h2 className="font-display text-foreground text-2xl font-bold">
           Comandă confirmată
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Îți mulțumim! Comanda{" "}
-          <span className="font-semibold text-foreground">#{orderNumber}</span>{" "}
+          <span className="text-foreground font-semibold">#{orderNumber}</span>{" "}
           a fost plasată. Ai primit un email cu detaliile și vei fi notificat la
           expediere.
         </p>

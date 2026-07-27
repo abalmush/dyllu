@@ -98,18 +98,18 @@ const Payment = ({
   };
 
   return (
-    <section className="clip-corner-cut-lg clip-shadow-md bg-card p-6 ring-1 ring-border small:p-8">
+    <section className="clip-corner-cut-lg clip-shadow-md bg-card ring-border small:p-8 p-6 ring-1">
       <div className="mb-6 flex flex-row items-center justify-between gap-4">
         <div className="space-y-2">
-          <Text className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          <Text className="text-muted-foreground text-xs font-semibold tracking-[0.16em] uppercase">
             Pasul 3
           </Text>
           <Heading
             level="h2"
             className={clx(
-              "flex flex-row items-baseline gap-x-2 font-display text-xl font-bold tracking-tight text-foreground",
+              "font-display text-foreground flex flex-row items-baseline gap-x-2 text-xl font-bold tracking-tight",
               {
-                "pointer-events-none select-none opacity-50":
+                "pointer-events-none opacity-50 select-none":
                   !isOpen && !paymentReady,
               }
             )}
@@ -118,7 +118,7 @@ const Payment = ({
             {!isOpen && paymentReady && <CheckCircleSolid />}
           </Heading>
           {isOpen && (
-            <Text className="text-sm text-muted-foreground">
+            <Text className="text-muted-foreground text-sm">
               Selectează metoda de plată și continuă către verificarea finală.
             </Text>
           )}
@@ -127,7 +127,7 @@ const Payment = ({
           <Text>
             <button
               onClick={handleEdit}
-              className="text-sm font-semibold text-primary transition-colors hover:text-primary/80"
+              className="text-primary hover:text-primary/80 text-sm font-semibold transition-colors"
               data-testid="edit-payment-button"
             >
               Editează
@@ -155,12 +155,12 @@ const Payment = ({
           )}
 
           {paidByGiftcard && (
-            <div className="clip-corner-cut-md flex flex-col bg-surface-subtle/60 p-4 ring-1 ring-border/70">
-              <Text className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <div className="clip-corner-cut-md bg-surface-subtle/60 ring-border/70 flex flex-col p-4 ring-1">
+              <Text className="text-muted-foreground mb-1 text-xs font-semibold tracking-[0.18em] uppercase">
                 Metodă de plată
               </Text>
               <Text
-                className="text-sm text-foreground"
+                className="text-foreground text-sm"
                 data-testid="payment-method-summary"
               >
                 Card cadou
@@ -195,13 +195,13 @@ const Payment = ({
 
         <div className={isOpen ? "hidden" : "block"}>
           {cart && paymentReady && activeSession ? (
-            <div className="clip-corner-cut-md grid gap-5 bg-surface-subtle/60 p-5 ring-1 ring-border/70 small:grid-cols-2">
+            <div className="clip-corner-cut-md bg-surface-subtle/60 ring-border/70 small:grid-cols-2 grid gap-6 p-6 ring-1">
               <div className="flex flex-col">
-                <Text className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <Text className="text-muted-foreground mb-1 text-xs font-semibold tracking-[0.18em] uppercase">
                   Metodă de plată
                 </Text>
                 <Text
-                  className="text-sm text-foreground"
+                  className="text-foreground text-sm"
                   data-testid="payment-method-summary"
                 >
                   {paymentInfoMap[activeSession?.provider_id]?.title ||
@@ -209,14 +209,14 @@ const Payment = ({
                 </Text>
               </div>
               <div className="flex flex-col">
-                <Text className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <Text className="text-muted-foreground mb-1 text-xs font-semibold tracking-[0.18em] uppercase">
                   Confirmare plată
                 </Text>
                 <div
-                  className="flex items-center gap-2 text-sm text-muted-foreground"
+                  className="text-muted-foreground flex items-center gap-2 text-sm"
                   data-testid="payment-details-summary"
                 >
-                  <Container className="clip-corner-cut-xs flex h-8 w-fit items-center bg-background px-3 ring-1 ring-border">
+                  <Container className="clip-corner-cut-xs bg-background ring-border flex h-8 w-fit items-center px-4 ring-1">
                     {paymentInfoMap[selectedPaymentMethod]?.icon || (
                       <CreditCard />
                     )}
@@ -226,12 +226,12 @@ const Payment = ({
               </div>
             </div>
           ) : paidByGiftcard ? (
-            <div className="clip-corner-cut-md flex flex-col bg-surface-subtle/60 p-5 ring-1 ring-border/70">
-              <Text className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <div className="clip-corner-cut-md bg-surface-subtle/60 ring-border/70 flex flex-col p-6 ring-1">
+              <Text className="text-muted-foreground mb-1 text-xs font-semibold tracking-[0.18em] uppercase">
                 Metodă de plată
               </Text>
               <Text
-                className="text-sm text-foreground"
+                className="text-foreground text-sm"
                 data-testid="payment-method-summary"
               >
                 Card cadou

@@ -39,15 +39,15 @@ function RevealHeader() {
   return (
     <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
       <div>
-        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+        <span className="text-2xs text-primary font-semibold tracking-[0.18em] uppercase">
           Categorii populare — reveal
         </span>
-        <h2 className="mt-2 font-display text-display-sm font-extrabold tracking-tight text-foreground sm:text-display-md">
+        <h2 className="font-display text-display-sm text-foreground sm:text-display-md mt-2 font-extrabold tracking-tight">
           Tot ce ai nevoie
           <span className="text-primary"> pentru următorul proiect.</span>
         </h2>
       </div>
-      <p className="max-w-md text-sm text-muted-foreground sm:text-right">
+      <p className="text-muted-foreground max-w-md text-sm sm:text-right">
         Mosaicul existent — secțiunea rămâne pe loc, cardurile apar pe măsură ce
         derulezi.
       </p>
@@ -57,10 +57,10 @@ function RevealHeader() {
 
 function RevealMobile({ items }: { items: Item[] }) {
   return (
-    <section className="medium:hidden py-16 small:py-24">
+    <section className="medium:hidden small:py-24 py-16">
       <Container>
         <RevealHeader />
-        <div className="mt-10 grid gap-4 sm:auto-rows-[280px] sm:grid-cols-12">
+        <div className="mt-12 grid gap-4 sm:auto-rows-[280px] sm:grid-cols-12">
           {items.map((cat, idx) => {
             const visual = getCategoryVisual(cat.handle);
             const productCount = cat.children.reduce(
@@ -137,13 +137,13 @@ function RevealDesktop({ items }: { items: Item[] }) {
     <section
       ref={wrapperRef}
       style={{ height: "280vh" }}
-      className="relative hidden medium:block"
+      className="medium:block relative hidden"
       aria-label="Categorii populare — reveal"
     >
-      <div className="sticky top-0 flex h-screen w-full flex-col justify-center overflow-hidden bg-background">
+      <div className="bg-background sticky top-0 flex h-screen w-full flex-col justify-center overflow-hidden">
         <Container>
           <RevealHeader />
-          <div className="mt-10 grid gap-4 sm:auto-rows-[clamp(220px,30vh,300px)] sm:grid-cols-12">
+          <div className="mt-12 grid gap-4 sm:auto-rows-[clamp(220px,30vh,300px)] sm:grid-cols-12">
             {items.map((cat, idx) => (
               <RevealCard
                 key={cat.handle}

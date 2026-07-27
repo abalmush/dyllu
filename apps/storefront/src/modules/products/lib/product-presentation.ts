@@ -1,5 +1,7 @@
 import { HttpTypes } from "@medusajs/types";
 
+import { normalizeCatalogBrand } from "@lib/util/catalog-brand";
+
 import type { ComboItem } from "@/components/organisms/pdp-hero-combo";
 import type { ProductType } from "@/components/organisms/product-type-badge";
 import type {
@@ -9,6 +11,367 @@ import type {
 import type { SetPiece } from "@/components/organisms/set-breakdown";
 
 type ProductMetadata = Record<string, unknown>;
+
+export type ProductSpecification = {
+  label: string;
+  value: string;
+};
+
+export type ProductPowerSupply = {
+  powerSource: string;
+  platform?: string;
+  batteryIncluded?: boolean;
+  batteryCount?: number;
+  batteryCapacity?: string;
+  chargerIncluded?: boolean;
+  compatibleBatteries: Array<{ sku: string; capacityAh?: number }>;
+  compatibleChargers: Array<{ sku: string; outputA?: number }>;
+};
+
+export type IncludedAccessoryRelationship = {
+  sku?: string;
+  name?: string;
+  quantity: number;
+  kind?: "battery" | "charger";
+};
+
+function metadataValue(
+  product: HttpTypes.StoreProduct,
+  variant: HttpTypes.StoreProductVariant | undefined,
+  key: string
+): unknown {
+  const variantMetadata = (variant?.metadata ?? {}) as ProductMetadata;
+  if (variantMetadata[key] !== undefined) return variantMetadata[key];
+
+  return ((product.metadata ?? {}) as ProductMetadata)[key];
+}
+
+function metadataBoolean(value: unknown): boolean | undefined {
+  if (typeof value === "boolean") return value;
+  if (typeof value !== "string") return undefined;
+
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "yes" || normalized === "true") return true;
+  if (normalized === "no" || normalized === "false") return false;
+  return undefined;
+}
+
+const TECHNICAL_MEASUREMENT_RE =
+  /\b\d[\d.,/–—~×x-]*\s*(?:V|W|kW|A|Ah|mAh|N\s*[·.]?\s*m|Nm|J|rpm|rot\/min|bpm|lovituri\/min|mm|cm|m|L|ml|bar|MPa|kPa|PSI|m\/s|m³\/min|°C|Hz)\b/i;
+const TECHNICAL_MEASUREMENT_TOKEN_RE =
+  /\b\d[\d.,/–—~×x-]*\s*(?:V|W|kW|A|Ah|mAh|N\s*[·.]?\s*m|Nm|J|rpm|rot\/min|bpm|lovituri\/min|mm|cm|m|L|ml|bar|MPa|kPa|PSI|m\/s|m³\/min|°C|Hz)\b/gi;
+function inferAccessoryKind(name?: string): "battery" | "charger" | undefined {
+  if (!name?.trim()) return undefined;
+  if (/(acumulator|acumulatori|baterie|baterii|battery|batteries)/i.test(name))
+    return "battery";
+  if (/(încărcător|incarcator|charger)/i.test(name)) return "charger";
+  return undefined;
+}
+
+function metadataString(
+  product: HttpTypes.StoreProduct,
+  variant: HttpTypes.StoreProductVariant | undefined,
+  key: string
+): string | undefined {
+  const value = metadataValue(product, variant, key);
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function metadataStringArray(value: unknown): string[] {
+  let parsed = value;
+  if (typeof value === "string") {
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      return [];
+    }
+  }
+
+  return Array.isArray(parsed)
+    ? parsed.filter(
+        (item): item is string =>
+          typeof item === "string" && item.trim().length > 0
+      )
+    : [];
+}
+
+function includedRelationships(
+  value: unknown
+): IncludedAccessoryRelationship[] {
+  let parsed = value;
+  if (typeof value === "string") {
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(parsed)) return [];
+
+  return parsed.flatMap((row) => {
+    if (!row || typeof row !== "object") return [];
+    const record = row as Record<string, unknown>;
+    const rawSku =
+      typeof record.sku === "string"
+        ? record.sku
+        : typeof record.component_sku === "string"
+          ? record.component_sku
+          : typeof record.target_sku === "string"
+            ? record.target_sku
+            : "";
+    const rawName =
+      typeof record.name === "string" && record.name.trim()
+        ? record.name.trim()
+        : undefined;
+    if (!rawSku.trim() && !rawName) return [];
+    const rawQuantity =
+      typeof record.qty === "number"
+        ? record.qty
+        : typeof record.qty === "string"
+          ? Number(record.qty)
+          : typeof record.quantity === "number"
+            ? record.quantity
+            : typeof record.quantity === "string"
+              ? Number(record.quantity)
+              : 1;
+
+    return [
+      {
+        sku: rawSku.trim() || undefined,
+        name: rawName,
+        kind: inferAccessoryKind(
+          typeof record.name === "string" ? record.name : undefined
+        ),
+        quantity:
+          Number.isFinite(rawQuantity) && rawQuantity > 0
+            ? Math.floor(rawQuantity)
+            : 1,
+      },
+    ];
+  });
+}
+
+function getExplicitIncludedRelationships(
+  product: HttpTypes.StoreProduct,
+  variant?: HttpTypes.StoreProductVariant
+): IncludedAccessoryRelationship[] {
+  return ["bundle_components", "included_items"].flatMap((key) =>
+    includedRelationships(metadataValue(product, variant, key))
+  );
+}
+
+export function getIncludedAccessoryRelationships(
+  product: HttpTypes.StoreProduct,
+  variant?: HttpTypes.StoreProductVariant
+): IncludedAccessoryRelationship[] {
+  const relationships = getExplicitIncludedRelationships(product, variant);
+
+  const mergedRelationships = new Map<string, IncludedAccessoryRelationship>();
+  for (const relationship of relationships) {
+    const quantity = Number.isFinite(relationship.quantity)
+      ? Math.max(1, Math.floor(relationship.quantity))
+      : 1;
+    const key = `${relationship.kind ?? "unknown"}:${relationship.sku ?? relationship.name}`;
+    const existing = mergedRelationships.get(key);
+    if (!existing) {
+      mergedRelationships.set(key, {
+        ...relationship,
+        quantity,
+      });
+      continue;
+    }
+
+    mergedRelationships.set(key, {
+      ...existing,
+      quantity: existing.quantity + quantity,
+    });
+  }
+
+  return Array.from(mergedRelationships.values());
+}
+
+export function stripSpecificationSection(value?: string | null): string {
+  if (!value?.trim()) return "";
+  const specificationStart = value.search(/(?:^|\n)\s*Specificații\s*:/i);
+  return (
+    specificationStart >= 0 ? value.slice(0, specificationStart) : value
+  ).trim();
+}
+
+function safeNarrativeSentences(value?: string): string {
+  if (!value) return "";
+  return value
+    .split(/(?<=[.!?])\s+/)
+    .filter((sentence) => !TECHNICAL_MEASUREMENT_RE.test(sentence))
+    .join(" ")
+    .trim();
+}
+
+function normalizedMeasurementTokens(value: string): Set<string> {
+  return new Set(
+    (value.match(TECHNICAL_MEASUREMENT_TOKEN_RE) ?? []).map((token) =>
+      token
+        .toLocaleLowerCase("ro")
+        .replace(/,/g, ".")
+        .replace(/[\s·]/g, "")
+        .replace(/n\.m$/, "nm")
+    )
+  );
+}
+
+function safeIntro(value: string, trustedTitle?: string | null): string {
+  const trustedTokens = normalizedMeasurementTokens(trustedTitle ?? "");
+  return value
+    .split(/(?<=[.!?])\s+/)
+    .map((sentence) => {
+      const punctuation = sentence.match(/[.!?]$/)?.[0] ?? "";
+      const body = punctuation ? sentence.slice(0, -1) : sentence;
+      const clauses = body.split(/;\s*|,\s+(?=\p{L})/u).filter((clause) => {
+        const claims = normalizedMeasurementTokens(clause);
+        return (
+          claims.size === 0 ||
+          [...claims].every((claim) => trustedTokens.has(claim))
+        );
+      });
+      return clauses.length ? `${clauses.join(", ")}${punctuation}` : "";
+    })
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+}
+
+function uniqueDescriptionParagraphs(values: string[]): string[] {
+  const seen = new Set<string>();
+  return values.filter((value) => {
+    const normalized = value
+      .toLocaleLowerCase("ro")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!normalized || seen.has(normalized)) return false;
+    seen.add(normalized);
+    return true;
+  });
+}
+
+function compatiblePowerAccessories(
+  value: unknown,
+  numericKey: "capacity_ah" | "output_a"
+): Array<{ sku: string; value?: number }> {
+  let parsed = value;
+  if (typeof value === "string") {
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(parsed)) return [];
+
+  return parsed.flatMap((row) => {
+    if (!row || typeof row !== "object") return [];
+    const record = row as Record<string, unknown>;
+    if (typeof record.sku !== "string" || !record.sku.trim()) return [];
+    const numericValue = record[numericKey];
+    return [
+      {
+        sku: record.sku.trim(),
+        value:
+          typeof numericValue === "number" && Number.isFinite(numericValue)
+            ? numericValue
+            : undefined,
+      },
+    ];
+  });
+}
+
+export function getProductPowerSupply(
+  product: HttpTypes.StoreProduct,
+  variant?: HttpTypes.StoreProductVariant
+): ProductPowerSupply | undefined {
+  const requiresBattery = metadataBoolean(
+    metadataValue(product, variant, "requires_battery")
+  );
+  const rawPowerSource = metadataValue(product, variant, "power_source");
+  const powerSource =
+    typeof rawPowerSource === "string" && rawPowerSource.trim()
+      ? rawPowerSource.trim().toLowerCase()
+      : requiresBattery
+        ? "cordless_battery"
+        : undefined;
+
+  if (!powerSource) return undefined;
+
+  const rawCount = metadataValue(product, variant, "battery_count");
+  const batteryCount =
+    typeof rawCount === "number"
+      ? rawCount
+      : typeof rawCount === "string"
+        ? Number.parseInt(rawCount, 10)
+        : undefined;
+  const rawCapacity = metadataValue(product, variant, "battery_capacity");
+  const batteryCapacity =
+    typeof rawCapacity === "string" && rawCapacity.trim()
+      ? rawCapacity.trim()
+      : undefined;
+  const rawPlatform = metadataValue(product, variant, "platform");
+  const platform =
+    typeof rawPlatform === "string" && rawPlatform.trim()
+      ? rawPlatform.trim()
+      : undefined;
+  const batteries = compatiblePowerAccessories(
+    metadataValue(product, variant, "compatible_batteries"),
+    "capacity_ah"
+  );
+  const chargers = compatiblePowerAccessories(
+    metadataValue(product, variant, "compatible_chargers"),
+    "output_a"
+  );
+
+  const explicitRelationships = getExplicitIncludedRelationships(
+    product,
+    variant
+  );
+  const linkedBatteries = explicitRelationships.filter(
+    (relationship) => relationship.kind === "battery"
+  );
+  const linkedChargers = explicitRelationships.filter(
+    (relationship) => relationship.kind === "charger"
+  );
+  const linkedBatteryCount = linkedBatteries.reduce(
+    (sum, relationship) => sum + relationship.quantity,
+    0
+  );
+
+  return {
+    powerSource,
+    platform,
+    batteryIncluded:
+      linkedBatteries.length > 0
+        ? true
+        : (metadataBoolean(
+            metadataValue(product, variant, "battery_included")
+          ) ?? (requiresBattery ? false : undefined)),
+    batteryCount:
+      linkedBatteryCount > 0
+        ? linkedBatteryCount
+        : batteryCount !== undefined && batteryCount > 0
+          ? batteryCount
+          : undefined,
+    batteryCapacity,
+    chargerIncluded:
+      linkedChargers.length > 0
+        ? true
+        : metadataBoolean(metadataValue(product, variant, "charger_included")),
+    compatibleBatteries: batteries.map(({ sku, value }) => ({
+      sku,
+      capacityAh: value,
+    })),
+    compatibleChargers: chargers.map(({ sku, value }) => ({
+      sku,
+      outputA: value,
+    })),
+  };
+}
 
 const BATTERY_INCLUDED_RE =
   /\b(acumulator|încărcător|incarcator|charger|battery)\b/i;
@@ -40,8 +403,12 @@ export function getProductEyebrow(
   return category.split(",")[0]?.trim() || undefined;
 }
 
-export function getProductUiType(product: HttpTypes.StoreProduct): ProductType {
+export function getProductUiType(
+  product: HttpTypes.StoreProduct,
+  variant?: HttpTypes.StoreProductVariant
+): ProductType {
   const metadata = (product.metadata ?? {}) as ProductMetadata;
+  const powerSupply = getProductPowerSupply(product, variant);
 
   // A "Configurație" option (bare vs. tool+battery+charger kit) is an authoritative
   // variant selector: the shopper must be able to pick a configuration, so this
@@ -50,8 +417,12 @@ export function getProductUiType(product: HttpTypes.StoreProduct): ProductType {
   const hasConfigurationOption = (product.options ?? []).some(
     (o) => (o.title ?? "").trim().toLowerCase() === "configurație"
   );
+
   if (hasConfigurationOption) {
-    return metadata.requires_battery === true ? "needs-battery" : "single";
+    return powerSupply?.powerSource === "cordless_battery" &&
+      powerSupply?.batteryIncluded === false
+      ? "needs-battery"
+      : "single";
   }
 
   const sourceCategory = String(
@@ -89,11 +460,172 @@ export function getProductUiType(product: HttpTypes.StoreProduct): ProductType {
   // standard accessories) is NOT a combo — it renders the normal purchase PDP,
   // and its bundled contents show in an "Include în cutie" section. The combo/kit
   // templates are reserved for genuine multi-tool bundles (handled above).
-  if (metadata.requires_battery === true) {
+  //
+  // Only cordless power tools "need" a battery — a battery not being included
+  // is meaningless for a manual/corded/pneumatic/petrol tool (or the battery
+  // product itself, whose own power_source is "battery").
+  if (
+    powerSupply?.powerSource === "cordless_battery" &&
+    powerSupply?.batteryIncluded === false
+  ) {
     return "needs-battery";
   }
 
   return "single";
+}
+
+export function getSelectedVariant(
+  product: HttpTypes.StoreProduct,
+  variantId?: string
+): HttpTypes.StoreProductVariant | undefined {
+  if (!product.variants?.length) return undefined;
+
+  return (
+    product.variants.find((variant) => variant.id === variantId) ??
+    product.variants[0]
+  );
+}
+
+export function getVariantDisplayTitle(
+  product: HttpTypes.StoreProduct,
+  variant?: HttpTypes.StoreProductVariant
+): string {
+  const powerSupply = getProductPowerSupply(product, variant);
+  let productTitle = normalizeCatalogBrand(
+    product.title?.trim() || "Produs DYLLU"
+  );
+
+  if (powerSupply?.chargerIncluded === false) {
+    productTitle = productTitle
+      .replace(/\s+(?:și|cu)\s+încărcător(?=\s+Dyllu\b|[,.]|$)/giu, "")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+  }
+
+  if (!variant || (product.variants?.length ?? 0) <= 1) return productTitle;
+
+  const variantTitle = variant.title?.trim();
+  if (!variantTitle || /^default(?:\s+variant)?$/i.test(variantTitle)) {
+    return productTitle;
+  }
+
+  return `${productTitle} — ${normalizeCatalogBrand(variantTitle)}`;
+}
+
+export function getVariantDescription(
+  product: HttpTypes.StoreProduct,
+  variant?: HttpTypes.StoreProductVariant
+): string | undefined {
+  const explicitDescription = metadataString(product, variant, "description");
+  const intro = safeIntro(
+    stripSpecificationSection(
+      metadataString(product, variant, "short_description") ||
+        explicitDescription ||
+        product.description
+    ),
+    product.title
+  );
+  const reason = safeNarrativeSentences(
+    metadataString(product, variant, "why_good") ||
+      metadataString(product, variant, "seo_text")
+  );
+  const highlights = metadataStringArray(
+    metadataValue(product, variant, "highlights")
+  ).filter((highlight) => !TECHNICAL_MEASUREMENT_RE.test(highlight));
+  const useCases = metadataStringArray(
+    metadataValue(product, variant, "use_cases")
+  );
+  const description = uniqueDescriptionParagraphs([
+    intro,
+    reason,
+    highlights.length ? `Avantaje: ${highlights.join("; ")}.` : "",
+    useCases.length ? `Recomandat pentru: ${useCases.join("; ")}.` : "",
+  ]).join("\n\n");
+
+  return description ? normalizeCatalogBrand(description) : undefined;
+}
+
+export function getVariantSpecifications(
+  product: HttpTypes.StoreProduct,
+  variant?: HttpTypes.StoreProductVariant
+): ProductSpecification[] {
+  const variantSpecs = parseSpecifications(
+    ((variant?.metadata ?? {}) as ProductMetadata).specs
+  );
+  if (variantSpecs.length > 0) return variantSpecs;
+
+  return parseSpecifications(
+    ((product.metadata ?? {}) as ProductMetadata).specs
+  );
+}
+
+export function getVariantImageUrl(
+  product: HttpTypes.StoreProduct,
+  variant?: HttpTypes.StoreProductVariant
+): string | undefined {
+  const directImage = variant?.images?.[0]?.url;
+  if (directImage) return directImage;
+
+  return product.thumbnail ?? product.images?.[0]?.url ?? undefined;
+}
+
+export function getVariantImages(
+  product: HttpTypes.StoreProduct,
+  variant?: HttpTypes.StoreProductVariant
+): HttpTypes.StoreProductImage[] {
+  const images = variant?.images?.length
+    ? variant.images
+    : (product.images ?? []);
+  const originalImage = metadataString(product, variant, "original_image");
+
+  if (!originalImage || images.some((image) => image.url === originalImage)) {
+    return images;
+  }
+
+  return [
+    ...images,
+    {
+      id: `original-${variant?.id ?? product.id}`,
+      url: originalImage,
+    } as HttpTypes.StoreProductImage,
+  ];
+}
+
+export function isVariantInStock(
+  variant?: HttpTypes.StoreProductVariant
+): boolean {
+  if (!variant) return false;
+  if (variant.manage_inventory !== true) return true;
+
+  return (variant.inventory_quantity ?? 0) > 0 || !!variant.allow_backorder;
+}
+
+function parseSpecifications(raw: unknown): ProductSpecification[] {
+  let value = raw;
+
+  if (typeof raw === "string") {
+    try {
+      value = JSON.parse(raw);
+    } catch {
+      return [];
+    }
+  }
+
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .filter(
+      (spec): spec is ProductSpecification =>
+        !!spec &&
+        typeof spec === "object" &&
+        typeof (spec as ProductSpecification).label === "string" &&
+        typeof (spec as ProductSpecification).value === "string"
+    )
+    .map((spec) => ({
+      label: spec.label.trim(),
+      value: spec.value.trim(),
+    }))
+    .filter((spec) => spec.label.length > 0 && spec.value.length > 0);
 }
 
 export function getEffectivePlatform(product: HttpTypes.StoreProduct): string {
@@ -257,28 +789,38 @@ export function getProductCategoryLabel(
 }
 
 export function buildProductBreadcrumbs(
-  product: HttpTypes.StoreProduct
+  product: HttpTypes.StoreProduct,
+  variant?: HttpTypes.StoreProductVariant
 ): ProductBreadcrumb[] {
   const metadata = (product.metadata ?? {}) as ProductMetadata;
   const category = product.categories?.[0];
   const sourceCategory = String(metadata.ingco_source_categories ?? "")
     .split(",")[0]
     ?.trim();
+  const normalizeCategoryLabel = (value?: string) =>
+    (value || "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((word) => `${word[0]?.toUpperCase()}${word.slice(1)}`)
+      .join(" ");
+  const breadcrumbCategory = category?.name
+    ? normalizeCategoryLabel(category.name)
+    : sourceCategory
+      ? normalizeCategoryLabel(sourceCategory)
+      : undefined;
+  const categorySlug =
+    category?.handle ?? (sourceCategory ? slugify(sourceCategory) : "");
+  const categoryPath = categorySlug
+    ? `/categories/${slugify(categorySlug)}`
+    : undefined;
 
   return [
     { label: "Acasă", href: "/" },
-    { label: "Magazin", href: "/store" },
-    ...(category?.handle && category.name
-      ? [{ label: category.name, href: `/categories/${category.handle}` }]
-      : sourceCategory
-        ? [
-            {
-              label: sourceCategory,
-              href: `/categories/${slugify(sourceCategory)}`,
-            },
-          ]
-        : []),
-    { label: product.title ?? "Produs" },
+    ...(breadcrumbCategory && categoryPath
+      ? [{ label: breadcrumbCategory, href: categoryPath }]
+      : []),
+    { label: getVariantDisplayTitle(product, variant) },
   ];
 }
 

@@ -18,7 +18,10 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
   return (
     <nav
       aria-label="Breadcrumb"
-      className={cn("flex flex-wrap items-center gap-1 text-sm", className)}
+      className={cn(
+        "no-scrollbar flex items-center gap-1 overflow-x-auto text-sm whitespace-nowrap",
+        className
+      )}
     >
       {items.map((item, idx) => {
         const last = idx === items.length - 1;
@@ -27,7 +30,7 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
             {item.href && !last ? (
               <Link
                 href={item.href}
-                className="text-muted-foreground transition-colors hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 {item.label}
               </Link>
@@ -43,7 +46,7 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
             )}
             {!last && (
               <ChevronRight
-                className="size-3.5 text-muted-foreground/60"
+                className="text-muted-foreground/60 size-3.5"
                 aria-hidden
               />
             )}

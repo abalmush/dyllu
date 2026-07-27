@@ -23,14 +23,14 @@ export function PlpFilters({ groups, priceRange }: Props) {
 
   return (
     <aside className="flex flex-col gap-6">
-      <div className="flex items-center gap-2 text-foreground">
+      <div className="text-foreground flex items-center gap-2">
         <SlidersHorizontal aria-hidden="true" className="size-5" />
         <span className="text-base font-bold tracking-wide">Filtre</span>
       </div>
 
       {groups.map((group) => (
-        <fieldset key={group.id} className="border-t border-border pt-5">
-          <legend className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        <fieldset key={group.id} className="border-border border-t pt-6">
+          <legend className="text-muted-foreground mb-4 text-xs font-semibold tracking-[0.16em] uppercase">
             {group.label}
           </legend>
           <ul className="space-y-2">
@@ -38,17 +38,17 @@ export function PlpFilters({ groups, priceRange }: Props) {
               const key = `${group.id}:${option.value}`;
               return (
                 <li key={key}>
-                  <label className="flex min-h-11 cursor-pointer items-center gap-3 text-base text-foreground">
+                  <label className="text-foreground flex min-h-11 cursor-pointer items-center gap-4 text-base">
                     <input
                       name={key}
                       type="checkbox"
                       checked={!!selected[key]}
                       onChange={() => toggle(key)}
-                      className="size-5 accent-primary"
+                      className="accent-primary size-5"
                     />
                     <span className="flex-1">{option.label}</span>
                     {option.count != null && (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-muted-foreground text-xs">
                         {option.count}
                       </span>
                     )}
@@ -61,8 +61,8 @@ export function PlpFilters({ groups, priceRange }: Props) {
       ))}
 
       {priceRange && (
-        <fieldset className="border-t border-border pt-5">
-          <legend className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        <fieldset className="border-border border-t pt-6">
+          <legend className="text-muted-foreground mb-4 text-xs font-semibold tracking-[0.16em] uppercase">
             Preț (MDL)
           </legend>
           <div className="flex items-center gap-2">
@@ -73,7 +73,7 @@ export function PlpFilters({ groups, priceRange }: Props) {
               min={0}
               defaultValue={priceRange.min}
               aria-label="Preț minim"
-              className="clip-corner-cut-xs w-full border border-border bg-card px-3 py-2 text-sm text-foreground"
+              className="clip-corner-cut-xs border-border bg-card text-foreground w-full border px-4 py-2 text-sm"
             />
             <span className="text-muted-foreground">—</span>
             <input
@@ -83,7 +83,7 @@ export function PlpFilters({ groups, priceRange }: Props) {
               min={0}
               defaultValue={priceRange.max}
               aria-label="Preț maxim"
-              className="clip-corner-cut-xs w-full border border-border bg-card px-3 py-2 text-sm text-foreground"
+              className="clip-corner-cut-xs border-border bg-card text-foreground w-full border px-4 py-2 text-sm"
             />
           </div>
         </fieldset>
@@ -105,13 +105,13 @@ export function ActiveFilterChips({
       {filters.map((filter) => (
         <span
           key={filter}
-          className="clip-corner-cut-xs inline-flex items-center gap-1.5 bg-muted px-3 py-1 text-xs font-medium text-foreground"
+          className="clip-corner-cut-xs bg-muted text-foreground inline-flex items-center gap-1.5 px-4 py-1 text-xs font-medium"
         >
           {filter}
           <button
             type="button"
             aria-label={`Elimină filtrul ${filter}`}
-            className="text-muted-foreground transition-colors hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground transition-colors"
           >
             ×
           </button>
@@ -120,7 +120,7 @@ export function ActiveFilterChips({
       <button
         type="button"
         onClick={onClear}
-        className="px-2 text-sm font-semibold text-brand-800 underline-offset-2 hover:underline"
+        className="text-brand-800 px-2 text-sm font-semibold underline-offset-2 hover:underline"
       >
         Șterge tot
       </button>

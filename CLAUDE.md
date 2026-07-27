@@ -66,21 +66,22 @@ pnpm-workspace.yaml           # Workspace config
 
 Orchestrated by Turborepo — `pnpm <script>` fans out to the right workspace(s).
 
-| Command                                                          | Effect                                                                     |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `pnpm dev`                                                       | Run **all** dev servers (backend + storefront) via turbo                   |
-| `pnpm -F @dyllu/backend dev`                                     | Backend only (admin at `http://localhost:9000/backend`)                    |
-| `pnpm -F @dyllu/storefront dev`                                  | Storefront only (`http://localhost:4000`)                                  |
-| `pnpm build`                                                     | Production build for all workspaces                                        |
-| `pnpm lint` / `pnpm typecheck` / `pnpm test`                     | Fans out                                                                   |
-| `pnpm check`                                                     | Lint + typecheck + test (storefront only; backend has no check script yet) |
-| `pnpm format`                                                    | Prettier write across the monorepo                                         |
-| `pnpm -F @dyllu/backend db:migrate`                              | Run pending migrations + any seed scripts                                  |
-| `pnpm -F @dyllu/backend db:create-user -e <email> -p <password>` | Create admin user                                                          |
+| Command                                                          | Effect                                                                                                                                                              |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm dev`                                                       | Run **all** dev servers (backend + storefront + catalog-admin) via turbo                                                                                            |
+| `pnpm dev:store`                                                 | Storefront-facing stack only (backend + storefront). Stable command — excludes the WIP `catalog-admin`, which under turbo can take the whole run down when it exits |
+| `pnpm -F @dyllu/backend dev`                                     | Backend only (admin at `http://localhost:9000/backend`)                                                                                                             |
+| `pnpm -F @dyllu/storefront dev`                                  | Storefront only (`http://localhost:4000`)                                                                                                                           |
+| `pnpm build`                                                     | Production build for all workspaces                                                                                                                                 |
+| `pnpm lint` / `pnpm typecheck` / `pnpm test`                     | Fans out                                                                                                                                                            |
+| `pnpm check`                                                     | Lint + typecheck + test (storefront only; backend has no check script yet)                                                                                          |
+| `pnpm format`                                                    | Prettier write across the monorepo                                                                                                                                  |
+| `pnpm -F @dyllu/backend db:migrate`                              | Run pending migrations + any seed scripts                                                                                                                           |
+| `pnpm -F @dyllu/backend db:create-user -e <email> -p <password>` | Create admin user                                                                                                                                                   |
 
 ## Local dev setup
 
-1. **Prerequisites:** Node 20.19+, Docker (for Postgres), pnpm 10+.
+1. **Prerequisites:** Node 22.12+ (repo pins 22.22.0 in `.nvmrc` — run `nvm use`), Docker (for Postgres), pnpm 10+. Medusa 2.18 and Next 16 are unstable below Node 22.12; `pnpm dev` fails fast via a `predev` guard if the Node version is too old.
 2. **Clone and install:**
    ```bash
    pnpm install

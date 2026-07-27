@@ -55,13 +55,14 @@ export function PromoMosaic({ promos }: PromoMosaicProps) {
   const [dominant, ...supporting] = visible;
 
   return (
-    <section className="py-8 small:py-12">
+    <section className="small:py-12 py-8">
       <Container>
-        <div className={cn("grid gap-4 medium:gap-5", layout.gridClass)}>
+        <div className={cn("medium:gap-6 grid gap-4", layout.gridClass)}>
           <BannerCard
             {...dominant}
             className={layout.dominantClass}
             headingLevel="h1"
+            imagePriority
           />
           {supporting.map((promo, i) => (
             <BannerCard

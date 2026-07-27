@@ -46,21 +46,21 @@ export function ProductReviews({
   const maxBar = Math.max(1, ...distribution);
 
   return (
-    <section className="bg-surface-subtle py-16 small:py-20">
+    <section className="bg-surface-subtle small:py-20 py-16">
       <Container>
-        <h2 className="font-display text-2xl font-extrabold tracking-tight text-foreground small:text-3xl">
+        <h2 className="font-display text-foreground small:text-3xl text-2xl font-extrabold tracking-tight">
           Recenzii clienți
         </h2>
 
-        <div className="mt-8 grid gap-10 medium:grid-cols-[minmax(0,320px)_1fr] medium:gap-16">
-          <div className="clip-corner-cut-lg h-fit bg-card p-6 ring-1 ring-border">
-            <div className="flex items-end gap-3">
-              <span className="font-display text-5xl font-extrabold leading-none text-foreground">
+        <div className="medium:grid-cols-[minmax(0,320px)_1fr] medium:gap-16 mt-8 grid gap-12">
+          <div className="clip-corner-cut-lg bg-card ring-border h-fit p-6 ring-1">
+            <div className="flex items-end gap-4">
+              <span className="font-display text-foreground text-5xl leading-none font-extrabold">
                 {average.toFixed(1)}
               </span>
               <div className="pb-1">
                 <Stars rating={average} />
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   {count} recenzii
                 </p>
               </div>
@@ -70,17 +70,17 @@ export function ProductReviews({
               {distribution
                 .map((n, i) => ({ stars: 5 - i, n }))
                 .map(({ stars, n }) => (
-                  <li key={stars} className="flex items-center gap-3">
-                    <span className="w-8 shrink-0 text-xs text-muted-foreground">
+                  <li key={stars} className="flex items-center gap-4">
+                    <span className="text-muted-foreground w-8 shrink-0 text-xs">
                       {stars}★
                     </span>
-                    <span className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                    <span className="bg-muted h-2 flex-1 overflow-hidden rounded-full">
                       <span
-                        className="block h-full rounded-full bg-warning"
+                        className="bg-warning block h-full rounded-full"
                         style={{ width: `${(n / maxBar) * 100}%` }}
                       />
                     </span>
-                    <span className="w-6 shrink-0 text-right text-xs text-muted-foreground">
+                    <span className="text-muted-foreground w-6 shrink-0 text-right text-xs">
                       {n}
                     </span>
                   </li>
@@ -88,22 +88,22 @@ export function ProductReviews({
             </ul>
           </div>
 
-          <ul className="space-y-5">
+          <ul className="space-y-6">
             {reviews.map((review) => (
               <li
                 key={review.id}
-                className="border-b border-border pb-5 last:border-0"
+                className="border-border border-b pb-6 last:border-0"
               >
                 <div className="flex items-center justify-between gap-4">
-                  <span className="font-semibold text-foreground">
+                  <span className="text-foreground font-semibold">
                     {review.author}
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-muted-foreground text-xs">
                     {review.date}
                   </span>
                 </div>
                 <Stars rating={review.rating} className="mt-1.5" />
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
                   {review.body}
                 </p>
               </li>
