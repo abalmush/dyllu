@@ -3,8 +3,8 @@ import { type CategoryNode } from "@lib/data/categories";
 export const CATEGORY_NAV_ORDER = [
   "scule-electrice",
   "scule-de-mana",
-  "accesorii-si-consumabile",
-  "gradina-si-agricultura",
+  "accesorii-si-consumabile-pentru-scule",
+  "gradinarit",
   "constructii-si-finisaje",
   "energie-si-electricitate",
   "auto-si-service",
@@ -20,12 +20,13 @@ export const CATEGORY_NAV_ORDER = [
 export const PRIMARY_CATEGORY_NAV_HANDLES = [
   "scule-electrice",
   "scule-de-mana",
-  "accesorii-si-consumabile",
-  "gradina-si-agricultura",
+  "accesorii-si-consumabile-pentru-scule",
+  "gradinarit",
 ] as const;
 
 const CATEGORY_NAV_LABELS: Record<string, string> = {
   "accesorii-si-consumabile": "Accesorii",
+  "accesorii-si-consumabile-pentru-scule": "Accesorii",
   "echipamente-de-protectie": "Protecție",
 };
 
