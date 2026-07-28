@@ -8,6 +8,7 @@ import { cn } from "@lib/utils";
 import { useShowcasePinned } from "@lib/stores/showcase-pinned";
 import { Logo } from "@/components/atoms/logo";
 import { IconButton } from "@/components/atoms/icon-button";
+import { NavigationProgress } from "@/components/atoms/navigation-progress";
 import { CartDrawer } from "@/components/organisms/cart-drawer";
 import { MegaMenu } from "@/components/organisms/mega-menu";
 import { MobileNav } from "@/components/organisms/mobile-nav";
@@ -108,6 +109,9 @@ export function SiteHeader({ cart, categories }: SiteHeaderProps) {
         onOpenChange={setSearchOpen}
         categories={categories}
       />
+      <React.Suspense fallback={null}>
+        <NavigationProgress />
+      </React.Suspense>
     </header>
   );
 }
