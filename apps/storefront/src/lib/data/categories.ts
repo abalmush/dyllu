@@ -15,7 +15,9 @@ export type CategoryNode = {
 
 const REPRESENTATIVE_PRODUCT_SKUS: Record<string, string> = {
   "accesorii-si-consumabile": "DTHD6B06",
+  "accesorii-si-consumabile-pentru-scule": "DTHD6B06",
   "atelier-depozitare-si-manipulare": "DTCS5A05",
+  "casa-si-gospodarie": "DVCW1001",
   "compresoare-si-pneumatice": "DTAP4A13",
   "constructii-si-finisaje": "DTCM2A160",
 };
