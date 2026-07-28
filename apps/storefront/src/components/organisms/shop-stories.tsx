@@ -9,6 +9,7 @@ import { type CategoryNode } from "@lib/data/categories";
 const STORIES = [
   {
     categoryHandle: "scule-electrice",
+    href: "/categories/scule-electrice",
     eyebrow: "Atelier de lemn",
     title: "Precizie de la prima tăiere",
     description:
@@ -16,7 +17,7 @@ const STORIES = [
     image: "/images/home/story-woodworking.webp",
   },
   {
-    categoryHandle: "auto-si-service",
+    href: "/c/service-auto",
     eyebrow: "Service auto",
     title: "Unelte pregătite pentru intervenții zilnice",
     description:
@@ -36,7 +37,9 @@ export function ShopStories({ categories }: { categories: CategoryNode[] }) {
     flattenCategories(categories).map((category) => category.handle)
   );
   const stories = STORIES.filter((story) =>
-    visibleHandles.has(story.categoryHandle)
+    "categoryHandle" in story
+      ? visibleHandles.has(story.categoryHandle)
+      : true
   );
 
   if (stories.length === 0) return null;
@@ -59,8 +62,8 @@ export function ShopStories({ categories }: { categories: CategoryNode[] }) {
         <div className="medium:grid-cols-2 grid gap-5">
           {stories.map((story) => (
             <Link
-              key={story.categoryHandle}
-              href={`/categories/${story.categoryHandle}`}
+              key={story.href}
+              href={story.href}
               className="clip-corner-cut-lg group relative min-h-[420px] overflow-hidden"
             >
               <Image
@@ -85,7 +88,7 @@ export function ShopStories({ categories }: { categories: CategoryNode[] }) {
                   {story.description}
                 </span>
                 <span className="mt-2 inline-flex items-center gap-2 text-sm font-semibold">
-                  Vezi categoria
+                  Vezi selecția
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                 </span>
               </span>
