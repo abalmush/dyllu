@@ -103,6 +103,25 @@ describe("parseBackendEnvironment", () => {
     ).toThrow(/S3_FILE_URL is required when S3 storage is configured/);
   });
 
+  it("enables Resend only when both values are configured", () => {
+    const environment = parseBackendEnvironment({
+      NODE_ENV: "test",
+      RESEND_API_KEY: "re_test",
+      RESEND_FROM_EMAIL: "DYLLU <notifications@dyllu.md>",
+    });
+
+    expect(environment.resend).toEqual({
+      apiKey: "re_test",
+      fromEmail: "DYLLU <notifications@dyllu.md>",
+    });
+    expect(() =>
+      parseBackendEnvironment({
+        NODE_ENV: "test",
+        RESEND_API_KEY: "re_test",
+      })
+    ).toThrow(/RESEND_FROM_EMAIL is required/);
+  });
+
   it("uses distinct development-only defaults without enabling TLS", () => {
     const environment = parseBackendEnvironment({ NODE_ENV: "test" });
 
@@ -110,5 +129,6 @@ describe("parseBackendEnvironment", () => {
     expect(environment.databaseSsl).toBe(false);
     expect(environment.jwtSecret).not.toBe(environment.cookieSecret);
     expect(environment.s3).toBeUndefined();
+    expect(environment.resend).toBeUndefined();
   });
 });

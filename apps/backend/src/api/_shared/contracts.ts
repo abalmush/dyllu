@@ -93,10 +93,29 @@ export const CompatibleAccessoriesQuerySchema = z
   })
   .strict();
 
+export const NewsletterSubscriptionSchema = z
+  .object({
+    email: z.string().trim().email().max(254),
+    website: z.string().max(0).optional().default(""),
+  })
+  .strict();
+
+export const NewsletterConfirmationQuerySchema = z
+  .object({
+    token: z.string().trim().min(32).max(2_048),
+  })
+  .strict();
+
 export type AiProposal = z.infer<typeof AiProposalSchema>;
 export type AiChatBody = z.infer<typeof AiChatBodySchema>;
 export type AiApplyBody = z.infer<typeof AiApplyBodySchema>;
 export type AccessoryKind = z.infer<typeof AccessoryKindSchema>;
 export type CompatibleAccessoriesQuery = z.infer<
   typeof CompatibleAccessoriesQuerySchema
+>;
+export type NewsletterSubscription = z.infer<
+  typeof NewsletterSubscriptionSchema
+>;
+export type NewsletterConfirmationQuery = z.infer<
+  typeof NewsletterConfirmationQuerySchema
 >;

@@ -79,5 +79,25 @@ module.exports = defineConfig({
           },
         ]
       : []),
+    ...(environment.resend
+      ? [
+          {
+            resolve: "@medusajs/medusa/notification",
+            options: {
+              providers: [
+                {
+                  resolve: "./src/modules/resend",
+                  id: "resend",
+                  options: {
+                    channels: ["email"],
+                    apiKey: environment.resend.apiKey,
+                    fromEmail: environment.resend.fromEmail,
+                  },
+                },
+              ],
+            },
+          },
+        ]
+      : []),
   ],
 });

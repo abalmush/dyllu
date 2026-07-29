@@ -14,6 +14,8 @@ import {
   AiApplyBodySchema,
   AiChatBodySchema,
   CompatibleAccessoriesQuerySchema,
+  NewsletterConfirmationQuerySchema,
+  NewsletterSubscriptionSchema,
 } from "./_shared/contracts";
 
 const adminAuthentication = authenticate("user", [
@@ -79,6 +81,22 @@ const middlewareConfig: MiddlewaresConfig = {
       methods: ["GET"],
       middlewares: [
         validateAndTransformQuery(CompatibleAccessoriesQuerySchema, {
+          defaults: [],
+          isList: false,
+        }),
+      ],
+    },
+    {
+      matcher: "/store/newsletter",
+      methods: ["POST"],
+      bodyParser: { sizeLimit: "4kb" },
+      middlewares: [validateAndTransformBody(NewsletterSubscriptionSchema)],
+    },
+    {
+      matcher: "/store/newsletter/confirm",
+      methods: ["GET"],
+      middlewares: [
+        validateAndTransformQuery(NewsletterConfirmationQuerySchema, {
           defaults: [],
           isList: false,
         }),

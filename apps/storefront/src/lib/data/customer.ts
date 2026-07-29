@@ -243,6 +243,66 @@ export async function login(_currentState: unknown, formData: FormData) {
   }
 }
 
+export async function requestPasswordReset(
+  _currentState: unknown,
+  formData: FormData
+) {
+  const email = formString(formData, "email", {
+    required: true,
+    max: 254,
+  }).toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return "Adresa de email nu este validă.";
+  }
+
+  try {
+    await sdk.auth.resetPassword("customer", "emailpass", {
+      identifier: email,
+    });
+  } catch (error) {
+    console.error("Password reset request failed", error);
+  }
+
+  return "Dacă există un cont pentru această adresă, vei primi instrucțiunile prin email.";
+}
+
+export async function completePasswordReset(
+  _currentState: unknown,
+  formData: FormData
+) {
+  const email = formString(formData, "email", {
+    required: true,
+    max: 254,
+  });
+  const token = formString(formData, "token", {
+    required: true,
+    max: 2_048,
+  });
+  const password = formString(formData, "password", {
+    required: true,
+    max: 128,
+  });
+  const confirmation = formString(formData, "password_confirmation", {
+    required: true,
+    max: 128,
+  });
+  if (password.length < 8) {
+    return "Parola trebuie să aibă cel puțin 8 caractere.";
+  }
+  if (password !== confirmation) {
+    return "Parolele nu coincid.";
+  }
+
+  try {
+    await sdk.auth.updateProvider("customer", "emailpass", { password }, token);
+  } catch (error) {
+    console.error("Password reset failed", error);
+    return "Linkul este invalid sau a expirat. Solicită un link nou.";
+  }
+
+  redirect(`/account?reset=success&email=${encodeURIComponent(email)}`);
+}
+
 export async function signout() {
   await sdk.auth.logout();
 
