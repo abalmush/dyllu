@@ -24,6 +24,7 @@ import {
 import { type CategoryNode } from "@lib/data/categories";
 import {
   getCategoryNavLabel,
+  orderChildCategoriesForNavigation,
   orderCategoriesForNavigation,
 } from "@lib/data/category-navigation";
 
@@ -69,6 +70,8 @@ export function MobileNav({ categories }: MobileNavProps) {
             <Accordion type="multiple" className="px-2">
               {navigationCategories.map((category) => {
                 const displayName = getCategoryNavLabel(category);
+                const childCategories =
+                  orderChildCategoriesForNavigation(category);
 
                 return (
                   <AccordionItem
@@ -99,7 +102,7 @@ export function MobileNav({ categories }: MobileNavProps) {
                       >
                         Vezi tot {displayName}
                       </Link>
-                      {category.children.map((child) => (
+                      {childCategories.map((child) => (
                         <div key={child.handle} className="space-y-0.5">
                           <Link
                             href={`/categories/${child.handle}`}

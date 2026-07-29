@@ -19,6 +19,7 @@ import { type CategoryNode } from "@lib/data/categories";
 import {
   getCategoryNavLabel,
   getPrimaryCategoriesForNavigation,
+  orderChildCategoriesForNavigation,
   orderCategoriesForNavigation,
 } from "@lib/data/category-navigation";
 
@@ -37,7 +38,7 @@ function ColumnItem({ node }: { node: CategoryNode }) {
                 alt=""
                 fill
                 sizes="72px"
-                className="object-cover"
+                className="object-contain"
               />
             </span>
           ) : null}
@@ -80,7 +81,7 @@ export function MegaMenu({
   const allCategories = orderCategoriesForNavigation(categories);
   const itemClassName = cn(
     navigationMenuTriggerStyle(),
-    "min-h-11 whitespace-nowrap rounded-full px-3 text-sm font-semibold tracking-tight text-background hover:bg-background/10 focus:bg-background/10 data-active:bg-background/10 undefined-state-open:bg-background/10"
+    "min-h-11 whitespace-nowrap rounded-full px-3 text-sm font-semibold tracking-tight text-background hover:bg-background/10 hover:text-background focus:bg-background/10 focus:text-background focus-visible:ring-2 focus-visible:ring-background/60 data-[active]:bg-background/10 data-[active]:text-background data-[state=open]:bg-background/10 data-[state=open]:text-background"
   );
 
   if (navigationCategories.length === 0 && !includeSaleLink) {
@@ -93,7 +94,8 @@ export function MegaMenu({
         {navigationCategories.map((category) => {
           const hasChildren = category.children.length > 0;
           const displayName = getCategoryNavLabel(category);
-          const useThreeColumns = category.children.length >= 12;
+          const childCategories = orderChildCategoriesForNavigation(category);
+          const useThreeColumns = childCategories.length >= 12;
           const gridColumnsClass = useThreeColumns
             ? "grid-cols-3 gap-x-4 gap-y-1.5"
             : "grid-cols-2 gap-x-6 gap-y-1.5";
@@ -133,7 +135,7 @@ export function MegaMenu({
                           </Link>
                         </div>
                         <div className={cn("grid", gridColumnsClass)}>
-                          {category.children.map((child) => (
+                          {childCategories.map((child) => (
                             <ColumnItem key={child.handle} node={child} />
                           ))}
                         </div>

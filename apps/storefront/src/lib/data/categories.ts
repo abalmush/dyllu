@@ -17,9 +17,18 @@ const REPRESENTATIVE_PRODUCT_SKUS: Record<string, string> = {
   "accesorii-si-consumabile": "DTHD6B06",
   "accesorii-si-consumabile-pentru-scule": "DTHD6B06",
   "atelier-depozitare-si-manipulare": "DTCS5A05",
+  "capsatoare-si-nituitoare-manuale": "DTGU3614",
+  "capsatoare-si-pistoale-de-cuie": "DTBJ1308",
   "casa-si-gospodarie": "DVCW1001",
+  "chei-si-surubelnite-cu-impact": "DTCD1B1285",
   "compresoare-si-pneumatice": "DTAP4A13",
   "constructii-si-finisaje": "DTCM2A160",
+  "fixare-si-capsare": "DTBJ1308",
+  "gaurire-si-insurubare-scule-electrice": "DTCDP7281",
+  "masini-de-gaurit-si-insurubat": "DTCDP7281",
+  "masurare-si-trasare": "DTMT4340",
+  "truse-si-seturi": "DTHS3B85",
+  "truse-si-seturi-de-scule": "DTHS3B85",
 };
 
 export const listCategories = async (query?: Record<string, any>) => {
@@ -76,9 +85,10 @@ const toVisibleNode = (
     name: category.name,
     handle: category.handle,
     navThumbnailUrl:
-      typeof navThumbnailUrl === "string"
+      pinnedImages.get(category.handle) ??
+      (typeof navThumbnailUrl === "string"
         ? navThumbnailUrl
-        : representativeImage,
+        : representativeImage),
     children,
   };
 };
