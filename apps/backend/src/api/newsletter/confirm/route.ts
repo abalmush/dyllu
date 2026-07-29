@@ -1,7 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 
-import type { NewsletterConfirmationQuery } from "../../../_shared/contracts";
-import { verifyNewsletterToken } from "../../../../lib/newsletter-token";
+import type { NewsletterConfirmationQuery } from "../../_shared/contracts";
+import { verifyNewsletterToken } from "../../../lib/newsletter-token";
 
 export async function GET(
   req: MedusaRequest<unknown, NewsletterConfirmationQuery>,

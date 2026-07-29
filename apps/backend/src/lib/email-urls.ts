@@ -9,3 +9,7 @@ export function getAdminUrl(path: string) {
     .find((value) => value.startsWith("https://"));
   return origin ? new URL(path, origin).toString() : null;
 }
+
+export function getNewsletterConfirmationUrl() {
+  return getAdminUrl("/newsletter/confirm");
+}
