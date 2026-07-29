@@ -93,7 +93,7 @@ const middlewareConfig: MiddlewaresConfig = {
       middlewares: [validateAndTransformBody(NewsletterSubscriptionSchema)],
     },
     {
-      matcher: "/store/newsletter/confirm",
+      matcher: "/newsletter/confirm",
       methods: ["GET"],
       middlewares: [
         validateAndTransformQuery(NewsletterConfirmationQuerySchema, {

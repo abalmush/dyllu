@@ -3,7 +3,7 @@ import { Modules } from "@medusajs/framework/utils";
 
 import type { NewsletterSubscription } from "../../_shared/contracts";
 import { emailButton, emailShell } from "../../../lib/email-content";
-import { getAdminUrl } from "../../../lib/email-urls";
+import { getNewsletterConfirmationUrl } from "../../../lib/email-urls";
 import { createNewsletterToken } from "../../../lib/newsletter-token";
 
 export async function POST(
@@ -17,7 +17,7 @@ export async function POST(
 
   const apiKey = process.env.RESEND_API_KEY;
   const secret = process.env.JWT_SECRET;
-  const confirmationBaseUrl = getAdminUrl("/store/newsletter/confirm");
+  const confirmationBaseUrl = getNewsletterConfirmationUrl();
   if (!apiKey || !secret || !confirmationBaseUrl) {
     return res.status(503).json({
       error: "email_unavailable",
