@@ -1,6 +1,6 @@
 import * as React from "react";
 import Image from "next/image";
-import { BatteryFull, Layers, Plug } from "lucide-react";
+import { BatteryFull, Briefcase, Plug } from "lucide-react";
 
 import { cn } from "@lib/utils";
 import { IMAGE_BG_NEUTRALIZE } from "@/components/organisms/pdp-hero-variants";
@@ -34,22 +34,42 @@ export function SetBreakdown({
 
   return (
     <div
-      className={cn(tone === "dark" ? "relative pt-7" : "space-y-4", className)}
+      className={cn(
+        tone === "dark" ? "relative pt-9 pb-2" : "space-y-4",
+        className
+      )}
     >
       {tone === "dark" && (
-        <div
-          aria-hidden="true"
-          className="border-foreground absolute top-0 left-1/2 z-10 h-10 w-32 -translate-x-1/2 rounded-t-2xl border-[8px] border-b-0"
-        >
-          <span className="bg-foreground absolute top-5 -left-5 h-5 w-8 rounded-t-md" />
-          <span className="bg-foreground absolute top-5 -right-5 h-5 w-8 rounded-t-md" />
-        </div>
+        <>
+          <div
+            aria-hidden="true"
+            className="border-foreground absolute top-0 left-1/2 z-10 h-12 w-40 -translate-x-1/2 rounded-t-3xl border-[14px] border-b-0"
+          >
+            <span className="bg-foreground absolute top-7 -left-6 h-5 w-10 rounded-t-lg" />
+            <span className="bg-foreground absolute top-7 -right-6 h-5 w-10 rounded-t-lg" />
+          </div>
+          <div
+            aria-hidden="true"
+            className="absolute top-9 left-1/2 z-20 flex -translate-x-1/2 gap-14"
+          >
+            <span className="bg-primary h-2.5 w-8 rounded-b-md" />
+            <span className="bg-primary h-2.5 w-8 rounded-b-md" />
+          </div>
+          <span
+            aria-hidden="true"
+            className="bg-foreground absolute bottom-0 left-12 h-3 w-14 rounded-b-md"
+          />
+          <span
+            aria-hidden="true"
+            className="bg-foreground absolute right-12 bottom-0 h-3 w-14 rounded-b-md"
+          />
+        </>
       )}
       <div
         className={cn(
           "space-y-4",
           tone === "dark" &&
-            "clip-corner-cut-lg bg-foreground text-background ring-background/15 small:p-6 p-6 ring-1"
+            "clip-corner-cut-lg clip-shadow-xl bg-foreground text-background small:p-6 ring-foreground p-6 ring-[5px]"
         )}
       >
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -59,7 +79,7 @@ export function SetBreakdown({
               tone === "dark" ? "text-background" : "text-foreground"
             )}
           >
-            <Layers className="size-4" />
+            <Briefcase className="size-5" />
             Ce este inclus
           </span>
           <span className="clip-corner-cut-sm bg-foreground text-2xs text-background px-4 py-1.5 font-bold tracking-[0.14em] uppercase">

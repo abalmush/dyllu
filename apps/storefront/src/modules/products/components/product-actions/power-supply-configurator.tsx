@@ -56,6 +56,92 @@ const isRapidCharger = (product: HttpTypes.StoreProduct) =>
   metadataNumber(product.metadata?.charger_output_a) >= 4 ||
   /rapid/i.test(product.title ?? "");
 
+function SupplyModeCard({
+  selected,
+  accent,
+  icon,
+  title,
+  description,
+  badge,
+  price,
+  onSelect,
+  testId,
+}: {
+  selected: boolean;
+  accent?: boolean;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  badge?: string;
+  price?: string;
+  onSelect: () => void;
+  testId: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={selected}
+      data-testid={testId}
+      className={cn(
+        "focus-visible:ring-ring relative flex min-h-28 items-start gap-3 rounded-xl border p-3.5 text-left transition-[background-color,border-color,box-shadow,transform] duration-200 focus-visible:ring-2 focus-visible:outline-hidden",
+        accent
+          ? "border-primary/70 bg-primary-subtle hover:border-primary hover:bg-primary/15"
+          : "border-border bg-background hover:border-foreground/40 hover:bg-muted",
+        selected &&
+          (accent
+            ? "border-primary bg-primary/15 ring-primary shadow-sm ring-1"
+            : "border-foreground ring-foreground shadow-sm ring-1")
+      )}
+    >
+      <span
+        aria-hidden
+        className={cn(
+          "grid size-10 shrink-0 place-items-center rounded-full",
+          accent
+            ? "bg-primary text-primary-foreground"
+            : selected
+              ? "bg-foreground text-background"
+              : "bg-surface-subtle text-foreground"
+        )}
+      >
+        {icon}
+      </span>
+
+      <span className="min-w-0 flex-1">
+        {badge ? (
+          <span className="bg-primary text-primary-foreground mb-1.5 inline-flex rounded-full px-2 py-0.5 text-[9px] font-black tracking-[0.12em] uppercase">
+            {badge}
+          </span>
+        ) : null}
+        <span className="text-foreground block text-sm font-bold">{title}</span>
+        <span className="text-muted-foreground mt-1 block text-xs leading-relaxed">
+          {description}
+        </span>
+        {price ? (
+          <span className="text-foreground mt-2 block text-xs font-black">
+            {price}
+          </span>
+        ) : null}
+      </span>
+
+      <span
+        aria-hidden
+        className={cn(
+          "grid size-5 shrink-0 place-items-center rounded-full border transition-colors",
+          selected
+            ? accent
+              ? "border-primary bg-primary text-primary-foreground"
+              : "border-foreground bg-foreground text-background"
+            : "border-foreground/30 bg-background text-transparent"
+        )}
+      >
+        <Check className="size-3 stroke-3" />
+      </span>
+    </button>
+  );
+}
+
 function ChoiceCard({
   product,
   selected,
@@ -155,6 +241,14 @@ export function PowerSupplyConfigurator({
     batteries[0];
   const recommendedCharger =
     chargers.find((charger) => isRapidCharger(charger)) ?? chargers[0];
+  const recommendedPowerPrice = [
+    productPrice(recommendedBattery),
+    recommendedCharger ? productPrice(recommendedCharger) : 0,
+  ].reduce<number | undefined>(
+    (total, price) =>
+      total == null || price == null ? undefined : total + price,
+    0
+  );
 
   if (!hasOptions) return null;
 
@@ -204,35 +298,34 @@ export function PowerSupplyConfigurator({
         </div>
       </div>
 
-      <div className="bg-background ring-border grid grid-cols-2 gap-1 rounded-lg p-1 ring-1">
-        <button
-          type="button"
-          onClick={selectToolOnly}
-          aria-pressed={!open}
-          className={cn(
-            "focus-visible:ring-ring flex min-h-10 items-center justify-center gap-2 rounded-md px-3 text-xs font-bold focus-visible:ring-2 focus-visible:outline-hidden",
-            !open
-              ? "bg-foreground text-background"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Wrench className="size-4" aria-hidden />
-          Doar scula
-        </button>
-        <button
-          type="button"
-          onClick={selectRecommendedPower}
-          aria-pressed={open}
-          className={cn(
-            "focus-visible:ring-ring flex min-h-10 items-center justify-center gap-2 rounded-md px-3 text-xs font-bold focus-visible:ring-2 focus-visible:outline-hidden",
-            open
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <BatteryCharging className="size-4" aria-hidden />
-          Adaugă acumulator
-        </button>
+      <div className="small:grid-cols-2 grid gap-2.5">
+        <SupplyModeCard
+          selected={!open}
+          icon={<Wrench className="size-5" />}
+          title="Doar scula"
+          description="Am deja un acumulator compatibil DYLLU P20S."
+          onSelect={selectToolOnly}
+          testId="power-mode-tool-only"
+        />
+        <SupplyModeCard
+          selected={open}
+          accent
+          icon={<BatteryCharging className="size-5" />}
+          title="Sculă + acumulator"
+          description={
+            recommendedCharger
+              ? "Gata de utilizare, cu încărcător compatibil."
+              : "Completează scula cu un acumulator compatibil."
+          }
+          badge="Recomandat"
+          price={
+            recommendedPowerPrice == null
+              ? undefined
+              : `+${priceFormatter.format(recommendedPowerPrice)} MDL`
+          }
+          onSelect={selectRecommendedPower}
+          testId="power-mode-with-battery"
+        />
       </div>
 
       {open ? (
