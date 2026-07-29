@@ -18,7 +18,7 @@ const FIELDS: Field[] = [
     id: "phone",
     label: "Telefon",
     type: "tel",
-    placeholder: "+373 6X XXX XXX",
+    placeholder: "+373 6X XX XX XX",
   },
   { id: "email", label: "Email", type: "email", placeholder: "ion@exemplu.md" },
   {

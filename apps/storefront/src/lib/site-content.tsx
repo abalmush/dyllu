@@ -1,5 +1,5 @@
 export const SITE_CONTACT = {
-  phoneDisplay: "+373 79 121 220",
+  phoneDisplay: "+373 79 12 12 20",
   phoneHref: "tel:+37379121220",
   email: "contact@dyllu.md",
   emailHref: "mailto:contact@dyllu.md",
@@ -21,14 +21,14 @@ export const SHOWROOMS = [
     city: "Chișinău",
     address: "str. Calea Ieșilor 10",
     schedule: "L–S 08:00–18:00 · D 09:00–14:00",
-    phone: "+373 79 979 888",
+    phone: "+373 79 97 98 88",
     note: "Magazin DYLLU",
   },
   {
     city: "Chișinău",
     address: "str. Calea Moșilor 1C",
     schedule: "L–S 08:00–18:00 · D 09:00–14:00",
-    phone: "+373 79 979 888",
+    phone: "+373 79 97 98 88",
     note: "Ridicare, service și consultanță tehnică",
   },
 ] as const;
