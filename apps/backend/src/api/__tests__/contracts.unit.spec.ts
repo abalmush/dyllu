@@ -2,6 +2,8 @@ import {
   AiApplyBodySchema,
   AiChatBodySchema,
   CompatibleAccessoriesQuerySchema,
+  NewsletterConfirmationQuerySchema,
+  NewsletterSubscriptionSchema,
 } from "../_shared/contracts";
 
 describe("AI request contracts", () => {
@@ -57,6 +59,36 @@ describe("AI request contracts", () => {
           summary: "Edit image",
         },
       }).success
+    ).toBe(false);
+  });
+});
+
+describe("newsletter contracts", () => {
+  it("normalizes valid subscriptions and rejects bot or unknown fields", () => {
+    expect(
+      NewsletterSubscriptionSchema.parse({ email: " Test@Example.com " })
+    ).toEqual({ email: "Test@Example.com", website: "" });
+    expect(
+      NewsletterSubscriptionSchema.safeParse({
+        email: "invalid",
+      }).success
+    ).toBe(false);
+    expect(
+      NewsletterSubscriptionSchema.safeParse({
+        email: "test@example.com",
+        role: "admin",
+      }).success
+    ).toBe(false);
+  });
+
+  it("accepts only bounded confirmation tokens", () => {
+    expect(
+      NewsletterConfirmationQuerySchema.safeParse({
+        token: "a".repeat(64),
+      }).success
+    ).toBe(true);
+    expect(
+      NewsletterConfirmationQuerySchema.safeParse({ token: "short" }).success
     ).toBe(false);
   });
 });

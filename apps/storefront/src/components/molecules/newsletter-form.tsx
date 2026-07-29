@@ -4,7 +4,6 @@ import * as React from "react";
 import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
-import { SITE_CONTACT } from "@lib/site-content";
 import { cn } from "@lib/utils";
 import { Button } from "@/components/atoms/button";
 import { Input } from "@/components/atoms/input";
@@ -21,7 +20,7 @@ export function NewsletterForm({ className, invert }: NewsletterFormProps) {
   const [pending, setPending] = React.useState(false);
   const [error, setError] = React.useState("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const trimmedEmail = email.trim();
 
@@ -35,17 +34,34 @@ export function NewsletterForm({ className, invert }: NewsletterFormProps) {
 
     setError("");
     setPending(true);
+    const website = String(new FormData(e.currentTarget).get("website") || "");
 
-    const subject = encodeURIComponent("Abonare newsletter DYLLU");
-    const body = encodeURIComponent(
-      `Bună ziua,\n\nDoresc să primesc noutățile DYLLU pe adresa ${trimmedEmail}.\n`
-    );
-
-    window.location.href = `${SITE_CONTACT.emailHref}?subject=${subject}&body=${body}`;
-    setPending(false);
-    toast.message(
-      "Se deschide aplicația de email pentru confirmarea abonării."
-    );
+    try {
+      const response = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmedEmail, website }),
+      });
+      const result = (await response.json()) as { message?: string };
+      if (!response.ok) {
+        throw new Error(
+          result.message || "Abonarea nu este disponibilă momentan."
+        );
+      }
+      setEmail("");
+      toast.success(
+        "Verifică emailul și confirmă abonarea la noutățile DYLLU."
+      );
+    } catch (submitError) {
+      const message =
+        submitError instanceof Error
+          ? submitError.message
+          : "Abonarea nu este disponibilă momentan.";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setPending(false);
+    }
   };
 
   return (
@@ -78,6 +94,14 @@ export function NewsletterForm({ className, invert }: NewsletterFormProps) {
             "border-background/30 bg-background/10 text-background placeholder:text-background/60 focus-visible:ring-background"
         )}
       />
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute -left-[9999px] size-px"
+      />
       {error ? (
         <p
           id={errorId}
@@ -106,14 +130,8 @@ export function NewsletterForm({ className, invert }: NewsletterFormProps) {
           invert ? "text-secondary-foreground/75" : "text-muted-foreground"
         )}
       >
-        Confirmarea se face prin email la{" "}
-        <a
-          href={SITE_CONTACT.emailHref}
-          className="underline underline-offset-4 hover:text-current"
-        >
-          {SITE_CONTACT.email}
-        </a>
-        .
+        Vei primi un email pentru confirmarea abonării. Te poți dezabona
+        oricând.
       </p>
     </form>
   );

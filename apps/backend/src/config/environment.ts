@@ -41,6 +41,8 @@ const rawEnvironmentSchema = z
     S3_REGION: optionalString,
     S3_BUCKET: optionalString,
     S3_ENDPOINT: optionalString,
+    RESEND_API_KEY: optionalString,
+    RESEND_FROM_EMAIL: optionalString,
   })
   .passthrough();
 
@@ -102,6 +104,10 @@ export type BackendEnvironment = {
   jwtSecret: string;
   cookieSecret: string;
   s3?: S3Environment;
+  resend?: {
+    apiKey: string;
+    fromEmail: string;
+  };
 };
 
 export class EnvironmentValidationError extends Error {
@@ -195,6 +201,20 @@ export function parseBackendEnvironment(
     }
   }
 
+  const hasAnyResendValue = Boolean(
+    env.RESEND_API_KEY || env.RESEND_FROM_EMAIL
+  );
+  if (hasAnyResendValue) {
+    if (!env.RESEND_API_KEY) {
+      issues.push("RESEND_API_KEY is required when Resend email is configured");
+    }
+    if (!env.RESEND_FROM_EMAIL) {
+      issues.push(
+        "RESEND_FROM_EMAIL is required when Resend email is configured"
+      );
+    }
+  }
+
   if (issues.length > 0) {
     throw new EnvironmentValidationError([...new Set(issues)]);
   }
@@ -230,6 +250,12 @@ export function parseBackendEnvironment(
     jwtSecret,
     cookieSecret,
     s3,
+    resend: hasAnyResendValue
+      ? {
+          apiKey: env.RESEND_API_KEY!,
+          fromEmail: env.RESEND_FROM_EMAIL!,
+        }
+      : undefined,
   };
 }
 
