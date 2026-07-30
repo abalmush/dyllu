@@ -63,7 +63,7 @@ module.exports = defineConfig({
             options: {
               providers: [
                 {
-                  resolve: "@medusajs/medusa/file-s3",
+                  resolve: "./src/modules/organized-s3-file",
                   id: "s3",
                   options: {
                     file_url: environment.s3.fileUrl,

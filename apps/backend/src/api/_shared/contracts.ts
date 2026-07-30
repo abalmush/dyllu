@@ -14,6 +14,16 @@ const HttpUrlSchema = z
     return protocol === "https:" || protocol === "http:";
   }, "URL must use http: or https:");
 
+export const CategoryImageUploadSchema = z
+  .object({
+    filename: z.string().trim().min(1).max(255),
+    mime_type: z.enum(["image/jpeg", "image/png", "image/webp"]),
+    content: z.string().min(1).max(7_000_000),
+  })
+  .strict();
+
+export type CategoryImageUpload = z.infer<typeof CategoryImageUploadSchema>;
+
 const HistoryMessageSchema = z
   .object({
     role: z.enum(["user", "assistant", "system"]),

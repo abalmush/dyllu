@@ -10,8 +10,18 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 type UploadResponse = {
-  files?: Array<{ url?: string }>;
+  file?: { url?: string };
 };
+
+async function fileToBase64(file: File) {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let binary = "";
+  const chunkSize = 32_768;
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+  }
+  return btoa(binary);
+}
 
 function configuredImage(category: AdminProductCategory) {
   const value = category.metadata?.nav_thumbnail_url;
@@ -78,18 +88,21 @@ function CategoryImageWidget({
     if (!file || saving) return;
     setSaving(true);
     try {
-      const formData = new FormData();
-      formData.append("files", file);
-      const upload = await fetch("/admin/uploads", {
+      const upload = await fetch("/admin/category-image-uploads", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: formData,
+        body: JSON.stringify({
+          filename: `${data.handle}.${file.name.split(".").pop() ?? "webp"}`,
+          mime_type: file.type,
+          content: await fileToBase64(file),
+        }),
       });
       if (!upload.ok) {
         throw new Error(`Încărcarea imaginii a eșuat (${upload.status})`);
       }
       const payload = (await upload.json()) as UploadResponse;
-      const uploadedUrl = payload.files?.[0]?.url;
+      const uploadedUrl = payload.file?.url;
       if (!uploadedUrl) throw new Error("Răspunsul nu conține URL-ul imaginii");
 
       await updateCategoryImage(data, uploadedUrl);
