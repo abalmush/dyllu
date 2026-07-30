@@ -116,12 +116,22 @@ async function ProductRailBlock({
         )
       : undefined;
   if (source.kind === "collection" && !collection) return null;
+
+  // Diverse-random selection groups by product type across the whole
+  // collection to pick varied representatives, so it needs full visibility
+  // into that collection (bounded by its curated size, not the catalogue).
+  // Every other rail only ever shows `limit` products, so it can ask the
+  // backend for exactly that many instead of overfetching.
+  const needsFullCollectionVisibility =
+    source.kind === "collection" && source.selection === "diverse-random";
+
   const {
     response: { products },
   } = await listProductsWithSort({
-    fetchAll: true,
+    fetchAll: needsFullCollectionVisibility,
+    page: 1,
     queryParams: {
-      limit: 100,
+      limit: needsFullCollectionVisibility ? 100 : limit,
       fields: "*variants.calculated_price",
       ...(source.kind === "collection"
         ? { collection_id: collection?.id }

@@ -29,10 +29,6 @@ export default async function SharedProductLayout({
   purchaseSupplement,
   includedPieces,
 }: Props) {
-  const includedAccessoryImages = await getIncludedAccessoryImages(
-    product,
-    region.id
-  );
   const isSingleVariant = (product.variants?.length ?? 0) <= 1;
   const accessoryPlatform = isSingleVariant
     ? product.variants
@@ -44,15 +40,17 @@ export default async function SharedProductLayout({
             supply.platform?.startsWith("dyllu-")
         )?.platform
     : undefined;
-  let compatiblePowerAccessories: CompatibleAccessories = {
-    batteries: [],
-    chargers: [],
-  };
 
-  if (accessoryPlatform) {
-    compatiblePowerAccessories =
-      await getCompatibleAccessories(accessoryPlatform);
-  }
+  const [includedAccessoryImages, compatiblePowerAccessories] =
+    await Promise.all([
+      getIncludedAccessoryImages(product, region.id),
+      accessoryPlatform
+        ? getCompatibleAccessories(accessoryPlatform)
+        : Promise.resolve<CompatibleAccessories>({
+            batteries: [],
+            chargers: [],
+          }),
+    ]);
 
   return (
     <VariantProductStage
