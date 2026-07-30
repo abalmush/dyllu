@@ -24,6 +24,24 @@ module.exports = defineConfig({
   admin: {
     path: "/backend",
   },
+  plugins: [
+    {
+      resolve: "@dyllu/medusa-plugin-mcp",
+      options: {
+        enabled: environment.mcp.enabled,
+        bootstrapUserIds: environment.mcp.bootstrapUserIds,
+        ...(environment.mcp.oauth
+          ? {
+              oauth: {
+                ...environment.mcp.oauth,
+                requiredScopes: ["mcp:connect"],
+                medusaUserIdClaim: "https://dyllu.md/medusa_user_id",
+              },
+            }
+          : {}),
+      },
+    },
+  ],
   modules: [
     ...(environment.redisUrl
       ? [

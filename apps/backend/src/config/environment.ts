@@ -43,6 +43,11 @@ const rawEnvironmentSchema = z
     S3_ENDPOINT: optionalString,
     RESEND_API_KEY: optionalString,
     RESEND_FROM_EMAIL: optionalString,
+    DYLLU_MCP_ENABLED: optionalBoolean,
+    DYLLU_MCP_AUTH0_ISSUER: optionalString,
+    DYLLU_MCP_RESOURCE: optionalString,
+    DYLLU_MCP_ALLOWED_CLIENT_IDS: optionalString,
+    DYLLU_MCP_BOOTSTRAP_USER_IDS: optionalString,
   })
   .passthrough();
 
@@ -107,6 +112,15 @@ export type BackendEnvironment = {
   resend?: {
     apiKey: string;
     fromEmail: string;
+  };
+  mcp: {
+    enabled: boolean;
+    bootstrapUserIds: string[];
+    oauth: {
+      allowedClientIds: string[];
+      issuer: string;
+      resource: string;
+    } | null;
   };
 };
 
@@ -184,6 +198,44 @@ export function parseBackendEnvironment(
     issues.push("JWT_SECRET and COOKIE_SECRET must be distinct");
   }
 
+  const mcpEnabled = env.DYLLU_MCP_ENABLED ?? false;
+  const allowedMcpClientIds = parseIdentifierList(
+    env.DYLLU_MCP_ALLOWED_CLIENT_IDS,
+    "DYLLU_MCP_ALLOWED_CLIENT_IDS",
+    /^[A-Za-z0-9_-]{5,200}$/,
+    "client ID",
+    issues
+  );
+  const mcpBootstrapUserIds = parseIdentifierList(
+    env.DYLLU_MCP_BOOTSTRAP_USER_IDS,
+    "DYLLU_MCP_BOOTSTRAP_USER_IDS",
+    /^user_[A-Za-z0-9]+$/,
+    "Medusa user ID",
+    issues
+  );
+  const hasMcpConfiguration = Boolean(
+    env.DYLLU_MCP_AUTH0_ISSUER ||
+    env.DYLLU_MCP_RESOURCE ||
+    env.DYLLU_MCP_ALLOWED_CLIENT_IDS ||
+    env.DYLLU_MCP_BOOTSTRAP_USER_IDS
+  );
+  if (mcpEnabled || hasMcpConfiguration) {
+    for (const key of [
+      "DYLLU_MCP_AUTH0_ISSUER",
+      "DYLLU_MCP_RESOURCE",
+      "DYLLU_MCP_ALLOWED_CLIENT_IDS",
+      "DYLLU_MCP_BOOTSTRAP_USER_IDS",
+    ] as const) {
+      if (!env[key]) issues.push(`${key} is required when MCP is configured`);
+    }
+  }
+  validateHttpsUrl(
+    env.DYLLU_MCP_AUTH0_ISSUER,
+    "DYLLU_MCP_AUTH0_ISSUER",
+    issues
+  );
+  validateHttpsUrl(env.DYLLU_MCP_RESOURCE, "DYLLU_MCP_RESOURCE", issues);
+
   const hasAnyS3Value = S3_KEYS.some((key) => Boolean(env[key]));
   if (hasAnyS3Value) {
     for (const key of S3_KEYS) {
@@ -256,7 +308,44 @@ export function parseBackendEnvironment(
           fromEmail: env.RESEND_FROM_EMAIL!,
         }
       : undefined,
+    mcp: {
+      enabled: mcpEnabled,
+      bootstrapUserIds: mcpBootstrapUserIds,
+      oauth:
+        env.DYLLU_MCP_AUTH0_ISSUER &&
+        env.DYLLU_MCP_RESOURCE &&
+        allowedMcpClientIds.length > 0 &&
+        mcpBootstrapUserIds.length > 0
+          ? {
+              issuer: env.DYLLU_MCP_AUTH0_ISSUER,
+              resource: env.DYLLU_MCP_RESOURCE,
+              allowedClientIds: allowedMcpClientIds,
+            }
+          : null,
+    },
   };
+}
+
+function parseIdentifierList(
+  value: string | undefined,
+  key: string,
+  pattern: RegExp,
+  label: string,
+  issues: string[]
+) {
+  if (!value) return [];
+
+  const entries = value.split(",").map((entry) => entry.trim());
+  if (entries.some((entry) => entry.length === 0)) {
+    issues.push(`${key} must not contain empty values`);
+  }
+
+  const identifiers = [...new Set(entries.filter(Boolean))];
+  if (identifiers.some((identifier) => !pattern.test(identifier))) {
+    issues.push(`${key} contains an invalid ${label}`);
+  }
+
+  return identifiers;
 }
 
 function validateServiceUrl(
@@ -287,6 +376,22 @@ function validateHttpUrl(
     const url = new URL(value);
     if (url.protocol !== "https:" && url.protocol !== "http:") {
       issues.push(`${key} must use http: or https:`);
+    }
+  } catch {
+    issues.push(`${key} must be a valid URL`);
+  }
+}
+
+function validateHttpsUrl(
+  value: string | undefined,
+  key: string,
+  issues: string[]
+) {
+  if (!value) return;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:") {
+      issues.push(`${key} must use https:`);
     }
   } catch {
     issues.push(`${key} must be a valid URL`);
