@@ -1,11 +1,10 @@
 # Catalog source
 
-`apps/backend/data/ingco/catalog-latest/Dyllu Full range price MDL.csv` is the
-only source for product facts:
+Medusa is the source of truth for the live catalog.
 
-- SKU, product name, description and specifications
-- included items, batteries, chargers and packaging
-- price, stock, discount and gift flags
+`apps/backend/data/ingco/catalog-latest/Dyllu Full range price MDL.csv` is a
+reference used to investigate suspected catalog issues. It must not overwrite
+intentional Medusa changes automatically.
 
 Build the Medusa projection:
 
@@ -22,18 +21,19 @@ pnpm --dir apps/backend exec medusa exec \
   dryRun=true
 ```
 
-Apply the complete projection to the local Medusa database:
+Apply the projection only to an explicitly selected local Medusa database:
 
 ```bash
 pnpm catalog:sync:local
 ```
 
 The command always previews first and refuses non-local or production
-databases. Medusa variants absent from the CSV are reported and left unchanged;
-all matching variants are replaced with CSV-derived facts.
+databases. Review every proposed difference against Medusa before applying it.
+Medusa variants absent from the CSV are reported and left unchanged.
 
-The generated JSON is a projection, not an editable source. Images and taxonomy
-remain Medusa relationships keyed by the CSV SKU.
+The generated JSON is a diagnostic projection, not an editable source. Images,
+taxonomy and current catalog content remain Medusa-owned relationships and
+data.
 
 Audit included component SKUs against the CSV and image manifest:
 
@@ -41,6 +41,5 @@ Audit included component SKUs against the CSV and image manifest:
 python3 tools/audit_catalog_components.py
 ```
 
-The storefront renders every included battery or charger from the CSV. When a
-referenced SKU has no Medusa product image, it renders a typed SKU card instead
-of silently dropping the component.
+Use the audit output to identify mismatches for review. Any correction is made
+in Medusa through an approved catalog workflow.
