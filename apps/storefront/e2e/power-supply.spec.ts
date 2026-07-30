@@ -98,6 +98,21 @@ test("included charger uses its approved reference image", async ({
   expect(html).toContain("DTFCP518-a9c4ce8bb80a.webp");
 });
 
+test("set products with mapped SKUs show their catalog images", async ({
+  request,
+}) => {
+  const response = await request.get(
+    "/products/set-scule-cu-2-acumulatori-si-incarcator-20-v-dyllu-dtck20273"
+  );
+  const html = await response.text();
+
+  expect(response.status()).toBe(200);
+  expect(html).toContain('data-testid="included-item-DTCDP6281"');
+  expect(html).toContain('data-testid="included-item-DTLAP5322"');
+  expect(html).toContain("DTCDP6281-6f5c5596b05c.webp");
+  expect(html).toContain("DTLAP5322-878bb4a233c3.webp");
+});
+
 test("product pages use the transparent Cloudflare image relationship", async ({
   request,
 }) => {

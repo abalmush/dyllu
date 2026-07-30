@@ -12,6 +12,11 @@ import type { SetPiece } from "@/components/organisms/set-breakdown";
 
 type ProductMetadata = Record<string, unknown>;
 
+const PDP_PRIMARY_IMAGE_BY_SKU: Record<string, string> = {
+  DTCK20273:
+    "/images/dyllu-dyllu-cordless-2-pieces-combo-kit-dtck20273-power-tool-combo-kit-1209174688.webp",
+};
+
 export type ProductSpecification = {
   label: string;
   value: string;
@@ -28,7 +33,7 @@ export type ProductPowerSupply = {
   compatibleChargers: Array<{ sku: string; outputA?: number }>;
 };
 
-export type IncludedAccessoryRelationship = {
+export type IncludedItemRelationship = {
   sku?: string;
   name?: string;
   quantity: number;
@@ -95,9 +100,7 @@ function metadataStringArray(value: unknown): string[] {
     : [];
 }
 
-function includedRelationships(
-  value: unknown
-): IncludedAccessoryRelationship[] {
+function includedRelationships(value: unknown): IncludedItemRelationship[] {
   let parsed = value;
   if (typeof value === "string") {
     try {
@@ -154,19 +157,19 @@ function includedRelationships(
 function getExplicitIncludedRelationships(
   product: HttpTypes.StoreProduct,
   variant?: HttpTypes.StoreProductVariant
-): IncludedAccessoryRelationship[] {
+): IncludedItemRelationship[] {
   return ["bundle_components", "included_items"].flatMap((key) =>
     includedRelationships(metadataValue(product, variant, key))
   );
 }
 
-export function getIncludedAccessoryRelationships(
+export function getIncludedItemRelationships(
   product: HttpTypes.StoreProduct,
   variant?: HttpTypes.StoreProductVariant
-): IncludedAccessoryRelationship[] {
+): IncludedItemRelationship[] {
   const relationships = getExplicitIncludedRelationships(product, variant);
 
-  const mergedRelationships = new Map<string, IncludedAccessoryRelationship>();
+  const mergedRelationships = new Map<string, IncludedItemRelationship>();
   for (const relationship of relationships) {
     const quantity = Number.isFinite(relationship.quantity)
       ? Math.max(1, Math.floor(relationship.quantity))
@@ -563,6 +566,10 @@ export function getVariantImageUrl(
   product: HttpTypes.StoreProduct,
   variant?: HttpTypes.StoreProductVariant
 ): string | undefined {
+  const sku = variant?.sku ?? product.variants?.[0]?.sku;
+  const primaryImage = sku ? PDP_PRIMARY_IMAGE_BY_SKU[sku.toUpperCase()] : null;
+  if (primaryImage) return primaryImage;
+
   const directImage = variant?.images?.[0]?.url;
   if (directImage) return directImage;
 
@@ -578,16 +585,32 @@ export function getVariantImages(
     : (product.images ?? []);
   const originalImage = metadataString(product, variant, "original_image");
 
-  if (!originalImage || images.some((image) => image.url === originalImage)) {
-    return images;
-  }
+  const completeImages =
+    !originalImage || images.some((image) => image.url === originalImage)
+      ? images
+      : [
+          ...images,
+          {
+            id: `original-${variant?.id ?? product.id}`,
+            url: originalImage,
+          } as HttpTypes.StoreProductImage,
+        ];
+  const sku = variant?.sku ?? product.variants?.[0]?.sku;
+  const primaryImage = sku ? PDP_PRIMARY_IMAGE_BY_SKU[sku.toUpperCase()] : null;
+
+  if (!primaryImage) return completeImages;
+
+  const matchedImage = completeImages.find(
+    (image) => image.url === primaryImage
+  );
 
   return [
-    ...images,
-    {
-      id: `original-${variant?.id ?? product.id}`,
-      url: originalImage,
-    } as HttpTypes.StoreProductImage,
+    matchedImage ??
+      ({
+        id: `primary-${variant?.id ?? product.id}`,
+        url: primaryImage,
+      } as HttpTypes.StoreProductImage),
+    ...completeImages.filter((image) => image.url !== primaryImage),
   ];
 }
 

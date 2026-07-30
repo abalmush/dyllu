@@ -11,7 +11,7 @@ import {
   type SetPiece,
 } from "@/components/organisms/set-breakdown";
 import type { CompatibleAccessories } from "@lib/data/compatible-accessories";
-import type { IncludedAccessoryImage } from "@lib/data/included-accessories";
+import type { IncludedItemImage } from "@lib/data/included-accessories";
 import { cn } from "@lib/utils";
 import ImageGallery from "@modules/products/components/image-gallery";
 import ProductActions from "@modules/products/components/product-actions";
@@ -19,7 +19,7 @@ import { PowerSupplyStatus } from "@modules/products/components/product-actions/
 import ProductPageHeader from "@modules/products/components/product-page-header";
 import ProductTabs from "@modules/products/components/product-tabs";
 import {
-  getIncludedAccessoryRelationships,
+  getIncludedItemRelationships,
   getVariantImages,
 } from "@modules/products/lib/product-presentation";
 
@@ -27,7 +27,7 @@ type Props = {
   product: HttpTypes.StoreProduct;
   region: HttpTypes.StoreRegion;
   initialVariantId?: string;
-  includedAccessoryImages?: IncludedAccessoryImage[];
+  includedItemImages?: IncludedItemImage[];
   compatiblePowerAccessories?: CompatibleAccessories;
   mediaSupplement?: ReactNode;
   purchaseSupplement?: ReactNode;
@@ -39,7 +39,7 @@ export default function VariantProductStage({
   product,
   region,
   initialVariantId,
-  includedAccessoryImages = [],
+  includedItemImages = [],
   compatiblePowerAccessories = { batteries: [], chargers: [] },
   mediaSupplement,
   purchaseSupplement,
@@ -56,33 +56,33 @@ export default function VariantProductStage({
     [product.variants, selectedVariantId]
   );
   const images = getVariantImages(product, selectedVariant);
-  const includedAccessoryRelationships = useMemo(
-    () => getIncludedAccessoryRelationships(product, selectedVariant),
+  const includedItemRelationships = useMemo(
+    () => getIncludedItemRelationships(product, selectedVariant),
     [product, selectedVariant]
   );
   const imageBySku = useMemo(
     () =>
       new Map(
-        includedAccessoryImages.map((accessory) => [
-          accessory.sku.trim().toLowerCase(),
-          accessory,
+        includedItemImages.map((includedItem) => [
+          includedItem.sku.trim().toLowerCase(),
+          includedItem,
         ])
       ),
-    [includedAccessoryImages]
+    [includedItemImages]
   );
-  const includedAccessoryPieces: SetPiece[] = useMemo(
+  const includedItemPieces: SetPiece[] = useMemo(
     () =>
-      includedAccessoryRelationships.map((relationship) => {
-        const accessory = imageBySku.get(
+      includedItemRelationships.map((relationship) => {
+        const includedItem = imageBySku.get(
           (relationship.sku ?? "").trim().toLowerCase()
         );
 
         return {
-          id: `accessory-${relationship.sku}-${relationship.quantity}`,
+          id: `included-${relationship.sku}-${relationship.quantity}`,
           label:
-            accessory?.title ??
+            includedItem?.title ??
             [
-              relationship.name ?? "Accesoriu inclus",
+              relationship.name ?? "Produs inclus",
               relationship.sku &&
               !relationship.name
                 ?.toLowerCase()
@@ -92,17 +92,17 @@ export default function VariantProductStage({
             ]
               .filter(Boolean)
               .join(" "),
-          image: accessory?.imageUrl,
+          image: includedItem?.imageUrl,
           qty: relationship.quantity,
           kind: relationship.kind,
           sku: relationship.sku,
         };
       }),
-    [includedAccessoryRelationships, imageBySku]
+    [includedItemRelationships, imageBySku]
   );
   const combinedIncludedPieces = useMemo(
-    () => [...includedPieces, ...includedAccessoryPieces],
-    [includedPieces, includedAccessoryPieces]
+    () => [...includedPieces, ...includedItemPieces],
+    [includedPieces, includedItemPieces]
   );
   const combinedIncludedCount = useMemo(
     () =>

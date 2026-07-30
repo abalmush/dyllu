@@ -3,18 +3,15 @@ import "server-only";
 import { HttpTypes } from "@medusajs/types";
 
 import { listProducts } from "@lib/data/products";
-import { getIncludedAccessoryRelationships } from "@modules/products/lib/product-presentation";
+import { getIncludedItemRelationships } from "@modules/products/lib/product-presentation";
 
-export type IncludedAccessoryImage = {
+export type IncludedItemImage = {
   sku: string;
   title: string;
   imageUrl: string;
 };
 
-const POWER_ACCESSORY_RE =
-  /(acumulator|acumulatori|baterie|baterii|battery|batteries|încărcător|incarcator|charger)/i;
-
-const ACCESSORY_IMAGE_REFERENCES = new Map([
+const INCLUDED_ITEM_IMAGE_REFERENCES = new Map([
   [
     "dtfcp502",
     {
@@ -84,19 +81,13 @@ function productLooksRelatedToSku(
   return searchable.includes(lowerSku);
 }
 
-export async function getIncludedAccessoryImages(
+export async function getIncludedItemImages(
   product: HttpTypes.StoreProduct,
   regionId: string
-): Promise<IncludedAccessoryImage[]> {
-  const relationships = (product.variants ?? [])
-    .flatMap((variant) => getIncludedAccessoryRelationships(product, variant))
-    .filter(
-      (relationship) =>
-        relationship.kind === "battery" ||
-        relationship.kind === "charger" ||
-        (typeof relationship.name === "string" &&
-          POWER_ACCESSORY_RE.test(relationship.name))
-    );
+): Promise<IncludedItemImage[]> {
+  const relationships = (product.variants ?? []).flatMap((variant) =>
+    getIncludedItemRelationships(product, variant)
+  );
   const skus = [
     ...new Set(
       relationships
@@ -106,11 +97,11 @@ export async function getIncludedAccessoryImages(
   ];
   if (skus.length === 0) return [];
 
-  const resolveAccessoryImage = async (rawSku: string) => {
+  const resolveIncludedItemImage = async (rawSku: string) => {
     const sku = rawSku.trim();
     if (!sku) return null;
     const lowerSku = normalizeSku(sku);
-    const imageReference = ACCESSORY_IMAGE_REFERENCES.get(lowerSku);
+    const imageReference = INCLUDED_ITEM_IMAGE_REFERENCES.get(lowerSku);
     const lookupSku = imageReference?.sku ?? sku;
     const lowerLookupSku = normalizeSku(lookupSku);
     const candidateQuery = {
@@ -251,7 +242,7 @@ export async function getIncludedAccessoryImages(
   };
 
   const results = await Promise.allSettled(
-    skus.map((sku) => resolveAccessoryImage(sku))
+    skus.map((sku) => resolveIncludedItemImage(sku))
   );
 
   return results.flatMap((result) => {

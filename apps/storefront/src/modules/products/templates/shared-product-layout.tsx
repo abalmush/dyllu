@@ -6,7 +6,7 @@ import {
   getCompatibleAccessories,
   type CompatibleAccessories,
 } from "@lib/data/compatible-accessories";
-import { getIncludedAccessoryImages } from "@lib/data/included-accessories";
+import { getIncludedItemImages } from "@lib/data/included-accessories";
 import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta";
 import { getProductPowerSupply } from "@modules/products/lib/product-presentation";
 import VariantProductStage from "./variant-product-stage";
@@ -29,10 +29,7 @@ export default async function SharedProductLayout({
   purchaseSupplement,
   includedPieces,
 }: Props) {
-  const includedAccessoryImages = await getIncludedAccessoryImages(
-    product,
-    region.id
-  );
+  const includedItemImages = await getIncludedItemImages(product, region.id);
   const isSingleVariant = (product.variants?.length ?? 0) <= 1;
   const accessoryPlatform = isSingleVariant
     ? product.variants
@@ -59,7 +56,7 @@ export default async function SharedProductLayout({
       product={product}
       region={region}
       initialVariantId={selectedVariant?.id}
-      includedAccessoryImages={includedAccessoryImages}
+      includedItemImages={includedItemImages}
       compatiblePowerAccessories={compatiblePowerAccessories}
       mediaSupplement={mediaSupplement}
       purchaseSupplement={purchaseSupplement}

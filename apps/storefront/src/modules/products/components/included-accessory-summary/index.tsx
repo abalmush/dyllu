@@ -2,8 +2,8 @@ import Image from "next/image";
 import { Check } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 
-import type { IncludedAccessoryImage } from "@lib/data/included-accessories";
-import { getIncludedAccessoryRelationships } from "@modules/products/lib/product-presentation";
+import type { IncludedItemImage } from "@lib/data/included-accessories";
+import { getIncludedItemRelationships } from "@modules/products/lib/product-presentation";
 
 const BATTERY_RE =
   /(acumulator|acumulatori|baterie|baterii|battery|batteries)/i;
@@ -14,7 +14,7 @@ type AccessoryKind = "battery" | "charger";
 type Props = {
   product: HttpTypes.StoreProduct;
   variant?: HttpTypes.StoreProductVariant;
-  accessoryImages: IncludedAccessoryImage[];
+  accessoryImages: IncludedItemImage[];
 };
 
 function getAccessoryKind(
@@ -39,7 +39,7 @@ export function IncludedAccessorySummary({
   const imageBySku = new Map(
     accessoryImages.map((accessory) => [normalizeSku(accessory.sku), accessory])
   );
-  const items = getIncludedAccessoryRelationships(product, variant).flatMap(
+  const items = getIncludedItemRelationships(product, variant).flatMap(
     (relationship) => {
       if (!relationship.sku) return [];
       const accessory = imageBySku.get(normalizeSku(relationship.sku));

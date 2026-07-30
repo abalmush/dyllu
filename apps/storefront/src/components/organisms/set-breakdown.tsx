@@ -106,7 +106,9 @@ export function SetBreakdown({
                   data-testid={
                     piece.kind
                       ? `included-power-accessory-${piece.sku ?? piece.kind}`
-                      : undefined
+                      : piece.sku
+                        ? `included-item-${piece.sku}`
+                        : undefined
                   }
                   className={cn(
                     "clip-corner-cut-md clip-shadow-sm relative aspect-[1.02] overflow-hidden ring-1",
