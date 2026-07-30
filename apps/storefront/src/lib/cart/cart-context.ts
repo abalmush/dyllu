@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import type { HttpTypes } from "@medusajs/types";
 import type { CartView } from "@lib/cart/cart-view";
 
 export type OptimisticCartItem = {
@@ -19,6 +20,12 @@ export type CartContextValue = {
   isBootstrapping: boolean;
   isMutating: boolean;
   isOpen: boolean;
+  // Full-fidelity data for widgets CartView can't serve (mismatch banner,
+  // free-shipping nudge). Populated once the commerce-shell bootstrap
+  // request resolves; null/empty until then.
+  rawCart: HttpTypes.StoreCart | null;
+  authenticated: boolean;
+  shippingOptions: HttpTypes.StoreCartShippingOption[];
   openCart(): void;
   closeCart(): void;
   addItem(
