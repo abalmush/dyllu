@@ -1,1 +1,3 @@
-export default {}
+import "../recover-stale-chunks";
+
+export default {};
