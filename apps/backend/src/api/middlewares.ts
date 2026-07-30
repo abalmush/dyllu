@@ -13,6 +13,7 @@ import { PolicyOperation } from "@medusajs/framework/utils";
 import {
   AiApplyBodySchema,
   AiChatBodySchema,
+  CategoryImageUploadSchema,
   CompatibleAccessoriesQuerySchema,
   NewsletterConfirmationQuerySchema,
   NewsletterSubscriptionSchema,
@@ -56,6 +57,16 @@ const middlewareConfig: MiddlewaresConfig = {
       matcher,
       middlewares: [securityHeaders],
     })),
+    {
+      matcher: "/admin/category-image-uploads",
+      methods: ["POST"],
+      bodyParser: { sizeLimit: "8mb" },
+      policies: [{ resource: "file", operation: PolicyOperation.create }],
+      middlewares: [
+        adminAuthentication,
+        validateAndTransformBody(CategoryImageUploadSchema),
+      ],
+    },
     {
       matcher: "/admin/ai-edit/chat",
       methods: ["POST"],
