@@ -44,7 +44,7 @@ async function updateCategoryImage(
     }),
   });
   if (!response.ok) {
-    throw new Error(`Actualizarea categoriei a eșuat (${response.status})`);
+    throw new Error(`Category update failed (${response.status})`);
   }
 }
 
@@ -67,15 +67,15 @@ function CategoryImageWidget({
     const selected = event.target.files?.[0] ?? null;
     if (!selected) return;
     if (!ACCEPTED_TYPES.has(selected.type)) {
-      toast.error("Format neacceptat", {
-        description: "Folosește JPG, PNG sau WebP.",
+      toast.error("Unsupported format", {
+        description: "Use JPG, PNG, or WebP.",
       });
       event.target.value = "";
       return;
     }
     if (selected.size > MAX_FILE_SIZE) {
-      toast.error("Imaginea este prea mare", {
-        description: "Dimensiunea maximă este 5 MB.",
+      toast.error("Image is too large", {
+        description: "The maximum file size is 5 MB.",
       });
       event.target.value = "";
       return;
@@ -99,21 +99,21 @@ function CategoryImageWidget({
         }),
       });
       if (!upload.ok) {
-        throw new Error(`Încărcarea imaginii a eșuat (${upload.status})`);
+        throw new Error(`Image upload failed (${upload.status})`);
       }
       const payload = (await upload.json()) as UploadResponse;
       const uploadedUrl = payload.file?.url;
-      if (!uploadedUrl) throw new Error("Răspunsul nu conține URL-ul imaginii");
+      if (!uploadedUrl) throw new Error("The response has no image URL");
 
       await updateCategoryImage(data, uploadedUrl);
       setImageUrl(uploadedUrl);
       setFile(null);
       setPreviewUrl("");
-      toast.success("Imaginea categoriei a fost salvată");
+      toast.success("Category image saved");
     } catch (error) {
-      toast.error("Nu am putut salva imaginea", {
+      toast.error("Could not save the image", {
         description:
-          error instanceof Error ? error.message : "Eroare necunoscută",
+          error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setSaving(false);
@@ -128,13 +128,13 @@ function CategoryImageWidget({
       setImageUrl("");
       setFile(null);
       setPreviewUrl("");
-      toast.success("Imaginea categoriei a fost eliminată", {
-        description: "Va fi folosită imaginea unui produs din categorie.",
+      toast.success("Category image removed", {
+        description: "A representative product image will be used.",
       });
     } catch (error) {
-      toast.error("Nu am putut elimina imaginea", {
+      toast.error("Could not remove the image", {
         description:
-          error instanceof Error ? error.message : "Eroare necunoscută",
+          error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setSaving(false);
@@ -147,24 +147,24 @@ function CategoryImageWidget({
     <div className="border-ui-border-base bg-ui-bg-base shadow-elevation-card-rest rounded-lg border p-6">
       <div className="mb-4">
         <h2 className="text-ui-fg-base text-base font-semibold">
-          Imagine categorie
+          Category image
         </h2>
         <p className="text-ui-fg-subtle mt-1 text-sm">
-          Imaginea selectată are prioritate. Fără ea, magazinul folosește un
-          produs reprezentativ.
+          The selected image takes priority. Without one, the storefront uses a
+          representative product image.
         </p>
       </div>
 
       {displayedImage ? (
         <div
-          aria-label="Previzualizare imagine categorie"
+          aria-label="Category image preview"
           className="bg-ui-bg-subtle mb-4 aspect-square w-full max-w-56 rounded-lg bg-contain bg-center bg-no-repeat"
           role="img"
           style={{ backgroundImage: `url(${JSON.stringify(displayedImage)})` }}
         />
       ) : (
         <div className="border-ui-border-base text-ui-fg-muted mb-4 flex aspect-square w-full max-w-56 items-center justify-center rounded-lg border border-dashed p-4 text-center text-sm">
-          Se folosește automat imaginea unui produs
+          Using a representative product image automatically
         </div>
       )}
 
@@ -183,7 +183,7 @@ function CategoryImageWidget({
           onClick={save}
           type="button"
         >
-          {saving ? "Se salvează…" : "Salvează imaginea"}
+          {saving ? "Saving…" : "Save image"}
         </button>
         {imageUrl ? (
           <button
@@ -192,7 +192,7 @@ function CategoryImageWidget({
             onClick={remove}
             type="button"
           >
-            Elimină
+            Remove
           </button>
         ) : null}
       </div>
