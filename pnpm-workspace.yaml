@@ -3,6 +3,10 @@ packages:
   - "packages/*"
   - "!apps/backend/.medusa/**"
 
+syncInjectedDepsAfterScripts:
+  - build
+injectWorkspacePackages: true
+
 auditConfig:
   ignoreGhsas:
     - GHSA-mh99-v99m-4gvg
