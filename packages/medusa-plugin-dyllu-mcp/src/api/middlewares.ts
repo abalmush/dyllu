@@ -14,6 +14,7 @@ import { McpAuthenticationError } from "../auth/auth0-access-token-verifier";
 import { DylluMcpGovernanceModuleService } from "../modules/governance/service";
 import { DYLLU_MCP_GOVERNANCE_MODULE } from "../modules/governance";
 import { ActorRateLimiter } from "./actor-rate-limiter";
+import { handleOAuthProtectedResourceMetadata } from "./oauth-protected-resource";
 
 const actorRateLimiter = new ActorRateLimiter(120, 60_000, 10_000);
 const userAuthentication = authenticate("user", ["session", "bearer"]);
@@ -147,7 +148,11 @@ export default defineMiddlewares({
     {
       matcher: "/.well-known/oauth-protected-resource",
       methods: ["GET"],
-      middlewares: [setPrivateHeaders, requireEnabled],
+      middlewares: [
+        setPrivateHeaders,
+        requireEnabled,
+        handleOAuthProtectedResourceMetadata,
+      ],
     },
     {
       matcher: "/admin/dyllu-mcp/users/:id/capabilities",
