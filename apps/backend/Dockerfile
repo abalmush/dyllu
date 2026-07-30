@@ -17,7 +17,7 @@ COPY packages/medusa-plugin-dyllu-mcp packages/medusa-plugin-dyllu-mcp
 RUN pnpm --filter=@dyllu/medusa-plugin-mcp build \
   && pnpm --filter=@dyllu/backend build
 
-RUN HUSKY=0 pnpm --filter=@dyllu/backend deploy --prod --legacy /prod/backend
+RUN HUSKY=0 pnpm --filter=@dyllu/backend deploy --prod /prod/backend
 
 FROM node:22-alpine AS runtime
 WORKDIR /app

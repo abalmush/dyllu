@@ -3,6 +3,7 @@ lockfileVersion: '9.0'
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
+  injectWorkspacePackages: true
 
 overrides:
   '@babel/core@7.29.0': 7.29.7
@@ -71,7 +72,7 @@ importers:
         version: 3.1036.0
       '@dyllu/medusa-plugin-mcp':
         specifier: workspace:*
-        version: link:../../packages/medusa-plugin-dyllu-mcp
+        version: file:packages/medusa-plugin-dyllu-mcp(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@medusajs/admin-sdk':
         specifier: 2.18.0
         version: 2.18.0
@@ -996,6 +997,19 @@ packages:
   '@dotenvx/dotenvx@1.31.0':
     resolution: {integrity: sha512-GeDxvtjiRuoyWVU9nQneId879zIyNdL05bS7RKiqMkfBSKpHMWHLoRyRqjYWLaXmX/llKO1hTlqHDmatkQAjPA==}
     hasBin: true
+
+  '@dyllu/medusa-plugin-mcp@file:packages/medusa-plugin-dyllu-mcp':
+    resolution: {directory: packages/medusa-plugin-dyllu-mcp, type: directory}
+    engines: {node: '>=22.12.0'}
+    peerDependencies:
+      '@medusajs/admin-sdk': 2.18.0
+      '@medusajs/admin-shared': 2.18.0
+      '@medusajs/cli': 2.18.0
+      '@medusajs/framework': 2.18.0
+      '@medusajs/medusa': 2.18.0
+      '@medusajs/test-utils': 2.18.0
+      react: ^18.3.1
+      react-dom: ^18.3.1
 
   '@ecies/ciphers@0.2.6':
     resolution: {integrity: sha512-patgsRPKGkhhoBjETV4XxD0En4ui5fbX0hzayqI3M8tvNMGUoUvmyYAIWwlxBc1KX5cturfqByYdj5bYGRpN9g==}
@@ -10902,6 +10916,24 @@ snapshots:
       object-treeify: 1.1.33
       picomatch: 4.0.4
       which: 4.0.0
+
+  '@dyllu/medusa-plugin-mcp@file:packages/medusa-plugin-dyllu-mcp(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@medusajs/admin-sdk': 2.18.0
+      '@medusajs/admin-shared': 2.18.0
+      '@medusajs/cli': 2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3)
+      '@medusajs/framework': 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
+      '@medusajs/medusa': 2.18.0(3aa503070f10d585d82b7fd12a05571b)
+      '@medusajs/test-utils': 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
+      '@modelcontextprotocol/sdk': 1.30.0(zod@4.2.0)
+      jsonwebtoken: 9.0.3
+      jwks-rsa: 3.2.2
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      zod: 4.2.0
+    transitivePeerDependencies:
+      - '@cfworker/json-schema'
+      - supports-color
 
   '@ecies/ciphers@0.2.6(@noble/ciphers@1.3.0)':
     dependencies:
