@@ -2,19 +2,19 @@
 
 import { transferCart } from "@lib/data/customer";
 import { ExclamationCircleSolid } from "@medusajs/icons";
-import { StoreCart, StoreCustomer } from "@medusajs/types";
+import { StoreCart } from "@medusajs/types";
 import { Button } from "@lib/ui-compat";
 import { useState } from "react";
 
 function CartMismatchBanner(props: {
-  customer: StoreCustomer;
+  authenticated: boolean;
   cart: StoreCart;
 }) {
-  const { customer, cart } = props;
+  const { authenticated, cart } = props;
   const [isPending, setIsPending] = useState(false);
   const [actionText, setActionText] = useState("Run transfer again");
 
-  if (!customer || !!cart.customer_id) {
+  if (!authenticated || !!cart.customer_id) {
     return;
   }
 
@@ -31,8 +31,8 @@ function CartMismatchBanner(props: {
   };
 
   return (
-    <div className="mt-2 flex items-center justify-center gap-1 bg-orange-300 p-2 text-center text-sm text-orange-800 small:gap-2 small:p-4">
-      <div className="flex flex-col items-center gap-1 small:flex-row small:gap-2">
+    <div className="small:gap-2 small:p-4 mt-2 flex items-center justify-center gap-1 bg-orange-300 p-2 text-center text-sm text-orange-800">
+      <div className="small:flex-row small:gap-2 flex flex-col items-center gap-1">
         <span className="flex items-center gap-1">
           <ExclamationCircleSolid className="inline" />
           Something went wrong when we tried to transfer your cart
