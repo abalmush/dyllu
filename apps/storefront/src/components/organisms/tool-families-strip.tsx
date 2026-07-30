@@ -28,7 +28,7 @@ export function ToolFamiliesStrip({
             Alege după tipul sculei.
           </h2>
         </header>
-        <ul className="small:grid-cols-6 small:gap-4 grid grid-cols-3 gap-4">
+        <ul className="small:grid-cols-6 small:gap-4 grid grid-cols-2 gap-3">
           {families.map((family) => {
             const image = getRepresentativeImage(family);
 
@@ -44,7 +44,7 @@ export function ToolFamiliesStrip({
                         src={image}
                         alt=""
                         fill
-                        sizes="(max-width: 767px) 33vw, 16vw"
+                        sizes="(max-width: 767px) 50vw, 16vw"
                         className="object-contain transition-transform duration-300 group-hover:scale-105"
                       />
                     </span>
