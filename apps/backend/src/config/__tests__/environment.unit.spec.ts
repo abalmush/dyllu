@@ -40,6 +40,11 @@ describe("parseBackendEnvironment", () => {
       bucket: "dyllu-assets",
       endpoint: "https://account.r2.cloudflarestorage.com",
     });
+    expect(environment.mcp).toEqual({
+      enabled: false,
+      bootstrapUserIds: [],
+      oauth: null,
+    });
   });
 
   it("allows an explicit database TLS override", () => {
@@ -122,6 +127,54 @@ describe("parseBackendEnvironment", () => {
     ).toThrow(/RESEND_FROM_EMAIL is required/);
   });
 
+  it("parses a complete disabled MCP configuration for staged rollout", () => {
+    const environment = parseBackendEnvironment({
+      ...productionEnvironment(),
+      DYLLU_MCP_ENABLED: "false",
+      DYLLU_MCP_AUTH0_ISSUER: "https://dyllu.eu.auth0.com",
+      DYLLU_MCP_RESOURCE: "https://api.dyllu.md/mcp",
+      DYLLU_MCP_ALLOWED_CLIENT_IDS: "tpc_chatgpt,tpc_codex",
+      DYLLU_MCP_BOOTSTRAP_USER_IDS: "user_ANDREI,user_ANDREI",
+    });
+
+    expect(environment.mcp).toEqual({
+      enabled: false,
+      bootstrapUserIds: ["user_ANDREI"],
+      oauth: {
+        issuer: "https://dyllu.eu.auth0.com",
+        resource: "https://api.dyllu.md/mcp",
+        allowedClientIds: ["tpc_chatgpt", "tpc_codex"],
+      },
+    });
+  });
+
+  it("fails closed when MCP is enabled without complete configuration", () => {
+    expect(() =>
+      parseBackendEnvironment({
+        ...productionEnvironment(),
+        DYLLU_MCP_ENABLED: "true",
+      })
+    ).toThrow(/DYLLU_MCP_AUTH0_ISSUER is required/);
+  });
+
+  it("rejects unsafe MCP URLs and identifiers", () => {
+    const input = {
+      ...productionEnvironment(),
+      DYLLU_MCP_ENABLED: "true",
+      DYLLU_MCP_AUTH0_ISSUER: "http://dyllu.eu.auth0.com",
+      DYLLU_MCP_RESOURCE: "https://api.dyllu.md/mcp",
+      DYLLU_MCP_ALLOWED_CLIENT_IDS: "bad client",
+      DYLLU_MCP_BOOTSTRAP_USER_IDS: "not-a-user",
+    };
+
+    expect(() => parseBackendEnvironment(input)).toThrow(
+      /DYLLU_MCP_AUTH0_ISSUER must use https:/
+    );
+    expect(() => parseBackendEnvironment(input)).toThrow(
+      /DYLLU_MCP_ALLOWED_CLIENT_IDS contains an invalid client ID/
+    );
+  });
+
   it("uses distinct development-only defaults without enabling TLS", () => {
     const environment = parseBackendEnvironment({ NODE_ENV: "test" });
 
@@ -130,5 +183,10 @@ describe("parseBackendEnvironment", () => {
     expect(environment.jwtSecret).not.toBe(environment.cookieSecret);
     expect(environment.s3).toBeUndefined();
     expect(environment.resend).toBeUndefined();
+    expect(environment.mcp).toEqual({
+      enabled: false,
+      bootstrapUserIds: [],
+      oauth: null,
+    });
   });
 });

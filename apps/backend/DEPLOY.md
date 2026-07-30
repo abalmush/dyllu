@@ -38,7 +38,7 @@ you don't want Coolify-managed data services. Just plug the URLs into env.
 | Dockerfile path   | `apps/backend/Dockerfile`    |
 | Exposed port      | `9000`                       |
 | Domain            | `api.<yourdomain>`           |
-| Health check path | `/health`                    |
+| Health check path | `/ready`                     |
 
 **Environment variables** — copy from `apps/backend/.env.production.example`
 and fill real values. Critical ones:
@@ -48,6 +48,27 @@ and fill real values. Critical ones:
 - `STORE_CORS`, `ADMIN_CORS`, `AUTH_CORS` — production domains
 - `JWT_SECRET`, `COOKIE_SECRET` — `openssl rand -hex 64`
 - `S3_*` — Cloudflare R2 bucket + API token (free tier: 10 GB/mo)
+
+## MCP rollout
+
+The MCP plugin defaults to disabled. Roll it out separately:
+
+1. Deploy the code without MCP variables and verify `/ready`, `/backend` and
+   the storefront.
+2. Add the complete configuration below with `DYLLU_MCP_ENABLED=false`, deploy
+   and verify again.
+3. Set `DYLLU_MCP_ENABLED=true`, deploy, then verify OAuth metadata,
+   unauthenticated rejection and a manager login before testing catalog tools.
+
+| Key                            | Value source                              |
+| ------------------------------ | ----------------------------------------- |
+| `DYLLU_MCP_ENABLED`            | rollout gate: `false`, then `true`        |
+| `DYLLU_MCP_AUTH0_ISSUER`       | Auth0 tenant HTTPS URL                    |
+| `DYLLU_MCP_RESOURCE`           | Auth0 API identifier / public MCP URL     |
+| `DYLLU_MCP_ALLOWED_CLIENT_IDS` | comma-separated approved OAuth client IDs |
+| `DYLLU_MCP_BOOTSTRAP_USER_IDS` | comma-separated Medusa Admin user IDs     |
+
+No Auth0 client secret belongs in the Medusa container.
 
 ## Object storage (Cloudflare R2)
 
