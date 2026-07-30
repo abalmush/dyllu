@@ -79,16 +79,14 @@ const toVisibleNode = (
     pinnedImages.get(category.handle) ??
     representativeImages.get(category.id) ??
     children.find((child) => child.navThumbnailUrl)?.navThumbnailUrl;
+  const configuredImage =
+    typeof navThumbnailUrl === "string" ? navThumbnailUrl : undefined;
 
   return {
     id: category.id,
     name: category.name,
     handle: category.handle,
-    navThumbnailUrl:
-      pinnedImages.get(category.handle) ??
-      (typeof navThumbnailUrl === "string"
-        ? navThumbnailUrl
-        : representativeImage),
+    navThumbnailUrl: configuredImage ?? representativeImage,
     children,
   };
 };
