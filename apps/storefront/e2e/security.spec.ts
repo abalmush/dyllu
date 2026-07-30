@@ -1,6 +1,18 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("security boundaries", () => {
+  test("product requests are never redirected by a static catalog map", async ({
+    request,
+  }) => {
+    const response = await request.get(
+      "/products/set-clesti-3-piese-160-mm-dyllu-dtps0623",
+      { maxRedirects: 0 }
+    );
+
+    expect(response.status()).not.toBe(301);
+    expect(response.headers().location).toBeUndefined();
+  });
+
   test("revalidation rejects unauthenticated writes and has no GET endpoint", async ({
     request,
   }) => {
