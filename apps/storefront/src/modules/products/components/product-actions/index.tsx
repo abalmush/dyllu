@@ -5,7 +5,8 @@ import { isEqual } from "lodash";
 import { ShoppingBag } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 
-import { addItemsToCart } from "@lib/data/cart";
+import { useCart } from "@lib/cart/cart-context";
+import type { OptimisticCartItem } from "@lib/cart/cart-context";
 import type { CompatibleAccessories } from "@lib/data/compatible-accessories";
 import { useIntersection } from "@lib/hooks/use-in-view";
 import { cn } from "@lib/utils";
@@ -58,6 +59,7 @@ export default function ProductActions({
   compatiblePowerAccessories = { batteries: [], chargers: [] },
   disabled,
 }: Props) {
+  const { addItems } = useCart();
   const [options, setOptions] = React.useState<
     Record<string, string | undefined>
   >(() => {
@@ -145,21 +147,69 @@ export default function ProductActions({
   const actionsRef = React.useRef<HTMLDivElement>(null);
   const inView = useIntersection(actionsRef, "0px");
 
+  const findAccessoryVariant = (variantId?: string) => {
+    if (!variantId) return undefined;
+    return [
+      ...compatiblePowerAccessories.batteries,
+      ...compatiblePowerAccessories.chargers,
+    ]
+      .flatMap((accessory) =>
+        (accessory.variants ?? []).map((variant) => ({ accessory, variant }))
+      )
+      .find(({ variant }) => variant.id === variantId);
+  };
+
   const handleAddToCart = async () => {
     if (!selectedVariant?.id) return;
     setIsAdding(true);
+
+    const accessoryItems = [selectedBatteryId, selectedChargerId].flatMap(
+      (variantId) => {
+        if (!showPowerConfigurator || !variantId) return [];
+        const match = findAccessoryVariant(variantId);
+        if (!match) return [];
+
+        return [
+          {
+            variantId,
+            productHandle: match.accessory.handle ?? "",
+            title: match.accessory.title ?? "",
+            variantTitle: match.variant.title ?? undefined,
+            thumbnail: match.accessory.thumbnail ?? undefined,
+            quantity: 1,
+            unitPrice: match.variant.calculated_price?.calculated_amount ?? 0,
+            currencyCode:
+              match.variant.calculated_price?.currency_code ?? "mdl",
+          } satisfies OptimisticCartItem,
+        ];
+      }
+    );
+
     try {
-      await addItemsToCart({
-        items: [
-          { variantId: selectedVariant.id, quantity },
-          ...(showPowerConfigurator && selectedBatteryId
-            ? [{ variantId: selectedBatteryId, quantity: 1 }]
-            : []),
-          ...(showPowerConfigurator && selectedChargerId
-            ? [{ variantId: selectedChargerId, quantity: 1 }]
-            : []),
-        ],
-      });
+      await addItems(
+        {
+          items: [
+            { variantId: selectedVariant.id, quantity },
+            ...accessoryItems.map(({ variantId, quantity }) => ({
+              variantId,
+              quantity,
+            })),
+          ],
+        },
+        [
+          {
+            variantId: selectedVariant.id,
+            productHandle: product.handle ?? "",
+            title: product.title ?? "",
+            variantTitle: selectedVariant.title ?? undefined,
+            thumbnail: product.thumbnail ?? undefined,
+            quantity,
+            unitPrice: displayPrice?.calculated_price_number ?? 0,
+            currencyCode: displayPrice?.currency_code ?? "mdl",
+          },
+          ...accessoryItems,
+        ]
+      );
     } finally {
       setIsAdding(false);
     }

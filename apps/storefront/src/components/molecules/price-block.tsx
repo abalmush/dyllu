@@ -4,6 +4,8 @@ import { cn } from "@lib/utils";
 
 export type PriceShape = {
   calculated_price: string;
+  calculated_price_number?: number;
+  currency_code?: string;
   original_price?: string;
   price_type?: string;
   percentage_diff?: string | number;
@@ -35,13 +37,13 @@ export const PriceBlock = React.forwardRef<HTMLDivElement, PriceBlockProps>(
         {...props}
       >
         {prefix && (
-          <span className="text-sm font-medium text-muted-foreground">
+          <span className="text-muted-foreground text-sm font-medium">
             {prefix}
           </span>
         )}
         <span
           className={cn(
-            "font-semibold tracking-tight text-foreground",
+            "text-foreground font-semibold tracking-tight",
             sizeMap[size],
             isSale && "text-destructive"
           )}
@@ -50,12 +52,12 @@ export const PriceBlock = React.forwardRef<HTMLDivElement, PriceBlockProps>(
           {price.calculated_price}
         </span>
         {isSale && price.original_price && (
-          <span className="text-sm text-muted-foreground line-through">
+          <span className="text-muted-foreground text-sm line-through">
             {price.original_price}
           </span>
         )}
         {isSale && price.percentage_diff && (
-          <span className="rounded-full border border-destructive/20 bg-destructive/10 px-2 py-1 text-sm font-semibold tracking-wide text-destructive">
+          <span className="border-destructive/20 bg-destructive/10 text-destructive rounded-full border px-2 py-1 text-sm font-semibold tracking-wide">
             -{price.percentage_diff}%
           </span>
         )}

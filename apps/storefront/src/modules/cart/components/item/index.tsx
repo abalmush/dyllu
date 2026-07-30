@@ -3,15 +3,15 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Loader2, Trash2 } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 
 import { cn } from "@lib/utils";
-import { deleteLineItem, updateLineItem } from "@lib/data/cart";
+import { useCart } from "@lib/cart/cart-context";
 import { convertToLocale } from "@lib/util/money";
 import { IMAGE_BG_NEUTRALIZE } from "@/components/organisms/pdp-hero-variants";
 import { QuantityStepper } from "@/components/molecules/quantity-stepper";
-import ErrorMessage from "@modules/checkout/components/error-message";
 
 type Props = {
   item: HttpTypes.StoreCartLineItem;
@@ -19,14 +19,19 @@ type Props = {
   currencyCode: string;
 };
 
+// Quantity/remove go through the shared CartProvider so the header badge and
+// minibag stay in sync with edits made directly on the cart page, then
+// router.refresh() re-fetches this page's own authoritative totals (sale
+// pricing, promotions) since CartView doesn't carry those fields.
 export default function CartItemRow({
   item,
   type = "full",
   currencyCode,
 }: Props) {
+  const router = useRouter();
+  const { updateItem, removeItem } = useCart();
   const [updating, setUpdating] = React.useState(false);
   const [removing, setRemoving] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
   const [quantity, setQuantity] = React.useState(item.quantity);
 
   const debounced = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -43,13 +48,10 @@ export default function CartItemRow({
     setQuantity(next);
     if (debounced.current) clearTimeout(debounced.current);
     debounced.current = setTimeout(async () => {
-      setError(null);
       setUpdating(true);
       try {
-        await updateLineItem({ lineId: item.id, quantity: next });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Eroare actualizare");
-        setQuantity(item.quantity);
+        await updateItem(item.id, next);
+        router.refresh();
       } finally {
         setUpdating(false);
       }
@@ -62,16 +64,10 @@ export default function CartItemRow({
       debounced.current = null;
     }
 
-    setError(null);
     setRemoving(true);
     try {
-      await deleteLineItem(item.id);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Nu am putut șterge produsul. Încearcă din nou."
-      );
+      await removeItem(item.id);
+      router.refresh();
     } finally {
       setRemoving(false);
     }
@@ -157,9 +153,6 @@ export default function CartItemRow({
               </span>
             )}
           </div>
-        )}
-        {error && (
-          <ErrorMessage error={error} data-testid="product-error-message" />
         )}
       </div>
       <div

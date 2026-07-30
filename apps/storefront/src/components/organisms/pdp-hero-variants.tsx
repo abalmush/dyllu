@@ -8,7 +8,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import AutoplayPlugin from "embla-carousel-autoplay";
 import { HttpTypes } from "@medusajs/types";
 
-import { addToCart } from "@lib/data/cart";
+import { useCart } from "@lib/cart/cart-context";
 import { cn } from "@lib/utils";
 import { Button } from "@/components/atoms/button";
 import { PurchaseTrustGrid } from "@/components/organisms/purchase-trust-grid";
@@ -663,6 +663,7 @@ export function InfoCard({
 }
 
 export function useInfoCardController(product: HttpTypes.StoreProduct) {
+  const { addItem } = useCart();
   const primaryOption = product.options?.[0];
   const optionValues = primaryOption?.values?.map((v) => v.value) ?? [];
   const isMultiVariant = (product.variants?.length ?? 0) > 1;
@@ -715,7 +716,20 @@ export function useInfoCardController(product: HttpTypes.StoreProduct) {
     if (!selectedVariant?.id || isAdding) return;
     setIsAdding(true);
     try {
-      await addToCart({ variantId: selectedVariant.id, quantity });
+      await addItem(
+        { variantId: selectedVariant.id, quantity },
+        {
+          variantId: selectedVariant.id,
+          productHandle: product.handle ?? "",
+          title: product.title ?? "",
+          variantTitle: selectedVariant.title ?? undefined,
+          thumbnail: product.thumbnail ?? undefined,
+          quantity,
+          unitPrice: selectedVariant.calculated_price?.calculated_amount ?? 0,
+          currencyCode:
+            selectedVariant.calculated_price?.currency_code ?? "mdl",
+        }
+      );
       setJustAdded(true);
       window.setTimeout(() => setJustAdded(false), 2500);
     } finally {

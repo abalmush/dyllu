@@ -14,14 +14,12 @@ import { MegaMenu } from "@/components/organisms/mega-menu";
 import { MobileNav } from "@/components/organisms/mobile-nav";
 import { SearchCommand } from "@/components/organisms/search-command";
 import { type CategoryNode } from "@lib/data/categories";
-import { HttpTypes } from "@medusajs/types";
 
 export interface SiteHeaderProps {
-  cart: HttpTypes.StoreCart | null;
   categories: CategoryNode[];
 }
 
-export function SiteHeader({ cart, categories }: SiteHeaderProps) {
+export function SiteHeader({ categories }: SiteHeaderProps) {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
   const showcasePinned = useShowcasePinned((state) => state.pinnedCount > 0);
@@ -101,7 +99,7 @@ export function SiteHeader({ cart, categories }: SiteHeaderProps) {
           >
             <User aria-hidden="true" className="size-5" />
           </Link>
-          <CartDrawer cart={cart} />
+          <CartDrawer />
         </div>
       </div>
       <SearchCommand
