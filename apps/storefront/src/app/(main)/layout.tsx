@@ -4,8 +4,10 @@ import { listCartOptions, retrieveCart } from "@lib/data/cart";
 import { getCategoryTree } from "@lib/data/categories";
 import { retrieveCustomer } from "@lib/data/customer";
 import { getBaseURL } from "@lib/util/env";
+import { toCartView } from "@lib/cart/cart-view.mapper";
 import { StoreCartShippingOption } from "@medusajs/types";
 
+import { CartProvider } from "@/components/providers/cart-provider";
 import { AnnouncementBar } from "@/components/organisms/announcement-bar";
 import { SiteFooter } from "@/components/organisms/site-footer";
 import { SiteHeader } from "@/components/organisms/site-header";
@@ -32,24 +34,26 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="bg-background flex min-h-screen flex-col">
-      <AnnouncementBar />
-      <UtilityBar />
-      <SiteHeader cart={cart} categories={categories} />
-      {customer && cart && (
-        <CartMismatchBanner customer={customer} cart={cart} />
-      )}
-      {cart && (
-        <FreeShippingPriceNudge
-          variant="popup"
-          cart={cart}
-          shippingOptions={shippingOptions}
-        />
-      )}
-      <main id="main-content" tabIndex={-1} className="flex-1 outline-hidden">
-        {props.children}
-      </main>
-      <SiteFooter categories={categories} />
-    </div>
+    <CartProvider initialCart={cart ? toCartView(cart) : null}>
+      <div className="bg-background flex min-h-screen flex-col">
+        <AnnouncementBar />
+        <UtilityBar />
+        <SiteHeader categories={categories} />
+        {customer && cart && (
+          <CartMismatchBanner customer={customer} cart={cart} />
+        )}
+        {cart && (
+          <FreeShippingPriceNudge
+            variant="popup"
+            cart={cart}
+            shippingOptions={shippingOptions}
+          />
+        )}
+        <main id="main-content" tabIndex={-1} className="flex-1 outline-hidden">
+          {props.children}
+        </main>
+        <SiteFooter categories={categories} />
+      </div>
+    </CartProvider>
   );
 }

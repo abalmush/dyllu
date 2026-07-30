@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { HttpTypes } from "@medusajs/types";
 
-import { addToCart } from "@lib/data/cart";
+import { useCart } from "@lib/cart/cart-context";
 import { cn } from "@lib/utils";
 import { Button } from "@/components/atoms/button";
 
@@ -33,6 +33,7 @@ function formatPrice(amount: number | null | undefined, code = "MDL") {
 }
 
 export function PdpHero({ product, eyebrow }: Props) {
+  const { addItem } = useCart();
   const images = (product.images ?? []).filter((i) => i.url);
   const hasMultipleImages = images.length > 1;
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -99,7 +100,20 @@ export function PdpHero({ product, eyebrow }: Props) {
     if (!selectedVariant?.id || isAdding) return;
     setIsAdding(true);
     try {
-      await addToCart({ variantId: selectedVariant.id, quantity: 1 });
+      await addItem(
+        { variantId: selectedVariant.id, quantity: 1 },
+        {
+          variantId: selectedVariant.id,
+          productHandle: product.handle ?? "",
+          title: product.title ?? "",
+          variantTitle: selectedVariant.title ?? undefined,
+          thumbnail: product.thumbnail ?? undefined,
+          quantity: 1,
+          unitPrice: selectedVariant.calculated_price?.calculated_amount ?? 0,
+          currencyCode:
+            selectedVariant.calculated_price?.currency_code ?? "mdl",
+        }
+      );
       setJustAdded(true);
       window.setTimeout(() => setJustAdded(false), 2500);
     } finally {

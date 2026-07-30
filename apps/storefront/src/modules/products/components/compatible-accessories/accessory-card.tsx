@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Check, Plus } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 
-import { addToCart } from "@lib/data/cart";
+import { useCart } from "@lib/cart/cart-context";
 import { cn } from "@lib/utils";
 import { Button } from "@/components/atoms/button";
 
@@ -16,6 +16,7 @@ type Props = {
 };
 
 export function AccessoryCard({ product, kind }: Props) {
+  const { addItem } = useCart();
   const variants = product.variants ?? [];
   const hasMultiple = variants.length > 1;
   const [selectedId, setSelectedId] = React.useState<string>(
@@ -32,7 +33,19 @@ export function AccessoryCard({ product, kind }: Props) {
     if (!selectedId || pending) return;
     setPending(true);
     try {
-      await addToCart({ variantId: selectedId, quantity: 1 });
+      await addItem(
+        { variantId: selectedId, quantity: 1 },
+        {
+          variantId: selectedId,
+          productHandle: product.handle ?? "",
+          title: product.title ?? "",
+          variantTitle: selected?.title ?? undefined,
+          thumbnail: image ?? undefined,
+          quantity: 1,
+          unitPrice: selected?.calculated_price?.calculated_amount ?? 0,
+          currencyCode: selected?.calculated_price?.currency_code ?? "mdl",
+        }
+      );
       setAdded(true);
       window.setTimeout(() => setAdded(false), 2500);
     } finally {

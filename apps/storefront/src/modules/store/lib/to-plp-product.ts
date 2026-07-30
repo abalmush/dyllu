@@ -31,6 +31,7 @@ export function toPlpProduct(
   return {
     id: selectedVariant ? `${product.id}:${selectedVariant.id}` : product.id,
     href: `/products/${product.handle}${variantQuery}`,
+    productHandle: product.handle ?? "",
     title: getVariantDisplayTitle(product, selectedVariant),
     thumbnail: getVariantImageUrl(product, selectedVariant),
     category: getProductCategoryLabel(product),

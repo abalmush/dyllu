@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Check, Link2, Plus, ShoppingCart } from "lucide-react";
 
-import { addToCart } from "@lib/data/cart";
+import { useCart } from "@lib/cart/cart-context";
 import { cn } from "@lib/utils";
 import { Badge, type BadgeProps } from "@/components/atoms/badge";
 import { Button } from "@/components/atoms/button";
@@ -97,6 +97,7 @@ function PriceLine({
 }
 
 function CompatibleLayout({ mainName, products, compatibilityNote }: Props) {
+  const { addItem } = useCart();
   const [pendingId, setPendingId] = React.useState<string | null>(null);
   const [addedIds, setAddedIds] = React.useState<Record<string, boolean>>({});
 
@@ -105,7 +106,18 @@ function CompatibleLayout({ mainName, products, compatibilityNote }: Props) {
 
     setPendingId(product.id);
     try {
-      await addToCart({ variantId: product.variantId, quantity: 1 });
+      await addItem(
+        { variantId: product.variantId, quantity: 1 },
+        {
+          variantId: product.variantId,
+          productHandle: product.handle,
+          title: product.name,
+          thumbnail: product.image,
+          quantity: 1,
+          unitPrice: product.price,
+          currencyCode: "mdl",
+        }
+      );
       setAddedIds((current) => ({ ...current, [product.id]: true }));
       window.setTimeout(() => {
         setAddedIds((current) => {

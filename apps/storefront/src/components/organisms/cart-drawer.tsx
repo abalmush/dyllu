@@ -3,13 +3,11 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { ShoppingBag, Trash2, ArrowRight } from "lucide-react";
 
 import { cn } from "@lib/utils";
 import { convertToLocale } from "@lib/util/money";
-import { deleteLineItem } from "@lib/data/cart";
-import { HttpTypes } from "@medusajs/types";
+import { useCart } from "@lib/cart/cart-context";
 import { Button } from "@/components/atoms/button";
 import { ScrollArea } from "@/components/atoms/scroll-area";
 import {
@@ -24,42 +22,30 @@ import { Separator } from "@/components/atoms/separator";
 import { IconButton } from "@/components/atoms/icon-button";
 
 type Props = {
-  cart: HttpTypes.StoreCart | null;
   trigger?: React.ReactNode;
 };
 
-export function CartDrawer({ cart, trigger }: Props) {
-  const [open, setOpen] = React.useState(false);
+export function CartDrawer({ trigger }: Props) {
+  const { cart, isOpen, openCart, closeCart, removeItem } = useCart();
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
-  const pathname = usePathname();
-  const previousCount = React.useRef<number | null>(null);
-  const totalItems = cart?.items?.reduce((acc, i) => acc + i.quantity, 0) ?? 0;
-
-  React.useEffect(() => {
-    if (
-      previousCount.current !== null &&
-      previousCount.current < totalItems &&
-      !pathname.includes("/cart")
-    ) {
-      setOpen(true);
-    }
-    previousCount.current = totalItems;
-  }, [totalItems, pathname]);
-
+  const totalItems = cart?.totalQuantity ?? 0;
   const subtotal = cart?.subtotal ?? 0;
-  const currencyCode = cart?.currency_code ?? "mdl";
+  const currencyCode = cart?.currencyCode ?? "mdl";
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);
     try {
-      await deleteLineItem(id);
+      await removeItem(id);
     } finally {
       setDeletingId(null);
     }
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(next) => (next ? openCart() : closeCart())}
+    >
       <SheetTrigger asChild>
         {trigger ?? (
           <IconButton label="Deschide coșul" variant="outline" size="md">
@@ -92,9 +78,7 @@ export function CartDrawer({ cart, trigger }: Props) {
               <ul className="divide-border divide-y">
                 {cart.items
                   .slice()
-                  .sort((a, b) =>
-                    (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
-                  )
+                  .reverse()
                   .map((item) => (
                     <li
                       key={item.id}
@@ -102,8 +86,8 @@ export function CartDrawer({ cart, trigger }: Props) {
                       data-testid="cart-item"
                     >
                       <Link
-                        href={`/products/${item.product_handle}`}
-                        onClick={() => setOpen(false)}
+                        href={`/products/${item.productHandle}`}
+                        onClick={closeCart}
                         className="group bg-surface-subtle relative aspect-square overflow-hidden rounded-lg"
                       >
                         {item.thumbnail ? (
@@ -118,16 +102,16 @@ export function CartDrawer({ cart, trigger }: Props) {
                       </Link>
                       <div className="flex min-w-0 flex-col gap-1">
                         <Link
-                          href={`/products/${item.product_handle}`}
-                          onClick={() => setOpen(false)}
+                          href={`/products/${item.productHandle}`}
+                          onClick={closeCart}
                           className="text-foreground hover:text-primary line-clamp-2 text-sm font-semibold tracking-tight"
                           data-testid="product-link"
                         >
                           {item.title}
                         </Link>
-                        {item.variant?.title && (
+                        {item.variantTitle && (
                           <p className="text-muted-foreground text-xs">
-                            {item.variant.title}
+                            {item.variantTitle}
                           </p>
                         )}
                         <div className="mt-auto flex items-center justify-between">
@@ -186,7 +170,7 @@ export function CartDrawer({ cart, trigger }: Props) {
                   size="lg"
                   className={cn("flex-1")}
                 >
-                  <Link href="/cart" onClick={() => setOpen(false)}>
+                  <Link href="/cart" onClick={closeCart}>
                     Vezi coșul
                   </Link>
                 </Button>
@@ -196,10 +180,7 @@ export function CartDrawer({ cart, trigger }: Props) {
                   className="flex-1"
                   data-testid="go-to-cart-button"
                 >
-                  <Link
-                    href="/checkout?step=address"
-                    onClick={() => setOpen(false)}
-                  >
+                  <Link href="/checkout?step=address" onClick={closeCart}>
                     Finalizează
                     <ArrowRight className="size-4" />
                   </Link>
@@ -219,7 +200,7 @@ export function CartDrawer({ cart, trigger }: Props) {
               </p>
             </div>
             <Button asChild size="lg">
-              <Link href="/store" onClick={() => setOpen(false)}>
+              <Link href="/store" onClick={closeCart}>
                 Explorează produsele
                 <ArrowRight className="size-4" />
               </Link>
