@@ -1263,6 +1263,7 @@ const PLP_PRODUCTS: PlpProduct[] = [
   {
     id: "DTCLP5121",
     href: "/products/fierastrau-cu-lant-combo-dtclp5121",
+    productHandle: "fierastrau-cu-lant-combo-dtclp5121",
     title: "Fierăstrău cu lanț fără fir 20V — combo 2 acumulatori",
     thumbnail: `${COMBO_IMAGE_BASE}/DTCLP5121.png`,
     category: "Scule electrice",
@@ -1275,6 +1276,7 @@ const PLP_PRODUCTS: PlpProduct[] = [
   {
     id: "DTLBP550",
     href: "/products/acumulator-20v-5ah-dtlbp550",
+    productHandle: "acumulator-20v-5ah-dtlbp550",
     title: "Acumulator 20V 5.0Ah Li-Ion DTLBP550",
     thumbnail: `${COMBO_IMAGE_BASE}/DTLBP550.png`,
     category: "Acumulatori",
@@ -1287,6 +1289,7 @@ const PLP_PRODUCTS: PlpProduct[] = [
   {
     id: "SET62",
     href: "/products/set-biti-surubelnita-62",
+    productHandle: "set-biti-surubelnita-62",
     title: "Set biți șurubelniță cromați — 62 piese",
     thumbnail: "/images/dyllu-consumables.png",
     category: "Accesorii",
@@ -1300,6 +1303,7 @@ const PLP_PRODUCTS: PlpProduct[] = [
   {
     id: "VAC",
     href: "/products/aspirator-p20s",
+    productHandle: "aspirator-p20s",
     title: "Aspirator umed/uscat 20V P20S",
     thumbnail: "/images/dyllu-vacuum-p20s.png",
     category: "Scule electrice",
@@ -1312,6 +1316,7 @@ const PLP_PRODUCTS: PlpProduct[] = [
   {
     id: "DTZY1418",
     href: "/products/lant-de-rezerva-18-dtzy1418",
+    productHandle: "lant-de-rezerva-18-dtzy1418",
     title: "Lanț de rezervă 18″ DTZY1418",
     thumbnail: `${COMBO_IMAGE_BASE}/DTZY1418.png`,
     category: "Piese de schimb",
@@ -1324,6 +1329,7 @@ const PLP_PRODUCTS: PlpProduct[] = [
   {
     id: "SAFETY",
     href: "/products/set-protectie-forestiera",
+    productHandle: "set-protectie-forestiera",
     title: "Set protecție forestieră (cască + vizieră + antifoane)",
     thumbnail: "/images/dyllu-safety-gear.png",
     category: "Protecție",

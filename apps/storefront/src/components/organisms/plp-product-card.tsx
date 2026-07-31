@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Check, ShoppingCart, Star } from "lucide-react";
 
-import { addToCart } from "@lib/data/cart";
+import { useCart } from "@lib/cart/cart-context";
 import { Badge } from "@/components/atoms/badge";
 import {
   PriceBlock,
@@ -19,6 +19,7 @@ import {
 export type PlpProduct = {
   id: string;
   href: string;
+  productHandle: string;
   title: string;
   thumbnail?: string;
   category?: string;
@@ -38,6 +39,7 @@ export function PlpProductCard({
   product: PlpProduct;
   imagePriority?: boolean;
 }) {
+  const { addItem } = useCart();
   const [isAdding, setIsAdding] = React.useState(false);
   const [justAdded, setJustAdded] = React.useState(false);
   const isSale = product.price?.price_type === "sale";
@@ -48,7 +50,18 @@ export function PlpProductCard({
 
     setIsAdding(true);
     try {
-      await addToCart({ variantId: product.variantId, quantity: 1 });
+      await addItem(
+        { variantId: product.variantId, quantity: 1 },
+        {
+          variantId: product.variantId,
+          productHandle: product.productHandle,
+          title: product.title,
+          thumbnail: product.thumbnail,
+          quantity: 1,
+          unitPrice: product.price?.calculated_price_number ?? 0,
+          currencyCode: product.price?.currency_code ?? "mdl",
+        }
+      );
       setJustAdded(true);
       window.setTimeout(() => setJustAdded(false), 2500);
     } finally {

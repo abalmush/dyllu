@@ -5,6 +5,8 @@ import medusaError from "@lib/util/medusa-error";
 import { HttpTypes } from "@medusajs/types";
 import { refresh, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
+import type { CartView } from "@lib/cart/cart-view";
+import { toCartView } from "@lib/cart/cart-view.mapper";
 import {
   assertOrderAccessConfigured,
   getAuthHeaders,
@@ -191,6 +193,19 @@ export async function retrieveCart() {
   return retrieveCartByCookie();
 }
 
+// Cart item CRUD returns CartView instead of calling refresh()/syncCartStorefront
+// so a mutation only performs cart-related work, not a full route re-render.
+// Medusa's mutation responses aren't guaranteed to carry every field CartView
+// needs, so we do one targeted, fully-specified cart read instead of trusting
+// the mutation response shape.
+async function retrieveCartViewOrThrow(): Promise<CartView> {
+  const cart = await retrieveCartByCookie();
+  if (!cart) {
+    throw new Error("Cart not found after mutation");
+  }
+  return toCartView(cart);
+}
+
 async function getOrSetCart() {
   const region = await getRegion();
 
@@ -253,7 +268,7 @@ export async function addToCart({
 }: {
   variantId: string;
   quantity: number;
-}) {
+}): Promise<CartView> {
   if (!variantId) {
     throw new Error("Missing variant ID when adding to cart");
   }
@@ -280,17 +295,16 @@ export async function addToCart({
       {},
       headers
     )
-    .then(async () => {
-      await syncCartStorefront("fulfillment", "shippingOptions");
-    })
     .catch(medusaError);
+
+  return retrieveCartViewOrThrow();
 }
 
 export async function addItemsToCart({
   items,
 }: {
   items: Array<{ variantId: string; quantity: number }>;
-}) {
+}): Promise<CartView> {
   if (items.length === 0) {
     throw new Error("No items provided when adding to cart");
   }
@@ -324,7 +338,7 @@ export async function addItemsToCart({
       .catch(medusaError);
   }
 
-  await syncCartStorefront("fulfillment", "shippingOptions");
+  return retrieveCartViewOrThrow();
 }
 
 export async function updateLineItem({
@@ -333,7 +347,7 @@ export async function updateLineItem({
 }: {
   lineId: string;
   quantity: number;
-}) {
+}): Promise<CartView> {
   if (!lineId) {
     throw new Error("Missing lineItem ID when updating line item");
   }
@@ -352,13 +366,12 @@ export async function updateLineItem({
 
   await sdk.store.cart
     .updateLineItem(cartId, lineId, { quantity }, {}, headers)
-    .then(async () => {
-      await syncCartStorefront("fulfillment", "shippingOptions");
-    })
     .catch(medusaError);
+
+  return retrieveCartViewOrThrow();
 }
 
-export async function deleteLineItem(lineId: string) {
+export async function deleteLineItem(lineId: string): Promise<CartView> {
   if (!lineId) {
     throw new Error("Missing lineItem ID when deleting line item");
   }
@@ -376,10 +389,9 @@ export async function deleteLineItem(lineId: string) {
 
   await sdk.store.cart
     .deleteLineItem(cartId, lineId, {}, headers)
-    .then(async () => {
-      await syncCartStorefront("fulfillment", "shippingOptions");
-    })
     .catch(medusaError);
+
+  return retrieveCartViewOrThrow();
 }
 
 export async function setShippingMethod(shippingMethodId: string) {
@@ -442,6 +454,9 @@ export async function initiatePaymentSession(providerId: string) {
     .catch(medusaError);
 }
 
+// Only used by the checkout DiscountCode widget today, which reads
+// promotions off the server-rendered cart prop rather than a CartView -
+// kept on the refresh() path per the checkout-mutation exception.
 export async function applyPromotions(codes: string[]) {
   const cartId = await getCartId();
 
