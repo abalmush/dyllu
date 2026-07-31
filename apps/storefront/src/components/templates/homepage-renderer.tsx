@@ -1,7 +1,9 @@
 import * as React from "react";
+import type { HttpTypes } from "@medusajs/types";
 
-import { listProductsWithSort } from "@lib/data/products";
+import { listProducts, listProductsWithSort } from "@lib/data/products";
 import { getCollectionByHandle } from "@lib/data/collections";
+import { listCollectionProductCandidates } from "@lib/data/homepage-products";
 import { getRegion } from "@lib/data/regions";
 import { type CategoryNode } from "@lib/data/categories";
 import { getProductPrice } from "@lib/util/get-product-price";
@@ -17,7 +19,7 @@ import { ToolFamiliesStrip } from "@/components/organisms/tool-families-strip";
 import { TrustBand } from "@/components/organisms/trust-band";
 import { ShopStories } from "@/components/organisms/shop-stories";
 import { ANATOMY_ITEMS } from "@/lib/data/anatomy-items";
-import { selectDiverseProducts } from "@/lib/homepage/product-selection";
+import { selectDiverseProductIds } from "@/lib/homepage/product-selection";
 import type { HomepageBlock, ProductRailSource } from "@/lib/homepage/types";
 
 const flattenCategories = (categories: CategoryNode[]): CategoryNode[] =>
@@ -117,33 +119,14 @@ async function ProductRailBlock({
       : undefined;
   if (source.kind === "collection" && !collection) return null;
 
-  // Diverse-random selection groups by product type across the whole
-  // collection to pick varied representatives, so it needs full visibility
-  // into that collection (bounded by its curated size, not the catalogue).
-  // Every other rail only ever shows `limit` products, so it can ask the
-  // backend for exactly that many instead of overfetching.
-  const needsFullCollectionVisibility =
-    source.kind === "collection" && source.selection === "diverse-random";
-
-  const {
-    response: { products },
-  } = await listProductsWithSort({
-    fetchAll: needsFullCollectionVisibility,
-    page: 1,
-    queryParams: {
-      limit: needsFullCollectionVisibility ? 100 : limit,
-      fields: "*variants.calculated_price",
-      ...(source.kind === "collection"
-        ? { collection_id: collection?.id }
-        : {}),
-    },
-  });
-
-  if (!products?.length) return null;
   const displayedProducts =
-    source.kind === "collection" && source.selection === "diverse-random"
-      ? selectDiverseProducts(products, limit)
-      : products.slice(0, limit);
+    source.kind === "collection" &&
+    source.selection === "diverse-random" &&
+    collection
+      ? await getDiverseCollectionProducts(collection.id, region.id, limit)
+      : await getBoundedRailProducts(source, collection?.id, limit);
+
+  if (!displayedProducts.length) return null;
 
   return (
     <ProductRailSection
@@ -170,4 +153,61 @@ async function ProductRailBlock({
       </div>
     </ProductRailSection>
   );
+}
+
+// Diverse merchandising needs visibility into a whole (curated) collection to
+// group by product type, but the expensive part - listing candidates - is
+// cross-request cached; only the final small selection's price/stock is
+// fetched fresh. The seed changes daily so the pick isn't frozen forever
+// while staying identical across concurrent requests within the same day.
+async function getDiverseCollectionProducts(
+  collectionId: string,
+  regionId: string,
+  limit: number
+): Promise<HttpTypes.StoreProduct[]> {
+  const candidates = await listCollectionProductCandidates(
+    collectionId,
+    regionId
+  );
+  if (!candidates.length) return [];
+
+  const seed = `${collectionId}:${new Date().toISOString().slice(0, 10)}`;
+  const selectedIds = selectDiverseProductIds(candidates, limit, seed);
+  if (!selectedIds.length) return [];
+
+  const { response } = await listProducts({
+    regionId,
+    queryParams: {
+      id: selectedIds,
+      limit: selectedIds.length,
+      fields: "*variants.calculated_price",
+    },
+  });
+
+  const productsById = new Map(
+    response.products.map((product) => [product.id, product])
+  );
+  return selectedIds.flatMap((id) => {
+    const product = productsById.get(id);
+    return product ? [product] : [];
+  });
+}
+
+async function getBoundedRailProducts(
+  source: ProductRailSource,
+  collectionId: string | undefined,
+  limit: number
+): Promise<HttpTypes.StoreProduct[]> {
+  const {
+    response: { products },
+  } = await listProductsWithSort({
+    fetchAll: false,
+    page: 1,
+    queryParams: {
+      limit,
+      fields: "*variants.calculated_price",
+      ...(source.kind === "collection" ? { collection_id: collectionId } : {}),
+    },
+  });
+  return products.slice(0, limit);
 }
