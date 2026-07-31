@@ -2,8 +2,11 @@ import "server-only";
 
 import { cache } from "react";
 import { sdk } from "@lib/config";
-import { listProductsWithSort } from "@lib/data/products";
+import { getCacheOptions } from "@lib/data/cookies";
+import { listNavigationProducts } from "@lib/data/navigation-products";
 import { HttpTypes } from "@medusajs/types";
+
+const CATEGORY_TREE_REVALIDATE_SECONDS = 300;
 
 export type CategoryNode = {
   id: string;
@@ -92,7 +95,9 @@ const toVisibleNode = (
 };
 
 export const getCategoryTree = cache(async (): Promise<CategoryNode[]> => {
-  const [{ product_categories }, productsResult] = await Promise.all([
+  const categoryCacheOptions = await getCacheOptions("categories");
+
+  const [{ product_categories }, products] = await Promise.all([
     sdk.client.fetch<{
       product_categories: HttpTypes.StoreProductCategory[];
     }>("/store/product-categories", {
@@ -103,25 +108,24 @@ export const getCategoryTree = cache(async (): Promise<CategoryNode[]> => {
         include_descendants_tree: true,
         limit: 200,
       },
-      cache: "no-store",
-    }),
-    listProductsWithSort({
-      fetchAll: true,
-      queryParams: {
-        limit: 100,
-        fields: "id,thumbnail,*categories,variants.sku",
+      headers: { "x-medusa-locale": "ro" },
+      cache: "force-cache",
+      next: {
+        ...categoryCacheOptions,
+        revalidate: CATEGORY_TREE_REVALIDATE_SECONDS,
       },
     }),
+    listNavigationProducts(),
   ]);
 
   const visibleCategoryIds = new Set(
-    productsResult.response.products.flatMap(
+    products.flatMap(
       (product) => product.categories?.map((category) => category.id) ?? []
     )
   );
   const representativeImages = new Map<string, string>();
   const pinnedImages = new Map<string, string>();
-  for (const product of productsResult.response.products) {
+  for (const product of products) {
     if (!product.thumbnail) continue;
     const productSkus = new Set(
       product.variants?.flatMap((variant) =>
