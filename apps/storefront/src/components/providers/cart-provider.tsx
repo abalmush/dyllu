@@ -9,12 +9,15 @@ import {
   deleteLineItem,
   updateLineItem,
 } from "@lib/data/cart";
+import type { HttpTypes } from "@medusajs/types";
 import type { CartView, CartViewItem } from "@lib/cart/cart-view";
+import { toCartView } from "@lib/cart/cart-view.mapper";
 import {
   CartContext,
   type CartContextValue,
   type OptimisticCartItem,
 } from "@lib/cart/cart-context";
+import type { CommerceShellResponse } from "@/app/api/commerce-shell/route";
 
 type Patch = (cart: CartView | null) => CartView | null;
 
@@ -109,18 +112,20 @@ function applyOptimisticRemove(
   };
 }
 
-export function CartProvider({
-  initialCart,
-  children,
-}: {
-  initialCart: CartView | null;
-  children: React.ReactNode;
-}) {
-  const [cart, setCart] = React.useState<CartView | null>(initialCart);
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  const [cart, setCart] = React.useState<CartView | null>(null);
   const [isOpen, setIsOpen] = React.useState(false);
   const [isMutating, setIsMutating] = React.useState(false);
+  const [isBootstrapping, setIsBootstrapping] = React.useState(true);
+  const [rawCart, setRawCart] = React.useState<HttpTypes.StoreCart | null>(
+    null
+  );
+  const [authenticated, setAuthenticated] = React.useState(false);
+  const [shippingOptions, setShippingOptions] = React.useState<
+    HttpTypes.StoreCartShippingOption[]
+  >([]);
 
-  const authoritativeRef = React.useRef<CartView | null>(initialCart);
+  const authoritativeRef = React.useRef<CartView | null>(null);
   const inFlightPatchesRef = React.useRef<Map<symbol, Patch>>(new Map());
   const mutationQueueRef = React.useRef<Promise<unknown>>(Promise.resolve());
 
@@ -131,6 +136,44 @@ export function CartProvider({
     }
     setCart(next);
   }, []);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/commerce-shell", { cache: "no-store" })
+      .then((response) => {
+        if (!response.ok) throw new Error("commerce-shell request failed");
+        return response.json() as Promise<CommerceShellResponse>;
+      })
+      .then((shell) => {
+        if (cancelled) return;
+        setRawCart(shell.cart);
+        setAuthenticated(shell.authenticated);
+        setShippingOptions(shell.shippingOptions);
+
+        // Don't clobber a cart already established by an add that
+        // completed while bootstrap was still in flight.
+        if (
+          authoritativeRef.current === null &&
+          inFlightPatchesRef.current.size === 0
+        ) {
+          authoritativeRef.current = shell.cart ? toCartView(shell.cart) : null;
+          recompute();
+        }
+      })
+      .catch(() => {
+        // Public navigation must stay usable when the commerce endpoint is
+        // slow or unavailable; cart state simply stays empty until an add
+        // action establishes it directly.
+      })
+      .finally(() => {
+        if (!cancelled) setIsBootstrapping(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [recompute]);
 
   const runMutation = React.useCallback(
     (patch: Patch, mutate: () => Promise<CartView>, errorMessage: string) => {
@@ -212,9 +255,12 @@ export function CartProvider({
   const value = React.useMemo<CartContextValue>(
     () => ({
       cart,
-      isBootstrapping: false,
+      isBootstrapping,
       isMutating,
       isOpen,
+      rawCart,
+      authenticated,
+      shippingOptions,
       openCart: () => setIsOpen(true),
       closeCart: () => setIsOpen(false),
       addItem,
@@ -222,7 +268,19 @@ export function CartProvider({
       updateItem,
       removeItem,
     }),
-    [cart, isMutating, isOpen, addItem, addItems, updateItem, removeItem]
+    [
+      cart,
+      isBootstrapping,
+      isMutating,
+      isOpen,
+      rawCart,
+      authenticated,
+      shippingOptions,
+      addItem,
+      addItems,
+      updateItem,
+      removeItem,
+    ]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
