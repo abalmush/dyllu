@@ -5,17 +5,31 @@ import { z } from "@medusajs/framework/zod";
 import { ApplicationError } from "../application/errors";
 import { ProductChangeApplication } from "../application/product-change-application";
 import { RequestContext } from "../domain/types";
-import { requestPublishConfirmation } from "./confirmation-gate";
 
 const productIdSchema = z.string().trim().min(1).max(100);
 const proposalIdSchema = z.string().trim().min(1).max(100);
 const revisionIdSchema = z.string().trim().min(1).max(100);
+const contentHashSchema = z.string().regex(/^sha256:[a-f0-9]{64}$/);
 
 export function createDylluMcpServer(
   application: ProductChangeApplication,
   getContext: () => RequestContext,
+  logger: { error(message: string): void },
   securityScopes: string[] = ["mcp:connect"]
 ) {
+  const execute = <T>(tool: string, operation: () => Promise<T>) =>
+    executeTool(operation, (error) => {
+      const context = getContext();
+      logger.error(
+        JSON.stringify({
+          event: "dyllu_mcp.tool.failed",
+          request_id: context.requestId,
+          actor_id: context.actorId,
+          tool,
+          ...describeError(error),
+        })
+      );
+    });
   const oauthToolMeta = {
     securitySchemes: [
       {
@@ -36,7 +50,8 @@ export function createDylluMcpServer(
         "Show the complete before/after proposal to the manager.",
         "Call publish_product_description only after the manager asks to publish.",
         "Call publish_product_price only after the manager asks to publish the exact price proposal.",
-        "Publishing always requests a separate structured confirmation.",
+        "Only call a publish tool after the manager explicitly confirms the exact proposal.",
+        "Pass the exact stored content_hash as confirmed_content_hash when publishing.",
         "Rollback creates a new proposal and never removes audit history.",
         "Never invent product facts, prices, specifications or warranty terms.",
         "Preserve verified facts unless the manager provides a verified replacement.",
@@ -54,7 +69,7 @@ export function createDylluMcpServer(
       annotations: readOnlyAnnotations,
       _meta: oauthToolMeta,
     },
-    () => executeTool(() => application.getMyAccess(getContext()))
+    () => execute("get_my_access", () => application.getMyAccess(getContext()))
   );
 
   server.registerTool(
@@ -73,7 +88,7 @@ export function createDylluMcpServer(
       _meta: oauthToolMeta,
     },
     (input) =>
-      executeTool(() =>
+      execute("search_products", () =>
         application.searchProducts(getContext(), {
           query: input.query,
           limit: input.limit,
@@ -92,7 +107,9 @@ export function createDylluMcpServer(
       _meta: oauthToolMeta,
     },
     ({ product_id: productId }) =>
-      executeTool(() => application.getProduct(getContext(), productId))
+      execute("get_product", () =>
+        application.getProduct(getContext(), productId)
+      )
   );
 
   server.registerTool(
@@ -120,7 +137,7 @@ export function createDylluMcpServer(
       _meta: oauthToolMeta,
     },
     (input) =>
-      executeTool(() =>
+      execute("propose_product_price", () =>
         application.proposePrice(getContext(), {
           productId: input.product_id,
           variantId: input.variant_id,
@@ -154,7 +171,7 @@ export function createDylluMcpServer(
       _meta: oauthToolMeta,
     },
     (input) =>
-      executeTool(() =>
+      execute("propose_product_description", () =>
         application.proposeDescription(getContext(), {
           productId: input.product_id,
           proposedDescription: input.proposed_description,
@@ -174,7 +191,9 @@ export function createDylluMcpServer(
       _meta: oauthToolMeta,
     },
     ({ proposal_id: proposalId }) =>
-      executeTool(() => application.getProposal(getContext(), proposalId))
+      execute("get_change_proposal", () =>
+        application.getProposal(getContext(), proposalId)
+      )
   );
 
   server.registerTool(
@@ -182,8 +201,13 @@ export function createDylluMcpServer(
     {
       title: "Publish a product description",
       description:
-        "Request explicit human confirmation, then publish the exact stored proposal.",
-      inputSchema: z.object({ proposal_id: proposalIdSchema }).strict(),
+        "Publish an exact stored proposal after the manager explicitly confirms it. Copy its content_hash into confirmed_content_hash.",
+      inputSchema: z
+        .object({
+          proposal_id: proposalIdSchema,
+          confirmed_content_hash: contentHashSchema,
+        })
+        .strict(),
       annotations: {
         readOnlyHint: false,
         destructiveHint: true,
@@ -192,26 +216,20 @@ export function createDylluMcpServer(
       },
       _meta: oauthToolMeta,
     },
-    ({ proposal_id: proposalId }) =>
-      executeTool(async () => {
+    ({
+      proposal_id: proposalId,
+      confirmed_content_hash: confirmedContentHash,
+    }) =>
+      execute("publish_product_description", async () => {
         const context = getContext();
-        const proposal = await application.getProposal(context, proposalId);
-        const confirmation = await requestPublishConfirmation(
-          server.server,
-          proposal,
-          () => new Date()
-        );
-        if (!confirmation) {
-          await application.rejectProposal(context, proposal.id);
-          return {
-            published: false,
-            status: "cancelled",
-            proposal_id: proposal.id,
-          };
-        }
         const revision = await application.publishDescription(context, {
           proposalId,
-          confirmation,
+          confirmation: {
+            action: "accept",
+            proposalId,
+            contentHash: confirmedContentHash,
+            confirmedAt: new Date(),
+          },
         });
         return {
           published: true,
@@ -225,8 +243,13 @@ export function createDylluMcpServer(
     {
       title: "Publish a product price",
       description:
-        "Request explicit human confirmation, then publish the exact stored MDL price proposal.",
-      inputSchema: z.object({ proposal_id: proposalIdSchema }).strict(),
+        "Publish an exact stored MDL price proposal after the manager explicitly confirms it. Copy its content_hash into confirmed_content_hash.",
+      inputSchema: z
+        .object({
+          proposal_id: proposalIdSchema,
+          confirmed_content_hash: contentHashSchema,
+        })
+        .strict(),
       annotations: {
         readOnlyHint: false,
         destructiveHint: true,
@@ -235,26 +258,20 @@ export function createDylluMcpServer(
       },
       _meta: oauthToolMeta,
     },
-    ({ proposal_id: proposalId }) =>
-      executeTool(async () => {
+    ({
+      proposal_id: proposalId,
+      confirmed_content_hash: confirmedContentHash,
+    }) =>
+      execute("publish_product_price", async () => {
         const context = getContext();
-        const proposal = await application.getProposal(context, proposalId);
-        const confirmation = await requestPublishConfirmation(
-          server.server,
-          proposal,
-          () => new Date()
-        );
-        if (!confirmation) {
-          await application.rejectProposal(context, proposal.id);
-          return {
-            published: false,
-            status: "cancelled",
-            proposal_id: proposal.id,
-          };
-        }
         const revision = await application.publishPrice(context, {
           proposalId,
-          confirmation,
+          confirmation: {
+            action: "accept",
+            proposalId,
+            contentHash: confirmedContentHash,
+            confirmedAt: new Date(),
+          },
         });
         return {
           published: true,
@@ -279,7 +296,7 @@ export function createDylluMcpServer(
       _meta: oauthToolMeta,
     },
     ({ product_id: productId, limit }) =>
-      executeTool(() =>
+      execute("list_product_history", () =>
         application.listProductHistory(getContext(), productId, limit)
       )
   );
@@ -301,7 +318,7 @@ export function createDylluMcpServer(
       _meta: oauthToolMeta,
     },
     (input) =>
-      executeTool(() =>
+      execute("list_audit_events", () =>
         application.listAuditEvents(getContext(), {
           actorId: input.actor_id,
           targetId: input.target_id,
@@ -331,7 +348,7 @@ export function createDylluMcpServer(
       _meta: oauthToolMeta,
     },
     ({ revision_id: revisionId, reason }) =>
-      executeTool(() =>
+      execute("propose_product_description_rollback", () =>
         application.proposeRollback(getContext(), {
           revisionId,
           reason,
@@ -360,7 +377,7 @@ export function createDylluMcpServer(
       _meta: oauthToolMeta,
     },
     ({ revision_id: revisionId, reason }) =>
-      executeTool(() =>
+      execute("propose_product_price_rollback", () =>
         application.proposePriceRollback(getContext(), {
           revisionId,
           reason,
@@ -379,7 +396,8 @@ const readOnlyAnnotations = {
 } as const;
 
 async function executeTool<T>(
-  operation: () => Promise<T>
+  operation: () => Promise<T>,
+  onUnexpectedError: (error: unknown) => void
 ): Promise<CallToolResult> {
   try {
     const result = await operation();
@@ -392,6 +410,9 @@ async function executeTool<T>(
       ],
     };
   } catch (error) {
+    if (!(error instanceof ApplicationError)) {
+      onUnexpectedError(error);
+    }
     const mapped =
       error instanceof ApplicationError
         ? { code: error.code, message: error.message }
@@ -409,4 +430,18 @@ async function executeTool<T>(
       isError: true,
     };
   }
+}
+
+function describeError(error: unknown) {
+  if (!(error instanceof Error)) {
+    return {
+      error_name: "NonErrorThrown",
+      error_message: String(error),
+    };
+  }
+  return {
+    error_name: error.name,
+    error_message: error.message,
+    error_stack: error.stack,
+  };
 }

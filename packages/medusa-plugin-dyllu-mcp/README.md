@@ -8,7 +8,8 @@ truth; an MCP client supplies the LLM.
 - Read and search products
 - Propose a product-description change without publishing it
 - Propose an exact product-variant base-price change in MDL
-- Publish only the exact stored proposal after native MCP elicitation
+- Publish only after explicit manager confirmation, with the exact stored
+  proposal content hash
 - Immutable before/after revisions and audit events
 - Rollback through a new proposal
 - Per-user capabilities and admin-only grant management
@@ -60,6 +61,10 @@ routes.
 
 The in-memory MCP session registry requires a single application instance or
 verified sticky routing.
+
+MCP clients must require approval for the destructive publish tools. The server
+also rejects a publish call unless `confirmed_content_hash` matches the exact
+stored proposal.
 
 ## Activation gate
 

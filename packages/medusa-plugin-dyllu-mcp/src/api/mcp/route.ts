@@ -21,6 +21,7 @@ async function handle(req: MedusaRequest<unknown>, res: MedusaResponse) {
   }
 
   const requestId = req.requestId ?? randomUUID();
+  const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER);
   try {
     const governance = req.scope.resolve<DylluMcpGovernanceModuleService>(
       DYLLU_MCP_GOVERNANCE_MODULE
@@ -37,11 +38,11 @@ async function handle(req: MedusaRequest<unknown>, res: MedusaResponse) {
         createDylluMcpServer(
           createProductChangeApplication(req.scope),
           getContext,
+          logger,
           oauthMetadata.scopes_supported
         )
     );
   } catch (error) {
-    const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER);
     logger.error(
       JSON.stringify({
         event: "dyllu_mcp.request.failed",
