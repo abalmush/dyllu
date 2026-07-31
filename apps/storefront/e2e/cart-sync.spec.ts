@@ -53,5 +53,12 @@ test.describe("cart sync", () => {
         { timeout: 20_000 }
       )
       .toBe(true);
+
+    await page.goto("/checkout?step=address");
+
+    await expect(page.getByTestId("checkout-container")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Pagina nu a putut fi încărcată" })
+    ).toHaveCount(0);
   });
 });
