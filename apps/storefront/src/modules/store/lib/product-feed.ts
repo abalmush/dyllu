@@ -1,6 +1,7 @@
 import "server-only";
 
-import { listProductsWithSort } from "@lib/data/products";
+import { listProducts, listProductsWithSort } from "@lib/data/products";
+import { HttpTypes } from "@medusajs/types";
 import { toPlpProducts } from "@modules/store/lib/to-plp-product";
 import {
   PRODUCT_LIMIT,
@@ -9,6 +10,9 @@ import {
   type ProductFeedRequest,
   type ProductFeedResponse,
 } from "@modules/store/lib/product-feed-contract";
+
+const BOUNDED_FETCH_PAGE_SIZE = 100;
+const MAX_BOUNDED_FETCH_PRODUCTS = 1_000;
 
 type ProductFeedQueryParams = {
   limit: number;
@@ -65,13 +69,79 @@ function buildProductQueryParams(
   }
 
   if (request.sortBy === "created_at") {
-    queryParams.order = "created_at";
+    queryParams.order = "-created_at";
   }
 
   return queryParams;
 }
 
+function usesBoundedFetch(request: NormalizedProductFeedRequest): boolean {
+  return request.sortBy === "created_at" && !request.onSale;
+}
+
 async function fetchProductFeedPage(
+  request: NormalizedProductFeedRequest
+): Promise<ProductFeedResponse> {
+  return usesBoundedFetch(request)
+    ? fetchBoundedCreatedAtPage(request)
+    : fetchFullScanPage(request);
+}
+
+// Price sort and the on-sale filter cannot be pushed down to the backend
+// (calculated price isn't a sortable/filterable column), so they still need
+// a full-catalogue scan for correctness. The default created_at browse path
+// below is bounded instead.
+async function fetchBoundedCreatedAtPage(
+  request: NormalizedProductFeedRequest
+): Promise<ProductFeedResponse> {
+  const queryParams = {
+    ...buildProductQueryParams(request),
+    limit: BOUNDED_FETCH_PAGE_SIZE,
+  };
+
+  const firstPage = await listProducts({ pageParam: 1, queryParams });
+  const productCount = firstPage.response.count;
+  const collectedProducts: HttpTypes.StoreProduct[] = [
+    ...firstPage.response.products,
+  ];
+  let expandedCards = collectedProducts.flatMap(toPlpProducts);
+  const targetCardCount = request.page * PRODUCT_LIMIT + PRODUCT_LIMIT;
+
+  while (
+    expandedCards.length < targetCardCount &&
+    collectedProducts.length < productCount &&
+    collectedProducts.length < MAX_BOUNDED_FETCH_PRODUCTS
+  ) {
+    const nextPageParam =
+      Math.floor(collectedProducts.length / BOUNDED_FETCH_PAGE_SIZE) + 1;
+    const { response } = await listProducts({
+      pageParam: nextPageParam,
+      queryParams,
+    });
+    collectedProducts.push(...response.products);
+    expandedCards = collectedProducts.flatMap(toPlpProducts);
+  }
+
+  const offset = (request.page - 1) * PRODUCT_LIMIT;
+  const catalogExhausted = collectedProducts.length >= productCount;
+  const hasKnownMoreCards = expandedCards.length > offset + PRODUCT_LIMIT;
+  const nextPage =
+    hasKnownMoreCards || !catalogExhausted ? request.page + 1 : null;
+
+  return {
+    products: expandedCards.slice(offset, offset + PRODUCT_LIMIT),
+    // Approximates the true card count with the backend product count
+    // (cheap, returned by the first bounded page) rather than scanning the
+    // whole catalogue to expand every multi-variant product into cards.
+    count: productCount,
+    currentPage: request.page,
+    nextPage,
+    totalPages: Math.max(request.page, Math.ceil(productCount / PRODUCT_LIMIT)),
+    pageSize: PRODUCT_LIMIT,
+  };
+}
+
+async function fetchFullScanPage(
   request: NormalizedProductFeedRequest
 ): Promise<ProductFeedResponse> {
   const {
