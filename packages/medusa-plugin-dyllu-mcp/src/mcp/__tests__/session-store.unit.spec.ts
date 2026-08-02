@@ -1,7 +1,7 @@
 import { McpSessionStore } from "../session-store";
 
 describe("McpSessionStore", () => {
-  it("never returns a session to another authenticated Medusa user", () => {
+  it("never returns a session to another authenticated DYLLU user", () => {
     const store = new McpSessionStore<string>(10, 60_000);
     store.add("session_1", "user_andrei", "private transport", 1_000);
 

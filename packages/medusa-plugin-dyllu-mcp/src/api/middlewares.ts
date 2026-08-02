@@ -47,7 +47,7 @@ function rateLimitActor(
   if (!actorId) {
     res.status(401).json({
       error: "authentication_required",
-      message: "An authenticated Medusa user is required",
+      message: "An authenticated DYLLU user is required",
     });
     return;
   }

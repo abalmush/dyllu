@@ -1,11 +1,12 @@
-# DYLLU Medusa MCP
+# DYLLU MCP
 
-Governed MCP tools for Medusa managers. Medusa remains the catalog source of
+Governed MCP tools for DYLLU managers. The DYLLU catalog remains the source of
 truth; an MCP client supplies the LLM.
 
 ## Implemented scope
 
 - Read and search products
+- List orders by DYLLU calendar date and read complete order information
 - Propose a product-description change without publishing it
 - Propose an exact product-variant base-price change in MDL
 - Publish only after explicit manager confirmation, with the exact stored
@@ -13,7 +14,7 @@ truth; an MCP client supplies the LLM.
 - Immutable before/after revisions and audit events
 - Rollback through a new proposal
 - Per-user capabilities and admin-only grant management
-- Auth0 OAuth access-token validation, immutable Medusa-user mapping,
+- Auth0 OAuth access-token validation, immutable DYLLU-user mapping,
   session-to-user binding and rate limits
 
 Storefront-layout changes are intentionally outside the first vertical slice.
@@ -21,6 +22,7 @@ Storefront-layout changes are intentionally outside the first vertical slice.
 ## Capabilities
 
 - `capability.manage`
+- `order.read`
 - `product.read`
 - `product_content.update`
 - `product_price.update`
@@ -43,7 +45,7 @@ Permission changes are not exposed as MCP tools.
 ## MCP endpoint
 
 `GET`, `POST` and `DELETE /mcp` implement stateful Streamable HTTP. Each
-session is permanently bound to the Medusa user authenticated during
+session is permanently bound to the DYLLU user authenticated during
 initialization.
 
 The endpoint requires an Auth0 OAuth access token with:
@@ -54,9 +56,9 @@ The endpoint requires an Auth0 OAuth access token with:
 - scope `mcp:connect`
 - custom claim `https://dyllu.md/medusa_user_id`
 
-The custom claim must contain the immutable ID of an active Medusa Admin user.
+The custom claim must contain the immutable ID of an active DYLLU Admin user.
 Authorization is then evaluated from that user's stored MCP capabilities.
-Permission changes remain available only through authenticated Medusa Admin
+Permission changes remain available only through authenticated DYLLU Admin
 routes.
 
 The in-memory MCP session registry requires a single application instance or
@@ -70,7 +72,7 @@ stored proposal.
 
 Do not enable this package in production until these facts are reviewed:
 
-- actual Medusa plugin/module configuration
+- actual backend plugin/module configuration
 - bootstrap manager user ID
 - database migration backup and rollback
 - public MCP URL, Auth0 issuer, resource URI and static OAuth client

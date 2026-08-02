@@ -9,7 +9,18 @@ import { RequestContext } from "../domain/types";
 const productIdSchema = z.string().trim().min(1).max(100);
 const proposalIdSchema = z.string().trim().min(1).max(100);
 const revisionIdSchema = z.string().trim().min(1).max(100);
+const orderReferenceSchema = z.string().trim().min(1).max(100);
 const contentHashSchema = z.string().regex(/^sha256:[a-f0-9]{64}$/);
+const calendarDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD");
+const orderStatusSchema = z.enum([
+  "pending",
+  "completed",
+  "archived",
+  "canceled",
+  "requires_action",
+]);
 
 export function createDylluMcpServer(
   application: ProductChangeApplication,
@@ -46,16 +57,18 @@ export function createDylluMcpServer(
     {
       instructions: [
         "Use search_products and get_product before proposing a change.",
-        "Proposal tools never mutate public catalog data.",
+        "Use list_orders for a specific DYLLU calendar date and get_order for complete order information.",
+        "Interpret today, yesterday and calendar dates in Europe/Chisinau.",
+        "Proposal tools never mutate public DYLLU catalog data.",
         "Show the complete before/after proposal to the manager.",
         "Call publish_product_description only after the manager asks to publish.",
         "Call publish_product_price only after the manager asks to publish the exact price proposal.",
         "Only call a publish tool after the manager explicitly confirms the exact proposal.",
         "Pass the exact stored content_hash as confirmed_content_hash when publishing.",
         "Rollback creates a new proposal and never removes audit history.",
-        "Never invent product facts, prices, specifications or warranty terms.",
+        "Never invent DYLLU product facts, prices, specifications or warranty terms.",
         "Preserve verified facts unless the manager provides a verified replacement.",
-        "Ask the manager when required product information is uncertain.",
+        "Ask the manager when required DYLLU product information is uncertain.",
       ].join(" "),
     }
   );
@@ -65,7 +78,7 @@ export function createDylluMcpServer(
     {
       title: "Get my DYLLU access",
       description:
-        "Return the authenticated Medusa manager and exact MCP capabilities.",
+        "Return the authenticated DYLLU manager and exact MCP capabilities.",
       annotations: readOnlyAnnotations,
       _meta: oauthToolMeta,
     },
@@ -77,7 +90,7 @@ export function createDylluMcpServer(
     {
       title: "Search DYLLU products",
       description:
-        "Search a bounded Medusa product projection before proposing changes.",
+        "Search a bounded DYLLU product projection before proposing changes.",
       inputSchema: z
         .object({
           query: z.string().trim().min(2).max(100),
@@ -97,11 +110,56 @@ export function createDylluMcpServer(
   );
 
   server.registerTool(
+    "list_orders",
+    {
+      title: "List DYLLU orders",
+      description:
+        "List DYLLU orders created on one calendar date in Europe/Chisinau, newest first.",
+      inputSchema: z
+        .object({
+          date: calendarDateSchema,
+          status: orderStatusSchema.optional(),
+          limit: z.number().int().min(1).max(50).default(20),
+          offset: z.number().int().min(0).max(10_000).default(0),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("list_orders", () =>
+        application.listOrders(getContext(), {
+          localDate: input.date,
+          timeZone: "Europe/Chisinau",
+          ...(input.status ? { status: input.status } : {}),
+          limit: input.limit,
+          offset: input.offset,
+        })
+      )
+  );
+
+  server.registerTool(
+    "get_order",
+    {
+      title: "Get a DYLLU order",
+      description:
+        "Return complete DYLLU order information by internal order ID or visible order number.",
+      inputSchema: z.object({ order_reference: orderReferenceSchema }).strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    ({ order_reference: orderReference }) =>
+      execute("get_order", () =>
+        application.getOrder(getContext(), orderReference)
+      )
+  );
+
+  server.registerTool(
     "get_product",
     {
       title: "Get a DYLLU product",
       description:
-        "Return the current Medusa title, status, description, variants and base prices.",
+        "Return the current DYLLU title, status, description, variants and base prices.",
       inputSchema: z.object({ product_id: productIdSchema }).strict(),
       annotations: readOnlyAnnotations,
       _meta: oauthToolMeta,
@@ -115,7 +173,7 @@ export function createDylluMcpServer(
   server.registerTool(
     "propose_product_price",
     {
-      title: "Propose a product price",
+      title: "Propose a DYLLU product price",
       description:
         "Store a reviewable MDL base-price proposal for one exact variant price. This does not publish anything.",
       inputSchema: z
@@ -152,7 +210,7 @@ export function createDylluMcpServer(
   server.registerTool(
     "propose_product_description",
     {
-      title: "Propose a product description",
+      title: "Propose a DYLLU product description",
       description:
         "Store a reviewable before/after proposal. This does not publish anything.",
       inputSchema: z
@@ -183,7 +241,7 @@ export function createDylluMcpServer(
   server.registerTool(
     "get_change_proposal",
     {
-      title: "Review a product change proposal",
+      title: "Review a DYLLU product change proposal",
       description:
         "Return the exact stored proposal, content hash, status and expiry.",
       inputSchema: z.object({ proposal_id: proposalIdSchema }).strict(),
@@ -199,7 +257,7 @@ export function createDylluMcpServer(
   server.registerTool(
     "publish_product_description",
     {
-      title: "Publish a product description",
+      title: "Publish a DYLLU product description",
       description:
         "Publish an exact stored proposal after the manager explicitly confirms it. Copy its content_hash into confirmed_content_hash.",
       inputSchema: z
@@ -241,7 +299,7 @@ export function createDylluMcpServer(
   server.registerTool(
     "publish_product_price",
     {
-      title: "Publish a product price",
+      title: "Publish a DYLLU product price",
       description:
         "Publish an exact stored MDL price proposal after the manager explicitly confirms it. Copy its content_hash into confirmed_content_hash.",
       inputSchema: z
@@ -283,7 +341,7 @@ export function createDylluMcpServer(
   server.registerTool(
     "list_product_history",
     {
-      title: "List product change history",
+      title: "List DYLLU product change history",
       description:
         "Return immutable description and price revisions for audit and rollback.",
       inputSchema: z

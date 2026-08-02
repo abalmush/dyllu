@@ -2,6 +2,8 @@ import {
   Clock,
   GovernanceStore,
   IdGenerator,
+  OrderDirectory,
+  OrderListQuery,
   ProductCatalog,
   ProductChangeExecutor,
   UserDirectory,
@@ -70,6 +72,7 @@ export type ProductChangeApplicationDependencies = {
   users: UserDirectory;
   capabilities: CapabilityStore;
   products: ProductCatalog;
+  orders: OrderDirectory;
   governance: GovernanceStore;
   executor: ProductChangeExecutor;
   clock: Clock;
@@ -93,7 +96,7 @@ export class ProductChangeApplication {
     if (!actor) {
       throw new ApplicationError(
         "actor_not_active",
-        "The selected Medusa user is not active"
+        "The selected DYLLU user is not active"
       );
     }
     const granted = await this.dependencies.capabilities.listForUser(actor.id);
@@ -109,7 +112,7 @@ export class ProductChangeApplication {
     if (!actor) {
       throw new ApplicationError(
         "actor_not_active",
-        "The selected Medusa user is not active"
+        "The selected DYLLU user is not active"
       );
     }
     const requested = new Set(input.capabilities);
@@ -131,13 +134,30 @@ export class ProductChangeApplication {
     return this.dependencies.products.search(input);
   }
 
+  async listOrders(context: RequestContext, input: OrderListQuery) {
+    await this.requireCapability(context, "order.read", input.localDate);
+    return this.dependencies.orders.list(input);
+  }
+
+  async getOrder(context: RequestContext, reference: string) {
+    await this.requireCapability(context, "order.read", reference);
+    const order = await this.dependencies.orders.findByReference(reference);
+    if (!order) {
+      throw new ApplicationError(
+        "order_not_found",
+        `DYLLU order ${reference} was not found`
+      );
+    }
+    return order;
+  }
+
   async getProduct(context: RequestContext, productId: string) {
     await this.requireCapability(context, "product.read", productId);
     const product = await this.dependencies.products.findById(productId);
     if (!product) {
       throw new ApplicationError(
         "product_not_found",
-        `Product ${productId} was not found`
+        `DYLLU product ${productId} was not found`
       );
     }
     return product;
@@ -194,7 +214,15 @@ export class ProductChangeApplication {
         "Audit event limit must be between 1 and 100"
       );
     }
-    return this.dependencies.governance.listEvents(input);
+    const events = await this.dependencies.governance.listEvents(input);
+    return events.map((event) =>
+      event.details.capability === "active_medusa_user"
+        ? {
+            ...event,
+            details: { ...event.details, capability: "active_dyllu_user" },
+          }
+        : event
+    );
   }
 
   async proposeDescription(
@@ -213,7 +241,7 @@ export class ProductChangeApplication {
     if (!product) {
       throw new ApplicationError(
         "product_not_found",
-        `Product ${input.productId} was not found`
+        `DYLLU product ${input.productId} was not found`
       );
     }
 
@@ -291,7 +319,7 @@ export class ProductChangeApplication {
     if (!target) {
       throw new ApplicationError(
         "price_not_found",
-        "The selected Medusa variant price was not found"
+        "The selected DYLLU variant price was not found"
       );
     }
     if (target.amount === input.proposedAmount) {
@@ -391,7 +419,7 @@ export class ProductChangeApplication {
       await this.failProposal(context, proposal, "product_missing_at_publish");
       throw new ApplicationError(
         "product_not_found",
-        `Product ${proposal.productId} was not found`
+        `DYLLU product ${proposal.productId} was not found`
       );
     }
     if (
@@ -405,7 +433,7 @@ export class ProductChangeApplication {
       );
       throw new ApplicationError(
         "stale_product",
-        "The product changed after this proposal was created"
+        "The DYLLU product changed after this proposal was created"
       );
     }
 
@@ -552,7 +580,7 @@ export class ProductChangeApplication {
     if (!product) {
       throw new ApplicationError(
         "product_not_found",
-        `Product ${revision.productId} was not found`
+        `DYLLU product ${revision.productId} was not found`
       );
     }
 
@@ -563,7 +591,7 @@ export class ProductChangeApplication {
     if (beforeValue === proposedValue) {
       throw new ApplicationError(
         "unchanged_description",
-        "The product already has the selected historical description"
+        "The DYLLU product already has the selected historical description"
       );
     }
 
@@ -638,7 +666,7 @@ export class ProductChangeApplication {
     if (!target) {
       throw new ApplicationError(
         "price_not_found",
-        "The selected Medusa variant price was not found"
+        "The selected DYLLU variant price was not found"
       );
     }
     const proposedAmount = Number(revision.beforeValue);
@@ -747,13 +775,13 @@ export class ProductChangeApplication {
     if (!actor) {
       await this.recordAuthorizationDenied(
         context,
-        "active_medusa_user",
+        "active_dyllu_user",
         targetId,
         "actor_not_active"
       );
       throw new ApplicationError(
         "actor_not_active",
-        "The authenticated Medusa user is not active"
+        "The authenticated DYLLU user is not active"
       );
     }
     return actor;
@@ -782,7 +810,7 @@ export class ProductChangeApplication {
 
   private async recordAuthorizationDenied(
     context: RequestContext,
-    capability: Capability | "active_medusa_user",
+    capability: Capability | "active_dyllu_user",
     targetId: string,
     reason: "actor_not_active" | "capability_denied"
   ) {

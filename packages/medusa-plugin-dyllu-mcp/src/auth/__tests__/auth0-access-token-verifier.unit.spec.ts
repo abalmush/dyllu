@@ -9,7 +9,7 @@ const userIdClaim = "https://dyllu.md/medusa_user_id";
 const clientId = "tpc_chatgpt_dyllu";
 
 describe("Auth0AccessTokenVerifier", () => {
-  it("accepts a correctly scoped Auth0 token mapped to a Medusa user", async () => {
+  it("accepts a correctly scoped Auth0 token mapped to a DYLLU user", async () => {
     const { privateKey, publicKey } = generateKeyPairSync("rsa", {
       modulusLength: 2048,
     });
@@ -90,7 +90,7 @@ describe("Auth0AccessTokenVerifier", () => {
     });
   });
 
-  it("rejects an Auth0 identity without a trusted Medusa user mapping", async () => {
+  it("rejects an Auth0 identity without a trusted DYLLU user mapping", async () => {
     const { privateKey, publicKey } = generateKeyPairSync("rsa", {
       modulusLength: 2048,
     });

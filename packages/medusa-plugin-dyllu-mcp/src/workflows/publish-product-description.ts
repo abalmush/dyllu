@@ -80,7 +80,7 @@ const dylluMcpValidateDescriptionChangeStep = createStep(
     ) {
       throw new MedusaError(
         MedusaError.Types.CONFLICT,
-        "The product changed after the MCP proposal was created"
+        "The DYLLU product changed after the MCP proposal was created"
       );
     }
 
@@ -106,7 +106,7 @@ const dylluMcpRecordDescriptionRevisionStep = createStep(
     ) {
       throw new MedusaError(
         MedusaError.Types.CONFLICT,
-        "The product changed while the MCP proposal was publishing"
+        "The DYLLU product changed while the MCP proposal was publishing"
       );
     }
     const service = resolveGovernanceService(container);
