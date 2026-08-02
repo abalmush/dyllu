@@ -19,6 +19,40 @@ medusaIntegrationTestRunner({
   cwd: process.cwd(),
   testSuite: ({ getContainer }) => {
     describe("DYLLU MCP price publishing", () => {
+      it("supersedes an older pending proposal for the same manager and product", async () => {
+        const container = getContainer();
+        const governance = new MedusaGovernanceStore(
+          container.resolve(DYLLU_MCP_GOVERNANCE_MODULE)
+        );
+        const occurredAt = new Date();
+        const firstProposal = createPendingPriceProposal({
+          id: generateEntityId(undefined, "mcpprop"),
+          proposedValue: "399",
+          createdAt: occurredAt,
+        });
+        const replacementProposal = createPendingPriceProposal({
+          id: generateEntityId(undefined, "mcpprop"),
+          proposedValue: "299",
+          createdAt: new Date(occurredAt.getTime() + 1_000),
+        });
+
+        await governance.createProposal({
+          proposal: firstProposal,
+          requestId: "request_first",
+        });
+        await governance.createProposal({
+          proposal: replacementProposal,
+          requestId: "request_replacement",
+        });
+
+        await expect(
+          governance.findProposal(firstProposal.id)
+        ).resolves.toMatchObject({ status: "superseded" });
+        await expect(
+          governance.findProposal(replacementProposal.id)
+        ).resolves.toMatchObject({ status: "pending" });
+      });
+
       it("publishes one exact existing MDL variant price and records the revision", async () => {
         const container = getContainer();
         const { result: products } = await createProductsWorkflow(
@@ -126,3 +160,33 @@ medusaIntegrationTestRunner({
     });
   },
 });
+
+function createPendingPriceProposal(input: {
+  id: string;
+  proposedValue: string;
+  createdAt: Date;
+}) {
+  const targetUpdatedAt = new Date("2026-07-31T10:00:00.000Z");
+  const proposal = {
+    id: input.id,
+    kind: "price_update" as const,
+    status: "pending" as const,
+    actorId: "user_supersede_integration",
+    productId: "prod_supersede_integration",
+    productTitle: "Supersede integration product",
+    variantId: "variant_supersede_integration",
+    priceId: "price_supersede_integration",
+    currencyCode: "mdl",
+    beforeValue: "429",
+    proposedValue: input.proposedValue,
+    targetUpdatedAt,
+    reason: "Integration test replacement",
+    sourceRevisionId: null,
+    createdAt: input.createdAt,
+    expiresAt: new Date(input.createdAt.getTime() + 30 * 60 * 1000),
+  };
+  return {
+    ...proposal,
+    contentHash: createCatalogChangeHash(proposal),
+  };
+}

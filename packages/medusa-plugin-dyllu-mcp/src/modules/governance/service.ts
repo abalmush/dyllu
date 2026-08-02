@@ -272,7 +272,7 @@ export class DylluMcpGovernanceModuleService extends MedusaService({
 
     const proposalIds = pending.map((proposal) => proposal.id);
     await transactionManager.nativeUpdate(
-      "dyllu_mcp_change_proposal",
+      DylluMcpChangeProposal,
       { id: { $in: proposalIds }, status: "pending" },
       { status: "superseded", updated_at: input.occurredAt }
     );
