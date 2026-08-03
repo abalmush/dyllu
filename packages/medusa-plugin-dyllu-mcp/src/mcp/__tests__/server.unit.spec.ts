@@ -5,6 +5,117 @@ import { ProductChangeApplication } from "../../application/product-change-appli
 import { createDylluMcpServer } from "../server";
 
 describe("DYLLU MCP server", () => {
+  it("uses only DYLLU terminology in manager-visible tool metadata", async () => {
+    const server = createDylluMcpServer(
+      {} as ProductChangeApplication,
+      () => ({ actorId: "user_test", requestId: "request_test" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const tools = await client.listTools();
+      expect(JSON.stringify(tools)).not.toMatch(/medusa/i);
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
+  it("lists DYLLU orders for an exact calendar date", async () => {
+    const application = {
+      listOrders: jest.fn().mockResolvedValue({ orders: [], count: 0 }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_orders" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "list_orders",
+        arguments: {
+          date: "2026-08-02",
+          status: "pending",
+          limit: 20,
+          offset: 0,
+        },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(application.listOrders).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_orders" },
+        {
+          localDate: "2026-08-02",
+          timeZone: "Europe/Chisinau",
+          status: "pending",
+          limit: 20,
+          offset: 0,
+        }
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
+  it("gets complete DYLLU order information by order reference", async () => {
+    const application = {
+      getOrder: jest.fn().mockResolvedValue({
+        id: "order_42",
+        displayId: 42,
+      }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_order" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "get_order",
+        arguments: { order_reference: "#42" },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(application.getOrder).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_order" },
+        "#42"
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("publishes through clients that do not support MCP elicitation", async () => {
     const application = {
       publishPrice: jest.fn().mockResolvedValue({ id: "revision_test" }),

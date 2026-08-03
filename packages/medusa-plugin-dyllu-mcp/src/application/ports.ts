@@ -2,6 +2,8 @@ import {
   Actor,
   AuditEvent,
   Capability,
+  OrderDetails,
+  OrderSummary,
   ProductChangeProposal,
   ProductChangeRevision,
   ProductDescriptionProposal,
@@ -16,6 +18,22 @@ export type ProductSearch = {
   query: string;
   limit: number;
 };
+
+export type OrderListQuery = {
+  localDate: string;
+  timeZone: "Europe/Chisinau";
+  status?: string;
+  limit: number;
+  offset: number;
+};
+
+export interface OrderDirectory {
+  list(input: OrderListQuery): Promise<{
+    orders: OrderSummary[];
+    count: number;
+  }>;
+  findByReference(reference: string): Promise<OrderDetails | null>;
+}
 
 export interface UserDirectory {
   findActiveUser(userId: string): Promise<Actor | null>;

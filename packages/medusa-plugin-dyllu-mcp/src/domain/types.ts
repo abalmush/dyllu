@@ -1,5 +1,6 @@
 export const capabilities = [
   "capability.manage",
+  "order.read",
   "product.read",
   "product_content.update",
   "product_price.update",
@@ -20,6 +21,60 @@ export type Actor = {
 export type RequestContext = {
   actorId: string;
   requestId: string;
+};
+
+export type OrderSummary = {
+  id: string;
+  displayId: number;
+  status: string;
+  paymentStatus: string;
+  fulfillmentStatus: string;
+  email: string | null;
+  customerId: string | null;
+  currencyCode: string;
+  total: number;
+  itemCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type OrderAddress = {
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
+  company: string | null;
+  address1: string | null;
+  address2: string | null;
+  city: string | null;
+  province: string | null;
+  postalCode: string | null;
+  countryCode: string | null;
+};
+
+export type OrderLineItem = {
+  id: string;
+  title: string;
+  variantId: string | null;
+  sku: string | null;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+};
+
+export type OrderDetails = OrderSummary & {
+  subtotal: number;
+  discountTotal: number;
+  shippingTotal: number;
+  taxTotal: number;
+  canceledAt: Date | null;
+  shippingAddress: OrderAddress | null;
+  billingAddress: OrderAddress | null;
+  items: OrderLineItem[];
+  shippingMethods: Array<{
+    id: string;
+    name: string;
+    amount: number;
+  }>;
 };
 
 export type ProductSummary = {

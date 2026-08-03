@@ -9,6 +9,8 @@ export type ApplicationErrorCode =
   | "invalid_revision_price"
   | "invalid_reason"
   | "invalid_audit_limit"
+  | "invalid_order_date"
+  | "order_not_found"
   | "unchanged_description"
   | "unchanged_price"
   | "price_not_found"

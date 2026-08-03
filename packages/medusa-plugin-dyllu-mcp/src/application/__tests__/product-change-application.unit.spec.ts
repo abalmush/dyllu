@@ -2,6 +2,7 @@ import {
   Clock,
   GovernanceStore,
   IdGenerator,
+  OrderDirectory,
   ProductCatalog,
   ProductChangeExecutor,
   UserDirectory,
@@ -12,6 +13,8 @@ import {
   Actor,
   AuditEvent,
   Capability,
+  OrderDetails,
+  OrderSummary,
   ProductChangeProposal,
   ProductChangeRevision,
   ProductDescriptionRevision,
@@ -66,6 +69,53 @@ const priceTarget: ProductPriceTarget = {
   currencyCode: "mdl",
   updatedAt: new Date("2026-07-29T09:00:00.000Z"),
 };
+const order: OrderSummary = {
+  id: "order_today",
+  displayId: 42,
+  status: "pending",
+  paymentStatus: "not_paid",
+  fulfillmentStatus: "not_fulfilled",
+  email: "client@example.com",
+  customerId: "cus_client",
+  currencyCode: "mdl",
+  total: 429,
+  itemCount: 1,
+  createdAt: new Date("2026-07-29T08:30:00.000Z"),
+  updatedAt: new Date("2026-07-29T08:30:00.000Z"),
+};
+const orderDetails: OrderDetails = {
+  ...order,
+  subtotal: 429,
+  discountTotal: 0,
+  shippingTotal: 0,
+  taxTotal: 0,
+  canceledAt: null,
+  shippingAddress: {
+    firstName: "Ana",
+    lastName: "Client",
+    phone: "+37360000000",
+    company: null,
+    address1: "str. Test 1",
+    address2: null,
+    city: "Chișinău",
+    province: null,
+    postalCode: "MD-2001",
+    countryCode: "md",
+  },
+  billingAddress: null,
+  items: [
+    {
+      id: "item_1",
+      title: "Trusă de scule",
+      variantId: "variant_tools",
+      sku: "TOOLS-1",
+      quantity: 1,
+      unitPrice: 429,
+      total: 429,
+    },
+  ],
+  shippingMethods: [],
+};
 
 class TestUsers implements UserDirectory {
   async findActiveUser(userId: string) {
@@ -117,6 +167,21 @@ class TestProducts implements ProductCatalog {
   async search(input: { query: string; limit: number }) {
     this.searches.push(input);
     return [...this.values.values()];
+  }
+}
+
+class TestOrders implements OrderDirectory {
+  readonly lists: Parameters<OrderDirectory["list"]>[0][] = [];
+  readonly references: string[] = [];
+
+  async list(input: Parameters<OrderDirectory["list"]>[0]) {
+    this.lists.push(input);
+    return { orders: [order], count: 1 };
+  }
+
+  async findByReference(reference: string): Promise<OrderDetails | null> {
+    this.references.push(reference);
+    return reference === String(order.displayId) ? orderDetails : null;
   }
 }
 
@@ -279,6 +344,117 @@ class TestIds implements IdGenerator {
 }
 
 describe("ProductChangeApplication", () => {
+  it("lists orders for one DYLLU calendar date for an authorized manager", async () => {
+    const orders = new TestOrders();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["order.read"]),
+      products: new TestProducts(),
+      orders,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.listOrders(
+        { actorId: actor.id, requestId: "req_orders_today" },
+        {
+          localDate: "2026-07-29",
+          timeZone: "Europe/Chisinau",
+          limit: 20,
+          offset: 0,
+        }
+      )
+    ).resolves.toEqual({ orders: [order], count: 1 });
+    expect(orders.lists).toEqual([
+      {
+        localDate: "2026-07-29",
+        timeZone: "Europe/Chisinau",
+        limit: 20,
+        offset: 0,
+      },
+    ]);
+  });
+
+  it("returns complete order details by DYLLU order number", async () => {
+    const orders = new TestOrders();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["order.read"]),
+      products: new TestProducts(),
+      orders,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.getOrder(
+        { actorId: actor.id, requestId: "req_order_details" },
+        "42"
+      )
+    ).resolves.toEqual(orderDetails);
+    expect(orders.references).toEqual(["42"]);
+  });
+
+  it("reports a missing DYLLU order without leaking platform terminology", async () => {
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["order.read"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.getOrder(
+        { actorId: actor.id, requestId: "req_missing_order" },
+        "999"
+      )
+    ).rejects.toMatchObject({
+      code: "order_not_found",
+      message: "DYLLU order 999 was not found",
+    });
+  });
+
+  it("denies and audits order access without order.read", async () => {
+    const governance = new TestGovernance();
+    const orders = new TestOrders();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["product.read"]),
+      products: new TestProducts(),
+      orders,
+      governance,
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.getOrder(
+        { actorId: actor.id, requestId: "req_denied_order" },
+        "42"
+      )
+    ).rejects.toMatchObject({ code: "capability_denied" });
+    expect(orders.references).toEqual([]);
+    expect(governance.events).toEqual([
+      expect.objectContaining({
+        name: "authorization.denied",
+        details: {
+          capability: "order.read",
+          reason: "capability_denied",
+        },
+      }),
+    ]);
+  });
+
   it("reports the authenticated manager and exact capabilities", async () => {
     const application = new ProductChangeApplication({
       users: new TestUsers(),
@@ -287,6 +463,7 @@ describe("ProductChangeApplication", () => {
         "product_content.update",
       ]),
       products: new TestProducts(),
+      orders: new TestOrders(),
       governance: new TestGovernance(),
       executor: new TestExecutor(),
       clock: new TestClock(),
@@ -310,6 +487,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: capabilityStore,
       products: new TestProducts(),
+      orders: new TestOrders(),
       governance: new TestGovernance(),
       executor: new TestExecutor(),
       clock: new TestClock(),
@@ -363,6 +541,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["audit.read"]),
       products: new TestProducts(),
+      orders: new TestOrders(),
       governance,
       executor: new TestExecutor(),
       clock: new TestClock(),
@@ -383,6 +562,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["product.read"]),
       products,
+      orders: new TestOrders(),
       governance: new TestGovernance(),
       executor: new TestExecutor(),
       clock: new TestClock(),
@@ -405,6 +585,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["product_content.update"]),
       products,
+      orders: new TestOrders(),
       governance,
       executor: new TestExecutor(),
       clock: new TestClock(),
@@ -449,6 +630,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["product_price.update"]),
       products,
+      orders: new TestOrders(),
       governance,
       executor: new TestExecutor(),
       clock: new TestClock(),
@@ -488,6 +670,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["product_price.update"]),
       products: new TestProducts(),
+      orders: new TestOrders(),
       governance: new TestGovernance(),
       executor,
       clock: new TestClock(),
@@ -531,6 +714,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["product_price.update"]),
       products,
+      orders: new TestOrders(),
       governance,
       executor,
       clock: new TestClock(),
@@ -598,6 +782,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["product.rollback"]),
       products: new TestProducts(),
+      orders: new TestOrders(),
       governance,
       executor: new TestExecutor(),
       clock: new TestClock(),
@@ -629,6 +814,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["product.read"]),
       products: new TestProducts(),
+      orders: new TestOrders(),
       governance,
       executor: new TestExecutor(),
       clock: new TestClock(),
@@ -667,6 +853,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["product_content.update"]),
       products: new TestProducts(),
+      orders: new TestOrders(),
       governance,
       executor: new TestExecutor(),
       clock: new TestClock(),
@@ -706,6 +893,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["product_content.update"]),
       products: new TestProducts(),
+      orders: new TestOrders(),
       governance: new TestGovernance(),
       executor,
       clock: new TestClock(),
@@ -751,6 +939,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["product_content.update"]),
       products: new TestProducts(),
+      orders: new TestOrders(),
       governance: new TestGovernance(),
       executor,
       clock: new TestClock(),
@@ -784,6 +973,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["product_content.update"]),
       products: new TestProducts(),
+      orders: new TestOrders(),
       governance,
       executor: new TestExecutor(),
       clock: new TestClock(),
@@ -819,6 +1009,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["product_content.update"]),
       products: new TestProducts(),
+      orders: new TestOrders(),
       governance,
       executor: new TestExecutor(new Error("workflow failed")),
       clock: new TestClock(),
@@ -882,6 +1073,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["product.rollback"]),
       products,
+      orders: new TestOrders(),
       governance,
       executor: new TestExecutor(),
       clock: new TestClock(),
@@ -940,6 +1132,7 @@ describe("ProductChangeApplication", () => {
       users: new TestUsers(),
       capabilities: new TestCapabilities(["product.rollback"]),
       products,
+      orders: new TestOrders(),
       governance,
       executor,
       clock: new TestClock(),

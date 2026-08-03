@@ -1,7 +1,7 @@
 {
   "name": "@dyllu/medusa-plugin-mcp",
   "version": "0.1.0",
-  "description": "Governed MCP tools for DYLLU Medusa administration.",
+  "description": "Governed MCP tools for DYLLU administration.",
   "license": "UNLICENSED",
   "private": true,
   "files": [
