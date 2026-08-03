@@ -97,9 +97,9 @@ test.describe("cart sync", () => {
         .getByTestId("order-complete-container")
         .getByText("Comandă confirmată", { exact: true })
     ).toBeVisible();
-    await expect(page.getByTestId("shipping-method-summary")).toContainText(
-      "Standard Shipping"
-    );
+    await expect(
+      page.getByTestId("shipping-method-summary").locator("p").nth(1)
+    ).toHaveText(/^\S(?:.*\S)?\s+\(MDL\s+\d[\d.,]*\)$/);
 
     const quantity = page.getByTestId("product-quantity");
     const unitPrice = page.getByTestId("product-unit-price");
