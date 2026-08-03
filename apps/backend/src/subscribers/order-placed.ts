@@ -1,31 +1,36 @@
 import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework";
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 
-import { emailShell, escapeHtml } from "../lib/email-content";
+import {
+  createOrderConfirmationEmail,
+  type OrderConfirmationEmailSource,
+} from "../lib/order-confirmation-email";
+import { getStorefrontUrl } from "../lib/email-urls";
 
-type OrderLine = {
-  title?: string;
-  quantity?: number;
-  total?: number;
-};
-
-type Order = {
-  display_id?: number | string;
-  email?: string;
-  currency_code?: string;
-  total?: number;
-  items?: OrderLine[];
-};
-
-const formatMoney = (
-  amount: number | undefined,
-  currency: string | undefined
-) =>
-  new Intl.NumberFormat("ro-MD", {
-    style: "currency",
-    currency: (currency || "MDL").toUpperCase(),
-    maximumFractionDigits: 0,
-  }).format(amount || 0);
+export const ORDER_CONFIRMATION_FIELDS = [
+  "id",
+  "display_id",
+  "email",
+  "created_at",
+  "currency_code",
+  "total",
+  "subtotal",
+  "item_subtotal",
+  "shipping_total",
+  "shipping_subtotal",
+  "tax_total",
+  "discount_total",
+  "discount_subtotal",
+  "gift_card_total",
+  "shipping_address.*",
+  "items.*",
+  "items.tax_lines.*",
+  "items.adjustments.*",
+  "shipping_methods.*",
+  "shipping_methods.tax_lines.*",
+  "shipping_methods.adjustments.*",
+  "payment_collections.payments.provider_id",
+] as const;
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -35,49 +40,22 @@ export default async function orderPlacedHandler({
   const notificationService = container.resolve(Modules.NOTIFICATION);
   const { data: orders } = await query.graph({
     entity: "order",
-    fields: [
-      "display_id",
-      "email",
-      "currency_code",
-      "total",
-      "items.title",
-      "items.quantity",
-      "items.total",
-    ],
+    // Medusa needs the item and shipping relations to calculate order totals.
+    fields: [...ORDER_CONFIRMATION_FIELDS],
     filters: { id: data.id },
   });
-  const order = orders[0] as unknown as Order | undefined;
+  const order = orders[0] as unknown as
+    | OrderConfirmationEmailSource
+    | undefined;
   if (!order?.email) return;
 
-  const itemRows = (order.items || [])
-    .map(
-      (item) =>
-        `<tr><td style="padding:10px 0;border-bottom:1px solid #ddd">${escapeHtml(
-          item.title
-        )} × ${item.quantity || 1}</td><td style="padding:10px 0;border-bottom:1px solid #ddd;text-align:right">${escapeHtml(
-          formatMoney(item.total, order.currency_code)
-        )}</td></tr>`
-    )
-    .join("");
-  const orderNumber = order.display_id || data.id;
+  const content = createOrderConfirmationEmail(order, getStorefrontUrl("/"));
 
   await notificationService.createNotifications({
     to: order.email,
     channel: "email",
     template: "order-placed",
-    content: {
-      subject: `Comanda DYLLU #${orderNumber} a fost înregistrată`,
-      text: `Am înregistrat comanda #${orderNumber}. Total: ${formatMoney(
-        order.total,
-        order.currency_code
-      )}.`,
-      html: emailShell(
-        `Comanda #${orderNumber}`,
-        `<p>Mulțumim pentru comandă. Am înregistrat-o și revenim cu detaliile livrării.</p><table style="width:100%;border-collapse:collapse">${itemRows}<tr><td style="padding-top:16px;font-weight:800">Total</td><td style="padding-top:16px;text-align:right;font-weight:800">${escapeHtml(
-          formatMoney(order.total, order.currency_code)
-        )}</td></tr></table>`
-      ),
-    },
+    content,
   });
 }
 
