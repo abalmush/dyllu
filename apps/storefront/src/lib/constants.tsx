@@ -12,22 +12,14 @@ export const paymentInfoMap: Record<
     icon: <PayPal />,
   },
   pp_system_default: {
-    title: "Plată confirmată la procesare",
+    title: "Plată la livrare",
     icon: <CreditCard />,
   },
 };
 
-export const isPaypal = (providerId?: string) => {
-  return providerId?.startsWith("pp_paypal");
-};
-
-export const isManual = (providerId?: string) => {
-  return providerId?.startsWith("pp_system_default");
-};
-
 export const MD_POSTAL_CODE_PATTERN = "(MD[\\s-]?)?\\d{4}";
 export const MD_POSTAL_CODE_TITLE =
-  "Moldova postal code: 4 digits, optionally prefixed with MD- (e.g. MD-2001)";
+  "Cod poștal din Moldova: 4 cifre, opțional cu prefixul MD- (de exemplu MD-2001)";
 
 export const noDivisionCurrencies = [
   "krw",

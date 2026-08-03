@@ -23,10 +23,10 @@ const LineItemUnitPrice = ({
   );
 
   return (
-    <div className="flex h-full flex-col justify-center text-ui-fg-muted">
+    <div className="text-ui-fg-muted flex h-full flex-col justify-center whitespace-nowrap tabular-nums">
       {hasReducedPrice && (
         <>
-          <p>
+          <p className="whitespace-nowrap">
             {style === "default" && (
               <span className="text-ui-fg-muted">Original: </span>
             )}
@@ -46,7 +46,7 @@ const LineItemUnitPrice = ({
         </>
       )}
       <span
-        className={clx("text-base-regular", {
+        className={clx("text-base-regular whitespace-nowrap", {
           "text-ui-fg-interactive": hasReducedPrice,
         })}
         data-testid="product-unit-price"

@@ -1,39 +1,34 @@
 import { ShieldCheck, Truck } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 
-import { CheckoutStepKey } from "@modules/checkout/lib/presentation";
-import Item from "@modules/cart/components/item";
+import CartItemPreview from "@modules/cart/components/item-preview";
 import DiscountCode from "@modules/checkout/components/discount-code";
 import CartTotals from "@modules/common/components/cart-totals";
+import { hasCheckoutAmountDue } from "@lib/checkout/state";
 
 const CheckoutSummary = ({
   cart,
-  activeStep,
 }: {
   cart: HttpTypes.StoreCart & {
     promotions: HttpTypes.StorePromotion[];
   };
-  activeStep: CheckoutStepKey;
 }) => {
   const items = cart.items
     ?.slice()
     .sort((a, b) => ((a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1));
-  const isReview =
-    activeStep === "review" && (cart.shipping_methods?.length ?? 0) > 0;
+  const hasAmountDue = hasCheckoutAmountDue(cart);
 
   return (
-    <aside className="clip-corner-cut-lg clip-shadow-md bg-card ring-border sticky top-28 flex flex-col gap-6 p-6 ring-1">
+    <aside className="clip-corner-cut-lg clip-shadow-md bg-card ring-border flex flex-col gap-6 p-6 ring-1">
       <div className="space-y-2">
         <span className="text-muted-foreground text-xs font-semibold tracking-[0.16em] uppercase">
           Comandă DYLLU
         </span>
-        <h2 className="font-display text-foreground text-xl font-bold tracking-tight">
-          {isReview ? "Sumar final" : "Comanda ta"}
+        <h2 className="font-display text-foreground text-xl font-bold tracking-tight text-balance">
+          Comanda ta
         </h2>
         <p className="text-muted-foreground text-sm">
-          {isReview
-            ? "Revizuiește totalurile finale și aplică un cod promoțional dacă este cazul."
-            : "Verifică produsele și totalurile înainte să plasezi comanda."}
+          Verifică produsele și aplică un cod promoțional înainte de plasare.
         </p>
       </div>
 
@@ -48,10 +43,9 @@ const CheckoutSummary = ({
         </div>
         <ul>
           {items?.map((item) => (
-            <Item
+            <CartItemPreview
               key={item.id}
               item={item}
-              type="preview"
               currencyCode={cart.currency_code}
             />
           ))}
@@ -59,7 +53,10 @@ const CheckoutSummary = ({
       </div>
 
       <div className="clip-corner-cut-md bg-background/80 ring-border/70 p-4 ring-1">
-        <CartTotals totals={cart} />
+        <CartTotals
+          totals={cart}
+          shippingPending={(cart.shipping_methods?.length ?? 0) === 0}
+        />
       </div>
 
       <div className="clip-corner-cut-md bg-surface-subtle/60 ring-border/70 p-4 ring-1">
@@ -68,13 +65,15 @@ const CheckoutSummary = ({
 
       <ul className="clip-corner-cut-md bg-surface-subtle/60 text-muted-foreground ring-border/70 flex flex-col gap-4 p-4 text-xs ring-1">
         <li className="flex items-center gap-2">
-          <ShieldCheck className="text-success size-3.5" />
-          Detaliile de plată se confirmă împreună cu echipa DYLLU
+          <ShieldCheck aria-hidden="true" className="text-success size-3.5" />
+          {hasAmountDue
+            ? "Plata se face la livrare, după confirmarea comenzii"
+            : "Totalul comenzii este acoperit integral"}
         </li>
         <li className="flex items-center gap-2">
-          <Truck className="text-primary size-3.5" />
-          Livrare în toată Moldova · costul final se confirmă la pasul de
-          livrare
+          <Truck aria-hidden="true" className="text-primary size-3.5" />
+          Livrarea standard și costul ei se aplică automat după validarea
+          adresei
         </li>
       </ul>
     </aside>

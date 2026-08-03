@@ -180,7 +180,7 @@ export function CartDrawer({ trigger }: Props) {
                   className="flex-1"
                   data-testid="go-to-cart-button"
                 >
-                  <Link href="/checkout?step=address" onClick={closeCart}>
+                  <Link href="/checkout" onClick={closeCart}>
                     Finalizează
                     <ArrowRight className="size-4" />
                   </Link>

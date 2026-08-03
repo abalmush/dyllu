@@ -1,63 +1,16 @@
-import { listCartShippingMethods } from "@lib/data/fulfillment";
-import { listCartPaymentMethods } from "@lib/data/payment";
 import { HttpTypes } from "@medusajs/types";
-import { CheckoutStepKey } from "@modules/checkout/lib/presentation";
 import Addresses from "@modules/checkout/components/addresses";
-import Payment from "@modules/checkout/components/payment";
-import Review from "@modules/checkout/components/review";
-import ScrollToActiveStep from "@modules/checkout/components/scroll-to-active-step";
-import Shipping from "@modules/checkout/components/shipping";
 
-export default async function CheckoutForm({
+export default function CheckoutForm({
   cart,
   customer,
-  activeStep,
 }: {
   cart: HttpTypes.StoreCart | null;
   customer: HttpTypes.StoreCustomer | null;
-  activeStep: CheckoutStepKey;
 }) {
   if (!cart) {
     return null;
   }
 
-  const [shippingMethods, paymentMethods] = await Promise.all([
-    listCartShippingMethods(),
-    listCartPaymentMethods(cart.region?.id ?? ""),
-  ]);
-
-  const shippingIsHidden =
-    activeStep === "review" && (cart.shipping_methods?.length ?? 0) > 0;
-
-  return (
-    <div className="grid w-full grid-cols-1 gap-y-6">
-      <ScrollToActiveStep />
-
-      <div data-checkout-section="address">
-        <Addresses cart={cart} customer={customer} activeStep={activeStep} />
-      </div>
-
-      {!shippingIsHidden && (
-        <div data-checkout-section="delivery">
-          <Shipping
-            cart={cart}
-            availableShippingMethods={shippingMethods}
-            activeStep={activeStep}
-          />
-        </div>
-      )}
-
-      <div data-checkout-section="payment">
-        <Payment
-          cart={cart}
-          availablePaymentMethods={paymentMethods}
-          activeStep={activeStep}
-        />
-      </div>
-
-      <div data-checkout-section="review">
-        <Review cart={cart} activeStep={activeStep} />
-      </div>
-    </div>
-  );
+  return <Addresses cart={cart} customer={customer} />;
 }

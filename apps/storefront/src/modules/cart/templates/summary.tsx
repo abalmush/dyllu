@@ -6,7 +6,6 @@ import { HttpTypes } from "@medusajs/types";
 
 import { Button } from "@/components/atoms/button";
 import { Separator } from "@/components/atoms/separator";
-import { getNextCheckoutStep } from "@modules/checkout/lib/presentation";
 import CartTotals from "@modules/common/components/cart-totals";
 import DiscountCode from "@modules/checkout/components/discount-code";
 
@@ -17,8 +16,6 @@ type Props = {
 };
 
 export default function Summary({ cart }: Props) {
-  const step = getNextCheckoutStep(cart);
-
   return (
     <aside className="clip-corner-cut-lg clip-shadow-md bg-card ring-border small:p-8 flex flex-col gap-6 p-6 ring-1">
       <div className="space-y-2">
@@ -42,7 +39,7 @@ export default function Summary({ cart }: Props) {
         className="clip-corner-cut-sm mt-1 w-full rounded-none"
         data-testid="checkout-button"
       >
-        <Link href={`/checkout?step=${step}`}>
+        <Link href="/checkout">
           Finalizează comanda
           <ArrowRight className="size-4" />
         </Link>

@@ -20,7 +20,7 @@ const Item = ({ item, currencyCode }: ItemProps) => {
         </div>
       </Table.Cell>
 
-      <Table.Cell className="text-left">
+      <Table.Cell className="min-w-0 text-left">
         <Text
           className="txt-medium-plus text-ui-fg-base"
           data-testid="product-name"
@@ -30,25 +30,25 @@ const Item = ({ item, currencyCode }: ItemProps) => {
         <LineItemOptions variant={item.variant} data-testid="product-variant" />
       </Table.Cell>
 
-      <Table.Cell className="pr-0!">
-        <span className="flex h-full flex-col items-end justify-center pr-0!">
-          <span className="flex gap-x-1">
-            <Text className="text-ui-fg-muted">
-              <span data-testid="product-quantity">{item.quantity}</span>x{" "}
+      <Table.Cell className="w-48 min-w-48 pr-0! text-right whitespace-nowrap">
+        <div className="flex h-full min-w-max flex-col items-end justify-center whitespace-nowrap tabular-nums">
+          <div className="inline-flex items-center justify-end gap-x-1 whitespace-nowrap">
+            <Text as="span" className="text-ui-fg-muted whitespace-nowrap">
+              <span data-testid="product-quantity">{item.quantity}</span>×
             </Text>
             <LineItemUnitPrice
               item={item}
               style="tight"
               currencyCode={currencyCode}
             />
-          </span>
+          </div>
 
           <LineItemPrice
             item={item}
             style="tight"
             currencyCode={currencyCode}
           />
-        </span>
+        </div>
       </Table.Cell>
     </Table.Row>
   );
