@@ -3,8 +3,7 @@ import { Container } from "@lib/ui-compat";
 import { MD_POSTAL_CODE_PATTERN, MD_POSTAL_CODE_TITLE } from "@lib/constants";
 import Checkbox from "@modules/common/components/checkbox";
 import Input from "@modules/common/components/input";
-import { mapKeys } from "lodash";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import AddressSelect from "../address-select";
 import CountrySelect from "../country-select";
 
@@ -19,17 +18,18 @@ const ShippingAddress = ({
   checked: boolean;
   onChange: () => void;
 }) => {
-  const [formData, setFormData] = useState<Record<string, any>>({
+  const [formData, setFormData] = useState<Record<string, string>>({
     "shipping_address.first_name": cart?.shipping_address?.first_name || "",
     "shipping_address.last_name": cart?.shipping_address?.last_name || "",
     "shipping_address.address_1": cart?.shipping_address?.address_1 || "",
+    "shipping_address.address_2": cart?.shipping_address?.address_2 || "",
     "shipping_address.company": cart?.shipping_address?.company || "",
     "shipping_address.postal_code": cart?.shipping_address?.postal_code || "",
     "shipping_address.city": cart?.shipping_address?.city || "",
     "shipping_address.country_code": cart?.shipping_address?.country_code || "",
     "shipping_address.province": cart?.shipping_address?.province || "",
     "shipping_address.phone": cart?.shipping_address?.phone || "",
-    email: cart?.email || "",
+    email: cart?.email || customer?.email || "",
   });
 
   const countriesInRegion = useMemo(
@@ -46,15 +46,16 @@ const ShippingAddress = ({
   );
 
   const setFormAddress = (
-    address?: HttpTypes.StoreCartAddress,
+    address?: HttpTypes.StoreCartAddress | HttpTypes.StoreCustomerAddress,
     email?: string
   ) => {
-    address &&
-      setFormData((prevState: Record<string, any>) => ({
+    if (address) {
+      setFormData((prevState) => ({
         ...prevState,
         "shipping_address.first_name": address?.first_name || "",
         "shipping_address.last_name": address?.last_name || "",
         "shipping_address.address_1": address?.address_1 || "",
+        "shipping_address.address_2": address?.address_2 || "",
         "shipping_address.company": address?.company || "",
         "shipping_address.postal_code": address?.postal_code || "",
         "shipping_address.city": address?.city || "",
@@ -62,28 +63,18 @@ const ShippingAddress = ({
         "shipping_address.province": address?.province || "",
         "shipping_address.phone": address?.phone || "",
       }));
+    }
 
-    email &&
-      setFormData((prevState: Record<string, any>) => ({
+    if (email) {
+      setFormData((prevState) => ({
         ...prevState,
         email: email,
       }));
+    }
   };
 
-  useEffect(() => {
-    if (cart && cart.shipping_address) {
-      setFormAddress(cart?.shipping_address, cart?.email);
-    }
-
-    if (cart && !cart.email && customer?.email) {
-      setFormAddress(undefined, customer.email);
-    }
-  }, [cart]);
-
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLInputElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     setFormData({
       ...formData,
@@ -99,12 +90,19 @@ const ShippingAddress = ({
             {`Salut${customer.first_name ? `, ${customer.first_name}` : ""}. Poți porni de la una dintre adresele salvate.`}
           </p>
           <AddressSelect
-            addresses={customer.addresses}
-            addressInput={
-              mapKeys(formData, (_, key) =>
-                key.replace("shipping_address.", "")
-              ) as HttpTypes.StoreCartAddress
-            }
+            addresses={addressesInRegion ?? []}
+            addressInput={{
+              first_name: formData["shipping_address.first_name"],
+              last_name: formData["shipping_address.last_name"],
+              address_1: formData["shipping_address.address_1"],
+              address_2: formData["shipping_address.address_2"],
+              company: formData["shipping_address.company"],
+              postal_code: formData["shipping_address.postal_code"],
+              city: formData["shipping_address.city"],
+              country_code: formData["shipping_address.country_code"],
+              province: formData["shipping_address.province"],
+              phone: formData["shipping_address.phone"],
+            }}
             onSelect={setFormAddress}
           />
         </Container>
@@ -136,6 +134,14 @@ const ShippingAddress = ({
           onChange={handleChange}
           required
           data-testid="shipping-address-input"
+        />
+        <Input
+          label="Apartament, scară, etaj"
+          name="shipping_address.address_2"
+          autoComplete="address-line2"
+          value={formData["shipping_address.address_2"]}
+          onChange={handleChange}
+          data-testid="shipping-address-2-input"
         />
         <Input
           label="Companie"
@@ -216,8 +222,9 @@ const ShippingAddress = ({
           label="Email"
           name="email"
           type="email"
-          title="Enter a valid email address."
+          title="Introdu o adresă de email validă."
           autoComplete="email"
+          spellCheck={false}
           value={formData.email}
           onChange={handleChange}
           required
@@ -226,9 +233,11 @@ const ShippingAddress = ({
         <Input
           label="Telefon"
           name="shipping_address.phone"
+          type="tel"
           autoComplete="tel"
           value={formData["shipping_address.phone"]}
           onChange={handleChange}
+          required
           data-testid="shipping-phone-input"
         />
       </div>

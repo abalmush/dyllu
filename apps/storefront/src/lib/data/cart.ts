@@ -22,6 +22,19 @@ import {
   canonicalizeShippingAddress,
   isShippingOptionAllowedForAddress,
 } from "@lib/shipping/delivery-area";
+import {
+  findPayOnDeliveryProviderId,
+  isPayOnDeliveryProvider,
+} from "@lib/checkout/payment";
+import { hasCheckoutDetails, hasReadyPayOnDelivery } from "@lib/checkout/state";
+import { isValidMoldovaPostalCode } from "@lib/checkout/address";
+import { findDefaultShippingOptionId } from "@lib/checkout/shipping";
+import compareAddresses from "@lib/util/compare-addresses";
+import { listCartShippingMethods } from "./fulfillment";
+
+export type CheckoutActionState = {
+  error: string | null;
+};
 
 async function updateTaggedCache(...tags: string[]) {
   const nextTags = new Set<string>();
@@ -81,10 +94,10 @@ function formString(
   const max = options.max ?? 200;
 
   if (options.required && !value) {
-    throw new Error(`${key} is required`);
+    throw new Error("Completează toate câmpurile obligatorii.");
   }
   if (value.length > max) {
-    throw new Error(`${key} is too long`);
+    throw new Error("Una dintre valorile introduse este prea lungă.");
   }
 
   return value;
@@ -96,7 +109,7 @@ function addressFromForm(formData: FormData, prefix: "shipping" | "billing") {
     max: 2,
   }).toLowerCase();
   if (!/^[a-z]{2}$/.test(countryCode)) {
-    throw new Error(`${prefix}_address.country_code is invalid`);
+    throw new Error("Țara selectată nu este validă.");
   }
 
   const address = {
@@ -112,7 +125,9 @@ function addressFromForm(formData: FormData, prefix: "shipping" | "billing") {
       required: true,
       max: 200,
     }),
-    address_2: "",
+    address_2: formString(formData, `${prefix}_address.address_2`, {
+      max: 200,
+    }),
     company: formString(formData, `${prefix}_address.company`, { max: 200 }),
     postal_code: formString(formData, `${prefix}_address.postal_code`, {
       required: true,
@@ -124,8 +139,20 @@ function addressFromForm(formData: FormData, prefix: "shipping" | "billing") {
     }),
     country_code: countryCode,
     province: formString(formData, `${prefix}_address.province`, { max: 100 }),
-    phone: formString(formData, `${prefix}_address.phone`, { max: 40 }),
+    phone: formString(formData, `${prefix}_address.phone`, {
+      required: prefix === "shipping",
+      max: 40,
+    }),
   };
+
+  if (
+    address.country_code === "md" &&
+    !isValidMoldovaPostalCode(address.postal_code)
+  ) {
+    throw new Error(
+      "Introdu un cod poștal valid din Moldova: 4 cifre, opțional cu prefixul MD-."
+    );
+  }
 
   return prefix === "shipping" ? canonicalizeShippingAddress(address) : address;
 }
@@ -185,7 +212,9 @@ async function assertShippingOptionAvailableForCart({
     !selectedOption ||
     !isShippingOptionAllowedForAddress(selectedOption, shippingAddress)
   ) {
-    throw new Error("Shipping method is not available for this cart");
+    throw new Error(
+      "Metoda de livrare selectată nu mai este disponibilă pentru această adresă."
+    );
   }
 }
 
@@ -394,63 +423,30 @@ export async function deleteLineItem(lineId: string): Promise<CartView> {
   return retrieveCartViewOrThrow();
 }
 
-export async function setShippingMethod(shippingMethodId: string) {
-  assertIdentifier(shippingMethodId, "shipping method ID");
-  const cartId = await getCartId();
-  if (!cartId) {
-    throw new Error("No existing cart found");
-  }
-
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
-
-  const cart = await retrieveCartByCookie("id,*shipping_address");
-  await assertShippingOptionAvailableForCart({
-    cartId,
-    shippingOptionId: shippingMethodId,
-    shippingAddress: cart?.shipping_address,
-    headers,
-  });
-
-  return sdk.store.cart
-    .addShippingMethod(cartId, { option_id: shippingMethodId }, {}, headers)
-    .then(async () => {
-      await syncCartStorefront("fulfillment", "shippingOptions");
-    })
-    .catch(medusaError);
-}
-
-export async function initiatePaymentSession(providerId: string) {
-  assertIdentifier(providerId, "payment provider ID");
-  const cart = await retrieveCartByCookie();
-  if (!cart?.region_id) {
-    throw new Error("No existing cart found");
-  }
-
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
-
-  const { payment_providers: paymentProviders } =
-    await sdk.client.fetch<HttpTypes.StorePaymentProviderListResponse>(
+async function listAvailablePaymentProviders(
+  regionId: string,
+  headers: Record<string, string>
+) {
+  return sdk.client
+    .fetch<HttpTypes.StorePaymentProviderListResponse>(
       "/store/payment-providers",
       {
-        query: { region_id: cart.region_id },
+        query: { region_id: regionId },
         headers,
         cache: "no-store",
       }
-    );
-  if (!paymentProviders.some((provider) => provider.id === providerId)) {
-    throw new Error("Payment method is not available for this cart");
-  }
+    )
+    .then(({ payment_providers: paymentProviders }) => paymentProviders)
+    .catch(medusaError);
+}
 
+async function initiatePaymentSessionForCart(
+  cart: HttpTypes.StoreCart,
+  providerId: string,
+  headers: Record<string, string>
+) {
   return sdk.store.payment
     .initiatePaymentSession(cart, { provider_id: providerId }, {}, headers)
-    .then(async (resp) => {
-      await syncCartStorefront();
-      return resp;
-    })
     .catch(medusaError);
 }
 
@@ -500,42 +496,113 @@ export async function submitPromotionForm(
   }
 }
 
-export async function setAddresses(_currentState: unknown, formData: FormData) {
-  try {
-    if (!formData) {
-      throw new Error("No form data found when setting addresses");
-    }
-    const cartId = await getCartId();
-    if (!cartId) {
-      throw new Error("No existing cart found when setting addresses");
-    }
-
-    const email = formString(formData, "email", { required: true, max: 254 });
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      throw new Error("Email address is invalid");
-    }
-
-    const shippingAddress = addressFromForm(formData, "shipping");
-    const data: HttpTypes.StoreUpdateCart = {
-      shipping_address: shippingAddress,
-      email,
-    };
-
-    const sameAsBilling = formData.get("same_as_billing");
-    if (sameAsBilling === "on") data.billing_address = shippingAddress;
-
-    if (sameAsBilling !== "on") {
-      data.billing_address = addressFromForm(formData, "billing");
-    }
-    await updateCart(data);
-  } catch (error: unknown) {
-    return errorMessage(error);
+async function updateCheckoutAddresses(
+  formData: FormData,
+  currentCart?: HttpTypes.StoreCart
+) {
+  if (!formData) {
+    throw new Error("Nu am primit datele formularului. Încearcă din nou.");
   }
 
-  redirect("/checkout?step=delivery");
+  const email = formString(formData, "email", { required: true, max: 254 });
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error("Introdu o adresă de email validă.");
+  }
+
+  const shippingAddress = addressFromForm(formData, "shipping");
+  const billingAddress =
+    formData.get("same_as_billing") === "on"
+      ? shippingAddress
+      : addressFromForm(formData, "billing");
+  const data: HttpTypes.StoreUpdateCart = {
+    shipping_address: shippingAddress,
+    billing_address: billingAddress,
+    email,
+  };
+
+  if (
+    currentCart &&
+    currentCart.email === email &&
+    compareAddresses(currentCart.shipping_address, shippingAddress) &&
+    compareAddresses(currentCart.billing_address, billingAddress)
+  ) {
+    return false;
+  }
+
+  await updateCart(data);
+  return true;
 }
 
-export async function placeOrder() {
+async function prepareCartForOrder(formData: FormData) {
+  const currentCart = await retrieveCartByCookie();
+  if (!currentCart?.items?.length) {
+    throw new Error("Coșul este gol. Adaugă produse înainte de finalizare.");
+  }
+
+  const addressesChanged = await updateCheckoutAddresses(formData, currentCart);
+  const cartWithAddress = addressesChanged
+    ? await retrieveCartByCookie()
+    : currentCart;
+  if (!cartWithAddress?.region_id) {
+    throw new Error("Regiunea comenzii nu este disponibilă.");
+  }
+
+  const shippingOptions = await listCartShippingMethods(cartWithAddress);
+  const shippingOptionId = findDefaultShippingOptionId(shippingOptions);
+  if (!shippingOptionId) {
+    throw new Error(
+      "Livrarea standard nu este disponibilă pentru această adresă. Verifică localitatea și codul poștal."
+    );
+  }
+
+  const headers = { ...(await getAuthHeaders()) };
+  await assertShippingOptionAvailableForCart({
+    cartId: cartWithAddress.id,
+    shippingOptionId,
+    shippingAddress: cartWithAddress.shipping_address,
+    headers,
+  });
+
+  const selectedShippingOptionId =
+    cartWithAddress.shipping_methods?.at(-1)?.shipping_option_id;
+  if (selectedShippingOptionId !== shippingOptionId) {
+    await sdk.store.cart
+      .addShippingMethod(
+        cartWithAddress.id,
+        { option_id: shippingOptionId },
+        {},
+        headers
+      )
+      .catch(medusaError);
+    await updateTaggedCache("carts", "fulfillment", "shippingOptions");
+  }
+
+  const preparedCart =
+    selectedShippingOptionId === shippingOptionId
+      ? cartWithAddress
+      : await retrieveCartByCookie();
+  if (!preparedCart?.region_id || !hasCheckoutDetails(preparedCart)) {
+    throw new Error("Datele de livrare nu au putut fi pregătite.");
+  }
+
+  if (!hasReadyPayOnDelivery(preparedCart)) {
+    const paymentProviders = await listAvailablePaymentProviders(
+      preparedCart.region_id,
+      headers
+    );
+    const providerId = findPayOnDeliveryProviderId(paymentProviders);
+    if (!providerId || !isPayOnDeliveryProvider(providerId)) {
+      throw new Error(
+        "Plata la livrare nu este disponibilă momentan. Încearcă din nou sau contactează echipa DYLLU."
+      );
+    }
+
+    await initiatePaymentSessionForCart(preparedCart, providerId, headers);
+    await updateTaggedCache("carts");
+  }
+}
+
+async function completeCheckoutOrder() {
   assertOrderAccessConfigured();
   const id = await getCartId();
 
@@ -547,12 +614,20 @@ export async function placeOrder() {
     ...(await getAuthHeaders()),
   };
 
-  const cart = await retrieveCartByCookie(
-    "id,*shipping_address,+shipping_methods.shipping_option_id"
-  );
+  const cart = await retrieveCartByCookie();
   const shippingOptionId = cart?.shipping_methods?.at(-1)?.shipping_option_id;
-  if (!cart || !shippingOptionId) {
-    throw new Error("No shipping method selected for this cart");
+  if (!cart?.items?.length) {
+    throw new Error("Coșul este gol. Adaugă produse înainte de finalizare.");
+  }
+  if (!hasCheckoutDetails(cart) || !shippingOptionId) {
+    throw new Error(
+      "Completează datele de contact, adresa și metoda de livrare."
+    );
+  }
+  if (!hasReadyPayOnDelivery(cart)) {
+    throw new Error(
+      "Plata la livrare nu este pregătită. Revino la detalii și încearcă din nou."
+    );
   }
   await assertShippingOptionAvailableForCart({
     cartId: id,
@@ -574,11 +649,31 @@ export async function placeOrder() {
 
     await setOrderConfirmationId(cartRes.order.id);
     await removeCartId();
-    redirect(`/order/${cartRes?.order.id}/confirmed`);
+    return cartRes.order.id;
   }
 
   refresh();
-  return cartRes.cart;
+  throw new Error(
+    "Comanda nu a putut fi finalizată. Verifică detaliile și încearcă din nou."
+  );
+}
+
+export async function placeOrder(
+  currentState: CheckoutActionState,
+  formData: FormData
+): Promise<CheckoutActionState> {
+  void currentState;
+
+  let orderId: string;
+  try {
+    assertOrderAccessConfigured();
+    await prepareCartForOrder(formData);
+    orderId = await completeCheckoutOrder();
+  } catch (error: unknown) {
+    return { error: errorMessage(error) };
+  }
+
+  redirect(`/order/${orderId}/confirmed`);
 }
 
 export async function listCartOptions() {

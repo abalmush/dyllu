@@ -16,6 +16,7 @@ type Props = {
     discount_subtotal?: number | null;
   };
   className?: string;
+  shippingPending?: boolean;
 };
 
 function Row({
@@ -38,7 +39,7 @@ function Row({
       <span
         className={cn(
           emphasis
-            ? "font-semibold tracking-tight text-foreground"
+            ? "text-foreground font-semibold tracking-tight"
             : "text-muted-foreground"
         )}
       >
@@ -59,7 +60,11 @@ function Row({
   );
 }
 
-export default function CartTotals({ totals, className }: Props) {
+export default function CartTotals({
+  totals,
+  className,
+  shippingPending = false,
+}: Props) {
   const {
     currency_code,
     total,
@@ -82,9 +87,11 @@ export default function CartTotals({ totals, className }: Props) {
       <Row
         label="Livrare"
         value={
-          (shipping_subtotal ?? 0) === 0
-            ? "Gratuită"
-            : fmt(shipping_subtotal ?? 0)
+          shippingPending
+            ? "Se adaugă la plasare"
+            : (shipping_subtotal ?? 0) === 0
+              ? "Gratuită"
+              : fmt(shipping_subtotal ?? 0)
         }
         testId="cart-shipping"
         testValue={shipping_subtotal ?? 0}
@@ -104,10 +111,10 @@ export default function CartTotals({ totals, className }: Props) {
         testId="cart-taxes"
         testValue={tax_total ?? 0}
       />
-      <div className="my-2 h-px w-full bg-border" />
+      <div className="bg-border my-2 h-px w-full" />
       <Row
         label={
-          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          <span className="text-muted-foreground text-xs font-semibold tracking-[0.16em] uppercase">
             Total
           </span>
         }
@@ -116,9 +123,10 @@ export default function CartTotals({ totals, className }: Props) {
         testId="cart-total"
         testValue={total ?? 0}
       />
-      <p className="mt-1 text-xs text-muted-foreground">
-        Toate prețurile includ TVA. Costul de livrare se calculează la
-        finalizare.
+      <p className="text-muted-foreground mt-1 text-xs">
+        {shippingPending
+          ? "Totalul afișat nu include încă livrarea standard. Costul se adaugă automat când plasezi comanda."
+          : "Toate prețurile includ TVA."}
       </p>
     </div>
   );

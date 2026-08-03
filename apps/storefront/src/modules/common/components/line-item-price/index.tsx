@@ -19,11 +19,11 @@ const LineItemPrice = ({
   const hasReducedPrice = currentPrice < originalPrice;
 
   return (
-    <div className="flex flex-col items-end gap-x-2 text-ui-fg-subtle">
-      <div className="text-left">
+    <div className="text-ui-fg-subtle flex flex-col items-end gap-x-2 whitespace-nowrap tabular-nums">
+      <div className="text-right whitespace-nowrap">
         {hasReducedPrice && (
           <>
-            <p>
+            <p className="whitespace-nowrap">
               {style === "default" && (
                 <span className="text-ui-fg-subtle">Original: </span>
               )}
@@ -45,7 +45,7 @@ const LineItemPrice = ({
           </>
         )}
         <span
-          className={clx("text-base-regular", {
+          className={clx("text-base-regular whitespace-nowrap", {
             "text-ui-fg-interactive": hasReducedPrice,
           })}
           data-testid="product-price"

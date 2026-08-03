@@ -1,7 +1,7 @@
 import { Listbox, Transition } from "@headlessui/react";
 import { ChevronUpDown } from "@medusajs/icons";
 import { clx } from "@lib/ui-compat";
-import { Fragment, useMemo } from "react";
+import { useMemo } from "react";
 
 import Radio from "@modules/common/components/radio";
 import compareAddresses from "@lib/util/compare-addresses";
@@ -9,9 +9,12 @@ import { HttpTypes } from "@medusajs/types";
 
 type AddressSelectProps = {
   addresses: HttpTypes.StoreCustomerAddress[];
-  addressInput: HttpTypes.StoreCartAddress | null;
+  addressInput: Partial<HttpTypes.StoreCartAddress> | null;
   onSelect: (
-    address: HttpTypes.StoreCartAddress | undefined,
+    address:
+      | HttpTypes.StoreCartAddress
+      | HttpTypes.StoreCustomerAddress
+      | undefined,
     email?: string
   ) => void;
 };
@@ -24,7 +27,7 @@ const AddressSelect = ({
   const handleSelect = (id: string) => {
     const savedAddress = addresses.find((a) => a.id === id);
     if (savedAddress) {
-      onSelect(savedAddress as HttpTypes.StoreCartAddress);
+      onSelect(savedAddress);
     }
   };
 
@@ -58,7 +61,6 @@ const AddressSelect = ({
           )}
         </Listbox.Button>
         <Transition
-          as={Fragment}
           leave="transition ease-in duration-100"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
