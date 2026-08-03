@@ -2,9 +2,9 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { Modules } from "@medusajs/framework/utils";
 
 import type { NewsletterSubscription } from "../../_shared/contracts";
-import { emailButton, emailShell } from "../../../lib/email-content";
 import { getNewsletterConfirmationUrl } from "../../../lib/email-urls";
 import { createNewsletterToken } from "../../../lib/newsletter-token";
+import { createNewsletterConfirmationEmail } from "../../../lib/transactional-emails";
 
 export async function POST(
   req: MedusaRequest<NewsletterSubscription>,
@@ -30,21 +30,12 @@ export async function POST(
   confirmationUrl.searchParams.set("token", token);
 
   const notificationService = req.scope.resolve(Modules.NOTIFICATION);
+  const content = createNewsletterConfirmationEmail(confirmationUrl.toString());
   await notificationService.createNotifications({
     to: email,
     channel: "email",
     template: "newsletter-confirmation",
-    content: {
-      subject: "Confirmă abonarea la noutățile DYLLU",
-      text: `Confirmă abonarea accesând: ${confirmationUrl}`,
-      html: emailShell(
-        "Confirmă abonarea",
-        `<p>Ai solicitat să primești noutățile DYLLU.</p>${emailButton(
-          "Confirmă adresa de email",
-          confirmationUrl.toString()
-        )}<p>Dacă nu ai făcut această solicitare, ignoră mesajul.</p>`
-      ),
-    },
+    content,
   });
 
   return res.status(202).json({ status: "confirmation_sent" });

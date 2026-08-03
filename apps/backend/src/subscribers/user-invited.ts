@@ -1,8 +1,8 @@
 import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework";
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 
-import { emailButton, emailShell } from "../lib/email-content";
 import { getAdminUrl } from "../lib/email-urls";
+import { createUserInviteEmail } from "../lib/transactional-emails";
 
 type Invite = {
   email?: string;
@@ -26,21 +26,12 @@ export default async function userInvitedHandler({
   const inviteUrl = new URL(url);
   inviteUrl.searchParams.set("token", invite.token);
   const notificationService = container.resolve(Modules.NOTIFICATION);
+  const content = createUserInviteEmail(inviteUrl.toString());
   await notificationService.createNotifications({
     to: invite.email,
     channel: "email",
     template: "user-invited",
-    content: {
-      subject: "Invitație în administrarea DYLLU",
-      text: `Acceptă invitația accesând: ${inviteUrl}`,
-      html: emailShell(
-        "Ai fost invitat în DYLLU",
-        `<p>Ai primit acces la administrarea magazinului.</p>${emailButton(
-          "Acceptă invitația",
-          inviteUrl.toString()
-        )}`
-      ),
-    },
+    content,
   });
 }
 
