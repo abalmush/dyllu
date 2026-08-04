@@ -5,7 +5,7 @@ truth; an MCP client supplies the LLM.
 
 ## Implemented scope
 
-- Read and search products
+- Read, search, and count products
 - List orders by DYLLU calendar date and read complete order information
 - Propose a product-description change without publishing it
 - Propose an exact product-variant base-price change in MDL

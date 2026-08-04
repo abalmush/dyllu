@@ -159,6 +159,15 @@ export class MedusaUserDirectory implements UserDirectory {
 export class MedusaProductCatalog implements ProductCatalog {
   constructor(private readonly query: Pick<RemoteQueryFunction, "graph">) {}
 
+  async count() {
+    const { metadata } = await this.query.graph({
+      entity: "product",
+      fields: ["id"],
+      pagination: { take: 1, skip: 0 },
+    });
+    return z.number().int().nonnegative().parse(metadata?.count);
+  }
+
   async findById(productId: string) {
     const { data } = await this.query.graph({
       entity: "product",

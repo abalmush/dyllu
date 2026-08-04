@@ -134,6 +134,11 @@ export class ProductChangeApplication {
     return this.dependencies.products.search(input);
   }
 
+  async countProducts(context: RequestContext) {
+    await this.requireCapability(context, "product.read", "catalog");
+    return { count: await this.dependencies.products.count() };
+  }
+
   async listOrders(context: RequestContext, input: OrderListQuery) {
     await this.requireCapability(context, "order.read", input.localDate);
     return this.dependencies.orders.list(input);

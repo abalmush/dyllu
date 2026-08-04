@@ -143,6 +143,7 @@ class TestCapabilities implements CapabilityStore {
 class TestProducts implements ProductCatalog {
   readonly values = new Map([[product.id, product]]);
   readonly searches: Array<{ query: string; limit: number }> = [];
+  countCalls = 0;
   private currentPrice = priceTarget;
 
   changeCurrentPrice(price: ProductPriceTarget) {
@@ -167,6 +168,11 @@ class TestProducts implements ProductCatalog {
   async search(input: { query: string; limit: number }) {
     this.searches.push(input);
     return [...this.values.values()];
+  }
+
+  async count() {
+    this.countCalls += 1;
+    return this.values.size;
   }
 }
 
@@ -576,6 +582,61 @@ describe("ProductChangeApplication", () => {
       )
     ).resolves.toEqual([product]);
     expect(products.searches).toEqual([{ query: "găurit", limit: 10 }]);
+  });
+
+  it("returns the exact product count for an authorized manager", async () => {
+    const products = new TestProducts();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["product.read"]),
+      products,
+      orders: new TestOrders(),
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.countProducts({
+        actorId: actor.id,
+        requestId: "req_product_count",
+      })
+    ).resolves.toEqual({ count: 1 });
+    expect(products.countCalls).toBe(1);
+  });
+
+  it("denies and audits product count access without product.read", async () => {
+    const products = new TestProducts();
+    const governance = new TestGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities([]),
+      products,
+      orders: new TestOrders(),
+      governance,
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.countProducts({
+        actorId: actor.id,
+        requestId: "req_denied_product_count",
+      })
+    ).rejects.toMatchObject({ code: "capability_denied" });
+    expect(products.countCalls).toBe(0);
+    expect(governance.events).toEqual([
+      expect.objectContaining({
+        name: "authorization.denied",
+        targetId: "catalog",
+        details: {
+          capability: "product.read",
+          reason: "capability_denied",
+        },
+      }),
+    ]);
   });
 
   it("creates a reviewable proposal without changing the product", async () => {
