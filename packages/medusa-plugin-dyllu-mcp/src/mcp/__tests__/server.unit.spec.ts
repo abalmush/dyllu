@@ -30,6 +30,45 @@ describe("DYLLU MCP server", () => {
     }
   });
 
+  it("returns the exact DYLLU product count", async () => {
+    const application = {
+      countProducts: jest.fn().mockResolvedValue({ count: 137 }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_product_count" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "count_products",
+        arguments: {},
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(result.content).toEqual([
+        { type: "text", text: JSON.stringify({ count: 137 }) },
+      ]);
+      expect(application.countProducts).toHaveBeenCalledWith({
+        actorId: "user_test",
+        requestId: "request_product_count",
+      });
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("lists DYLLU orders for an exact calendar date", async () => {
     const application = {
       listOrders: jest.fn().mockResolvedValue({ orders: [], count: 0 }),

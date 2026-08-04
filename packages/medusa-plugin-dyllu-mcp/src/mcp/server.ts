@@ -57,6 +57,7 @@ export function createDylluMcpServer(
     {
       instructions: [
         "Use search_products and get_product before proposing a change.",
+        "Use count_products for the exact DYLLU catalog total.",
         "Use list_orders for a specific DYLLU calendar date and get_order for complete order information.",
         "Interpret today, yesterday and calendar dates in Europe/Chisinau.",
         "Proposal tools never mutate public DYLLU catalog data.",
@@ -107,6 +108,18 @@ export function createDylluMcpServer(
           limit: input.limit,
         })
       )
+  );
+
+  server.registerTool(
+    "count_products",
+    {
+      title: "Count DYLLU products",
+      description: "Return the exact number of products in the DYLLU catalog.",
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    () =>
+      execute("count_products", () => application.countProducts(getContext()))
   );
 
   server.registerTool(

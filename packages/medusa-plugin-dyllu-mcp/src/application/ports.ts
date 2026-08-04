@@ -51,6 +51,7 @@ export interface CapabilityStore {
 }
 
 export interface ProductCatalog {
+  count(): Promise<number>;
   findById(productId: string): Promise<ProductSummary | null>;
   findVariantPrice(input: {
     productId: string;
