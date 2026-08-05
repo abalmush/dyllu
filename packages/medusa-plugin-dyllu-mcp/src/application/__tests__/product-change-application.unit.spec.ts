@@ -10,6 +10,7 @@ import {
   ProductChangeExecutor,
   UserDirectory,
   CapabilityStore,
+  InventoryDirectory,
 } from "../ports";
 import { ProductChangeApplication } from "../product-change-application";
 import {
@@ -28,6 +29,7 @@ import {
   OperationRevision,
   SaleVariantTarget,
   SaleDetails,
+  InventoryVariantSnapshot,
 } from "../../domain/types";
 
 const now = new Date("2026-07-29T10:00:00.000Z");
@@ -258,6 +260,20 @@ class TestOrders implements OrderDirectory {
   async findByReference(reference: string): Promise<OrderDetails | null> {
     this.references.push(reference);
     return reference === String(order.displayId) ? orderDetails : null;
+  }
+}
+
+class TestInventory implements InventoryDirectory {
+  readonly lists: Array<{ limit: number; offset: number }> = [];
+
+  constructor(private readonly variants: InventoryVariantSnapshot[]) {}
+
+  async list(input: { limit: number; offset: number }) {
+    this.lists.push(input);
+    return {
+      variants: this.variants.slice(input.offset, input.offset + input.limit),
+      count: this.variants.length,
+    };
   }
 }
 
@@ -1385,6 +1401,67 @@ describe("ProductChangeApplication", () => {
       products: [{ productId: "prod_incomplete" }],
     });
     expect(products.lists).toEqual([{ limit: 100, offset: 0 }]);
+  });
+
+  it("returns a bounded DYLLU inventory exception report", async () => {
+    const inventory = new TestInventory([
+      {
+        productId: product.id,
+        productTitle: product.title,
+        productStatus: "published",
+        variantId: "variant_low",
+        variantTitle: "Standard",
+        sku: "LOW-1",
+        manageInventory: true,
+        allowBackorder: false,
+        items: [
+          {
+            inventoryItemId: "iitem_low",
+            requiredQuantity: 1,
+            levels: [
+              {
+                locationId: "sloc_main",
+                locationName: "Main",
+                stockedQuantity: 3,
+                reservedQuantity: 1,
+                incomingQuantity: 0,
+                availableQuantity: 2,
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["inventory.read"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      inventory,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.getInventoryExceptions(
+        { actorId: actor.id, requestId: "req_inventory_exceptions" },
+        { lowStockThreshold: 5, resultLimit: 50, publishedOnly: true }
+      )
+    ).resolves.toMatchObject({
+      scannedVariantCount: 1,
+      managedVariantCount: 1,
+      variantsWithExceptions: 1,
+      variants: [
+        {
+          variantId: "variant_low",
+          availableQuantity: 2,
+          codes: ["low_stock"],
+        },
+      ],
+    });
+    expect(inventory.lists).toEqual([{ limit: 100, offset: 0 }]);
   });
 
   it("denies and audits product count access without product.read", async () => {

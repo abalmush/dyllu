@@ -18,6 +18,7 @@ import {
   SaleVariantTarget,
   OperationProposal,
   OperationRevision,
+  InventoryVariantSnapshot,
 } from "../domain/types";
 
 export type ProductSearch = {
@@ -39,6 +40,13 @@ export interface OrderDirectory {
     count: number;
   }>;
   findByReference(reference: string): Promise<OrderDetails | null>;
+}
+
+export interface InventoryDirectory {
+  list(input: { limit: number; offset: number }): Promise<{
+    variants: InventoryVariantSnapshot[];
+    count: number;
+  }>;
 }
 
 export type SaleListQuery = {

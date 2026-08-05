@@ -5,6 +5,7 @@ export const capabilities = [
   "sale.read",
   "sale.update",
   "sale.rollback",
+  "inventory.read",
   "product_content.update",
   "product_price.update",
   "product.rollback",
@@ -156,6 +157,64 @@ export type CatalogQualityReport = {
     handle: string;
     status: string;
     issues: CatalogQualityIssue[];
+  }>;
+};
+
+export type InventoryLevelSnapshot = {
+  locationId: string;
+  locationName: string;
+  stockedQuantity: number;
+  reservedQuantity: number;
+  incomingQuantity: number;
+  availableQuantity: number;
+};
+
+export type InventoryItemSnapshot = {
+  inventoryItemId: string;
+  requiredQuantity: number;
+  levels: InventoryLevelSnapshot[];
+};
+
+export type InventoryVariantSnapshot = {
+  productId: string;
+  productTitle: string;
+  productStatus: string;
+  variantId: string;
+  variantTitle: string;
+  sku: string | null;
+  manageInventory: boolean;
+  allowBackorder: boolean;
+  items: InventoryItemSnapshot[];
+};
+
+export const inventoryExceptionCodes = [
+  "missing_inventory_item",
+  "missing_inventory_level",
+  "negative_available",
+  "out_of_stock",
+  "low_stock",
+  "reservation_exceeds_stock",
+] as const;
+
+export type InventoryExceptionCode =
+  (typeof inventoryExceptionCodes)[number];
+
+export type InventoryExceptionReport = {
+  scannedVariantCount: number;
+  managedVariantCount: number;
+  variantsWithExceptions: number;
+  exceptionCounts: Partial<Record<InventoryExceptionCode, number>>;
+  resultsTruncated: boolean;
+  variants: Array<{
+    productId: string;
+    productTitle: string;
+    variantId: string;
+    variantTitle: string;
+    sku: string | null;
+    availableQuantity: number | null;
+    allowBackorder: boolean;
+    codes: InventoryExceptionCode[];
+    items: InventoryItemSnapshot[];
   }>;
 };
 

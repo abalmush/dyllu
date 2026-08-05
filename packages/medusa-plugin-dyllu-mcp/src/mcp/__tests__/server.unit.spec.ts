@@ -173,6 +173,49 @@ describe("DYLLU MCP server", () => {
     }
   });
 
+  it("returns a bounded DYLLU inventory exception report", async () => {
+    const application = {
+      getInventoryExceptions: jest.fn().mockResolvedValue({
+        managedVariantCount: 50,
+        variantsWithExceptions: 4,
+      }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_inventory" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "get_inventory_exceptions",
+        arguments: {
+          low_stock_threshold: 7,
+          result_limit: 80,
+          published_only: true,
+        },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(application.getInventoryExceptions).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_inventory" },
+        { lowStockThreshold: 7, resultLimit: 80, publishedOnly: true }
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("lists DYLLU sales with bounded pagination", async () => {
     const application = {
       listSales: jest.fn().mockResolvedValue({ sales: [], count: 0 }),

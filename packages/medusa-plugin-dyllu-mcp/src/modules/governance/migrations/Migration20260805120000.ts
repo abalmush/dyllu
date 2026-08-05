@@ -16,6 +16,7 @@ export class Migration20260805120000 extends Migration {
         'sale.read',
         'sale.update',
         'sale.rollback',
+        'inventory.read',
         'product_content.update',
         'product_price.update',
         'product.rollback',
@@ -165,7 +166,7 @@ export class Migration20260805120000 extends Migration {
     this.addSql(`
       delete from "dyllu_mcp_capability_grant"
       where "capability" in (
-        'sale.read', 'sale.update', 'sale.rollback'
+        'sale.read', 'sale.update', 'sale.rollback', 'inventory.read'
       );
     `);
     this.addSql(`

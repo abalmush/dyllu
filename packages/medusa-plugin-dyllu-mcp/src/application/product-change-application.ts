@@ -12,6 +12,7 @@ import {
   ProductChangeExecutor,
   UserDirectory,
   CapabilityStore,
+  InventoryDirectory,
 } from "./ports";
 import { ProductSearch } from "./ports";
 import {
@@ -32,6 +33,7 @@ import {
   OrderExceptionCode,
   OrderSummary,
   ProductSummary,
+  InventoryVariantSnapshot,
   capabilities as availableCapabilities,
 } from "../domain/types";
 import { ApplicationError } from "./errors";
@@ -40,6 +42,7 @@ import { createCatalogChangeHash } from "../domain/catalog-change-hash";
 import { createOperationHash } from "../domain/operation-hash";
 import { saleOperationValueSchema } from "./sale-operation-schema";
 import { createCatalogQualityReport } from "./catalog-quality";
+import { createInventoryExceptionReport } from "./inventory-exceptions";
 
 const PROPOSAL_TTL_MS = 30 * 60 * 1000;
 const MAX_DESCRIPTION_LENGTH = 20_000;
@@ -104,6 +107,12 @@ export type CatalogQualityAuditInput = {
   resultLimit: number;
 };
 
+export type InventoryExceptionReportInput = {
+  lowStockThreshold: number;
+  resultLimit: number;
+  publishedOnly: boolean;
+};
+
 export type ProposeSaleCreateInput = {
   title: string;
   description: string;
@@ -139,6 +148,7 @@ export type ProductChangeApplicationDependencies = {
   sales?: SaleDirectory;
   operationGovernance?: OperationGovernanceStore;
   saleExecutor?: SaleChangeExecutor;
+  inventory?: InventoryDirectory;
 };
 
 export class ProductChangeApplication {
@@ -270,6 +280,80 @@ export class ProductChangeApplication {
       input.minimumDescriptionLength,
       input.resultLimit
     );
+  }
+
+  async getInventoryExceptions(
+    context: RequestContext,
+    input: InventoryExceptionReportInput
+  ) {
+    await this.requireCapability(context, "inventory.read", "inventory");
+    if (
+      !Number.isSafeInteger(input.lowStockThreshold) ||
+      input.lowStockThreshold < 0 ||
+      input.lowStockThreshold > 1_000_000 ||
+      !Number.isSafeInteger(input.resultLimit) ||
+      input.resultLimit < 1 ||
+      input.resultLimit > 200
+    ) {
+      throw new ApplicationError(
+        "invalid_inventory_report",
+        "The inventory report limits are invalid"
+      );
+    }
+    const inventory = this.dependencies.inventory;
+    if (!inventory) {
+      throw new ApplicationError(
+        "inventory_directory_unavailable",
+        "DYLLU inventory data is unavailable"
+      );
+    }
+    const variants: InventoryVariantSnapshot[] = [];
+    const pageSize = 100;
+    const maximumVariants = 5_000;
+    let expectedCount: number | null = null;
+    while (expectedCount === null || variants.length < expectedCount) {
+      const page = await inventory.list({
+        limit: pageSize,
+        offset: variants.length,
+      });
+      if (!Number.isSafeInteger(page.count) || page.count < 0) {
+        throw new ApplicationError(
+          "inventory_report_unstable",
+          "The DYLLU inventory report could not get a stable variant count"
+        );
+      }
+      if (page.count > maximumVariants) {
+        throw new ApplicationError(
+          "inventory_report_limit_exceeded",
+          `The DYLLU inventory report exceeds ${maximumVariants} variants`
+        );
+      }
+      if (expectedCount !== null && page.count !== expectedCount) {
+        throw new ApplicationError(
+          "inventory_report_unstable",
+          "DYLLU inventory changed while the report was generated"
+        );
+      }
+      expectedCount = page.count;
+      if (page.variants.length === 0 && variants.length < expectedCount) {
+        throw new ApplicationError(
+          "inventory_report_unstable",
+          "The DYLLU inventory report returned an incomplete page"
+        );
+      }
+      variants.push(...page.variants);
+    }
+    if (
+      variants.length !== expectedCount ||
+      new Set(variants.map((variant) => variant.variantId)).size !==
+        variants.length
+    ) {
+      throw new ApplicationError(
+        "inventory_report_unstable",
+        "DYLLU inventory changed while the report was generated"
+      );
+    }
+    return createInventoryExceptionReport(variants, input);
   }
 
   async listOrders(context: RequestContext, input: OrderListQuery) {

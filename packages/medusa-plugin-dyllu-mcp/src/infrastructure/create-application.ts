@@ -21,6 +21,7 @@ import {
 } from "./medusa-governance-store";
 import { MedusaProductChangeExecutor } from "./medusa-product-change-executor";
 import { MedusaSaleChangeExecutor } from "./medusa-sale-change-executor";
+import { MedusaInventoryDirectory } from "./medusa-inventory-directory";
 import { MedusaIdGenerator, SystemClock } from "./system";
 
 export function createProductChangeApplication(container: MedusaContainer) {
@@ -35,6 +36,7 @@ export function createProductChangeApplication(container: MedusaContainer) {
     capabilities: new MedusaCapabilityStore(governanceService, locking),
     products: new MedusaProductCatalog(query),
     sales: new MedusaSaleDirectory(query),
+    inventory: new MedusaInventoryDirectory(query),
     orders: new MedusaOrderDirectory(query, {
       list: async (input) => {
         const { result } = await getOrdersListWorkflow(container).run({

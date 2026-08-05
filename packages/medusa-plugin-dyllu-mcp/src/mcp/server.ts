@@ -61,6 +61,7 @@ export function createDylluMcpServer(
         "Use count_products for the exact DYLLU catalog total.",
         "Use audit_catalog_quality to find missing or weak DYLLU product data before proposing corrections.",
         "Use propose_product_description_batch for up to 20 corrections, then show every independent proposal before any publish call.",
+        "Use get_inventory_exceptions to find missing, low, negative, or inconsistent DYLLU stock data.",
         "Use list_sales and get_sale before proposing a DYLLU sale change.",
         "Use list_orders for a specific DYLLU calendar date and get_order for complete order information.",
         "Use get_daily_order_report for exact order totals, status groups, and exceptions for one DYLLU calendar date.",
@@ -153,6 +154,37 @@ export function createDylluMcpServer(
         application.auditCatalogQuality(getContext(), {
           minimumDescriptionLength: input.minimum_description_length,
           resultLimit: input.result_limit,
+        })
+      )
+  );
+
+  server.registerTool(
+    "get_inventory_exceptions",
+    {
+      title: "Get DYLLU inventory exceptions",
+      description:
+        "Scan bounded DYLLU variant inventory for missing links, missing location levels, low stock, no stock, negative availability, and reservations above stock.",
+      inputSchema: z
+        .object({
+          low_stock_threshold: z
+            .number()
+            .int()
+            .min(0)
+            .max(1_000_000)
+            .default(5),
+          result_limit: z.number().int().min(1).max(200).default(50),
+          published_only: z.boolean().default(true),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("get_inventory_exceptions", () =>
+        application.getInventoryExceptions(getContext(), {
+          lowStockThreshold: input.low_stock_threshold,
+          resultLimit: input.result_limit,
+          publishedOnly: input.published_only,
         })
       )
   );
