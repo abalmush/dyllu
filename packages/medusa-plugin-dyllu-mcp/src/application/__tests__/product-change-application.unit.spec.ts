@@ -3,12 +3,18 @@ import {
   GovernanceStore,
   IdGenerator,
   OrderDirectory,
+  SaleDirectory,
+  OperationGovernanceStore,
+  SaleChangeExecutor,
   ProductCatalog,
   ProductChangeExecutor,
   UserDirectory,
   CapabilityStore,
+  InventoryDirectory,
 } from "../ports";
 import { ProductChangeApplication } from "../product-change-application";
+import { MerchandisingApplication } from "../merchandising-application";
+import { ReturnApplication } from "../return-application";
 import {
   Actor,
   AuditEvent,
@@ -21,6 +27,11 @@ import {
   ProductPriceRevision,
   ProductPriceTarget,
   ProductSummary,
+  OperationProposal,
+  OperationRevision,
+  SaleVariantTarget,
+  SaleDetails,
+  InventoryVariantSnapshot,
 } from "../../domain/types";
 
 const now = new Date("2026-07-29T10:00:00.000Z");
@@ -40,6 +51,7 @@ const product: ProductSummary = {
   handle: "masina-de-gaurit",
   status: "published",
   description: "Descriere veche",
+  imageCount: 1,
   updatedAt: new Date("2026-07-29T09:00:00.000Z"),
   variants: [
     {
@@ -68,6 +80,44 @@ const priceTarget: ProductPriceTarget = {
   amount: 1500,
   currencyCode: "mdl",
   updatedAt: new Date("2026-07-29T09:00:00.000Z"),
+};
+const saleTarget: SaleVariantTarget = {
+  productId: "prod_tools",
+  productTitle: "Trusă de scule",
+  variantId: "variant_tools",
+  variantTitle: "Standard",
+  sku: "DTHS1M28",
+  basePriceId: "price_base",
+  normalAmount: 429,
+  currencyCode: "mdl",
+  updatedAt: new Date("2026-07-29T09:00:00.000Z"),
+};
+const activeSale: SaleDetails = {
+  id: "plist_summer",
+  title: "Summer sale",
+  description: "Selected tools",
+  status: "active",
+  startsAt: null,
+  endsAt: null,
+  createdAt: new Date("2026-07-28T09:00:00.000Z"),
+  updatedAt: new Date("2026-07-29T09:30:00.000Z"),
+  items: [
+    {
+      priceId: "price_sale",
+      productId: saleTarget.productId,
+      productTitle: saleTarget.productTitle,
+      variantId: saleTarget.variantId,
+      variantTitle: saleTarget.variantTitle,
+      sku: saleTarget.sku,
+      currencyCode: "mdl",
+      normalAmount: 429,
+      saleAmount: 349,
+      minQuantity: null,
+      maxQuantity: null,
+      hasRules: false,
+      updatedAt: new Date("2026-07-29T09:30:00.000Z"),
+    },
+  ],
 };
 const order: OrderSummary = {
   id: "order_today",
@@ -143,6 +193,7 @@ class TestCapabilities implements CapabilityStore {
 class TestProducts implements ProductCatalog {
   readonly values = new Map([[product.id, product]]);
   readonly searches: Array<{ query: string; limit: number }> = [];
+  readonly lists: Array<{ limit: number; offset: number }> = [];
   countCalls = 0;
   private currentPrice = priceTarget;
 
@@ -152,6 +203,13 @@ class TestProducts implements ProductCatalog {
 
   async findById(productId: string) {
     return this.values.get(productId) ?? null;
+  }
+
+  async findByIds(productIds: string[]) {
+    return productIds.flatMap((productId) => {
+      const value = this.values.get(productId);
+      return value ? [value] : [];
+    });
   }
 
   async findVariantPrice(
@@ -174,20 +232,143 @@ class TestProducts implements ProductCatalog {
     this.countCalls += 1;
     return this.values.size;
   }
+
+  async list(input: { limit: number; offset: number }) {
+    this.lists.push(input);
+    return {
+      products: [...this.values.values()].slice(
+        input.offset,
+        input.offset + input.limit
+      ),
+      count: this.values.size,
+    };
+  }
 }
 
 class TestOrders implements OrderDirectory {
   readonly lists: Parameters<OrderDirectory["list"]>[0][] = [];
   readonly references: string[] = [];
 
+  constructor(private readonly summaries: OrderSummary[] = [order]) {}
+
   async list(input: Parameters<OrderDirectory["list"]>[0]) {
     this.lists.push(input);
-    return { orders: [order], count: 1 };
+    return {
+      orders: this.summaries.slice(input.offset, input.offset + input.limit),
+      count: this.summaries.length,
+    };
   }
 
   async findByReference(reference: string): Promise<OrderDetails | null> {
     this.references.push(reference);
     return reference === String(order.displayId) ? orderDetails : null;
+  }
+}
+
+class TestInventory implements InventoryDirectory {
+  readonly lists: Array<{ limit: number; offset: number }> = [];
+
+  constructor(private readonly variants: InventoryVariantSnapshot[]) {}
+
+  async list(input: { limit: number; offset: number }) {
+    this.lists.push(input);
+    return {
+      variants: this.variants.slice(input.offset, input.offset + input.limit),
+      count: this.variants.length,
+    };
+  }
+}
+
+class TestSales implements SaleDirectory {
+  readonly lists: Parameters<SaleDirectory["list"]>[0][] = [];
+
+  async list(input: Parameters<SaleDirectory["list"]>[0]) {
+    this.lists.push(input);
+    return { sales: [], count: 0 };
+  }
+
+  async findById() {
+    return this.sale;
+  }
+
+  constructor(
+    private readonly targets: SaleVariantTarget[] = [],
+    private readonly overlaps: Array<{
+      saleId: string;
+      variantId: string;
+    }> = [],
+    private readonly sale: SaleDetails | null = null
+  ) {}
+
+  async findVariantTargets() {
+    return this.targets;
+  }
+
+  async findOverlappingActiveSales() {
+    return this.overlaps;
+  }
+}
+
+class TestOperationGovernance implements OperationGovernanceStore {
+  readonly proposals: OperationProposal[] = [];
+  readonly revisions: OperationRevision[] = [];
+
+  async createProposal(
+    input: Parameters<OperationGovernanceStore["createProposal"]>[0]
+  ) {
+    this.proposals.push(input.proposal);
+  }
+
+  async findProposal(proposalId: string) {
+    return (
+      this.proposals.find((proposal) => proposal.id === proposalId) ?? null
+    );
+  }
+
+  async findRevision(revisionId: string) {
+    return (
+      this.revisions.find((revision) => revision.id === revisionId) ?? null
+    );
+  }
+
+  async listRevisions(targetKey: string, limit: number) {
+    return this.revisions
+      .filter((revision) => revision.targetKey === targetKey)
+      .slice(0, limit);
+  }
+
+  async closeProposal() {}
+}
+
+class TestSaleExecutor implements SaleChangeExecutor {
+  readonly creates: Parameters<SaleChangeExecutor["publishCreate"]>[0][] = [];
+
+  async publishCreate(
+    input: Parameters<SaleChangeExecutor["publishCreate"]>[0]
+  ) {
+    this.creates.push(input);
+    return {
+      id: "operationRevision_1",
+      proposalId: input.proposal.id,
+      kind: input.proposal.kind,
+      action: "update" as const,
+      actor: input.actor,
+      targetType: "sale" as const,
+      targetId: "plist_summer",
+      targetKey: "sale:plist_summer",
+      beforeValue: input.proposal.beforeValue,
+      afterValue: { ...input.proposal.proposedValue, saleId: "plist_summer" },
+      sourceRevisionId: null,
+      reason: input.proposal.reason,
+      requestId: input.requestId,
+      createdAt: input.confirmedAt,
+    };
+  }
+
+  async publishUpdate(
+    input: Parameters<SaleChangeExecutor["publishUpdate"]>[0]
+  ) {
+    return this.publishCreate(input);
   }
 }
 
@@ -223,6 +404,14 @@ class TestGovernance implements GovernanceStore {
       },
       occurredAt: input.proposal.createdAt,
     });
+  }
+
+  async createProposals(
+    input: Parameters<GovernanceStore["createProposals"]>[0]
+  ) {
+    for (const proposal of input.proposals) {
+      await this.createProposal({ proposal, requestId: input.requestId });
+    }
   }
 
   async findProposal(proposalId: string) {
@@ -344,12 +533,563 @@ class TestClock implements Clock {
 }
 
 class TestIds implements IdGenerator {
-  next(prefix: "proposal" | "revision" | "event") {
-    return `${prefix}_1`;
+  private readonly counts = new Map<string, number>();
+
+  next(
+    prefix:
+      | "proposal"
+      | "revision"
+      | "operationProposal"
+      | "operationRevision"
+      | "event"
+  ) {
+    const count = (this.counts.get(prefix) ?? 0) + 1;
+    this.counts.set(prefix, count);
+    return `${prefix}_${count}`;
   }
 }
 
 describe("ProductChangeApplication", () => {
+  it("lists product categories for a manager with merchandising access", async () => {
+    const merchandising = {
+      listCategories: jest.fn().mockResolvedValue({ categories: [], count: 0 }),
+    } as unknown as MerchandisingApplication;
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["merchandising.read"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      merchandising,
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.listProductCategories(
+        { actorId: actor.id, requestId: "req_categories" },
+        { limit: 20, offset: 0 }
+      )
+    ).resolves.toEqual({ categories: [], count: 0 });
+    expect(merchandising.listCategories).toHaveBeenCalledWith({
+      limit: 20,
+      offset: 0,
+    });
+  });
+
+  it("denies product category access without merchandising.read", async () => {
+    const governance = new TestGovernance();
+    const merchandising = {
+      listCategories: jest.fn(),
+    } as unknown as MerchandisingApplication;
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities([]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      governance,
+      executor: new TestExecutor(),
+      merchandising,
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.listProductCategories(
+        { actorId: actor.id, requestId: "req_categories_denied" },
+        { limit: 20, offset: 0 }
+      )
+    ).rejects.toMatchObject({ code: "capability_denied" });
+    expect(merchandising.listCategories).not.toHaveBeenCalled();
+    expect(governance.events).toEqual([
+      expect.objectContaining({
+        name: "authorization.denied",
+        targetId: "product-categories",
+        details: {
+          capability: "merchandising.read",
+          reason: "capability_denied",
+        },
+      }),
+    ]);
+  });
+
+  it("creates an exact sale proposal without publishing it", async () => {
+    const target: SaleVariantTarget = {
+      productId: "prod_tools",
+      productTitle: "Trusă de scule",
+      variantId: "variant_tools",
+      variantTitle: "Standard",
+      sku: "DTHS1M28",
+      basePriceId: "price_base",
+      normalAmount: 429,
+      currencyCode: "mdl",
+      updatedAt: new Date("2026-07-29T09:00:00.000Z"),
+    };
+    const sales = new TestSales([target]);
+    const operationGovernance = new TestOperationGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.update"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales,
+      operationGovernance,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    const proposal = await application.proposeSaleCreate(
+      { actorId: actor.id, requestId: "req_sale_create" },
+      {
+        title: "August sale",
+        description: "Selected tools",
+        status: "draft",
+        startsAt: "2026-08-01T00:00:00.000Z",
+        endsAt: "2026-08-31T23:59:59.000Z",
+        items: [{ variantId: target.variantId, saleAmount: 299 }],
+        reason: "Prepare the August sale",
+      }
+    );
+
+    expect(proposal).toMatchObject({
+      id: "operationProposal_1",
+      kind: "sale_create",
+      status: "pending",
+      actorId: actor.id,
+      targetType: "sale",
+      targetId: null,
+      targetKey: "sale:new:operationProposal_1",
+      beforeValue: {},
+      proposedValue: {
+        saleId: null,
+        title: "August sale",
+        description: "Selected tools",
+        status: "draft",
+        startsAt: "2026-08-01T00:00:00.000Z",
+        endsAt: "2026-08-31T23:59:59.000Z",
+        items: [
+          expect.objectContaining({
+            variantId: target.variantId,
+            normalAmount: 429,
+            saleAmount: 299,
+            currencyCode: "mdl",
+          }),
+        ],
+      },
+      contentHash: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
+      expiresAt: new Date("2026-07-29T10:30:00.000Z"),
+    });
+    expect(operationGovernance.proposals).toEqual([proposal]);
+  });
+
+  it("rejects a sale price that is not below the normal price", async () => {
+    const operationGovernance = new TestOperationGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.update"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales([saleTarget]),
+      operationGovernance,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.proposeSaleCreate(
+        { actorId: actor.id, requestId: "req_invalid_sale_price" },
+        {
+          title: "Invalid sale",
+          description: "Selected tools",
+          status: "draft",
+          startsAt: null,
+          endsAt: null,
+          items: [
+            {
+              variantId: saleTarget.variantId,
+              saleAmount: saleTarget.normalAmount,
+            },
+          ],
+          reason: "Check invalid price",
+        }
+      )
+    ).rejects.toMatchObject({ code: "invalid_sale_price" });
+    expect(operationGovernance.proposals).toEqual([]);
+  });
+
+  it("rejects a sale that overlaps another active sale", async () => {
+    const operationGovernance = new TestOperationGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.update"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales(
+        [saleTarget],
+        [{ saleId: "plist_existing", variantId: saleTarget.variantId }]
+      ),
+      operationGovernance,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.proposeSaleCreate(
+        { actorId: actor.id, requestId: "req_overlapping_sale" },
+        {
+          title: "Overlapping sale",
+          description: "Selected tools",
+          status: "active",
+          startsAt: null,
+          endsAt: null,
+          items: [{ variantId: saleTarget.variantId, saleAmount: 299 }],
+          reason: "Check sale overlap",
+        }
+      )
+    ).rejects.toMatchObject({ code: "sale_overlap" });
+    expect(operationGovernance.proposals).toEqual([]);
+  });
+
+  it("denies sale proposals without sale.update", async () => {
+    const governance = new TestGovernance();
+    const operationGovernance = new TestOperationGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities([]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales([saleTarget]),
+      operationGovernance,
+      governance,
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.proposeSaleCreate(
+        { actorId: actor.id, requestId: "req_denied_sale_create" },
+        {
+          title: "August sale",
+          description: "Selected tools",
+          status: "draft",
+          startsAt: null,
+          endsAt: null,
+          items: [{ variantId: saleTarget.variantId, saleAmount: 299 }],
+          reason: "Prepare the August sale",
+        }
+      )
+    ).rejects.toMatchObject({ code: "capability_denied" });
+    expect(operationGovernance.proposals).toEqual([]);
+    expect(governance.events).toEqual([
+      expect.objectContaining({
+        name: "authorization.denied",
+        targetId: "sale:new",
+        details: {
+          capability: "sale.update",
+          reason: "capability_denied",
+        },
+      }),
+    ]);
+  });
+
+  it("denies return reads without return.read", async () => {
+    const governance = new TestGovernance();
+    const returns = {
+      list: jest.fn(),
+    } as unknown as ReturnApplication;
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities([]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      returns,
+      governance,
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.listReturns(
+        { actorId: actor.id, requestId: "req_denied_return_read" },
+        { limit: 20, offset: 0 }
+      )
+    ).rejects.toMatchObject({ code: "capability_denied" });
+    expect(returns.list).not.toHaveBeenCalled();
+    expect(governance.events).toEqual([
+      expect.objectContaining({
+        name: "authorization.denied",
+        targetId: "returns",
+        details: {
+          capability: "return.read",
+          reason: "capability_denied",
+        },
+      }),
+    ]);
+  });
+
+  it("publishes only the exact sale proposal confirmed by its author", async () => {
+    const target: SaleVariantTarget = {
+      productId: "prod_tools",
+      productTitle: "Trusă de scule",
+      variantId: "variant_tools",
+      variantTitle: "Standard",
+      sku: "DTHS1M28",
+      basePriceId: "price_base",
+      normalAmount: 429,
+      currencyCode: "mdl",
+      updatedAt: new Date("2026-07-29T09:00:00.000Z"),
+    };
+    const operationGovernance = new TestOperationGovernance();
+    const saleExecutor = new TestSaleExecutor();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.update"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales([target]),
+      operationGovernance,
+      saleExecutor,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+    const proposal = await application.proposeSaleCreate(
+      { actorId: actor.id, requestId: "req_sale_create" },
+      {
+        title: "August sale",
+        description: "Selected tools",
+        status: "draft",
+        startsAt: null,
+        endsAt: null,
+        items: [{ variantId: target.variantId, saleAmount: 299 }],
+        reason: "Prepare the August sale",
+      }
+    );
+
+    await expect(
+      application.publishSaleChange(
+        { actorId: actor.id, requestId: "req_sale_publish" },
+        {
+          proposalId: proposal.id,
+          confirmation: {
+            action: "accept",
+            proposalId: proposal.id,
+            contentHash: proposal.contentHash,
+            confirmedAt: now,
+          },
+        }
+      )
+    ).resolves.toMatchObject({
+      proposalId: proposal.id,
+      targetId: "plist_summer",
+    });
+    expect(saleExecutor.creates).toEqual([
+      expect.objectContaining({
+        actor,
+        proposal,
+        requestId: "req_sale_publish",
+        confirmedAt: now,
+      }),
+    ]);
+  });
+
+  it("creates an exact proposal to change sale items", async () => {
+    const operationGovernance = new TestOperationGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.update"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales([saleTarget], [], activeSale),
+      operationGovernance,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    const proposal = await application.proposeSaleItems(
+      { actorId: actor.id, requestId: "req_sale_items" },
+      {
+        saleId: activeSale.id,
+        upsert: [{ variantId: saleTarget.variantId, saleAmount: 299 }],
+        removeVariantIds: [],
+        reason: "Reduce the sale price",
+      }
+    );
+
+    expect(proposal).toMatchObject({
+      kind: "sale_items_update",
+      targetId: activeSale.id,
+      targetKey: `sale:${activeSale.id}`,
+      targetVersion: activeSale.updatedAt.toISOString(),
+      beforeValue: {
+        items: [expect.objectContaining({ saleAmount: 349 })],
+      },
+      proposedValue: {
+        items: [
+          expect.objectContaining({
+            salePriceId: "price_sale",
+            normalAmount: 429,
+            saleAmount: 299,
+          }),
+        ],
+      },
+    });
+    expect(operationGovernance.proposals).toEqual([proposal]);
+  });
+
+  it("creates a safe proposal to end a sale", async () => {
+    const operationGovernance = new TestOperationGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.update"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales([saleTarget], [], activeSale),
+      operationGovernance,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.proposeSaleStatus(
+        { actorId: actor.id, requestId: "req_sale_end" },
+        {
+          saleId: activeSale.id,
+          action: "end",
+          reason: "End the summer sale",
+        }
+      )
+    ).resolves.toMatchObject({
+      kind: "sale_status_update",
+      beforeValue: { status: "active", endsAt: null },
+      proposedValue: {
+        status: "draft",
+        endsAt: "2026-07-29T10:00:00.000Z",
+      },
+    });
+  });
+
+  it("rolls back a created sale by ending it without deleting it", async () => {
+    const operationGovernance = new TestOperationGovernance();
+    operationGovernance.revisions.push({
+      id: "operationRevision_create",
+      proposalId: "operationProposal_create",
+      kind: "sale_create",
+      action: "update",
+      actor,
+      targetType: "sale",
+      targetId: activeSale.id,
+      targetKey: `sale:${activeSale.id}`,
+      beforeValue: {},
+      afterValue: { saleId: activeSale.id },
+      sourceRevisionId: null,
+      reason: "Create sale",
+      requestId: "req_create",
+      createdAt: new Date("2026-07-28T10:00:00.000Z"),
+    });
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.rollback"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales([saleTarget], [], activeSale),
+      operationGovernance,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.proposeSaleRollback(
+        { actorId: actor.id, requestId: "req_sale_rollback" },
+        {
+          revisionId: "operationRevision_create",
+          reason: "Undo the created sale",
+        }
+      )
+    ).resolves.toMatchObject({
+      kind: "sale_rollback",
+      sourceRevisionId: "operationRevision_create",
+      proposedValue: {
+        saleId: activeSale.id,
+        status: "draft",
+        endsAt: "2026-07-29T10:00:00.000Z",
+      },
+    });
+  });
+
+  it("lists sales for an authorized manager", async () => {
+    const sales = new TestSales();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.read"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.listSales(
+        { actorId: actor.id, requestId: "req_sales" },
+        { status: "active", limit: 20, offset: 0 }
+      )
+    ).resolves.toEqual({ sales: [], count: 0 });
+    expect(sales.lists).toEqual([{ status: "active", limit: 20, offset: 0 }]);
+  });
+
+  it("denies sale access without sale.read", async () => {
+    const governance = new TestGovernance();
+    const sales = new TestSales();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities([]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales,
+      governance,
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.listSales(
+        { actorId: actor.id, requestId: "req_denied_sales" },
+        { limit: 20, offset: 0 }
+      )
+    ).rejects.toMatchObject({ code: "capability_denied" });
+    expect(sales.lists).toEqual([]);
+    expect(governance.events).toEqual([
+      expect.objectContaining({
+        name: "authorization.denied",
+        targetId: "sales",
+        details: {
+          capability: "sale.read",
+          reason: "capability_denied",
+        },
+      }),
+    ]);
+  });
+
   it("lists orders for one DYLLU calendar date for an authorized manager", async () => {
     const orders = new TestOrders();
     const application = new ProductChangeApplication({
@@ -382,6 +1122,130 @@ describe("ProductChangeApplication", () => {
         offset: 0,
       },
     ]);
+  });
+
+  it("builds an exact daily order report with clear exceptions", async () => {
+    const orders = new TestOrders([
+      {
+        ...order,
+        id: "order_paid_stale",
+        displayId: 43,
+        paymentStatus: "captured",
+        fulfillmentStatus: "not_fulfilled",
+        createdAt: new Date("2026-07-29T06:00:00.000Z"),
+      },
+      {
+        ...order,
+        id: "order_canceled_paid",
+        displayId: 44,
+        status: "canceled",
+        paymentStatus: "captured",
+        total: 200,
+      },
+      {
+        ...order,
+        id: "order_action",
+        displayId: 45,
+        status: "requires_action",
+        paymentStatus: "requires_action",
+        email: null,
+        total: 100,
+      },
+    ]);
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["order.read"]),
+      products: new TestProducts(),
+      orders,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.getDailyOrderReport(
+        { actorId: actor.id, requestId: "req_order_report" },
+        {
+          localDate: "2026-07-29",
+          timeZone: "Europe/Chisinau",
+          staleAfterMinutes: 120,
+          exceptionLimit: 20,
+        }
+      )
+    ).resolves.toEqual({
+      localDate: "2026-07-29",
+      timeZone: "Europe/Chisinau",
+      orderCount: 3,
+      currencyTotals: [
+        {
+          currencyCode: "mdl",
+          placedAmount: 729,
+          canceledAmount: 200,
+          netAmount: 529,
+        },
+      ],
+      statusCounts: { pending: 1, canceled: 1, requires_action: 1 },
+      paymentStatusCounts: { captured: 2, requires_action: 1 },
+      fulfillmentStatusCounts: { not_fulfilled: 3 },
+      exceptionCount: 3,
+      exceptionsTruncated: false,
+      exceptions: [
+        {
+          order: expect.objectContaining({ id: "order_paid_stale" }),
+          codes: ["paid_not_fulfilled"],
+        },
+        {
+          order: expect.objectContaining({ id: "order_canceled_paid" }),
+          codes: ["canceled_with_payment"],
+        },
+        {
+          order: expect.objectContaining({ id: "order_action" }),
+          codes: ["requires_action", "missing_customer_email"],
+        },
+      ],
+    });
+    expect(orders.lists).toEqual([
+      {
+        localDate: "2026-07-29",
+        timeZone: "Europe/Chisinau",
+        limit: 100,
+        offset: 0,
+      },
+    ]);
+  });
+
+  it("fails closed when a daily order report exceeds its safe limit", async () => {
+    const orders: OrderDirectory = {
+      async list() {
+        return { orders: [], count: 5_001 };
+      },
+      async findByReference() {
+        return null;
+      },
+    };
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["order.read"]),
+      products: new TestProducts(),
+      orders,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.getDailyOrderReport(
+        { actorId: actor.id, requestId: "req_large_order_report" },
+        {
+          localDate: "2026-07-29",
+          timeZone: "Europe/Chisinau",
+          staleAfterMinutes: 120,
+          exceptionLimit: 20,
+        }
+      )
+    ).rejects.toMatchObject({ code: "order_report_limit_exceeded" });
   });
 
   it("returns complete order details by DYLLU order number", async () => {
@@ -606,6 +1470,107 @@ describe("ProductChangeApplication", () => {
     expect(products.countCalls).toBe(1);
   });
 
+  it("audits the complete bounded DYLLU catalog for quality issues", async () => {
+    const products = new TestProducts();
+    products.values.set("prod_incomplete", {
+      ...product,
+      id: "prod_incomplete",
+      title: "Produs incomplet",
+      handle: "produs-incomplet",
+      description: null,
+      imageCount: 0,
+      variants: [],
+    });
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["product.read"]),
+      products,
+      orders: new TestOrders(),
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.auditCatalogQuality(
+        { actorId: actor.id, requestId: "req_catalog_quality" },
+        { minimumDescriptionLength: 10, resultLimit: 50 }
+      )
+    ).resolves.toMatchObject({
+      productCount: 2,
+      productsWithIssues: 1,
+      issueCounts: {
+        missing_description: 1,
+        missing_image: 1,
+        missing_variant: 1,
+      },
+      products: [{ productId: "prod_incomplete" }],
+    });
+    expect(products.lists).toEqual([{ limit: 100, offset: 0 }]);
+  });
+
+  it("returns a bounded DYLLU inventory exception report", async () => {
+    const inventory = new TestInventory([
+      {
+        productId: product.id,
+        productTitle: product.title,
+        productStatus: "published",
+        variantId: "variant_low",
+        variantTitle: "Standard",
+        sku: "LOW-1",
+        manageInventory: true,
+        allowBackorder: false,
+        items: [
+          {
+            inventoryItemId: "iitem_low",
+            requiredQuantity: 1,
+            levels: [
+              {
+                locationId: "sloc_main",
+                locationName: "Main",
+                stockedQuantity: 3,
+                reservedQuantity: 1,
+                incomingQuantity: 0,
+                availableQuantity: 2,
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["inventory.read"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      inventory,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.getInventoryExceptions(
+        { actorId: actor.id, requestId: "req_inventory_exceptions" },
+        { lowStockThreshold: 5, resultLimit: 50, publishedOnly: true }
+      )
+    ).resolves.toMatchObject({
+      scannedVariantCount: 1,
+      managedVariantCount: 1,
+      variantsWithExceptions: 1,
+      variants: [
+        {
+          variantId: "variant_low",
+          availableQuantity: 2,
+          codes: ["low_stock"],
+        },
+      ],
+    });
+    expect(inventory.lists).toEqual([{ limit: 100, offset: 0 }]);
+  });
+
   it("denies and audits product count access without product.read", async () => {
     const products = new TestProducts();
     const governance = new TestGovernance();
@@ -682,6 +1647,61 @@ describe("ProductChangeApplication", () => {
         proposalId: proposal.id,
       }),
     ]);
+  });
+
+  it("creates an atomic batch of independent description proposals", async () => {
+    const products = new TestProducts();
+    products.values.set("prod_saw", {
+      ...product,
+      id: "prod_saw",
+      title: "Ferăstrău",
+      handle: "ferastrau",
+      description: "Descriere veche pentru ferăstrău",
+    });
+    const governance = new TestGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["product_content.update"]),
+      products,
+      orders: new TestOrders(),
+      governance,
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    const result = await application.proposeDescriptionBatch(
+      { actorId: actor.id, requestId: "req_description_batch" },
+      {
+        items: [
+          {
+            productId: product.id,
+            proposedDescription: "Descriere nouă pentru mașina de găurit",
+          },
+          {
+            productId: "prod_saw",
+            proposedDescription: "Descriere nouă pentru ferăstrău",
+          },
+        ],
+        reason: "Correct incomplete product descriptions",
+      }
+    );
+
+    expect(result.proposals).toEqual([
+      expect.objectContaining({
+        id: "proposal_1",
+        productId: product.id,
+        beforeValue: product.description,
+        proposedValue: "Descriere nouă pentru mașina de găurit",
+      }),
+      expect.objectContaining({
+        id: "proposal_2",
+        productId: "prod_saw",
+        beforeValue: "Descriere veche pentru ferăstrău",
+        proposedValue: "Descriere nouă pentru ferăstrău",
+      }),
+    ]);
+    expect(governance.proposals).toEqual(result.proposals);
   });
 
   it("creates an MDL price proposal without changing the current price", async () => {

@@ -2,6 +2,19 @@ export const capabilities = [
   "capability.manage",
   "order.read",
   "product.read",
+  "sale.read",
+  "sale.update",
+  "sale.rollback",
+  "inventory.read",
+  "merchandising.read",
+  "merchandising.update",
+  "merchandising.rollback",
+  "promotion.read",
+  "promotion.update",
+  "promotion.rollback",
+  "return.read",
+  "return.create",
+  "return.cancel",
   "product_content.update",
   "product_price.update",
   "product.rollback",
@@ -79,14 +92,406 @@ export type OrderDetails = OrderSummary & {
   }>;
 };
 
+export const orderExceptionCodes = [
+  "requires_action",
+  "canceled_with_payment",
+  "paid_not_fulfilled",
+  "fulfilled_not_paid",
+  "missing_customer_email",
+] as const;
+
+export type OrderExceptionCode = (typeof orderExceptionCodes)[number];
+
+export type DailyOrderReport = {
+  localDate: string;
+  timeZone: "Europe/Chisinau";
+  orderCount: number;
+  currencyTotals: Array<{
+    currencyCode: string;
+    placedAmount: number;
+    canceledAmount: number;
+    netAmount: number;
+  }>;
+  statusCounts: Record<string, number>;
+  paymentStatusCounts: Record<string, number>;
+  fulfillmentStatusCounts: Record<string, number>;
+  exceptionCount: number;
+  exceptionsTruncated: boolean;
+  exceptions: Array<{
+    order: OrderSummary;
+    codes: OrderExceptionCode[];
+  }>;
+};
+
 export type ProductSummary = {
   id: string;
   title: string;
   handle: string;
   status: string;
   description: string | null;
+  imageCount: number;
   updatedAt: Date;
   variants: ProductVariantSummary[];
+};
+
+export const catalogQualityIssueCodes = [
+  "missing_title",
+  "missing_handle",
+  "missing_description",
+  "short_description",
+  "missing_image",
+  "missing_variant",
+  "missing_sku",
+  "duplicate_sku",
+  "missing_mdl_price",
+  "duplicate_mdl_price",
+  "invalid_mdl_price",
+] as const;
+
+export type CatalogQualityIssueCode = (typeof catalogQualityIssueCodes)[number];
+
+export type CatalogQualityIssue = {
+  code: CatalogQualityIssueCode;
+  variantIds: string[];
+  values: string[];
+};
+
+export type CatalogQualityReport = {
+  productCount: number;
+  productsWithIssues: number;
+  issueCounts: Partial<Record<CatalogQualityIssueCode, number>>;
+  resultsTruncated: boolean;
+  products: Array<{
+    productId: string;
+    title: string;
+    handle: string;
+    status: string;
+    issues: CatalogQualityIssue[];
+  }>;
+};
+
+export type InventoryLevelSnapshot = {
+  locationId: string;
+  locationName: string;
+  stockedQuantity: number;
+  reservedQuantity: number;
+  incomingQuantity: number;
+  availableQuantity: number;
+};
+
+export type InventoryItemSnapshot = {
+  inventoryItemId: string;
+  requiredQuantity: number;
+  levels: InventoryLevelSnapshot[];
+};
+
+export type InventoryVariantSnapshot = {
+  productId: string;
+  productTitle: string;
+  productStatus: string;
+  variantId: string;
+  variantTitle: string;
+  sku: string | null;
+  manageInventory: boolean;
+  allowBackorder: boolean;
+  items: InventoryItemSnapshot[];
+};
+
+export const inventoryExceptionCodes = [
+  "missing_inventory_item",
+  "missing_inventory_level",
+  "negative_available",
+  "out_of_stock",
+  "low_stock",
+  "reservation_exceeds_stock",
+] as const;
+
+export type InventoryExceptionCode = (typeof inventoryExceptionCodes)[number];
+
+export type InventoryExceptionReport = {
+  scannedVariantCount: number;
+  managedVariantCount: number;
+  variantsWithExceptions: number;
+  exceptionCounts: Partial<Record<InventoryExceptionCode, number>>;
+  resultsTruncated: boolean;
+  variants: Array<{
+    productId: string;
+    productTitle: string;
+    variantId: string;
+    variantTitle: string;
+    sku: string | null;
+    availableQuantity: number | null;
+    allowBackorder: boolean;
+    codes: InventoryExceptionCode[];
+    items: InventoryItemSnapshot[];
+  }>;
+};
+
+export type ProductCategorySummary = {
+  id: string;
+  name: string;
+  handle: string;
+  parentCategoryId: string | null;
+  isActive: boolean;
+  isInternal: boolean;
+  rank: number;
+  updatedAt: Date;
+};
+
+export type ProductCategoryProduct = {
+  id: string;
+  title: string;
+  handle: string;
+  status: string;
+  updatedAt: Date;
+};
+
+export type ProductCategoryDetails = ProductCategorySummary & {
+  products: ProductCategoryProduct[];
+  productCount: number;
+};
+
+export type ProductCategoryTarget = {
+  productId: string;
+  productTitle: string;
+  productHandle: string;
+  productStatus: string;
+  productUpdatedAt: Date;
+  assigned: boolean;
+};
+
+export type CategoryAssignmentOperationValue = {
+  category: {
+    id: string;
+    name: string;
+    handle: string;
+    updatedAt: string;
+  };
+  products: Array<{
+    productId: string;
+    productTitle: string;
+    productHandle: string;
+    productStatus: string;
+    productUpdatedAt: string;
+    assigned: boolean;
+  }>;
+};
+
+export type PromotionStatus = "draft" | "active" | "inactive";
+
+export type PromotionDetails = {
+  id: string;
+  code: string;
+  type: "standard" | "buyget";
+  status: PromotionStatus;
+  isAutomatic: boolean;
+  isTaxInclusive: boolean;
+  limit: number | null;
+  used: number;
+  campaignId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type PromotionStatusOperationValue = {
+  id: string;
+  code: string;
+  type: "standard" | "buyget";
+  status: PromotionStatus;
+  isAutomatic: boolean;
+  isTaxInclusive: boolean;
+  limit: number | null;
+  used: number;
+  campaignId: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ReturnStatus =
+  | "requested"
+  | "received"
+  | "partially_received"
+  | "canceled";
+
+export type ReturnItemDetails = {
+  id: string;
+  itemId: string;
+  quantity: number;
+  receivedQuantity: number;
+  reasonId: string | null;
+};
+
+export type ReturnDetails = {
+  id: string;
+  displayId: number;
+  orderId: string;
+  status: ReturnStatus;
+  locationId: string | null;
+  refundAmount: number | null;
+  createdBy: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  requestedAt: Date | null;
+  receivedAt: Date | null;
+  canceledAt: Date | null;
+  items: ReturnItemDetails[];
+};
+
+export type ReturnOrderTarget = {
+  id: string;
+  displayId: number;
+  status: string;
+  fulfillmentStatus: string;
+  currencyCode: string;
+  updatedAt: Date;
+  items: Array<{
+    id: string;
+    title: string;
+    sku: string | null;
+    quantity: number;
+  }>;
+};
+
+export type ReturnRequestOperationValue = {
+  order: {
+    id: string;
+    displayId: number;
+    status: string;
+    fulfillmentStatus: string;
+    currencyCode: string;
+    updatedAt: string;
+  };
+  returnId: null;
+  status: null;
+  note: string | null;
+  items: Array<{
+    itemId: string;
+    title: string;
+    sku: string | null;
+    orderedQuantity: number;
+    alreadyReturnedQuantity: number;
+    requestQuantity: number;
+    reasonId: string | null;
+    note: string | null;
+  }>;
+};
+
+export type ReturnCancelOperationValue = {
+  returnId: string;
+  orderId: string;
+  displayId: number;
+  status: ReturnStatus;
+  updatedAt: string;
+  items: Array<{
+    itemId: string;
+    quantity: number;
+    receivedQuantity: number;
+    reasonId: string | null;
+  }>;
+};
+
+export type SaleStatus = "active" | "draft";
+
+export type SaleSummary = {
+  id: string;
+  title: string;
+  description: string;
+  status: SaleStatus;
+  startsAt: Date | null;
+  endsAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type SaleItem = {
+  priceId: string;
+  productId: string;
+  productTitle: string;
+  variantId: string;
+  variantTitle: string;
+  sku: string | null;
+  currencyCode: string;
+  normalAmount: number | null;
+  saleAmount: number;
+  minQuantity: number | null;
+  maxQuantity: number | null;
+  hasRules: boolean;
+  updatedAt: Date;
+};
+
+export type SaleDetails = SaleSummary & {
+  items: SaleItem[];
+};
+
+export type SaleVariantTarget = {
+  productId: string;
+  productTitle: string;
+  variantId: string;
+  variantTitle: string;
+  sku: string | null;
+  basePriceId: string;
+  normalAmount: number;
+  currencyCode: "mdl";
+  updatedAt: Date;
+};
+
+export type SaleOperationItem = {
+  productId: string;
+  productTitle: string;
+  variantId: string;
+  variantTitle: string;
+  sku: string | null;
+  basePriceId: string;
+  salePriceId: string | null;
+  normalAmount: number;
+  saleAmount: number;
+  currencyCode: "mdl";
+  targetUpdatedAt: string;
+};
+
+export type SaleOperationValue = {
+  saleId: string | null;
+  title: string;
+  description: string;
+  status: SaleStatus;
+  startsAt: string | null;
+  endsAt: string | null;
+  items: SaleOperationItem[];
+};
+
+export type OperationProposal = {
+  id: string;
+  kind: OperationKind;
+  status: ProposalStatus;
+  actorId: string;
+  targetType: OperationTargetType;
+  targetId: string | null;
+  targetKey: string;
+  beforeValue: Record<string, unknown>;
+  proposedValue: Record<string, unknown>;
+  targetVersion: string | null;
+  contentHash: string;
+  reason: string;
+  sourceRevisionId: string | null;
+  createdAt: Date;
+  expiresAt: Date;
+};
+
+export type OperationRevision = {
+  id: string;
+  proposalId: string;
+  kind: OperationKind;
+  action: RevisionAction;
+  actor: Actor;
+  targetType: OperationTargetType;
+  targetId: string;
+  targetKey: string;
+  beforeValue: Record<string, unknown>;
+  afterValue: Record<string, unknown>;
+  sourceRevisionId: string | null;
+  reason: string;
+  requestId: string;
+  createdAt: Date;
 };
 
 export type ProductVariantPriceSummary = {
@@ -135,6 +540,30 @@ export const proposalKinds = [
 ] as const;
 
 export type ProposalKind = (typeof proposalKinds)[number];
+
+export const operationKinds = [
+  "sale_create",
+  "sale_items_update",
+  "sale_status_update",
+  "sale_rollback",
+  "category_assignment_update",
+  "category_assignment_rollback",
+  "promotion_status_update",
+  "promotion_status_rollback",
+  "return_request_create",
+  "return_cancel",
+] as const;
+
+export type OperationKind = (typeof operationKinds)[number];
+
+export const operationTargetTypes = [
+  "sale",
+  "product_category",
+  "promotion",
+  "return",
+] as const;
+
+export type OperationTargetType = (typeof operationTargetTypes)[number];
 
 type BaseProductChangeProposal = {
   id: string;

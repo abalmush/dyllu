@@ -5,6 +5,8 @@ import { Clock, IdGenerator } from "../application/ports";
 const prefixes = {
   proposal: "mcpprop",
   revision: "mcprev",
+  operationProposal: "mcpop",
+  operationRevision: "mcporev",
   event: "mcpevt",
 } as const;
 

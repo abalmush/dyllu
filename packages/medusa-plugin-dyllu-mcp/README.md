@@ -9,8 +9,15 @@ truth; an MCP client supplies the LLM.
 - Analyze stored 1C comparisons without calling 1C
 - Receive fresh 1C data only through a separate explicit tool
 - List orders by DYLLU calendar date and read complete order information
+- Report daily order totals and order exceptions
+- Audit catalog quality and report inventory exceptions
 - Propose a product-description change without publishing it
+- Propose up to 20 independent product-description corrections
 - Propose an exact product-variant base-price change in MDL
+- List and control sales with exact product-variant prices
+- List and control product category assignments
+- List and control promotion status
+- List returns, request exact order-item returns, and cancel unreceived returns
 - Publish only after explicit manager confirmation, with the exact stored
   proposal content hash
 - Immutable before/after revisions and audit events
@@ -26,6 +33,19 @@ Storefront-layout changes are intentionally outside the first vertical slice.
 - `capability.manage`
 - `order.read`
 - `product.read`
+- `sale.read`
+- `sale.update`
+- `sale.rollback`
+- `inventory.read`
+- `merchandising.read`
+- `merchandising.update`
+- `merchandising.rollback`
+- `promotion.read`
+- `promotion.update`
+- `promotion.rollback`
+- `return.read`
+- `return.create`
+- `return.cancel`
 - `product_content.update`
 - `product_price.update`
 - `product.rollback`

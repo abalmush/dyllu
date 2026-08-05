@@ -14,6 +14,8 @@ import {
   Capability,
   ProductChangeProposal,
   ProductChangeRevision,
+  OperationProposal,
+  OperationRevision,
 } from "../../domain/types";
 import { Auth0AccessTokenVerifier } from "../../auth/auth0-access-token-verifier";
 import { Auth0JwksSigningKeyProvider } from "../../auth/auth0-jwks-signing-key-provider";
@@ -28,6 +30,8 @@ import {
   DylluMcpCapabilityGrant,
   DylluMcpChangeProposal,
   DylluMcpChangeRevision,
+  DylluMcpOperationProposal,
+  DylluMcpOperationRevision,
 } from "./models";
 
 export type CompleteCatalogChangeInput = {
@@ -51,6 +55,11 @@ export type CreateCatalogProposalInput = {
   requestId: string;
 };
 
+export type CreateCatalogProposalsInput = {
+  proposals: ProductChangeProposal[];
+  requestId: string;
+};
+
 export type CloseCatalogProposalInput = {
   actorId: string;
   proposalId: string;
@@ -61,6 +70,30 @@ export type CloseCatalogProposalInput = {
   reason: string;
 };
 
+export type CreateOperationProposalInput = {
+  proposal: OperationProposal;
+  requestId: string;
+};
+
+export type CloseOperationProposalInput = {
+  actorId: string;
+  proposalId: string;
+  targetKey: string;
+  requestId: string;
+  occurredAt: Date;
+  status: "expired" | "failed" | "rejected";
+  reason: string;
+};
+
+export type CompleteOperationChangeInput = {
+  actor: Actor;
+  proposal: OperationProposal;
+  revision: OperationRevision;
+  confirmedEventId: string;
+  appliedEventId: string;
+  confirmedAt: Date;
+};
+
 export type { DylluMcpModuleOptions } from "../../auth/options";
 
 export class DylluMcpGovernanceModuleService extends MedusaService({
@@ -68,6 +101,8 @@ export class DylluMcpGovernanceModuleService extends MedusaService({
   DylluMcpCapabilityGrant,
   DylluMcpChangeProposal,
   DylluMcpChangeRevision,
+  DylluMcpOperationProposal,
+  DylluMcpOperationRevision,
 }) {
   private readonly options_: ParsedDylluMcpOptions;
   private readonly accessTokenVerifier_: Auth0AccessTokenVerifier | null;
@@ -360,6 +395,27 @@ export class DylluMcpGovernanceModuleService extends MedusaService({
   }
 
   @InjectTransactionManager()
+  protected async createCatalogProposals_(
+    input: CreateCatalogProposalsInput,
+    @MedusaContext() sharedContext?: Context<EntityManager>
+  ) {
+    for (const proposal of input.proposals) {
+      await this.createCatalogProposal_(
+        { proposal, requestId: input.requestId },
+        sharedContext
+      );
+    }
+  }
+
+  @InjectManager()
+  async createCatalogProposals(
+    input: CreateCatalogProposalsInput,
+    @MedusaContext() sharedContext?: Context<EntityManager>
+  ) {
+    return this.createCatalogProposals_(input, sharedContext);
+  }
+
+  @InjectTransactionManager()
   protected async closeCatalogProposal_(
     input: CloseCatalogProposalInput,
     @MedusaContext() sharedContext?: Context<EntityManager>
@@ -412,6 +468,237 @@ export class DylluMcpGovernanceModuleService extends MedusaService({
     @MedusaContext() sharedContext?: Context<EntityManager>
   ) {
     return this.closeCatalogProposal_(input, sharedContext);
+  }
+
+  @InjectTransactionManager()
+  protected async createOperationProposal_(
+    input: CreateOperationProposalInput,
+    @MedusaContext() sharedContext?: Context<EntityManager>
+  ) {
+    const proposal = input.proposal;
+    const transactionManager = sharedContext?.transactionManager;
+    if (!transactionManager) {
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        "A transaction manager is required to create an MCP operation proposal"
+      );
+    }
+    const pending = await this.listDylluMcpOperationProposals(
+      {
+        actor_id: proposal.actorId,
+        target_key: proposal.targetKey,
+        status: "pending",
+      },
+      {},
+      sharedContext
+    );
+    if (pending.length > 0) {
+      await transactionManager.nativeUpdate(
+        "dyllu_mcp_operation_proposal",
+        { id: { $in: pending.map((item) => item.id) }, status: "pending" },
+        { status: "superseded", updated_at: proposal.createdAt }
+      );
+      await this.createDylluMcpAuditEvents(
+        pending.map((item) => ({
+          id: generateEntityId(undefined, "mcpevt"),
+          name: "proposal.superseded" as const,
+          actor_id: proposal.actorId,
+          target_id: proposal.targetKey,
+          proposal_id: item.id,
+          revision_id: null,
+          request_id: input.requestId,
+          details: { replacement_pending: true },
+          occurred_at: proposal.createdAt,
+        })),
+        sharedContext
+      );
+    }
+    await this.createDylluMcpOperationProposals(
+      {
+        id: proposal.id,
+        kind: proposal.kind,
+        status: proposal.status,
+        actor_id: proposal.actorId,
+        target_type: proposal.targetType,
+        target_id: proposal.targetId,
+        target_key: proposal.targetKey,
+        before_value: proposal.beforeValue,
+        proposed_value: proposal.proposedValue,
+        target_version: proposal.targetVersion,
+        content_hash: proposal.contentHash,
+        reason: proposal.reason,
+        source_revision_id: proposal.sourceRevisionId,
+        expires_at: proposal.expiresAt,
+      },
+      sharedContext
+    );
+    await this.createDylluMcpAuditEvents(
+      {
+        id: generateEntityId(undefined, "mcpevt"),
+        name: "proposal.created",
+        actor_id: proposal.actorId,
+        target_id: proposal.targetKey,
+        proposal_id: proposal.id,
+        revision_id: null,
+        request_id: input.requestId,
+        details: {
+          kind: proposal.kind,
+          content_hash: proposal.contentHash,
+          source_revision_id: proposal.sourceRevisionId,
+        },
+        occurred_at: proposal.createdAt,
+      },
+      sharedContext
+    );
+  }
+
+  @InjectManager()
+  async createOperationProposal(
+    input: CreateOperationProposalInput,
+    @MedusaContext() sharedContext?: Context<EntityManager>
+  ) {
+    return this.createOperationProposal_(input, sharedContext);
+  }
+
+  @InjectTransactionManager()
+  protected async closeOperationProposal_(
+    input: CloseOperationProposalInput,
+    @MedusaContext() sharedContext?: Context<EntityManager>
+  ) {
+    const transactionManager = sharedContext?.transactionManager;
+    if (!transactionManager) {
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        "A transaction manager is required to close an MCP operation proposal"
+      );
+    }
+    const affected = await transactionManager.nativeUpdate(
+      "dyllu_mcp_operation_proposal",
+      {
+        id: input.proposalId,
+        actor_id: input.actorId,
+        target_key: input.targetKey,
+        status: "pending",
+      },
+      { status: input.status, updated_at: input.occurredAt }
+    );
+    if (affected !== 1) {
+      throw new MedusaError(
+        MedusaError.Types.CONFLICT,
+        "The MCP operation proposal is no longer pending"
+      );
+    }
+    await this.createDylluMcpAuditEvents(
+      {
+        id: generateEntityId(undefined, "mcpevt"),
+        name: `proposal.${input.status}`,
+        actor_id: input.actorId,
+        target_id: input.targetKey,
+        proposal_id: input.proposalId,
+        revision_id: null,
+        request_id: input.requestId,
+        details: { reason: input.reason },
+        occurred_at: input.occurredAt,
+      },
+      sharedContext
+    );
+  }
+
+  @InjectManager()
+  async closeOperationProposal(
+    input: CloseOperationProposalInput,
+    @MedusaContext() sharedContext?: Context<EntityManager>
+  ) {
+    return this.closeOperationProposal_(input, sharedContext);
+  }
+
+  @InjectTransactionManager()
+  protected async completeOperationChange_(
+    input: CompleteOperationChangeInput,
+    @MedusaContext() sharedContext?: Context<EntityManager>
+  ) {
+    const transactionManager = sharedContext?.transactionManager;
+    if (!transactionManager) {
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        "A transaction manager is required to complete an MCP operation"
+      );
+    }
+    const affected = await transactionManager.nativeUpdate(
+      "dyllu_mcp_operation_proposal",
+      {
+        id: input.proposal.id,
+        actor_id: input.actor.id,
+        status: "pending",
+        content_hash: input.proposal.contentHash,
+      },
+      { status: "applied", updated_at: input.confirmedAt }
+    );
+    if (affected !== 1) {
+      throw new MedusaError(
+        MedusaError.Types.CONFLICT,
+        "The MCP operation proposal is no longer publishable"
+      );
+    }
+    await this.createDylluMcpOperationRevisions(
+      {
+        id: input.revision.id,
+        proposal_id: input.revision.proposalId,
+        kind: input.revision.kind,
+        action: input.revision.action,
+        actor_id: input.revision.actor.id,
+        actor_email: input.revision.actor.email,
+        actor_name: input.revision.actor.name,
+        target_type: input.revision.targetType,
+        target_id: input.revision.targetId,
+        target_key: input.revision.targetKey,
+        before_value: input.revision.beforeValue,
+        after_value: input.revision.afterValue,
+        source_revision_id: input.revision.sourceRevisionId,
+        reason: input.revision.reason,
+        request_id: input.revision.requestId,
+      },
+      sharedContext
+    );
+    await this.createDylluMcpAuditEvents(
+      [
+        {
+          id: input.confirmedEventId,
+          name: "proposal.confirmed",
+          actor_id: input.actor.id,
+          target_id: input.proposal.targetKey,
+          proposal_id: input.proposal.id,
+          revision_id: null,
+          request_id: input.revision.requestId,
+          details: { content_hash: input.proposal.contentHash },
+          occurred_at: input.confirmedAt,
+        },
+        {
+          id: input.appliedEventId,
+          name: "proposal.applied",
+          actor_id: input.actor.id,
+          target_id: input.revision.targetKey,
+          proposal_id: input.proposal.id,
+          revision_id: input.revision.id,
+          request_id: input.revision.requestId,
+          details: {
+            action: input.revision.action,
+            source_revision_id: input.revision.sourceRevisionId,
+          },
+          occurred_at: input.revision.createdAt,
+        },
+      ],
+      sharedContext
+    );
+    return input.revision;
+  }
+
+  @InjectManager()
+  async completeOperationChange(
+    input: CompleteOperationChangeInput,
+    @MedusaContext() sharedContext?: Context<EntityManager>
+  ) {
+    return this.completeOperationChange_(input, sharedContext);
   }
 
   @InjectTransactionManager()

@@ -6,6 +6,8 @@ import {
   OrderListQuery,
   ProductCatalog,
   ProductSearch,
+  SaleDirectory,
+  SaleListQuery,
   UserDirectory,
 } from "../application/ports";
 import { ApplicationError } from "../application/errors";
@@ -23,6 +25,7 @@ const productSchema = z.object({
   handle: z.string(),
   status: z.string(),
   description: z.string().nullable(),
+  images: z.array(z.object({ id: z.string() })).optional(),
   updated_at: z.coerce.date(),
   variants: z
     .array(
@@ -42,6 +45,10 @@ const productSchema = z.object({
                   min_quantity: z.number().nullable().optional(),
                   max_quantity: z.number().nullable().optional(),
                   updated_at: z.coerce.date(),
+                  price_list: z
+                    .object({ id: z.string() })
+                    .nullable()
+                    .optional(),
                   rules: z.array(z.unknown()).optional(),
                 })
               )
@@ -52,6 +59,18 @@ const productSchema = z.object({
       })
     )
     .optional(),
+});
+
+const saleSchema = z.object({
+  id: z.string(),
+  title: z.string().nullish(),
+  description: z.string().nullish(),
+  type: z.literal("sale"),
+  status: z.enum(["active", "draft"]),
+  starts_at: z.coerce.date().nullable().optional(),
+  ends_at: z.coerce.date().nullable().optional(),
+  created_at: z.coerce.date(),
+  updated_at: z.coerce.date(),
 });
 
 const numericSchema = z.preprocess((value) => {
@@ -71,6 +90,59 @@ const numericSchema = z.preprocess((value) => {
   }
   return Number(value);
 }, z.number().finite());
+
+const saleDetailsSchema = saleSchema.extend({
+  prices: z
+    .array(
+      z.object({
+        id: z.string(),
+        amount: numericSchema,
+        currency_code: z.string(),
+        min_quantity: numericSchema.nullable().optional(),
+        max_quantity: numericSchema.nullable().optional(),
+        price_rules: z.array(z.unknown()).optional(),
+        updated_at: z.coerce.date(),
+        price_set: z.object({
+          variant: z.object({ id: z.string() }).nullable(),
+        }),
+      })
+    )
+    .optional(),
+});
+
+const saleVariantSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  sku: z.string().nullable(),
+  product: z.object({ id: z.string(), title: z.string() }),
+  price_set: z.object({
+    prices: z.array(
+      z.object({
+        id: z.string(),
+        amount: numericSchema,
+        currency_code: z.string(),
+        min_quantity: numericSchema.nullable().optional(),
+        max_quantity: numericSchema.nullable().optional(),
+        price_list: z.object({ id: z.string() }).nullable().optional(),
+        price_rules: z.array(z.unknown()).optional(),
+        updated_at: z.coerce.date().optional(),
+      })
+    ),
+  }),
+});
+
+const overlapPriceSchema = z.object({
+  price_set: z.object({
+    variant: z.object({ id: z.string() }),
+  }),
+  price_list: z.object({
+    id: z.string(),
+    type: z.literal("sale"),
+    status: z.literal("active"),
+    starts_at: z.coerce.date().nullable().optional(),
+    ends_at: z.coerce.date().nullable().optional(),
+  }),
+});
 
 const orderSummarySchema = z.object({
   id: z.string(),
@@ -168,6 +240,41 @@ export class MedusaProductCatalog implements ProductCatalog {
     return z.number().int().nonnegative().parse(metadata?.count);
   }
 
+  async list(input: { limit: number; offset: number }) {
+    const { data, metadata } = await this.query.graph({
+      entity: "product",
+      fields: productFields,
+      pagination: {
+        take: input.limit,
+        skip: input.offset,
+        order: { id: "ASC" },
+      },
+    });
+    return {
+      products: z
+        .array(productSchema)
+        .parse(data)
+        .map((product) => this.toProduct(product)),
+      count: z.number().int().nonnegative().parse(metadata?.count),
+    };
+  }
+
+  async findByIds(productIds: string[]) {
+    if (productIds.length === 0) {
+      return [];
+    }
+    const { data } = await this.query.graph({
+      entity: "product",
+      fields: productFields,
+      filters: { id: productIds },
+      pagination: { take: productIds.length, skip: 0 },
+    });
+    return z
+      .array(productSchema)
+      .parse(data)
+      .map((product) => this.toProduct(product));
+  }
+
   async findById(productId: string) {
     const { data } = await this.query.graph({
       entity: "product",
@@ -231,6 +338,7 @@ export class MedusaProductCatalog implements ProductCatalog {
       handle: product.handle,
       status: product.status,
       description: product.description,
+      imageCount: product.images?.length ?? 0,
       updatedAt: product.updated_at,
       variants: (product.variants ?? []).map((variant) => ({
         id: variant.id,
@@ -242,6 +350,7 @@ export class MedusaProductCatalog implements ProductCatalog {
             (price) =>
               price.min_quantity == null &&
               price.max_quantity == null &&
+              price.price_list == null &&
               (price.rules?.length ?? 0) === 0
           )
           .map((price) => ({
@@ -253,6 +362,306 @@ export class MedusaProductCatalog implements ProductCatalog {
       })),
     };
   }
+}
+
+export class MedusaSaleDirectory implements SaleDirectory {
+  constructor(private readonly query: Pick<RemoteQueryFunction, "graph">) {}
+
+  async list(input: SaleListQuery) {
+    const { data, metadata } = await this.query.graph({
+      entity: "price_list",
+      fields: saleFields,
+      filters: {
+        type: "sale",
+        ...(input.status ? { status: input.status } : {}),
+      },
+      pagination: {
+        take: input.limit,
+        skip: input.offset,
+        order: { created_at: "DESC" },
+      },
+    });
+    const sales = z.array(saleSchema).parse(data).map((sale) => ({
+      id: sale.id,
+      title: sale.title ?? "",
+      description: sale.description ?? "",
+      status: sale.status,
+      startsAt: sale.starts_at ?? null,
+      endsAt: sale.ends_at ?? null,
+      createdAt: sale.created_at,
+      updatedAt: sale.updated_at,
+    }));
+    return {
+      sales,
+      count: z.number().int().nonnegative().parse(metadata?.count),
+    };
+  }
+
+  async findById(saleId: string) {
+    const { data } = await this.query.graph({
+      entity: "price_list",
+      fields: saleDetailsFields,
+      filters: { id: saleId, type: "sale" },
+      pagination: { take: 1, skip: 0 },
+    });
+    const parsedSale = saleDetailsSchema.safeParse(data[0]);
+    if (!parsedSale.success) {
+      return null;
+    }
+
+    const variantIds = [
+      ...new Set(
+        (parsedSale.data.prices ?? [])
+          .map((price) => price.price_set.variant?.id)
+          .filter((id): id is string => Boolean(id))
+      ),
+    ];
+    const variants = variantIds.length
+      ? await this.query.graph({
+          entity: "variant",
+          fields: saleVariantFields,
+          filters: { id: variantIds },
+          pagination: { take: variantIds.length, skip: 0 },
+        })
+      : { data: [] };
+    const parsedVariants = z.array(saleVariantSchema).parse(variants.data);
+    const variantsById = new Map(
+      parsedVariants.map((variant) => [variant.id, variant])
+    );
+    const sale = parsedSale.data;
+    const items = (sale.prices ?? []).map((price) => {
+      const variantId = price.price_set.variant?.id;
+      const variant = variantId ? variantsById.get(variantId) : undefined;
+      if (!variant) {
+        throw new ApplicationError(
+          "sale_data_invalid",
+          "A DYLLU sale item has no valid product variant"
+        );
+      }
+      const currencyCode = price.currency_code.toLowerCase();
+      const normalPrice = variant.price_set.prices.find(
+        (candidate) =>
+          candidate.currency_code.toLowerCase() === currencyCode &&
+          candidate.price_list == null &&
+          candidate.min_quantity == null &&
+          candidate.max_quantity == null &&
+          (candidate.price_rules?.length ?? 0) === 0
+      );
+      return {
+        priceId: price.id,
+        productId: variant.product.id,
+        productTitle: variant.product.title,
+        variantId: variant.id,
+        variantTitle: variant.title,
+        sku: variant.sku,
+        currencyCode,
+        normalAmount: normalPrice?.amount ?? null,
+        saleAmount: price.amount,
+        minQuantity: price.min_quantity ?? null,
+        maxQuantity: price.max_quantity ?? null,
+        hasRules: (price.price_rules?.length ?? 0) > 0,
+        updatedAt: price.updated_at,
+      };
+    });
+
+    return {
+      id: sale.id,
+      title: sale.title ?? "",
+      description: sale.description ?? "",
+      status: sale.status,
+      startsAt: sale.starts_at ?? null,
+      endsAt: sale.ends_at ?? null,
+      createdAt: sale.created_at,
+      updatedAt: sale.updated_at,
+      items,
+    };
+  }
+
+  async findVariantTargets(variantIds: string[], currencyCode: "mdl") {
+    if (variantIds.length === 0) {
+      return [];
+    }
+    const { data } = await this.query.graph({
+      entity: "variant",
+      fields: saleVariantFields,
+      filters: { id: variantIds },
+      pagination: { take: variantIds.length, skip: 0 },
+    });
+    const variants = z.array(saleVariantSchema).parse(data);
+    return variants.flatMap((variant) => {
+      const basePrice = variant.price_set.prices.find(
+        (price) =>
+          price.currency_code.toLowerCase() === currencyCode &&
+          price.price_list == null &&
+          price.min_quantity == null &&
+          price.max_quantity == null &&
+          (price.price_rules?.length ?? 0) === 0 &&
+          price.updated_at
+      );
+      return basePrice?.updated_at
+        ? [
+            {
+              productId: variant.product.id,
+              productTitle: variant.product.title,
+              variantId: variant.id,
+              variantTitle: variant.title,
+              sku: variant.sku,
+              basePriceId: basePrice.id,
+              normalAmount: basePrice.amount,
+              currencyCode,
+              updatedAt: basePrice.updated_at,
+            },
+          ]
+        : [];
+    });
+  }
+
+  async findOverlappingActiveSales(input: {
+    variantIds: string[];
+    startsAt: Date | null;
+    endsAt: Date | null;
+    excludeSaleId?: string;
+  }) {
+    if (input.variantIds.length === 0) {
+      return [];
+    }
+    const { data: variants } = await this.query.graph({
+      entity: "variant",
+      fields: ["id", "price_set.id"],
+      filters: { id: input.variantIds },
+      pagination: { take: input.variantIds.length, skip: 0 },
+    });
+    const priceSetIds = z
+      .array(z.object({ price_set: z.object({ id: z.string() }) }))
+      .parse(variants)
+      .map((variant) => variant.price_set.id);
+    if (priceSetIds.length === 0) {
+      return [];
+    }
+    const saleLimit = 1_000;
+    const { data: activeSales, metadata: saleMetadata } =
+      await this.query.graph({
+        entity: "price_list",
+        fields: ["id"],
+        filters: { type: "sale", status: "active" },
+        pagination: { take: saleLimit, skip: 0 },
+      });
+    const saleCount = z
+      .number()
+      .int()
+      .nonnegative()
+      .parse(saleMetadata?.count);
+    if (saleCount > saleLimit) {
+      throw new ApplicationError(
+        "sale_overlap_limit_exceeded",
+        "The DYLLU sale overlap check exceeded its safe limit"
+      );
+    }
+    const activeSaleIds = z
+      .array(z.object({ id: z.string() }))
+      .parse(activeSales)
+      .map((sale) => sale.id)
+      .filter((saleId) => saleId !== input.excludeSaleId);
+    if (activeSaleIds.length === 0) {
+      return [];
+    }
+    const take = 5_000;
+    const { data: prices, metadata } = await this.query.graph({
+      entity: "price",
+      fields: overlapPriceFields,
+      filters: {
+        price_set_id: priceSetIds,
+        price_list_id: activeSaleIds,
+        currency_code: "mdl",
+      },
+      pagination: { take, skip: 0 },
+    });
+    const count = z.number().int().nonnegative().parse(metadata?.count);
+    if (count > take) {
+      throw new ApplicationError(
+        "sale_overlap_limit_exceeded",
+        "The DYLLU sale overlap check exceeded its safe limit"
+      );
+    }
+    return z
+      .array(overlapPriceSchema)
+      .parse(prices)
+      .filter(
+        (price) =>
+          price.price_list.id !== input.excludeSaleId &&
+          dateRangesOverlap(
+            input.startsAt,
+            input.endsAt,
+            price.price_list.starts_at ?? null,
+            price.price_list.ends_at ?? null
+          )
+      )
+      .map((price) => ({
+        saleId: price.price_list.id,
+        variantId: price.price_set.variant.id,
+      }));
+  }
+}
+
+const saleFields = [
+  "id",
+  "title",
+  "description",
+  "type",
+  "status",
+  "starts_at",
+  "ends_at",
+  "created_at",
+  "updated_at",
+];
+
+const saleDetailsFields = [
+  ...saleFields,
+  "prices.id",
+  "prices.amount",
+  "prices.currency_code",
+  "prices.min_quantity",
+  "prices.max_quantity",
+  "prices.price_rules.id",
+  "prices.updated_at",
+  "prices.price_set.variant.id",
+];
+
+const saleVariantFields = [
+  "id",
+  "title",
+  "sku",
+  "product.id",
+  "product.title",
+  "price_set.prices.id",
+  "price_set.prices.amount",
+  "price_set.prices.currency_code",
+  "price_set.prices.min_quantity",
+  "price_set.prices.max_quantity",
+  "price_set.prices.price_list.id",
+  "price_set.prices.price_rules.id",
+  "price_set.prices.updated_at",
+];
+
+const overlapPriceFields = [
+  "price_set.variant.id",
+  "price_list.id",
+  "price_list.type",
+  "price_list.status",
+  "price_list.starts_at",
+  "price_list.ends_at",
+];
+
+function dateRangesOverlap(
+  leftStart: Date | null,
+  leftEnd: Date | null,
+  rightStart: Date | null,
+  rightEnd: Date | null
+) {
+  return (
+    (!leftEnd || !rightStart || rightStart <= leftEnd) &&
+    (!rightEnd || !leftStart || leftStart <= rightEnd)
+  );
 }
 
 type OrderListWorkflowInput = {
@@ -488,6 +897,7 @@ const productFields = [
   "handle",
   "status",
   "description",
+  "images.id",
   "updated_at",
   "variants.id",
   "variants.title",
@@ -499,6 +909,7 @@ const productFields = [
   "variants.price_set.prices.min_quantity",
   "variants.price_set.prices.max_quantity",
   "variants.price_set.prices.updated_at",
+  "variants.price_set.prices.price_list.id",
   "variants.price_set.prices.rules.*",
 ];
 
