@@ -1,7 +1,7 @@
 {
-  "name": "@dyllu/medusa-plugin-mcp",
+  "name": "@dyllu/medusa-plugin-one-c",
   "version": "0.1.0",
-  "description": "Governed MCP tools for DYLLU administration.",
+  "description": "Read-only 1C catalog synchronization manager for DYLLU.",
   "license": "UNLICENSED",
   "private": true,
   "files": [
@@ -9,9 +9,21 @@
   ],
   "exports": {
     "./package.json": "./package.json",
-    "./workflows": "./.medusa/server/src/workflows/index.js",
+    "./contracts": {
+      "types": "./.medusa/server/src/contracts.d.ts",
+      "default": "./.medusa/server/src/contracts.js"
+    },
+    "./access": {
+      "types": "./.medusa/server/src/access.d.ts",
+      "default": "./.medusa/server/src/access.js"
+    },
     "./.medusa/server/src/modules/*": "./.medusa/server/src/modules/*/index.js",
     "./modules/*": "./.medusa/server/src/modules/*/index.js",
+    "./admin": {
+      "import": "./.medusa/server/src/admin/index.mjs",
+      "require": "./.medusa/server/src/admin/index.js",
+      "default": "./.medusa/server/src/admin/index.js"
+    },
     "./*": "./.medusa/server/src/*.js"
   },
   "scripts": {
@@ -20,32 +32,27 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
     "typecheck": "tsc --noEmit --incremental false"
   },
-  "dependencies": {
-    "@dyllu/medusa-plugin-one-c": "workspace:*",
-    "@modelcontextprotocol/sdk": "1.30.0",
-    "jsonwebtoken": "9.0.3",
-    "jwks-rsa": "3.2.2",
-    "zod": "4.2.0"
-  },
   "devDependencies": {
     "@medusajs/admin-sdk": "2.18.0",
     "@medusajs/admin-shared": "2.18.0",
     "@medusajs/cli": "2.18.0",
     "@medusajs/eslint-plugin": "2.18.0",
     "@medusajs/framework": "2.18.0",
+    "@medusajs/icons": "2.18.0",
     "@medusajs/medusa": "2.18.0",
     "@medusajs/test-utils": "2.18.0",
+    "@medusajs/ui": "4.2.0",
     "@swc/core": "^1.7.28",
     "@swc/jest": "^0.2.36",
+    "@tanstack/react-query": "5.64.2",
     "@types/jest": "^29.5.13",
-    "@types/jsonwebtoken": "9.0.10",
     "@types/node": "^20.12.11",
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.2.25",
-    "eslint": "^9.0.0",
     "jest": "^29.7.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react-dom": "^18.2.25",
+    "react-router-dom": "6.30.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2",
     "yalc": "^1.0.0-pre.53"
@@ -55,10 +62,14 @@
     "@medusajs/admin-shared": "2.18.0",
     "@medusajs/cli": "2.18.0",
     "@medusajs/framework": "2.18.0",
+    "@medusajs/icons": "2.18.0",
     "@medusajs/medusa": "2.18.0",
     "@medusajs/test-utils": "2.18.0",
+    "@medusajs/ui": "4.2.0",
+    "@tanstack/react-query": "5.64.2",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.2.25",
+    "react-router-dom": "6.30.4"
   },
   "engines": {
     "node": ">=22.12.0"

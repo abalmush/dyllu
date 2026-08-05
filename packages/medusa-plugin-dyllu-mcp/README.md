@@ -6,6 +6,8 @@ truth; an MCP client supplies the LLM.
 ## Implemented scope
 
 - Read, search, and count products
+- Analyze stored 1C comparisons without calling 1C
+- Receive fresh 1C data only through a separate explicit tool
 - List orders by DYLLU calendar date and read complete order information
 - Propose a product-description change without publishing it
 - Propose an exact product-variant base-price change in MDL
@@ -30,6 +32,8 @@ Storefront-layout changes are intentionally outside the first vertical slice.
 - `homepage_draft.update`
 - `homepage.publish`
 - `audit.read`
+- `one_c_sync.read`
+- `one_c_sync.refresh`
 
 Homepage capabilities are reserved for a later workflow and grant no tools yet.
 

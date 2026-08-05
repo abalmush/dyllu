@@ -13,6 +13,7 @@ import {
   ProductPriceTarget,
   ProductSummary,
 } from "../domain/types";
+import type { OneCSyncAccess } from "@dyllu/medusa-plugin-one-c/contracts";
 
 export type ProductSearch = {
   query: string;
@@ -112,3 +113,5 @@ export interface Clock {
 export interface IdGenerator {
   next(prefix: "proposal" | "revision" | "event"): string;
 }
+
+export type OneCSyncDirectory = OneCSyncAccess;
