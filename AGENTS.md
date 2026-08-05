@@ -13,6 +13,11 @@ Before work on 1C connectivity, catalog sync, price sync, or MCP analysis, read
 verified endpoints, data rules, security limits, live test results, and open
 questions.
 
+# DYLLU MCP context
+
+Before MCP authentication, user onboarding, permission, ChatGPT setup, or tool
+work, read [`docs/dyllu-mcp.md`](docs/dyllu-mcp.md).
+
 # Production safety — non-negotiable
 
 Production availability takes priority over cleanup, hardening, refactoring, and
