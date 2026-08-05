@@ -350,6 +350,69 @@ describe("DYLLU MCP server", () => {
     }
   });
 
+  it("creates a reviewable DYLLU return request proposal", async () => {
+    const application = {
+      proposeReturnRequest: jest.fn().mockResolvedValue({
+        id: "operationProposal_return",
+        contentHash: "sha256:test",
+      }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_return" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "propose_return_request",
+        arguments: {
+          order_reference: "42",
+          items: [
+            {
+              item_id: "item_drill",
+              quantity: 1,
+              reason_id: null,
+              note: "Unused item",
+            },
+          ],
+          note: "Customer return request",
+          reason: "Customer requested a return",
+        },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(application.proposeReturnRequest).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_return" },
+        {
+          orderReference: "42",
+          items: [
+            {
+              itemId: "item_drill",
+              quantity: 1,
+              reasonId: null,
+              note: "Unused item",
+            },
+          ],
+          note: "Customer return request",
+          reason: "Customer requested a return",
+        }
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("gets one DYLLU sale with its exact items", async () => {
     const application = {
       getSale: jest.fn().mockResolvedValue({ id: "plist_summer", items: [] }),

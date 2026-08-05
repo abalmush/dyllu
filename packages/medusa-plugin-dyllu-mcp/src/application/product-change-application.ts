@@ -48,6 +48,7 @@ import {
   ProposeCategoryAssignmentsInput,
 } from "./merchandising-application";
 import { PromotionApplication } from "./promotion-application";
+import { ReturnApplication } from "./return-application";
 
 const PROPOSAL_TTL_MS = 30 * 60 * 1000;
 const MAX_DESCRIPTION_LENGTH = 20_000;
@@ -156,6 +157,7 @@ export type ProductChangeApplicationDependencies = {
   inventory?: InventoryDirectory;
   merchandising?: MerchandisingApplication;
   promotions?: PromotionApplication;
+  returns?: ReturnApplication;
 };
 
 export class ProductChangeApplication {
@@ -640,6 +642,83 @@ export class ProductChangeApplication {
       proposal.targetKey
     );
     return this.requirePromotions().publishStatus(actor, {
+      ...input,
+      requestId: context.requestId,
+    });
+  }
+
+  async listReturns(
+    context: RequestContext,
+    input: {
+      status?: "requested" | "received" | "partially_received" | "canceled";
+      limit: number;
+      offset: number;
+    }
+  ) {
+    await this.requireCapability(context, "return.read", "returns");
+    return this.requireReturns().list(input);
+  }
+
+  async getReturn(context: RequestContext, returnId: string) {
+    await this.requireCapability(context, "return.read", returnId);
+    return this.requireReturns().get(returnId);
+  }
+
+  async proposeReturnRequest(
+    context: RequestContext,
+    input: Parameters<ReturnApplication["proposeCreate"]>[1]
+  ) {
+    await this.requireCapability(
+      context,
+      "return.create",
+      input.orderReference
+    );
+    return this.requireReturns().proposeCreate(context, input);
+  }
+
+  async proposeReturnCancel(
+    context: RequestContext,
+    input: Parameters<ReturnApplication["proposeCancel"]>[1]
+  ) {
+    await this.requireCapability(context, "return.cancel", input.returnId);
+    return this.requireReturns().proposeCancel(context, input);
+  }
+
+  async listReturnHistory(
+    context: RequestContext,
+    returnId: string,
+    limit: number
+  ) {
+    await this.requireCapability(context, "audit.read", returnId);
+    return this.requireReturns().listHistory(returnId, limit);
+  }
+
+  async publishReturnChange(
+    context: RequestContext,
+    input: PublishDescriptionInput
+  ) {
+    const actor = await this.requireActiveActor(context, input.proposalId);
+    const proposal = await this.requireOperationGovernance().findProposal(
+      input.proposalId
+    );
+    if (
+      !proposal ||
+      proposal.targetType !== "return" ||
+      (proposal.kind !== "return_request_create" &&
+        proposal.kind !== "return_cancel")
+    ) {
+      throw new ApplicationError(
+        "proposal_not_found",
+        `Return proposal ${input.proposalId} was not found`
+      );
+    }
+    await this.requireCapabilityForActor(
+      context,
+      actor,
+      this.requiredCapabilityForOperation(proposal),
+      proposal.targetKey
+    );
+    return this.requireReturns().publish(actor, {
       ...input,
       requestId: context.requestId,
     });
@@ -1984,6 +2063,16 @@ export class ProductChangeApplication {
     return this.dependencies.promotions;
   }
 
+  private requireReturns() {
+    if (!this.dependencies.returns) {
+      throw new ApplicationError(
+        "return_unavailable",
+        "DYLLU return control is unavailable"
+      );
+    }
+    return this.dependencies.returns;
+  }
+
   private requireOperationGovernance() {
     if (!this.dependencies.operationGovernance) {
       throw new ApplicationError(
@@ -2209,6 +2298,12 @@ export class ProductChangeApplication {
     }
     if (proposal.kind === "promotion_status_update") {
       return "promotion.update";
+    }
+    if (proposal.kind === "return_cancel") {
+      return "return.cancel";
+    }
+    if (proposal.kind === "return_request_create") {
+      return "return.create";
     }
     if (proposal.kind === "sale_rollback") {
       return "sale.rollback";

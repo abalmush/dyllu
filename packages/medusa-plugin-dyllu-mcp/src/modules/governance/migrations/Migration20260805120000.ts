@@ -23,6 +23,9 @@ export class Migration20260805120000 extends Migration {
         'promotion.read',
         'promotion.update',
         'promotion.rollback',
+        'return.read',
+        'return.create',
+        'return.cancel',
         'product_content.update',
         'product_price.update',
         'product.rollback',
@@ -43,7 +46,9 @@ export class Migration20260805120000 extends Migration {
           'category_assignment_update',
           'category_assignment_rollback',
           'promotion_status_update',
-          'promotion_status_rollback'
+          'promotion_status_rollback',
+          'return_request_create',
+          'return_cancel'
         )) not null,
         "status" text check ("status" in (
           'pending', 'applied', 'expired', 'rejected', 'superseded', 'failed'
@@ -52,7 +57,8 @@ export class Migration20260805120000 extends Migration {
         "target_type" text check ("target_type" in (
           'sale',
           'product_category',
-          'promotion'
+          'promotion',
+          'return'
         )) not null,
         "target_id" text null,
         "target_key" text not null,
@@ -100,7 +106,9 @@ export class Migration20260805120000 extends Migration {
           'category_assignment_update',
           'category_assignment_rollback',
           'promotion_status_update',
-          'promotion_status_rollback'
+          'promotion_status_rollback',
+          'return_request_create',
+          'return_cancel'
         )) not null,
         "action" text check ("action" in ('update', 'rollback')) not null,
         "actor_id" text not null,
@@ -109,7 +117,8 @@ export class Migration20260805120000 extends Migration {
         "target_type" text check ("target_type" in (
           'sale',
           'product_category',
-          'promotion'
+          'promotion',
+          'return'
         )) not null,
         "target_id" text not null,
         "target_key" text not null,
@@ -186,7 +195,8 @@ export class Migration20260805120000 extends Migration {
       where "capability" in (
         'sale.read', 'sale.update', 'sale.rollback', 'inventory.read',
         'merchandising.read', 'merchandising.update', 'merchandising.rollback',
-        'promotion.read', 'promotion.update', 'promotion.rollback'
+        'promotion.read', 'promotion.update', 'promotion.rollback',
+        'return.read', 'return.create', 'return.cancel'
       );
     `);
     this.addSql(`

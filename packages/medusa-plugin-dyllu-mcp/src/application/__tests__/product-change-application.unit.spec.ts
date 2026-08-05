@@ -14,6 +14,7 @@ import {
 } from "../ports";
 import { ProductChangeApplication } from "../product-change-application";
 import { MerchandisingApplication } from "../merchandising-application";
+import { ReturnApplication } from "../return-application";
 import {
   Actor,
   AuditEvent,
@@ -793,6 +794,42 @@ describe("ProductChangeApplication", () => {
         targetId: "sale:new",
         details: {
           capability: "sale.update",
+          reason: "capability_denied",
+        },
+      }),
+    ]);
+  });
+
+  it("denies return reads without return.read", async () => {
+    const governance = new TestGovernance();
+    const returns = {
+      list: jest.fn(),
+    } as unknown as ReturnApplication;
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities([]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      returns,
+      governance,
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.listReturns(
+        { actorId: actor.id, requestId: "req_denied_return_read" },
+        { limit: 20, offset: 0 }
+      )
+    ).rejects.toMatchObject({ code: "capability_denied" });
+    expect(returns.list).not.toHaveBeenCalled();
+    expect(governance.events).toEqual([
+      expect.objectContaining({
+        name: "authorization.denied",
+        targetId: "returns",
+        details: {
+          capability: "return.read",
           reason: "capability_denied",
         },
       }),

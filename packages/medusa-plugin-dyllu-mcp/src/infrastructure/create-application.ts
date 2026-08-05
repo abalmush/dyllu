@@ -28,6 +28,9 @@ import { MedusaMerchandisingChangeExecutor } from "./medusa-merchandising-change
 import { PromotionApplication } from "../application/promotion-application";
 import { MedusaPromotionDirectory } from "./medusa-promotion-directory";
 import { MedusaPromotionChangeExecutor } from "./medusa-promotion-change-executor";
+import { ReturnApplication } from "../application/return-application";
+import { MedusaReturnDirectory } from "./medusa-return-directory";
+import { MedusaReturnChangeExecutor } from "./medusa-return-change-executor";
 import { MedusaIdGenerator, SystemClock } from "./system";
 
 export function createProductChangeApplication(container: MedusaContainer) {
@@ -49,6 +52,8 @@ export function createProductChangeApplication(container: MedusaContainer) {
     container,
     locking
   );
+  const returnDirectory = new MedusaReturnDirectory(query);
+  const returnExecutor = new MedusaReturnChangeExecutor(container, locking);
 
   return new ProductChangeApplication({
     users: new MedusaUserDirectory(query),
@@ -85,6 +90,13 @@ export function createProductChangeApplication(container: MedusaContainer) {
       directory: promotionDirectory,
       governance: operationGovernance,
       executor: promotionExecutor,
+      clock: new SystemClock(),
+      ids: new MedusaIdGenerator(),
+    }),
+    returns: new ReturnApplication({
+      directory: returnDirectory,
+      governance: operationGovernance,
+      executor: returnExecutor,
       clock: new SystemClock(),
       ids: new MedusaIdGenerator(),
     }),

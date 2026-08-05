@@ -25,6 +25,13 @@ const saleStatusSchema = z.enum(["active", "draft"]);
 const categoryIdSchema = z.string().trim().min(1).max(100);
 const promotionIdSchema = z.string().trim().min(1).max(100);
 const promotionStatusSchema = z.enum(["draft", "active", "inactive"]);
+const returnIdSchema = z.string().trim().min(1).max(100);
+const returnStatusSchema = z.enum([
+  "requested",
+  "received",
+  "partially_received",
+  "canceled",
+]);
 
 export function createDylluMcpServer(
   application: ProductChangeApplication,
@@ -67,6 +74,7 @@ export function createDylluMcpServer(
         "Use get_inventory_exceptions to find missing, low, negative, or inconsistent DYLLU stock data.",
         "Use list_product_categories and get_product_category before proposing a DYLLU category assignment change.",
         "Use list_promotions and get_promotion before proposing a DYLLU promotion status change.",
+        "Use get_order, list_returns, and get_return before proposing a DYLLU return request or cancellation.",
         "Use list_sales and get_sale before proposing a DYLLU sale change.",
         "Use list_orders for a specific DYLLU calendar date and get_order for complete order information.",
         "Use get_daily_order_report for exact order totals, status groups, and exceptions for one DYLLU calendar date.",
@@ -78,6 +86,7 @@ export function createDylluMcpServer(
         "Call publish_sale_change only after the manager asks to publish the exact sale proposal.",
         "Call publish_merchandising_change only after the manager asks to publish the exact category proposal.",
         "Call publish_promotion_change only after the manager asks to publish the exact promotion proposal.",
+        "Call publish_return_change only after the manager asks to publish the exact return proposal.",
         "Only call a publish tool after the manager explicitly confirms the exact proposal.",
         "Pass the exact stored content_hash as confirmed_content_hash when publishing.",
         "Rollback creates a new proposal and never removes audit history.",
@@ -795,6 +804,179 @@ export function createDylluMcpServer(
     }) =>
       execute("publish_sale_change", async () => {
         const revision = await application.publishSaleChange(getContext(), {
+          proposalId,
+          confirmation: {
+            action: "accept",
+            proposalId,
+            contentHash: confirmedContentHash,
+            confirmedAt: new Date(),
+          },
+        });
+        return { published: true, revision };
+      })
+  );
+
+  server.registerTool(
+    "list_returns",
+    {
+      title: "List DYLLU returns",
+      description: "List bounded DYLLU product returns, newest first.",
+      inputSchema: z
+        .object({
+          status: returnStatusSchema.optional(),
+          limit: z.number().int().min(1).max(50).default(20),
+          offset: z.number().int().min(0).max(10_000).default(0),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("list_returns", () =>
+        application.listReturns(getContext(), {
+          ...(input.status ? { status: input.status } : {}),
+          limit: input.limit,
+          offset: input.offset,
+        })
+      )
+  );
+
+  server.registerTool(
+    "get_return",
+    {
+      title: "Get a DYLLU return",
+      description:
+        "Return one DYLLU return with its order, status, quantities, reason IDs, and dates.",
+      inputSchema: z.object({ return_id: returnIdSchema }).strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    ({ return_id: returnId }) =>
+      execute("get_return", () => application.getReturn(getContext(), returnId))
+  );
+
+  server.registerTool(
+    "propose_return_request",
+    {
+      title: "Propose a DYLLU return request",
+      description:
+        "Store an exact proposal to create a DYLLU return request for selected order items. This does not issue a refund, receive stock, or publish anything.",
+      inputSchema: z
+        .object({
+          order_reference: orderReferenceSchema,
+          items: z
+            .array(
+              z
+                .object({
+                  item_id: z.string().trim().min(1).max(100),
+                  quantity: z.number().int().min(1).max(1_000_000),
+                  reason_id: z.string().trim().min(1).max(100).nullable(),
+                  note: z.string().trim().max(500).nullable(),
+                })
+                .strict()
+            )
+            .min(1)
+            .max(20),
+          note: z.string().trim().max(500).nullable(),
+          reason: z.string().trim().min(3).max(500),
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("propose_return_request", () =>
+        application.proposeReturnRequest(getContext(), {
+          orderReference: input.order_reference,
+          items: input.items.map((item) => ({
+            itemId: item.item_id,
+            quantity: item.quantity,
+            reasonId: item.reason_id,
+            note: item.note,
+          })),
+          note: input.note,
+          reason: input.reason,
+        })
+      )
+  );
+
+  server.registerTool(
+    "propose_return_cancel",
+    {
+      title: "Propose a DYLLU return cancellation",
+      description:
+        "Store an exact proposal to cancel one unreceived DYLLU return request. This does not publish anything.",
+      inputSchema: z
+        .object({
+          return_id: returnIdSchema,
+          reason: z.string().trim().min(3).max(500),
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    ({ return_id: returnId, reason }) =>
+      execute("propose_return_cancel", () =>
+        application.proposeReturnCancel(getContext(), { returnId, reason })
+      )
+  );
+
+  server.registerTool(
+    "list_return_history",
+    {
+      title: "List DYLLU return history",
+      description: "Return immutable DYLLU return revisions for audit.",
+      inputSchema: z
+        .object({
+          return_id: returnIdSchema,
+          limit: z.number().int().min(1).max(50).default(20),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    ({ return_id: returnId, limit }) =>
+      execute("list_return_history", () =>
+        application.listReturnHistory(getContext(), returnId, limit)
+      )
+  );
+
+  server.registerTool(
+    "publish_return_change",
+    {
+      title: "Publish a DYLLU return change",
+      description:
+        "Publish an exact stored DYLLU return proposal after the manager explicitly confirms it.",
+      inputSchema: z
+        .object({
+          proposal_id: proposalIdSchema,
+          confirmed_content_hash: contentHashSchema,
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: true,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    ({
+      proposal_id: proposalId,
+      confirmed_content_hash: confirmedContentHash,
+    }) =>
+      execute("publish_return_change", async () => {
+        const revision = await application.publishReturnChange(getContext(), {
           proposalId,
           confirmation: {
             action: "accept",

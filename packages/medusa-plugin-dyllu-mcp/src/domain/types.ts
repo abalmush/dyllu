@@ -12,6 +12,9 @@ export const capabilities = [
   "promotion.read",
   "promotion.update",
   "promotion.rollback",
+  "return.read",
+  "return.create",
+  "return.cancel",
   "product_content.update",
   "product_price.update",
   "product.rollback",
@@ -302,6 +305,89 @@ export type PromotionStatusOperationValue = {
   updatedAt: string;
 };
 
+export type ReturnStatus =
+  | "requested"
+  | "received"
+  | "partially_received"
+  | "canceled";
+
+export type ReturnItemDetails = {
+  id: string;
+  itemId: string;
+  quantity: number;
+  receivedQuantity: number;
+  reasonId: string | null;
+};
+
+export type ReturnDetails = {
+  id: string;
+  displayId: number;
+  orderId: string;
+  status: ReturnStatus;
+  locationId: string | null;
+  refundAmount: number | null;
+  createdBy: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  requestedAt: Date | null;
+  receivedAt: Date | null;
+  canceledAt: Date | null;
+  items: ReturnItemDetails[];
+};
+
+export type ReturnOrderTarget = {
+  id: string;
+  displayId: number;
+  status: string;
+  fulfillmentStatus: string;
+  currencyCode: string;
+  updatedAt: Date;
+  items: Array<{
+    id: string;
+    title: string;
+    sku: string | null;
+    quantity: number;
+  }>;
+};
+
+export type ReturnRequestOperationValue = {
+  order: {
+    id: string;
+    displayId: number;
+    status: string;
+    fulfillmentStatus: string;
+    currencyCode: string;
+    updatedAt: string;
+  };
+  returnId: null;
+  status: null;
+  note: string | null;
+  items: Array<{
+    itemId: string;
+    title: string;
+    sku: string | null;
+    orderedQuantity: number;
+    alreadyReturnedQuantity: number;
+    requestQuantity: number;
+    reasonId: string | null;
+    note: string | null;
+  }>;
+};
+
+export type ReturnCancelOperationValue = {
+  returnId: string;
+  orderId: string;
+  displayId: number;
+  status: ReturnStatus;
+  updatedAt: string;
+  items: Array<{
+    itemId: string;
+    quantity: number;
+    receivedQuantity: number;
+    reasonId: string | null;
+  }>;
+};
+
 export type SaleStatus = "active" | "draft";
 
 export type SaleSummary = {
@@ -462,6 +548,8 @@ export const operationKinds = [
   "category_assignment_rollback",
   "promotion_status_update",
   "promotion_status_rollback",
+  "return_request_create",
+  "return_cancel",
 ] as const;
 
 export type OperationKind = (typeof operationKinds)[number];
@@ -470,6 +558,7 @@ export const operationTargetTypes = [
   "sale",
   "product_category",
   "promotion",
+  "return",
 ] as const;
 
 export type OperationTargetType = (typeof operationTargetTypes)[number];
