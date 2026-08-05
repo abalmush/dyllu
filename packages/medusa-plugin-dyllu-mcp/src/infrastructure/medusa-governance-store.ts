@@ -1,10 +1,16 @@
-import { CapabilityStore, GovernanceStore } from "../application/ports";
+import {
+  CapabilityStore,
+  GovernanceStore,
+  OperationGovernanceStore,
+} from "../application/ports";
 import {
   AuditEvent,
   Capability,
   ProductChangeProposal,
   ProductChangeRevision,
   capabilities,
+  OperationProposal,
+  OperationRevision,
 } from "../domain/types";
 import { ILockingModule } from "@medusajs/framework/types";
 import { MedusaError } from "@medusajs/framework/utils";
@@ -244,7 +250,108 @@ export class MedusaGovernanceStore implements GovernanceStore {
   }
 }
 
+export class MedusaOperationGovernanceStore
+  implements OperationGovernanceStore
+{
+  constructor(private readonly service: DylluMcpGovernanceModuleService) {}
+
+  async createProposal(
+    input: Parameters<OperationGovernanceStore["createProposal"]>[0]
+  ) {
+    await this.service.createOperationProposal(input);
+  }
+
+  async findProposal(proposalId: string) {
+    const proposals = await this.service.listDylluMcpOperationProposals(
+      { id: proposalId },
+      { take: 1 }
+    );
+    const proposal = proposals[0];
+    return proposal ? this.toProposal(proposal) : null;
+  }
+
+  async findRevision(revisionId: string) {
+    const revisions = await this.service.listDylluMcpOperationRevisions(
+      { id: revisionId },
+      { take: 1 }
+    );
+    const revision = revisions[0];
+    return revision ? this.toRevision(revision) : null;
+  }
+
+  async listRevisions(targetKey: string, limit: number) {
+    const revisions = await this.service.listDylluMcpOperationRevisions(
+      { target_key: targetKey },
+      { take: limit, order: { created_at: "DESC" } }
+    );
+    return revisions.map((revision) => this.toRevision(revision));
+  }
+
+  async closeProposal(
+    input: Parameters<OperationGovernanceStore["closeProposal"]>[0]
+  ) {
+    await this.service.closeOperationProposal(input);
+  }
+
+  private toProposal(
+    proposal: Awaited<
+      ReturnType<
+        DylluMcpGovernanceModuleService["listDylluMcpOperationProposals"]
+      >
+    >[number]
+  ): OperationProposal {
+    return {
+      id: proposal.id,
+      kind: proposal.kind,
+      status: proposal.status,
+      actorId: proposal.actor_id,
+      targetType: proposal.target_type,
+      targetId: proposal.target_id,
+      targetKey: proposal.target_key,
+      beforeValue: operationValueSchema.parse(proposal.before_value),
+      proposedValue: operationValueSchema.parse(proposal.proposed_value),
+      targetVersion: proposal.target_version,
+      contentHash: proposal.content_hash,
+      reason: proposal.reason,
+      sourceRevisionId: proposal.source_revision_id,
+      createdAt: proposal.created_at,
+      expiresAt: proposal.expires_at,
+    };
+  }
+
+  private toRevision(
+    revision: Awaited<
+      ReturnType<
+        DylluMcpGovernanceModuleService["listDylluMcpOperationRevisions"]
+      >
+    >[number]
+  ): OperationRevision {
+    return {
+      id: revision.id,
+      proposalId: revision.proposal_id,
+      kind: revision.kind,
+      action: revision.action,
+      actor: {
+        id: revision.actor_id,
+        email: revision.actor_email,
+        name: revision.actor_name,
+      },
+      targetType: revision.target_type,
+      targetId: revision.target_id,
+      targetKey: revision.target_key,
+      beforeValue: operationValueSchema.parse(revision.before_value),
+      afterValue: operationValueSchema.parse(revision.after_value),
+      sourceRevisionId: revision.source_revision_id,
+      reason: revision.reason,
+      requestId: revision.request_id,
+      createdAt: revision.created_at,
+    };
+  }
+}
+
 const auditDetailsSchema = z.record(
   z.string(),
   z.union([z.string(), z.number(), z.boolean(), z.null()])
 );
+
+const operationValueSchema = z.record(z.string(), z.unknown());

@@ -39,6 +39,20 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: dyllu_mcp_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d dyllu_mcp_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     permissions:
       contents: read
     steps:
@@ -61,10 +75,13 @@ jobs:
         run: pnpm audit --prod --audit-level high
 
       - name: Validate MCP plugin
+        env:
+          MCP_MIGRATION_DATABASE_URL: postgres://postgres:postgres@localhost:5432/dyllu_mcp_test
         run: |
           pnpm --filter @dyllu/medusa-plugin-mcp typecheck
           pnpm --filter @dyllu/medusa-plugin-mcp lint
           pnpm --filter @dyllu/medusa-plugin-mcp test
+          pnpm --filter @dyllu/medusa-plugin-mcp test:postgres
           pnpm --filter @dyllu/medusa-plugin-mcp build
 
       - name: Typecheck backend

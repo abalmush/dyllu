@@ -21,6 +21,7 @@ const orderStatusSchema = z.enum([
   "canceled",
   "requires_action",
 ]);
+const saleStatusSchema = z.enum(["active", "draft"]);
 
 export function createDylluMcpServer(
   application: ProductChangeApplication,
@@ -58,12 +59,14 @@ export function createDylluMcpServer(
       instructions: [
         "Use search_products and get_product before proposing a change.",
         "Use count_products for the exact DYLLU catalog total.",
+        "Use list_sales and get_sale before proposing a DYLLU sale change.",
         "Use list_orders for a specific DYLLU calendar date and get_order for complete order information.",
         "Interpret today, yesterday and calendar dates in Europe/Chisinau.",
         "Proposal tools never mutate public DYLLU catalog data.",
         "Show the complete before/after proposal to the manager.",
         "Call publish_product_description only after the manager asks to publish.",
         "Call publish_product_price only after the manager asks to publish the exact price proposal.",
+        "Call publish_sale_change only after the manager asks to publish the exact sale proposal.",
         "Only call a publish tool after the manager explicitly confirms the exact proposal.",
         "Pass the exact stored content_hash as confirmed_content_hash when publishing.",
         "Rollback creates a new proposal and never removes audit history.",
@@ -120,6 +123,292 @@ export function createDylluMcpServer(
     },
     () =>
       execute("count_products", () => application.countProducts(getContext()))
+  );
+
+  server.registerTool(
+    "list_sales",
+    {
+      title: "List DYLLU sales",
+      description:
+        "List bounded DYLLU sale campaigns, newest first. This returns only sale price lists.",
+      inputSchema: z
+        .object({
+          status: saleStatusSchema.optional(),
+          limit: z.number().int().min(1).max(50).default(20),
+          offset: z.number().int().min(0).max(10_000).default(0),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("list_sales", () =>
+        application.listSales(getContext(), {
+          ...(input.status ? { status: input.status } : {}),
+          limit: input.limit,
+          offset: input.offset,
+        })
+      )
+  );
+
+  server.registerTool(
+    "get_sale",
+    {
+      title: "Get a DYLLU sale",
+      description:
+        "Return one DYLLU sale with exact variants, normal MDL prices, and sale MDL prices.",
+      inputSchema: z
+        .object({ sale_id: z.string().trim().min(1).max(100) })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    ({ sale_id: saleId }) =>
+      execute("get_sale", () => application.getSale(getContext(), saleId))
+  );
+
+  server.registerTool(
+    "propose_sale_create",
+    {
+      title: "Propose a DYLLU sale",
+      description:
+        "Store an exact reviewable proposal for a new DYLLU sale. This does not publish anything. Each sale price must be below its normal MDL price.",
+      inputSchema: z
+        .object({
+          title: z.string().trim().min(1).max(120),
+          description: z.string().trim().max(500).default(""),
+          status: saleStatusSchema.default("draft"),
+          starts_at: z.string().datetime().nullable().default(null),
+          ends_at: z.string().datetime().nullable().default(null),
+          items: z
+            .array(
+              z
+                .object({
+                  variant_id: z.string().trim().min(1).max(100),
+                  sale_amount: z
+                    .number()
+                    .int()
+                    .min(1)
+                    .max(100_000_000),
+                })
+                .strict()
+            )
+            .min(1)
+            .max(100),
+          reason: z.string().trim().min(3).max(500),
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("propose_sale_create", () =>
+        application.proposeSaleCreate(getContext(), {
+          title: input.title,
+          description: input.description,
+          status: input.status,
+          startsAt: input.starts_at,
+          endsAt: input.ends_at,
+          items: input.items.map((item) => ({
+            variantId: item.variant_id,
+            saleAmount: item.sale_amount,
+          })),
+          reason: input.reason,
+        })
+      )
+  );
+
+  server.registerTool(
+    "propose_sale_items",
+    {
+      title: "Propose DYLLU sale item changes",
+      description:
+        "Store an exact proposal to add, update, or remove variants in one DYLLU sale. This does not publish anything.",
+      inputSchema: z
+        .object({
+          sale_id: z.string().trim().min(1).max(100),
+          upsert: z
+            .array(
+              z
+                .object({
+                  variant_id: z.string().trim().min(1).max(100),
+                  sale_amount: z
+                    .number()
+                    .int()
+                    .min(1)
+                    .max(100_000_000),
+                })
+                .strict()
+            )
+            .max(100)
+            .default([]),
+          remove_variant_ids: z
+            .array(z.string().trim().min(1).max(100))
+            .max(100)
+            .default([]),
+          reason: z.string().trim().min(3).max(500),
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("propose_sale_items", () =>
+        application.proposeSaleItems(getContext(), {
+          saleId: input.sale_id,
+          upsert: input.upsert.map((item) => ({
+            variantId: item.variant_id,
+            saleAmount: item.sale_amount,
+          })),
+          removeVariantIds: input.remove_variant_ids,
+          reason: input.reason,
+        })
+      )
+  );
+
+  server.registerTool(
+    "propose_sale_status",
+    {
+      title: "Propose a DYLLU sale status change",
+      description:
+        "Store an exact proposal to activate, pause, or end one DYLLU sale. Ending makes the sale draft and sets its end time. This does not publish anything.",
+      inputSchema: z
+        .object({
+          sale_id: z.string().trim().min(1).max(100),
+          action: z.enum(["activate", "pause", "end"]),
+          reason: z.string().trim().min(3).max(500),
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("propose_sale_status", () =>
+        application.proposeSaleStatus(getContext(), {
+          saleId: input.sale_id,
+          action: input.action,
+          reason: input.reason,
+        })
+      )
+  );
+
+  server.registerTool(
+    "list_sale_history",
+    {
+      title: "List DYLLU sale history",
+      description:
+        "Return immutable DYLLU sale revisions for audit and rollback.",
+      inputSchema: z
+        .object({
+          sale_id: z.string().trim().min(1).max(100),
+          limit: z.number().int().min(1).max(50).default(20),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    ({ sale_id: saleId, limit }) =>
+      execute("list_sale_history", () =>
+        application.listSaleHistory(getContext(), saleId, limit)
+      )
+  );
+
+  server.registerTool(
+    "propose_sale_rollback",
+    {
+      title: "Propose a DYLLU sale rollback",
+      description:
+        "Create a reviewable proposal that restores one historical DYLLU sale revision. A created sale is safely ended, not deleted.",
+      inputSchema: z
+        .object({
+          revision_id: revisionIdSchema,
+          reason: z.string().trim().min(3).max(500),
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    ({ revision_id: revisionId, reason }) =>
+      execute("propose_sale_rollback", () =>
+        application.proposeSaleRollback(getContext(), {
+          revisionId,
+          reason,
+        })
+      )
+  );
+
+  server.registerTool(
+    "get_operation_proposal",
+    {
+      title: "Review a DYLLU operation proposal",
+      description:
+        "Return the exact stored DYLLU operation proposal, content hash, status, and expiry.",
+      inputSchema: z.object({ proposal_id: proposalIdSchema }).strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    ({ proposal_id: proposalId }) =>
+      execute("get_operation_proposal", () =>
+        application.getOperationProposal(getContext(), proposalId)
+      )
+  );
+
+  server.registerTool(
+    "publish_sale_change",
+    {
+      title: "Publish a DYLLU sale change",
+      description:
+        "Publish an exact stored DYLLU sale proposal after the manager explicitly confirms it. Copy its content_hash into confirmed_content_hash.",
+      inputSchema: z
+        .object({
+          proposal_id: proposalIdSchema,
+          confirmed_content_hash: contentHashSchema,
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: true,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    ({
+      proposal_id: proposalId,
+      confirmed_content_hash: confirmedContentHash,
+    }) =>
+      execute("publish_sale_change", async () => {
+        const revision = await application.publishSaleChange(getContext(), {
+          proposalId,
+          confirmation: {
+            action: "accept",
+            proposalId,
+            contentHash: confirmedContentHash,
+            confirmedAt: new Date(),
+          },
+        });
+        return { published: true, revision };
+      })
   );
 
   server.registerTool(

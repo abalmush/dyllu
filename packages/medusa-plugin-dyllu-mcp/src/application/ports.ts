@@ -12,6 +12,12 @@ import {
   ProductPriceRevision,
   ProductPriceTarget,
   ProductSummary,
+  SaleStatus,
+  SaleSummary,
+  SaleDetails,
+  SaleVariantTarget,
+  OperationProposal,
+  OperationRevision,
 } from "../domain/types";
 
 export type ProductSearch = {
@@ -33,6 +39,49 @@ export interface OrderDirectory {
     count: number;
   }>;
   findByReference(reference: string): Promise<OrderDetails | null>;
+}
+
+export type SaleListQuery = {
+  status?: SaleStatus;
+  limit: number;
+  offset: number;
+};
+
+export interface SaleDirectory {
+  list(input: SaleListQuery): Promise<{
+    sales: SaleSummary[];
+    count: number;
+  }>;
+  findById(saleId: string): Promise<SaleDetails | null>;
+  findVariantTargets(
+    variantIds: string[],
+    currencyCode: "mdl"
+  ): Promise<SaleVariantTarget[]>;
+  findOverlappingActiveSales(input: {
+    variantIds: string[];
+    startsAt: Date | null;
+    endsAt: Date | null;
+    excludeSaleId?: string;
+  }): Promise<Array<{ saleId: string; variantId: string }>>;
+}
+
+export interface OperationGovernanceStore {
+  createProposal(input: {
+    proposal: OperationProposal;
+    requestId: string;
+  }): Promise<void>;
+  findProposal(proposalId: string): Promise<OperationProposal | null>;
+  findRevision(revisionId: string): Promise<OperationRevision | null>;
+  listRevisions(targetKey: string, limit: number): Promise<OperationRevision[]>;
+  closeProposal(input: {
+    actorId: string;
+    proposalId: string;
+    targetKey: string;
+    requestId: string;
+    occurredAt: Date;
+    status: "expired" | "failed" | "rejected";
+    reason: string;
+  }): Promise<void>;
 }
 
 export interface UserDirectory {
@@ -105,10 +154,32 @@ export interface ProductChangeExecutor {
   }): Promise<ProductPriceRevision>;
 }
 
+export interface SaleChangeExecutor {
+  publishCreate(input: {
+    actor: Actor;
+    proposal: OperationProposal;
+    requestId: string;
+    confirmedAt: Date;
+  }): Promise<OperationRevision>;
+  publishUpdate(input: {
+    actor: Actor;
+    proposal: OperationProposal;
+    requestId: string;
+    confirmedAt: Date;
+  }): Promise<OperationRevision>;
+}
+
 export interface Clock {
   now(): Date;
 }
 
 export interface IdGenerator {
-  next(prefix: "proposal" | "revision" | "event"): string;
+  next(
+    prefix:
+      | "proposal"
+      | "revision"
+      | "operationProposal"
+      | "operationRevision"
+      | "event"
+  ): string;
 }

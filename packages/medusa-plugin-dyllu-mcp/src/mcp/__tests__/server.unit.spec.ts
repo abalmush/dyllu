@@ -69,6 +69,185 @@ describe("DYLLU MCP server", () => {
     }
   });
 
+  it("lists DYLLU sales with bounded pagination", async () => {
+    const application = {
+      listSales: jest.fn().mockResolvedValue({ sales: [], count: 0 }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_sales" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "list_sales",
+        arguments: { status: "active", limit: 20, offset: 0 },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(application.listSales).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_sales" },
+        { status: "active", limit: 20, offset: 0 }
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
+  it("gets one DYLLU sale with its exact items", async () => {
+    const application = {
+      getSale: jest.fn().mockResolvedValue({ id: "plist_summer", items: [] }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_sale" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "get_sale",
+        arguments: { sale_id: "plist_summer" },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(application.getSale).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_sale" },
+        "plist_summer"
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
+  it("creates a sale proposal without publishing it", async () => {
+    const application = {
+      proposeSaleCreate: jest.fn().mockResolvedValue({
+        id: "mcpop_test",
+        status: "pending",
+        contentHash: `sha256:${"b".repeat(64)}`,
+      }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_sale_proposal" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "propose_sale_create",
+        arguments: {
+          title: "August sale",
+          description: "Selected tools",
+          status: "draft",
+          starts_at: "2026-08-01T00:00:00.000Z",
+          ends_at: "2026-08-31T23:59:59.000Z",
+          items: [{ variant_id: "variant_tools", sale_amount: 299 }],
+          reason: "Prepare the August sale",
+        },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(application.proposeSaleCreate).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_sale_proposal" },
+        {
+          title: "August sale",
+          description: "Selected tools",
+          status: "draft",
+          startsAt: "2026-08-01T00:00:00.000Z",
+          endsAt: "2026-08-31T23:59:59.000Z",
+          items: [{ variantId: "variant_tools", saleAmount: 299 }],
+          reason: "Prepare the August sale",
+        }
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
+  it("publishes only an exact confirmed sale proposal", async () => {
+    const application = {
+      publishSaleChange: jest.fn().mockResolvedValue({
+        id: "mcporev_test",
+        targetId: "plist_summer",
+      }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_sale_publish" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const contentHash = `sha256:${"c".repeat(64)}`;
+      const result = await client.callTool({
+        name: "publish_sale_change",
+        arguments: {
+          proposal_id: "mcpop_test",
+          confirmed_content_hash: contentHash,
+        },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(application.publishSaleChange).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_sale_publish" },
+        {
+          proposalId: "mcpop_test",
+          confirmation: {
+            action: "accept",
+            proposalId: "mcpop_test",
+            contentHash,
+            confirmedAt: expect.any(Date),
+          },
+        }
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("lists DYLLU orders for an exact calendar date", async () => {
     const application = {
       listOrders: jest.fn().mockResolvedValue({ orders: [], count: 0 }),

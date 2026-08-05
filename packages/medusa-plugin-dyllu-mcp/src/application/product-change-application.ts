@@ -4,6 +4,10 @@ import {
   IdGenerator,
   OrderDirectory,
   OrderListQuery,
+  SaleDirectory,
+  SaleListQuery,
+  OperationGovernanceStore,
+  SaleChangeExecutor,
   ProductCatalog,
   ProductChangeExecutor,
   UserDirectory,
@@ -20,11 +24,17 @@ import {
   ProductPriceProposal,
   ProductPriceRevision,
   RequestContext,
+  OperationProposal,
+  SaleOperationValue,
+  SaleDetails,
+  OperationKind,
   capabilities as availableCapabilities,
 } from "../domain/types";
 import { ApplicationError } from "./errors";
 import { createProductDescriptionHash } from "../domain/product-description-hash";
 import { createCatalogChangeHash } from "../domain/catalog-change-hash";
+import { createOperationHash } from "../domain/operation-hash";
+import { saleOperationValueSchema } from "./sale-operation-schema";
 
 const PROPOSAL_TTL_MS = 30 * 60 * 1000;
 const MAX_DESCRIPTION_LENGTH = 20_000;
@@ -42,6 +52,7 @@ export type PublishDescriptionInput = {
 };
 
 export type PublishPriceInput = PublishDescriptionInput;
+export type PublishSaleChangeInput = PublishDescriptionInput;
 
 export type ProposePriceInput = {
   productId: string;
@@ -68,6 +79,29 @@ export type AuditEventQuery = {
   limit: number;
 };
 
+export type ProposeSaleCreateInput = {
+  title: string;
+  description: string;
+  status: "active" | "draft";
+  startsAt: string | null;
+  endsAt: string | null;
+  items: Array<{ variantId: string; saleAmount: number }>;
+  reason: string;
+};
+
+export type ProposeSaleItemsInput = {
+  saleId: string;
+  upsert: Array<{ variantId: string; saleAmount: number }>;
+  removeVariantIds: string[];
+  reason: string;
+};
+
+export type ProposeSaleStatusInput = {
+  saleId: string;
+  action: "activate" | "pause" | "end";
+  reason: string;
+};
+
 export type ProductChangeApplicationDependencies = {
   users: UserDirectory;
   capabilities: CapabilityStore;
@@ -77,6 +111,9 @@ export type ProductChangeApplicationDependencies = {
   executor: ProductChangeExecutor;
   clock: Clock;
   ids: IdGenerator;
+  sales?: SaleDirectory;
+  operationGovernance?: OperationGovernanceStore;
+  saleExecutor?: SaleChangeExecutor;
 };
 
 export class ProductChangeApplication {
@@ -144,6 +181,592 @@ export class ProductChangeApplication {
     return this.dependencies.orders.list(input);
   }
 
+  async listSales(context: RequestContext, input: SaleListQuery) {
+    await this.requireCapability(context, "sale.read", "sales");
+    if (!this.dependencies.sales) {
+      throw new ApplicationError(
+        "sale_directory_unavailable",
+        "DYLLU sale data is unavailable"
+      );
+    }
+    return this.dependencies.sales.list(input);
+  }
+
+  async getSale(context: RequestContext, saleId: string) {
+    await this.requireCapability(context, "sale.read", saleId);
+    if (!this.dependencies.sales) {
+      throw new ApplicationError(
+        "sale_directory_unavailable",
+        "DYLLU sale data is unavailable"
+      );
+    }
+    const sale = await this.dependencies.sales.findById(saleId);
+    if (!sale) {
+      throw new ApplicationError(
+        "sale_not_found",
+        `DYLLU sale ${saleId} was not found`
+      );
+    }
+    return sale;
+  }
+
+  async proposeSaleCreate(
+    context: RequestContext,
+    input: ProposeSaleCreateInput
+  ): Promise<OperationProposal> {
+    await this.requireCapability(context, "sale.update", "sale:new");
+    this.validateReason(input.reason);
+    const sales = this.dependencies.sales;
+    const governance = this.dependencies.operationGovernance;
+    if (!sales || !governance) {
+      throw new ApplicationError(
+        "sale_control_unavailable",
+        "DYLLU sale control is unavailable"
+      );
+    }
+    const title = input.title.trim();
+    const description = input.description.trim();
+    if (title.length < 1 || title.length > 120 || description.length > 500) {
+      throw new ApplicationError(
+        "invalid_sale",
+        "A sale needs a title of 1 to 120 characters and a description of at most 500 characters"
+      );
+    }
+    if (input.items.length < 1 || input.items.length > 100) {
+      throw new ApplicationError(
+        "invalid_sale_items",
+        "A sale proposal must contain 1 to 100 variants"
+      );
+    }
+    const variantIds = input.items.map((item) => item.variantId.trim());
+    if (
+      variantIds.some((variantId) => !variantId) ||
+      new Set(variantIds).size !== variantIds.length
+    ) {
+      throw new ApplicationError(
+        "invalid_sale_items",
+        "Each sale variant must be present once"
+      );
+    }
+    const startsAt = parseOptionalDate(input.startsAt);
+    const endsAt = parseOptionalDate(input.endsAt);
+    if (startsAt && endsAt && startsAt >= endsAt) {
+      throw new ApplicationError(
+        "invalid_sale_dates",
+        "The sale end date must be after its start date"
+      );
+    }
+    const targets = await sales.findVariantTargets(variantIds, "mdl");
+    const targetsByVariant = new Map(
+      targets.map((target) => [target.variantId, target])
+    );
+    if (targetsByVariant.size !== variantIds.length) {
+      throw new ApplicationError(
+        "sale_variant_not_found",
+        "Each selected DYLLU variant must have one normal MDL price"
+      );
+    }
+    const requestedByVariant = new Map(
+      input.items.map((item) => [item.variantId.trim(), item.saleAmount])
+    );
+    const items = variantIds
+      .map((variantId) => {
+        const target = targetsByVariant.get(variantId)!;
+        const saleAmount = requestedByVariant.get(variantId)!;
+        if (
+          !Number.isSafeInteger(saleAmount) ||
+          saleAmount < 1 ||
+          saleAmount >= target.normalAmount
+        ) {
+          throw new ApplicationError(
+            "invalid_sale_price",
+            "Each sale price must be a positive whole MDL amount below the normal price"
+          );
+        }
+        return {
+          productId: target.productId,
+          productTitle: target.productTitle,
+          variantId: target.variantId,
+          variantTitle: target.variantTitle,
+          sku: target.sku,
+          basePriceId: target.basePriceId,
+          salePriceId: null,
+          normalAmount: target.normalAmount,
+          saleAmount,
+          currencyCode: target.currencyCode,
+          targetUpdatedAt: target.updatedAt.toISOString(),
+        };
+      })
+      .sort((left, right) => left.variantId.localeCompare(right.variantId));
+    const overlaps = await sales.findOverlappingActiveSales({
+      variantIds,
+      startsAt,
+      endsAt,
+    });
+    if (overlaps.length > 0) {
+      throw new ApplicationError(
+        "sale_overlap",
+        `The selected variants already have an overlapping active DYLLU sale: ${[
+          ...new Set(overlaps.map((overlap) => overlap.saleId)),
+        ].join(", ")}`
+      );
+    }
+
+    const createdAt = this.dependencies.clock.now();
+    const id = this.dependencies.ids.next("operationProposal");
+    const targetKey = `sale:new:${id}`;
+    const proposedValue: SaleOperationValue = {
+      saleId: null,
+      title,
+      description,
+      status: input.status,
+      startsAt: startsAt?.toISOString() ?? null,
+      endsAt: endsAt?.toISOString() ?? null,
+      items,
+    };
+    const proposal: OperationProposal = {
+      id,
+      kind: "sale_create",
+      status: "pending",
+      actorId: context.actorId,
+      targetType: "sale",
+      targetId: null,
+      targetKey,
+      beforeValue: {},
+      proposedValue,
+      targetVersion: null,
+      contentHash: createOperationHash({
+        kind: "sale_create",
+        targetType: "sale",
+        targetId: null,
+        targetKey,
+        targetVersion: null,
+        beforeValue: {},
+        proposedValue,
+      }),
+      reason: input.reason.trim(),
+      sourceRevisionId: null,
+      createdAt,
+      expiresAt: new Date(createdAt.getTime() + PROPOSAL_TTL_MS),
+    };
+    await governance.createProposal({
+      proposal,
+      requestId: context.requestId,
+    });
+    return proposal;
+  }
+
+  async proposeSaleItems(
+    context: RequestContext,
+    input: ProposeSaleItemsInput
+  ): Promise<OperationProposal> {
+    await this.requireCapability(context, "sale.update", input.saleId);
+    this.validateReason(input.reason);
+    if (
+      input.upsert.length + input.removeVariantIds.length < 1 ||
+      input.upsert.length + input.removeVariantIds.length > 100
+    ) {
+      throw new ApplicationError(
+        "invalid_sale_items",
+        "A sale item proposal must change 1 to 100 variants"
+      );
+    }
+    const upsertIds = input.upsert.map((item) => item.variantId.trim());
+    const removeIds = input.removeVariantIds.map((variantId) =>
+      variantId.trim()
+    );
+    const allChangedIds = [...upsertIds, ...removeIds];
+    if (
+      allChangedIds.some((variantId) => !variantId) ||
+      new Set(allChangedIds).size !== allChangedIds.length
+    ) {
+      throw new ApplicationError(
+        "invalid_sale_items",
+        "Each changed sale variant must be present once"
+      );
+    }
+    const { sale, snapshot: beforeValue } = await this.loadSaleSnapshot(
+      input.saleId
+    );
+    if (sale.items.some((item) => item.hasRules || item.currencyCode !== "mdl")) {
+      throw new ApplicationError(
+        "unsupported_sale_item",
+        "This DYLLU sale has a price rule that the MCP cannot change"
+      );
+    }
+    const existingByVariant = new Map(
+      beforeValue.items.map((item) => [item.variantId, item])
+    );
+    for (const variantId of removeIds) {
+      if (!existingByVariant.delete(variantId)) {
+        throw new ApplicationError(
+          "sale_variant_not_found",
+          `Variant ${variantId} is not in this DYLLU sale`
+        );
+      }
+    }
+    const requestedAmountByVariant = new Map(
+      input.upsert.map((item) => [item.variantId.trim(), item.saleAmount])
+    );
+    const proposedVariantIds = [
+      ...new Set([...existingByVariant.keys(), ...upsertIds]),
+    ];
+    if (proposedVariantIds.length > 100) {
+      throw new ApplicationError(
+        "invalid_sale_items",
+        "A governed DYLLU sale can contain at most 100 variants"
+      );
+    }
+    const sales = this.requireSaleDirectory();
+    const targets = await sales.findVariantTargets(proposedVariantIds, "mdl");
+    const targetsByVariant = new Map(
+      targets.map((target) => [target.variantId, target])
+    );
+    if (targetsByVariant.size !== proposedVariantIds.length) {
+      throw new ApplicationError(
+        "sale_variant_not_found",
+        "Each selected DYLLU variant must have one normal MDL price"
+      );
+    }
+    const proposedItems = proposedVariantIds
+      .map((variantId) => {
+        const target = targetsByVariant.get(variantId)!;
+        const existing = existingByVariant.get(variantId);
+        const saleAmount = requestedAmountByVariant.get(variantId);
+        const amount = saleAmount ?? existing?.saleAmount;
+        if (
+          amount === undefined ||
+          !Number.isSafeInteger(amount) ||
+          amount < 1 ||
+          amount >= target.normalAmount
+        ) {
+          throw new ApplicationError(
+            "invalid_sale_price",
+            "Each sale price must be a positive whole MDL amount below the normal price"
+          );
+        }
+        return {
+          productId: target.productId,
+          productTitle: target.productTitle,
+          variantId: target.variantId,
+          variantTitle: target.variantTitle,
+          sku: target.sku,
+          basePriceId: target.basePriceId,
+          salePriceId: existing?.salePriceId ?? null,
+          normalAmount: target.normalAmount,
+          saleAmount: amount,
+          currencyCode: target.currencyCode,
+          targetUpdatedAt: target.updatedAt.toISOString(),
+        };
+      })
+      .sort((left, right) => left.variantId.localeCompare(right.variantId));
+    const proposedValue: SaleOperationValue = {
+      ...beforeValue,
+      items: proposedItems,
+    };
+    if (JSON.stringify(proposedValue) === JSON.stringify(beforeValue)) {
+      throw new ApplicationError(
+        "unchanged_sale",
+        "The proposed sale items are identical to the current sale"
+      );
+    }
+    const overlaps = await sales.findOverlappingActiveSales({
+      variantIds: proposedVariantIds,
+      startsAt: sale.startsAt,
+      endsAt: sale.endsAt,
+      excludeSaleId: sale.id,
+    });
+    if (overlaps.length > 0) {
+      throw new ApplicationError(
+        "sale_overlap",
+        "A selected variant has another overlapping active DYLLU sale"
+      );
+    }
+    return this.storeSaleOperationProposal(context, {
+      kind: "sale_items_update",
+      sale,
+      beforeValue,
+      proposedValue,
+      reason: input.reason,
+      sourceRevisionId: null,
+    });
+  }
+
+  async proposeSaleStatus(
+    context: RequestContext,
+    input: ProposeSaleStatusInput
+  ): Promise<OperationProposal> {
+    await this.requireCapability(context, "sale.update", input.saleId);
+    this.validateReason(input.reason);
+    const { sale, snapshot: beforeValue } = await this.loadSaleSnapshot(
+      input.saleId
+    );
+    const proposedValue: SaleOperationValue = {
+      ...beforeValue,
+      status: input.action === "activate" ? "active" : "draft",
+      endsAt:
+        input.action === "end"
+          ? this.dependencies.clock.now().toISOString()
+          : beforeValue.endsAt,
+    };
+    if (JSON.stringify(proposedValue) === JSON.stringify(beforeValue)) {
+      throw new ApplicationError(
+        "unchanged_sale",
+        "The proposed sale status is identical to the current sale"
+      );
+    }
+    if (input.action === "activate") {
+      const overlaps = await this.requireSaleDirectory().findOverlappingActiveSales(
+        {
+          variantIds: proposedValue.items.map((item) => item.variantId),
+          startsAt: sale.startsAt,
+          endsAt: sale.endsAt,
+          excludeSaleId: sale.id,
+        }
+      );
+      if (overlaps.length > 0) {
+        throw new ApplicationError(
+          "sale_overlap",
+          "A selected variant has another overlapping active DYLLU sale"
+        );
+      }
+    }
+    return this.storeSaleOperationProposal(context, {
+      kind: "sale_status_update",
+      sale,
+      beforeValue,
+      proposedValue,
+      reason: input.reason,
+      sourceRevisionId: null,
+    });
+  }
+
+  async listSaleHistory(
+    context: RequestContext,
+    saleId: string,
+    limit: number
+  ) {
+    await this.requireCapability(context, "audit.read", saleId);
+    if (limit < 1 || limit > 50) {
+      throw new ApplicationError(
+        "invalid_audit_limit",
+        "Sale history limit must be between 1 and 50"
+      );
+    }
+    const governance = this.requireOperationGovernance();
+    return governance.listRevisions(`sale:${saleId}`, limit);
+  }
+
+  async proposeSaleRollback(
+    context: RequestContext,
+    input: ProposeRollbackInput
+  ): Promise<OperationProposal> {
+    await this.requireCapability(context, "sale.rollback", input.revisionId);
+    this.validateReason(input.reason);
+    const governance = this.requireOperationGovernance();
+    const source = await governance.findRevision(input.revisionId);
+    if (!source || source.targetType !== "sale") {
+      throw new ApplicationError(
+        "revision_not_found",
+        `Sale revision ${input.revisionId} was not found`
+      );
+    }
+    const { sale, snapshot: beforeValue } = await this.loadSaleSnapshot(
+      source.targetId
+    );
+    let proposedValue: SaleOperationValue;
+    const historical = saleOperationValueSchema.safeParse(source.beforeValue);
+    if (source.kind === "sale_create" || !historical.success) {
+      proposedValue = {
+        ...beforeValue,
+        status: "draft",
+        endsAt: this.dependencies.clock.now().toISOString(),
+      };
+    } else {
+      const desired = historical.data;
+      const desiredVariantIds = desired.items.map((item) => item.variantId);
+      const targets = await this.requireSaleDirectory().findVariantTargets(
+        desiredVariantIds,
+        "mdl"
+      );
+      const targetsByVariant = new Map(
+        targets.map((target) => [target.variantId, target])
+      );
+      const currentByVariant = new Map(
+        beforeValue.items.map((item) => [item.variantId, item])
+      );
+      if (targets.length !== desiredVariantIds.length) {
+        throw new ApplicationError(
+          "sale_variant_not_found",
+          "A variant from this sale revision has no normal MDL price"
+        );
+      }
+      proposedValue = {
+        ...desired,
+        saleId: sale.id,
+        items: desired.items
+          .map((item) => {
+            const target = targetsByVariant.get(item.variantId)!;
+            if (item.saleAmount >= target.normalAmount) {
+              throw new ApplicationError(
+                "invalid_sale_price",
+                "A historical sale price is not below the current normal price"
+              );
+            }
+            return {
+              productId: target.productId,
+              productTitle: target.productTitle,
+              variantId: target.variantId,
+              variantTitle: target.variantTitle,
+              sku: target.sku,
+              basePriceId: target.basePriceId,
+              salePriceId:
+                currentByVariant.get(item.variantId)?.salePriceId ?? null,
+              normalAmount: target.normalAmount,
+              saleAmount: item.saleAmount,
+              currencyCode: target.currencyCode,
+              targetUpdatedAt: target.updatedAt.toISOString(),
+            };
+          })
+          .sort((left, right) => left.variantId.localeCompare(right.variantId)),
+      };
+    }
+    if (JSON.stringify(proposedValue) === JSON.stringify(beforeValue)) {
+      throw new ApplicationError(
+        "unchanged_sale",
+        "The selected revision is identical to the current sale"
+      );
+    }
+    if (proposedValue.status === "active") {
+      const overlaps = await this.requireSaleDirectory().findOverlappingActiveSales(
+        {
+          variantIds: proposedValue.items.map((item) => item.variantId),
+          startsAt: proposedValue.startsAt
+            ? new Date(proposedValue.startsAt)
+            : null,
+          endsAt: proposedValue.endsAt
+            ? new Date(proposedValue.endsAt)
+            : null,
+          excludeSaleId: sale.id,
+        }
+      );
+      if (overlaps.length > 0) {
+        throw new ApplicationError(
+          "sale_overlap",
+          "A restored variant has another overlapping active DYLLU sale"
+        );
+      }
+    }
+    return this.storeSaleOperationProposal(context, {
+      kind: "sale_rollback",
+      sale,
+      beforeValue,
+      proposedValue,
+      reason: input.reason,
+      sourceRevisionId: source.id,
+    });
+  }
+
+  async publishSaleChange(
+    context: RequestContext,
+    input: PublishSaleChangeInput
+  ) {
+    const actor = await this.requireActiveActor(context, input.proposalId);
+    const governance = this.dependencies.operationGovernance;
+    const executor = this.dependencies.saleExecutor;
+    if (!governance || !executor) {
+      throw new ApplicationError(
+        "sale_control_unavailable",
+        "DYLLU sale control is unavailable"
+      );
+    }
+    const proposal = await governance.findProposal(input.proposalId);
+    if (!proposal) {
+      throw new ApplicationError(
+        "proposal_not_found",
+        `Proposal ${input.proposalId} was not found`
+      );
+    }
+    await this.requireCapabilityForActor(
+      context,
+      actor,
+      this.requiredCapabilityForOperation(proposal),
+      proposal.targetKey
+    );
+    if (proposal.actorId !== actor.id) {
+      throw new ApplicationError(
+        "proposal_owner_mismatch",
+        "Only the proposal author can publish it"
+      );
+    }
+    if (proposal.status !== "pending") {
+      throw new ApplicationError(
+        "proposal_not_pending",
+        "The proposal is no longer pending"
+      );
+    }
+    if (
+      proposal.kind !== "sale_create" &&
+      proposal.kind !== "sale_items_update" &&
+      proposal.kind !== "sale_status_update" &&
+      proposal.kind !== "sale_rollback"
+    ) {
+      throw new ApplicationError(
+        "proposal_kind_mismatch",
+        "The proposal is not a supported sale change"
+      );
+    }
+    const currentTime = this.dependencies.clock.now();
+    if (proposal.expiresAt <= currentTime) {
+      await governance.closeProposal({
+        actorId: actor.id,
+        proposalId: proposal.id,
+        targetKey: proposal.targetKey,
+        requestId: context.requestId,
+        occurredAt: currentTime,
+        status: "expired",
+        reason: "proposal_ttl_elapsed",
+      });
+      throw new ApplicationError(
+        "proposal_expired",
+        "The proposal expired and must be regenerated"
+      );
+    }
+    if (
+      input.confirmation.action !== "accept" ||
+      input.confirmation.proposalId !== proposal.id ||
+      input.confirmation.contentHash !== proposal.contentHash
+    ) {
+      throw new ApplicationError(
+        "confirmation_mismatch",
+        "Confirmation does not match the exact proposal"
+      );
+    }
+    try {
+      const publish =
+        proposal.kind === "sale_create"
+          ? executor.publishCreate.bind(executor)
+          : executor.publishUpdate.bind(executor);
+      return await publish({
+        actor,
+        proposal,
+        requestId: context.requestId,
+        confirmedAt: input.confirmation.confirmedAt,
+      });
+    } catch (error) {
+      await governance.closeProposal({
+        actorId: actor.id,
+        proposalId: proposal.id,
+        targetKey: proposal.targetKey,
+        requestId: context.requestId,
+        occurredAt: this.dependencies.clock.now(),
+        status: "failed",
+        reason: "sale_publish_failed",
+      });
+      throw error;
+    }
+  }
+
   async getOrder(context: RequestContext, reference: string) {
     await this.requireCapability(context, "order.read", reference);
     const order = await this.dependencies.orders.findByReference(reference);
@@ -188,6 +811,42 @@ export class ProductChangeApplication {
         context,
         requiredCapability,
         proposal.productId,
+        "capability_denied"
+      );
+      throw new ApplicationError(
+        "capability_denied",
+        "The proposal is not available to this user"
+      );
+    }
+    return proposal;
+  }
+
+  async getOperationProposal(context: RequestContext, proposalId: string) {
+    const actor = await this.requireActiveActor(context, proposalId);
+    const governance = this.dependencies.operationGovernance;
+    if (!governance) {
+      throw new ApplicationError(
+        "sale_control_unavailable",
+        "DYLLU sale control is unavailable"
+      );
+    }
+    const proposal = await governance.findProposal(proposalId);
+    if (!proposal) {
+      throw new ApplicationError(
+        "proposal_not_found",
+        `Proposal ${proposalId} was not found`
+      );
+    }
+    const granted = await this.dependencies.capabilities.listForUser(actor.id);
+    const requiredCapability = this.requiredCapabilityForOperation(proposal);
+    const canAudit = granted.includes("audit.read");
+    const canReadOwn =
+      proposal.actorId === actor.id && granted.includes(requiredCapability);
+    if (!canAudit && !canReadOwn) {
+      await this.recordAuthorizationDenied(
+        context,
+        requiredCapability,
+        proposal.targetKey,
         "capability_denied"
       );
       throw new ApplicationError(
@@ -831,6 +1490,131 @@ export class ProductChangeApplication {
     );
   }
 
+  private requireSaleDirectory() {
+    if (!this.dependencies.sales) {
+      throw new ApplicationError(
+        "sale_control_unavailable",
+        "DYLLU sale control is unavailable"
+      );
+    }
+    return this.dependencies.sales;
+  }
+
+  private requireOperationGovernance() {
+    if (!this.dependencies.operationGovernance) {
+      throw new ApplicationError(
+        "sale_control_unavailable",
+        "DYLLU sale control is unavailable"
+      );
+    }
+    return this.dependencies.operationGovernance;
+  }
+
+  private async loadSaleSnapshot(saleId: string) {
+    const sales = this.requireSaleDirectory();
+    const sale = await sales.findById(saleId);
+    if (!sale) {
+      throw new ApplicationError(
+        "sale_not_found",
+        `DYLLU sale ${saleId} was not found`
+      );
+    }
+    if (sale.items.length > 100) {
+      throw new ApplicationError(
+        "invalid_sale_items",
+        "This DYLLU sale exceeds the governed limit of 100 variants"
+      );
+    }
+    const variantIds = sale.items.map((item) => item.variantId);
+    const targets = await sales.findVariantTargets(variantIds, "mdl");
+    const targetsByVariant = new Map(
+      targets.map((target) => [target.variantId, target])
+    );
+    if (targetsByVariant.size !== variantIds.length) {
+      throw new ApplicationError(
+        "sale_variant_not_found",
+        "Each DYLLU sale variant must have one normal MDL price"
+      );
+    }
+    const snapshot: SaleOperationValue = {
+      saleId: sale.id,
+      title: sale.title,
+      description: sale.description,
+      status: sale.status,
+      startsAt: sale.startsAt?.toISOString() ?? null,
+      endsAt: sale.endsAt?.toISOString() ?? null,
+      items: sale.items
+        .map((item) => {
+          const target = targetsByVariant.get(item.variantId)!;
+          return {
+            productId: target.productId,
+            productTitle: target.productTitle,
+            variantId: target.variantId,
+            variantTitle: target.variantTitle,
+            sku: target.sku,
+            basePriceId: target.basePriceId,
+            salePriceId: item.priceId,
+            normalAmount: target.normalAmount,
+            saleAmount: item.saleAmount,
+            currencyCode: target.currencyCode,
+            targetUpdatedAt: target.updatedAt.toISOString(),
+          };
+        })
+        .sort((left, right) => left.variantId.localeCompare(right.variantId)),
+    };
+    return { sale, snapshot };
+  }
+
+  private async storeSaleOperationProposal(
+    context: RequestContext,
+    input: {
+      kind: Extract<
+        OperationKind,
+        "sale_items_update" | "sale_status_update" | "sale_rollback"
+      >;
+      sale: SaleDetails;
+      beforeValue: SaleOperationValue;
+      proposedValue: SaleOperationValue;
+      reason: string;
+      sourceRevisionId: string | null;
+    }
+  ) {
+    const createdAt = this.dependencies.clock.now();
+    const id = this.dependencies.ids.next("operationProposal");
+    const targetKey = `sale:${input.sale.id}`;
+    const targetVersion = input.sale.updatedAt.toISOString();
+    const proposal: OperationProposal = {
+      id,
+      kind: input.kind,
+      status: "pending",
+      actorId: context.actorId,
+      targetType: "sale",
+      targetId: input.sale.id,
+      targetKey,
+      beforeValue: input.beforeValue,
+      proposedValue: input.proposedValue,
+      targetVersion,
+      contentHash: createOperationHash({
+        kind: input.kind,
+        targetType: "sale",
+        targetId: input.sale.id,
+        targetKey,
+        targetVersion,
+        beforeValue: input.beforeValue,
+        proposedValue: input.proposedValue,
+      }),
+      reason: input.reason.trim(),
+      sourceRevisionId: input.sourceRevisionId,
+      createdAt,
+      expiresAt: new Date(createdAt.getTime() + PROPOSAL_TTL_MS),
+    };
+    await this.requireOperationGovernance().createProposal({
+      proposal,
+      requestId: context.requestId,
+    });
+    return proposal;
+  }
+
   private validateDescription(value: string) {
     if (
       value.trim().length === 0 ||
@@ -887,6 +1671,15 @@ export class ProductChangeApplication {
       : "product_content.update";
   }
 
+  private requiredCapabilityForOperation(
+    proposal: OperationProposal
+  ): Capability {
+    if (proposal.kind === "sale_rollback") {
+      return "sale.rollback";
+    }
+    return "sale.update";
+  }
+
   private createEvent(input: {
     name: AuditEvent["name"];
     context: RequestContext;
@@ -907,4 +1700,18 @@ export class ProductChangeApplication {
       occurredAt: input.occurredAt,
     };
   }
+}
+
+function parseOptionalDate(value: string | null) {
+  if (value === null) {
+    return null;
+  }
+  const parsed = new Date(value);
+  if (!Number.isFinite(parsed.getTime()) || parsed.toISOString() !== value) {
+    throw new ApplicationError(
+      "invalid_sale_dates",
+      "Sale dates must use an exact ISO 8601 UTC value"
+    );
+  }
+  return parsed;
 }

@@ -3,6 +3,9 @@ import {
   GovernanceStore,
   IdGenerator,
   OrderDirectory,
+  SaleDirectory,
+  OperationGovernanceStore,
+  SaleChangeExecutor,
   ProductCatalog,
   ProductChangeExecutor,
   UserDirectory,
@@ -21,6 +24,10 @@ import {
   ProductPriceRevision,
   ProductPriceTarget,
   ProductSummary,
+  OperationProposal,
+  OperationRevision,
+  SaleVariantTarget,
+  SaleDetails,
 } from "../../domain/types";
 
 const now = new Date("2026-07-29T10:00:00.000Z");
@@ -68,6 +75,44 @@ const priceTarget: ProductPriceTarget = {
   amount: 1500,
   currencyCode: "mdl",
   updatedAt: new Date("2026-07-29T09:00:00.000Z"),
+};
+const saleTarget: SaleVariantTarget = {
+  productId: "prod_tools",
+  productTitle: "Trusă de scule",
+  variantId: "variant_tools",
+  variantTitle: "Standard",
+  sku: "DTHS1M28",
+  basePriceId: "price_base",
+  normalAmount: 429,
+  currencyCode: "mdl",
+  updatedAt: new Date("2026-07-29T09:00:00.000Z"),
+};
+const activeSale: SaleDetails = {
+  id: "plist_summer",
+  title: "Summer sale",
+  description: "Selected tools",
+  status: "active",
+  startsAt: null,
+  endsAt: null,
+  createdAt: new Date("2026-07-28T09:00:00.000Z"),
+  updatedAt: new Date("2026-07-29T09:30:00.000Z"),
+  items: [
+    {
+      priceId: "price_sale",
+      productId: saleTarget.productId,
+      productTitle: saleTarget.productTitle,
+      variantId: saleTarget.variantId,
+      variantTitle: saleTarget.variantTitle,
+      sku: saleTarget.sku,
+      currencyCode: "mdl",
+      normalAmount: 429,
+      saleAmount: 349,
+      minQuantity: null,
+      maxQuantity: null,
+      hasRules: false,
+      updatedAt: new Date("2026-07-29T09:30:00.000Z"),
+    },
+  ],
 };
 const order: OrderSummary = {
   id: "order_today",
@@ -188,6 +233,93 @@ class TestOrders implements OrderDirectory {
   async findByReference(reference: string): Promise<OrderDetails | null> {
     this.references.push(reference);
     return reference === String(order.displayId) ? orderDetails : null;
+  }
+}
+
+class TestSales implements SaleDirectory {
+  readonly lists: Parameters<SaleDirectory["list"]>[0][] = [];
+
+  async list(input: Parameters<SaleDirectory["list"]>[0]) {
+    this.lists.push(input);
+    return { sales: [], count: 0 };
+  }
+
+  async findById() {
+    return this.sale;
+  }
+
+  constructor(
+    private readonly targets: SaleVariantTarget[] = [],
+    private readonly overlaps: Array<{ saleId: string; variantId: string }> = [],
+    private readonly sale: SaleDetails | null = null
+  ) {}
+
+  async findVariantTargets() {
+    return this.targets;
+  }
+
+  async findOverlappingActiveSales() {
+    return this.overlaps;
+  }
+}
+
+class TestOperationGovernance implements OperationGovernanceStore {
+  readonly proposals: OperationProposal[] = [];
+  readonly revisions: OperationRevision[] = [];
+
+  async createProposal(
+    input: Parameters<OperationGovernanceStore["createProposal"]>[0]
+  ) {
+    this.proposals.push(input.proposal);
+  }
+
+  async findProposal(proposalId: string) {
+    return this.proposals.find((proposal) => proposal.id === proposalId) ?? null;
+  }
+
+  async findRevision(revisionId: string) {
+    return this.revisions.find((revision) => revision.id === revisionId) ?? null;
+  }
+
+  async listRevisions(targetKey: string, limit: number) {
+    return this.revisions
+      .filter((revision) => revision.targetKey === targetKey)
+      .slice(0, limit);
+  }
+
+  async closeProposal() {}
+}
+
+class TestSaleExecutor implements SaleChangeExecutor {
+  readonly creates: Parameters<SaleChangeExecutor["publishCreate"]>[0][] = [];
+
+  async publishCreate(
+    input: Parameters<SaleChangeExecutor["publishCreate"]>[0]
+  ) {
+    this.creates.push(input);
+    return {
+      id: "operationRevision_1",
+      proposalId: input.proposal.id,
+      kind: input.proposal.kind,
+      action: "update" as const,
+      actor: input.actor,
+      targetType: "sale" as const,
+      targetId: "plist_summer",
+      targetKey: "sale:plist_summer",
+      beforeValue: input.proposal.beforeValue,
+      afterValue: { ...input.proposal.proposedValue, saleId: "plist_summer" },
+      sourceRevisionId: null,
+      reason: input.proposal.reason,
+      requestId: input.requestId,
+      createdAt: input.confirmedAt,
+    };
+  }
+
+
+  async publishUpdate(
+    input: Parameters<SaleChangeExecutor["publishUpdate"]>[0]
+  ) {
+    return this.publishCreate(input);
   }
 }
 
@@ -344,12 +476,460 @@ class TestClock implements Clock {
 }
 
 class TestIds implements IdGenerator {
-  next(prefix: "proposal" | "revision" | "event") {
+  next(
+    prefix:
+      | "proposal"
+      | "revision"
+      | "operationProposal"
+      | "operationRevision"
+      | "event"
+  ) {
     return `${prefix}_1`;
   }
 }
 
 describe("ProductChangeApplication", () => {
+  it("creates an exact sale proposal without publishing it", async () => {
+    const target: SaleVariantTarget = {
+      productId: "prod_tools",
+      productTitle: "Trusă de scule",
+      variantId: "variant_tools",
+      variantTitle: "Standard",
+      sku: "DTHS1M28",
+      basePriceId: "price_base",
+      normalAmount: 429,
+      currencyCode: "mdl",
+      updatedAt: new Date("2026-07-29T09:00:00.000Z"),
+    };
+    const sales = new TestSales([target]);
+    const operationGovernance = new TestOperationGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.update"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales,
+      operationGovernance,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    const proposal = await application.proposeSaleCreate(
+      { actorId: actor.id, requestId: "req_sale_create" },
+      {
+        title: "August sale",
+        description: "Selected tools",
+        status: "draft",
+        startsAt: "2026-08-01T00:00:00.000Z",
+        endsAt: "2026-08-31T23:59:59.000Z",
+        items: [{ variantId: target.variantId, saleAmount: 299 }],
+        reason: "Prepare the August sale",
+      }
+    );
+
+    expect(proposal).toMatchObject({
+      id: "operationProposal_1",
+      kind: "sale_create",
+      status: "pending",
+      actorId: actor.id,
+      targetType: "sale",
+      targetId: null,
+      targetKey: "sale:new:operationProposal_1",
+      beforeValue: {},
+      proposedValue: {
+        saleId: null,
+        title: "August sale",
+        description: "Selected tools",
+        status: "draft",
+        startsAt: "2026-08-01T00:00:00.000Z",
+        endsAt: "2026-08-31T23:59:59.000Z",
+        items: [
+          expect.objectContaining({
+            variantId: target.variantId,
+            normalAmount: 429,
+            saleAmount: 299,
+            currencyCode: "mdl",
+          }),
+        ],
+      },
+      contentHash: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
+      expiresAt: new Date("2026-07-29T10:30:00.000Z"),
+    });
+    expect(operationGovernance.proposals).toEqual([proposal]);
+  });
+
+  it("rejects a sale price that is not below the normal price", async () => {
+    const operationGovernance = new TestOperationGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.update"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales([saleTarget]),
+      operationGovernance,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.proposeSaleCreate(
+        { actorId: actor.id, requestId: "req_invalid_sale_price" },
+        {
+          title: "Invalid sale",
+          description: "Selected tools",
+          status: "draft",
+          startsAt: null,
+          endsAt: null,
+          items: [
+            {
+              variantId: saleTarget.variantId,
+              saleAmount: saleTarget.normalAmount,
+            },
+          ],
+          reason: "Check invalid price",
+        }
+      )
+    ).rejects.toMatchObject({ code: "invalid_sale_price" });
+    expect(operationGovernance.proposals).toEqual([]);
+  });
+
+  it("rejects a sale that overlaps another active sale", async () => {
+    const operationGovernance = new TestOperationGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.update"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales([saleTarget], [
+        { saleId: "plist_existing", variantId: saleTarget.variantId },
+      ]),
+      operationGovernance,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.proposeSaleCreate(
+        { actorId: actor.id, requestId: "req_overlapping_sale" },
+        {
+          title: "Overlapping sale",
+          description: "Selected tools",
+          status: "active",
+          startsAt: null,
+          endsAt: null,
+          items: [{ variantId: saleTarget.variantId, saleAmount: 299 }],
+          reason: "Check sale overlap",
+        }
+      )
+    ).rejects.toMatchObject({ code: "sale_overlap" });
+    expect(operationGovernance.proposals).toEqual([]);
+  });
+
+  it("denies sale proposals without sale.update", async () => {
+    const governance = new TestGovernance();
+    const operationGovernance = new TestOperationGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities([]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales([saleTarget]),
+      operationGovernance,
+      governance,
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.proposeSaleCreate(
+        { actorId: actor.id, requestId: "req_denied_sale_create" },
+        {
+          title: "August sale",
+          description: "Selected tools",
+          status: "draft",
+          startsAt: null,
+          endsAt: null,
+          items: [{ variantId: saleTarget.variantId, saleAmount: 299 }],
+          reason: "Prepare the August sale",
+        }
+      )
+    ).rejects.toMatchObject({ code: "capability_denied" });
+    expect(operationGovernance.proposals).toEqual([]);
+    expect(governance.events).toEqual([
+      expect.objectContaining({
+        name: "authorization.denied",
+        targetId: "sale:new",
+        details: {
+          capability: "sale.update",
+          reason: "capability_denied",
+        },
+      }),
+    ]);
+  });
+
+  it("publishes only the exact sale proposal confirmed by its author", async () => {
+    const target: SaleVariantTarget = {
+      productId: "prod_tools",
+      productTitle: "Trusă de scule",
+      variantId: "variant_tools",
+      variantTitle: "Standard",
+      sku: "DTHS1M28",
+      basePriceId: "price_base",
+      normalAmount: 429,
+      currencyCode: "mdl",
+      updatedAt: new Date("2026-07-29T09:00:00.000Z"),
+    };
+    const operationGovernance = new TestOperationGovernance();
+    const saleExecutor = new TestSaleExecutor();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.update"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales([target]),
+      operationGovernance,
+      saleExecutor,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+    const proposal = await application.proposeSaleCreate(
+      { actorId: actor.id, requestId: "req_sale_create" },
+      {
+        title: "August sale",
+        description: "Selected tools",
+        status: "draft",
+        startsAt: null,
+        endsAt: null,
+        items: [{ variantId: target.variantId, saleAmount: 299 }],
+        reason: "Prepare the August sale",
+      }
+    );
+
+    await expect(
+      application.publishSaleChange(
+        { actorId: actor.id, requestId: "req_sale_publish" },
+        {
+          proposalId: proposal.id,
+          confirmation: {
+            action: "accept",
+            proposalId: proposal.id,
+            contentHash: proposal.contentHash,
+            confirmedAt: now,
+          },
+        }
+      )
+    ).resolves.toMatchObject({
+      proposalId: proposal.id,
+      targetId: "plist_summer",
+    });
+    expect(saleExecutor.creates).toEqual([
+      expect.objectContaining({
+        actor,
+        proposal,
+        requestId: "req_sale_publish",
+        confirmedAt: now,
+      }),
+    ]);
+  });
+
+  it("creates an exact proposal to change sale items", async () => {
+    const operationGovernance = new TestOperationGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.update"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales([saleTarget], [], activeSale),
+      operationGovernance,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    const proposal = await application.proposeSaleItems(
+      { actorId: actor.id, requestId: "req_sale_items" },
+      {
+        saleId: activeSale.id,
+        upsert: [{ variantId: saleTarget.variantId, saleAmount: 299 }],
+        removeVariantIds: [],
+        reason: "Reduce the sale price",
+      }
+    );
+
+    expect(proposal).toMatchObject({
+      kind: "sale_items_update",
+      targetId: activeSale.id,
+      targetKey: `sale:${activeSale.id}`,
+      targetVersion: activeSale.updatedAt.toISOString(),
+      beforeValue: {
+        items: [expect.objectContaining({ saleAmount: 349 })],
+      },
+      proposedValue: {
+        items: [
+          expect.objectContaining({
+            salePriceId: "price_sale",
+            normalAmount: 429,
+            saleAmount: 299,
+          }),
+        ],
+      },
+    });
+    expect(operationGovernance.proposals).toEqual([proposal]);
+  });
+
+  it("creates a safe proposal to end a sale", async () => {
+    const operationGovernance = new TestOperationGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.update"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales([saleTarget], [], activeSale),
+      operationGovernance,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.proposeSaleStatus(
+        { actorId: actor.id, requestId: "req_sale_end" },
+        {
+          saleId: activeSale.id,
+          action: "end",
+          reason: "End the summer sale",
+        }
+      )
+    ).resolves.toMatchObject({
+      kind: "sale_status_update",
+      beforeValue: { status: "active", endsAt: null },
+      proposedValue: {
+        status: "draft",
+        endsAt: "2026-07-29T10:00:00.000Z",
+      },
+    });
+  });
+
+  it("rolls back a created sale by ending it without deleting it", async () => {
+    const operationGovernance = new TestOperationGovernance();
+    operationGovernance.revisions.push({
+      id: "operationRevision_create",
+      proposalId: "operationProposal_create",
+      kind: "sale_create",
+      action: "update",
+      actor,
+      targetType: "sale",
+      targetId: activeSale.id,
+      targetKey: `sale:${activeSale.id}`,
+      beforeValue: {},
+      afterValue: { saleId: activeSale.id },
+      sourceRevisionId: null,
+      reason: "Create sale",
+      requestId: "req_create",
+      createdAt: new Date("2026-07-28T10:00:00.000Z"),
+    });
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.rollback"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales([saleTarget], [], activeSale),
+      operationGovernance,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.proposeSaleRollback(
+        { actorId: actor.id, requestId: "req_sale_rollback" },
+        {
+          revisionId: "operationRevision_create",
+          reason: "Undo the created sale",
+        }
+      )
+    ).resolves.toMatchObject({
+      kind: "sale_rollback",
+      sourceRevisionId: "operationRevision_create",
+      proposedValue: {
+        saleId: activeSale.id,
+        status: "draft",
+        endsAt: "2026-07-29T10:00:00.000Z",
+      },
+    });
+  });
+
+  it("lists sales for an authorized manager", async () => {
+    const sales = new TestSales();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["sale.read"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.listSales(
+        { actorId: actor.id, requestId: "req_sales" },
+        { status: "active", limit: 20, offset: 0 }
+      )
+    ).resolves.toEqual({ sales: [], count: 0 });
+    expect(sales.lists).toEqual([
+      { status: "active", limit: 20, offset: 0 },
+    ]);
+  });
+
+  it("denies sale access without sale.read", async () => {
+    const governance = new TestGovernance();
+    const sales = new TestSales();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities([]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales,
+      governance,
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.listSales(
+        { actorId: actor.id, requestId: "req_denied_sales" },
+        { limit: 20, offset: 0 }
+      )
+    ).rejects.toMatchObject({ code: "capability_denied" });
+    expect(sales.lists).toEqual([]);
+    expect(governance.events).toEqual([
+      expect.objectContaining({
+        name: "authorization.denied",
+        targetId: "sales",
+        details: {
+          capability: "sale.read",
+          reason: "capability_denied",
+        },
+      }),
+    ]);
+  });
+
   it("lists orders for one DYLLU calendar date for an authorized manager", async () => {
     const orders = new TestOrders();
     const application = new ProductChangeApplication({

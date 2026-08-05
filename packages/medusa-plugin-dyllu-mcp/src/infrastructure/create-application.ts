@@ -11,13 +11,16 @@ import { DylluMcpGovernanceModuleService } from "../modules/governance/service";
 import {
   MedusaOrderDirectory,
   MedusaProductCatalog,
+  MedusaSaleDirectory,
   MedusaUserDirectory,
 } from "./medusa-directory";
 import {
   MedusaCapabilityStore,
   MedusaGovernanceStore,
+  MedusaOperationGovernanceStore,
 } from "./medusa-governance-store";
 import { MedusaProductChangeExecutor } from "./medusa-product-change-executor";
+import { MedusaSaleChangeExecutor } from "./medusa-sale-change-executor";
 import { MedusaIdGenerator, SystemClock } from "./system";
 
 export function createProductChangeApplication(container: MedusaContainer) {
@@ -31,6 +34,7 @@ export function createProductChangeApplication(container: MedusaContainer) {
     users: new MedusaUserDirectory(query),
     capabilities: new MedusaCapabilityStore(governanceService, locking),
     products: new MedusaProductCatalog(query),
+    sales: new MedusaSaleDirectory(query),
     orders: new MedusaOrderDirectory(query, {
       list: async (input) => {
         const { result } = await getOrdersListWorkflow(container).run({
@@ -46,7 +50,9 @@ export function createProductChangeApplication(container: MedusaContainer) {
       },
     }),
     governance: new MedusaGovernanceStore(governanceService),
+    operationGovernance: new MedusaOperationGovernanceStore(governanceService),
     executor: new MedusaProductChangeExecutor(container, locking),
+    saleExecutor: new MedusaSaleChangeExecutor(container, locking),
     clock: new SystemClock(),
     ids: new MedusaIdGenerator(),
   });

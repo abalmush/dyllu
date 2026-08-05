@@ -2,6 +2,9 @@ export const capabilities = [
   "capability.manage",
   "order.read",
   "product.read",
+  "sale.read",
+  "sale.update",
+  "sale.rollback",
   "product_content.update",
   "product_price.update",
   "product.rollback",
@@ -87,6 +90,110 @@ export type ProductSummary = {
   variants: ProductVariantSummary[];
 };
 
+export type SaleStatus = "active" | "draft";
+
+export type SaleSummary = {
+  id: string;
+  title: string;
+  description: string;
+  status: SaleStatus;
+  startsAt: Date | null;
+  endsAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type SaleItem = {
+  priceId: string;
+  productId: string;
+  productTitle: string;
+  variantId: string;
+  variantTitle: string;
+  sku: string | null;
+  currencyCode: string;
+  normalAmount: number | null;
+  saleAmount: number;
+  minQuantity: number | null;
+  maxQuantity: number | null;
+  hasRules: boolean;
+  updatedAt: Date;
+};
+
+export type SaleDetails = SaleSummary & {
+  items: SaleItem[];
+};
+
+export type SaleVariantTarget = {
+  productId: string;
+  productTitle: string;
+  variantId: string;
+  variantTitle: string;
+  sku: string | null;
+  basePriceId: string;
+  normalAmount: number;
+  currencyCode: "mdl";
+  updatedAt: Date;
+};
+
+export type SaleOperationItem = {
+  productId: string;
+  productTitle: string;
+  variantId: string;
+  variantTitle: string;
+  sku: string | null;
+  basePriceId: string;
+  salePriceId: string | null;
+  normalAmount: number;
+  saleAmount: number;
+  currencyCode: "mdl";
+  targetUpdatedAt: string;
+};
+
+export type SaleOperationValue = {
+  saleId: string | null;
+  title: string;
+  description: string;
+  status: SaleStatus;
+  startsAt: string | null;
+  endsAt: string | null;
+  items: SaleOperationItem[];
+};
+
+export type OperationProposal = {
+  id: string;
+  kind: OperationKind;
+  status: ProposalStatus;
+  actorId: string;
+  targetType: OperationTargetType;
+  targetId: string | null;
+  targetKey: string;
+  beforeValue: Record<string, unknown>;
+  proposedValue: Record<string, unknown>;
+  targetVersion: string | null;
+  contentHash: string;
+  reason: string;
+  sourceRevisionId: string | null;
+  createdAt: Date;
+  expiresAt: Date;
+};
+
+export type OperationRevision = {
+  id: string;
+  proposalId: string;
+  kind: OperationKind;
+  action: RevisionAction;
+  actor: Actor;
+  targetType: OperationTargetType;
+  targetId: string;
+  targetKey: string;
+  beforeValue: Record<string, unknown>;
+  afterValue: Record<string, unknown>;
+  sourceRevisionId: string | null;
+  reason: string;
+  requestId: string;
+  createdAt: Date;
+};
+
 export type ProductVariantPriceSummary = {
   id: string;
   amount: number;
@@ -133,6 +240,19 @@ export const proposalKinds = [
 ] as const;
 
 export type ProposalKind = (typeof proposalKinds)[number];
+
+export const operationKinds = [
+  "sale_create",
+  "sale_items_update",
+  "sale_status_update",
+  "sale_rollback",
+] as const;
+
+export type OperationKind = (typeof operationKinds)[number];
+
+export const operationTargetTypes = ["sale"] as const;
+
+export type OperationTargetType = (typeof operationTargetTypes)[number];
 
 type BaseProductChangeProposal = {
   id: string;

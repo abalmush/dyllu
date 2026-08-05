@@ -392,6 +392,9 @@ importers:
       '@types/node':
         specifier: ^20.12.11
         version: 20.19.39
+      '@types/pg':
+        specifier: 8.20.0
+        version: 8.20.0
       '@types/react':
         specifier: ^18.3.2
         version: 18.3.28
@@ -404,6 +407,9 @@ importers:
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@20.19.39)(ts-node@10.9.2(@swc/core@1.15.30)(@types/node@20.19.39)(typescript@5.9.3))
+      pg:
+        specifier: 8.20.0
+        version: 8.20.0
       react:
         specifier: ^18.3.1
         version: 18.3.1
