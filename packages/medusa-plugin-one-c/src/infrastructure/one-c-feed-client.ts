@@ -184,7 +184,25 @@ export class OneCFeedClient {
     endpoint: "categories" | "brands" | "promo"
   ) {
     const response = await this.fetchJson(url);
+    if (
+      endpoint === "categories" &&
+      !isRecord(response.data) &&
+      !Array.isArray(response.data)
+    ) {
+      throw new OneCFeedError(
+        "invalid_items",
+        "1C categories feed is not an object or array"
+      );
+    }
     if (!isRecord(response.data) || !Array.isArray(response.data.Items)) {
+      if (endpoint === "categories") {
+        return {
+          endpoint,
+          batch: null,
+          url,
+          ...response,
+        };
+      }
       throw new OneCFeedError(
         "invalid_items",
         `1C ${endpoint} feed has no Items array`
