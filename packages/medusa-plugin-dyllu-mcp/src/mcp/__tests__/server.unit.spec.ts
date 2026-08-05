@@ -303,6 +303,53 @@ describe("DYLLU MCP server", () => {
     }
   });
 
+  it("creates a reviewable DYLLU promotion status proposal", async () => {
+    const application = {
+      proposePromotionStatus: jest.fn().mockResolvedValue({
+        id: "operationProposal_promotion",
+        contentHash: "sha256:test",
+      }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_promotion" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "propose_promotion_status",
+        arguments: {
+          promotion_id: "promo_august",
+          status: "active",
+          reason: "Start the approved campaign",
+        },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(application.proposePromotionStatus).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_promotion" },
+        {
+          promotionId: "promo_august",
+          status: "active",
+          reason: "Start the approved campaign",
+        }
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("gets one DYLLU sale with its exact items", async () => {
     const application = {
       getSale: jest.fn().mockResolvedValue({ id: "plist_summer", items: [] }),

@@ -9,6 +9,9 @@ export const capabilities = [
   "merchandising.read",
   "merchandising.update",
   "merchandising.rollback",
+  "promotion.read",
+  "promotion.update",
+  "promotion.rollback",
   "product_content.update",
   "product_price.update",
   "product.rollback",
@@ -269,6 +272,36 @@ export type CategoryAssignmentOperationValue = {
   }>;
 };
 
+export type PromotionStatus = "draft" | "active" | "inactive";
+
+export type PromotionDetails = {
+  id: string;
+  code: string;
+  type: "standard" | "buyget";
+  status: PromotionStatus;
+  isAutomatic: boolean;
+  isTaxInclusive: boolean;
+  limit: number | null;
+  used: number;
+  campaignId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type PromotionStatusOperationValue = {
+  id: string;
+  code: string;
+  type: "standard" | "buyget";
+  status: PromotionStatus;
+  isAutomatic: boolean;
+  isTaxInclusive: boolean;
+  limit: number | null;
+  used: number;
+  campaignId: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type SaleStatus = "active" | "draft";
 
 export type SaleSummary = {
@@ -427,11 +460,17 @@ export const operationKinds = [
   "sale_rollback",
   "category_assignment_update",
   "category_assignment_rollback",
+  "promotion_status_update",
+  "promotion_status_rollback",
 ] as const;
 
 export type OperationKind = (typeof operationKinds)[number];
 
-export const operationTargetTypes = ["sale", "product_category"] as const;
+export const operationTargetTypes = [
+  "sale",
+  "product_category",
+  "promotion",
+] as const;
 
 export type OperationTargetType = (typeof operationTargetTypes)[number];
 

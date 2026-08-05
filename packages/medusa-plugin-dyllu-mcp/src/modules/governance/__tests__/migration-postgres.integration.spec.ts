@@ -43,7 +43,8 @@ describe("DYLLU MCP governance migrations", () => {
       values
         ('grant_sale', 'user_existing', 'sale.update', 'user_admin'),
         ('grant_inventory', 'user_existing', 'inventory.read', 'user_admin'),
-        ('grant_merchandising', 'user_existing', 'merchandising.update', 'user_admin');
+        ('grant_merchandising', 'user_existing', 'merchandising.update', 'user_admin'),
+        ('grant_promotion', 'user_existing', 'promotion.update', 'user_admin');
     `);
     await client.query(`
       insert into dyllu_mcp_operation_proposal
@@ -109,6 +110,15 @@ describe("DYLLU MCP governance migrations", () => {
           (id, user_id, capability, granted_by)
         values
           ('grant_sale_after_down', 'user_existing', 'sale.update', 'user_admin');
+      `)
+    ).rejects.toThrow(/capability_check/i);
+    await expect(
+      client.query(`
+        insert into dyllu_mcp_capability_grant
+          (id, user_id, capability, granted_by)
+        values
+          ('grant_promotion_after_down', 'user_existing',
+           'promotion.update', 'user_admin');
       `)
     ).rejects.toThrow(/capability_check/i);
     await expect(

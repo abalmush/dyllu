@@ -20,6 +20,9 @@ export class Migration20260805120000 extends Migration {
         'merchandising.read',
         'merchandising.update',
         'merchandising.rollback',
+        'promotion.read',
+        'promotion.update',
+        'promotion.rollback',
         'product_content.update',
         'product_price.update',
         'product.rollback',
@@ -38,7 +41,9 @@ export class Migration20260805120000 extends Migration {
           'sale_status_update',
           'sale_rollback',
           'category_assignment_update',
-          'category_assignment_rollback'
+          'category_assignment_rollback',
+          'promotion_status_update',
+          'promotion_status_rollback'
         )) not null,
         "status" text check ("status" in (
           'pending', 'applied', 'expired', 'rejected', 'superseded', 'failed'
@@ -46,7 +51,8 @@ export class Migration20260805120000 extends Migration {
         "actor_id" text not null,
         "target_type" text check ("target_type" in (
           'sale',
-          'product_category'
+          'product_category',
+          'promotion'
         )) not null,
         "target_id" text null,
         "target_key" text not null,
@@ -92,7 +98,9 @@ export class Migration20260805120000 extends Migration {
           'sale_status_update',
           'sale_rollback',
           'category_assignment_update',
-          'category_assignment_rollback'
+          'category_assignment_rollback',
+          'promotion_status_update',
+          'promotion_status_rollback'
         )) not null,
         "action" text check ("action" in ('update', 'rollback')) not null,
         "actor_id" text not null,
@@ -100,7 +108,8 @@ export class Migration20260805120000 extends Migration {
         "actor_name" text not null,
         "target_type" text check ("target_type" in (
           'sale',
-          'product_category'
+          'product_category',
+          'promotion'
         )) not null,
         "target_id" text not null,
         "target_key" text not null,
@@ -176,7 +185,8 @@ export class Migration20260805120000 extends Migration {
       delete from "dyllu_mcp_capability_grant"
       where "capability" in (
         'sale.read', 'sale.update', 'sale.rollback', 'inventory.read',
-        'merchandising.read', 'merchandising.update', 'merchandising.rollback'
+        'merchandising.read', 'merchandising.update', 'merchandising.rollback',
+        'promotion.read', 'promotion.update', 'promotion.rollback'
       );
     `);
     this.addSql(`

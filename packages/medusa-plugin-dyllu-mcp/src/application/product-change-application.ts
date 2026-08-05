@@ -47,6 +47,7 @@ import {
   MerchandisingApplication,
   ProposeCategoryAssignmentsInput,
 } from "./merchandising-application";
+import { PromotionApplication } from "./promotion-application";
 
 const PROPOSAL_TTL_MS = 30 * 60 * 1000;
 const MAX_DESCRIPTION_LENGTH = 20_000;
@@ -154,6 +155,7 @@ export type ProductChangeApplicationDependencies = {
   saleExecutor?: SaleChangeExecutor;
   inventory?: InventoryDirectory;
   merchandising?: MerchandisingApplication;
+  promotions?: PromotionApplication;
 };
 
 export class ProductChangeApplication {
@@ -553,6 +555,91 @@ export class ProductChangeApplication {
       proposal.targetKey
     );
     return this.requireMerchandising().publishCategoryAssignments(actor, {
+      ...input,
+      requestId: context.requestId,
+    });
+  }
+
+  async listPromotions(
+    context: RequestContext,
+    input: {
+      status?: "draft" | "active" | "inactive";
+      limit: number;
+      offset: number;
+    }
+  ) {
+    await this.requireCapability(context, "promotion.read", "promotions");
+    return this.requirePromotions().list(input);
+  }
+
+  async getPromotion(context: RequestContext, promotionId: string) {
+    await this.requireCapability(context, "promotion.read", promotionId);
+    return this.requirePromotions().get(promotionId);
+  }
+
+  async proposePromotionStatus(
+    context: RequestContext,
+    input: {
+      promotionId: string;
+      status: "draft" | "active" | "inactive";
+      reason: string;
+    }
+  ) {
+    await this.requireCapability(
+      context,
+      "promotion.update",
+      input.promotionId
+    );
+    return this.requirePromotions().proposeStatus(context, input);
+  }
+
+  async listPromotionHistory(
+    context: RequestContext,
+    promotionId: string,
+    limit: number
+  ) {
+    await this.requireCapability(context, "audit.read", promotionId);
+    return this.requirePromotions().listHistory(promotionId, limit);
+  }
+
+  async proposePromotionRollback(
+    context: RequestContext,
+    input: ProposeRollbackInput
+  ) {
+    await this.requireCapability(
+      context,
+      "promotion.rollback",
+      input.revisionId
+    );
+    return this.requirePromotions().proposeRollback(context, input);
+  }
+
+  async publishPromotionChange(
+    context: RequestContext,
+    input: PublishDescriptionInput
+  ) {
+    const actor = await this.requireActiveActor(context, input.proposalId);
+    const proposal = await this.requireOperationGovernance().findProposal(
+      input.proposalId
+    );
+    if (
+      !proposal ||
+      proposal.targetType !== "promotion" ||
+      (proposal.kind !== "promotion_status_update" &&
+        proposal.kind !== "promotion_status_rollback")
+    ) {
+      throw new ApplicationError(
+        "proposal_not_found",
+        `Promotion proposal ${input.proposalId} was not found`
+      );
+    }
+    await this.requireCapabilityForActor(
+      context,
+      actor,
+      this.requiredCapabilityForOperation(proposal),
+      proposal.targetKey
+    );
+    return this.requirePromotions().publishStatus(actor, {
       ...input,
       requestId: context.requestId,
     });
@@ -1887,6 +1974,16 @@ export class ProductChangeApplication {
     return this.dependencies.merchandising;
   }
 
+  private requirePromotions() {
+    if (!this.dependencies.promotions) {
+      throw new ApplicationError(
+        "promotion_unavailable",
+        "DYLLU promotion control is unavailable"
+      );
+    }
+    return this.dependencies.promotions;
+  }
+
   private requireOperationGovernance() {
     if (!this.dependencies.operationGovernance) {
       throw new ApplicationError(
@@ -2106,6 +2203,12 @@ export class ProductChangeApplication {
     }
     if (proposal.kind === "category_assignment_update") {
       return "merchandising.update";
+    }
+    if (proposal.kind === "promotion_status_rollback") {
+      return "promotion.rollback";
+    }
+    if (proposal.kind === "promotion_status_update") {
+      return "promotion.update";
     }
     if (proposal.kind === "sale_rollback") {
       return "sale.rollback";

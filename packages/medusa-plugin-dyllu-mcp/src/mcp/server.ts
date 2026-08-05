@@ -23,6 +23,8 @@ const orderStatusSchema = z.enum([
 ]);
 const saleStatusSchema = z.enum(["active", "draft"]);
 const categoryIdSchema = z.string().trim().min(1).max(100);
+const promotionIdSchema = z.string().trim().min(1).max(100);
+const promotionStatusSchema = z.enum(["draft", "active", "inactive"]);
 
 export function createDylluMcpServer(
   application: ProductChangeApplication,
@@ -64,6 +66,7 @@ export function createDylluMcpServer(
         "Use propose_product_description_batch for up to 20 corrections, then show every independent proposal before any publish call.",
         "Use get_inventory_exceptions to find missing, low, negative, or inconsistent DYLLU stock data.",
         "Use list_product_categories and get_product_category before proposing a DYLLU category assignment change.",
+        "Use list_promotions and get_promotion before proposing a DYLLU promotion status change.",
         "Use list_sales and get_sale before proposing a DYLLU sale change.",
         "Use list_orders for a specific DYLLU calendar date and get_order for complete order information.",
         "Use get_daily_order_report for exact order totals, status groups, and exceptions for one DYLLU calendar date.",
@@ -74,6 +77,7 @@ export function createDylluMcpServer(
         "Call publish_product_price only after the manager asks to publish the exact price proposal.",
         "Call publish_sale_change only after the manager asks to publish the exact sale proposal.",
         "Call publish_merchandising_change only after the manager asks to publish the exact category proposal.",
+        "Call publish_promotion_change only after the manager asks to publish the exact promotion proposal.",
         "Only call a publish tool after the manager explicitly confirms the exact proposal.",
         "Pass the exact stored content_hash as confirmed_content_hash when publishing.",
         "Rollback creates a new proposal and never removes audit history.",
@@ -347,6 +351,169 @@ export function createDylluMcpServer(
     }) =>
       execute("publish_merchandising_change", async () => {
         const revision = await application.publishMerchandisingChange(
+          getContext(),
+          {
+            proposalId,
+            confirmation: {
+              action: "accept",
+              proposalId,
+              contentHash: confirmedContentHash,
+              confirmedAt: new Date(),
+            },
+          }
+        );
+        return { published: true, revision };
+      })
+  );
+
+  server.registerTool(
+    "list_promotions",
+    {
+      title: "List DYLLU promotions",
+      description: "List bounded DYLLU discount promotions, newest first.",
+      inputSchema: z
+        .object({
+          status: promotionStatusSchema.optional(),
+          limit: z.number().int().min(1).max(50).default(20),
+          offset: z.number().int().min(0).max(10_000).default(0),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("list_promotions", () =>
+        application.listPromotions(getContext(), {
+          ...(input.status ? { status: input.status } : {}),
+          limit: input.limit,
+          offset: input.offset,
+        })
+      )
+  );
+
+  server.registerTool(
+    "get_promotion",
+    {
+      title: "Get a DYLLU promotion",
+      description:
+        "Return one DYLLU promotion with its code, type, status, limits, usage, and campaign link.",
+      inputSchema: z.object({ promotion_id: promotionIdSchema }).strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    ({ promotion_id: promotionId }) =>
+      execute("get_promotion", () =>
+        application.getPromotion(getContext(), promotionId)
+      )
+  );
+
+  server.registerTool(
+    "propose_promotion_status",
+    {
+      title: "Propose a DYLLU promotion status change",
+      description:
+        "Store an exact proposal to activate, pause, or return one DYLLU promotion to draft. This does not publish anything.",
+      inputSchema: z
+        .object({
+          promotion_id: promotionIdSchema,
+          status: promotionStatusSchema,
+          reason: z.string().trim().min(3).max(500),
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("propose_promotion_status", () =>
+        application.proposePromotionStatus(getContext(), {
+          promotionId: input.promotion_id,
+          status: input.status,
+          reason: input.reason,
+        })
+      )
+  );
+
+  server.registerTool(
+    "list_promotion_history",
+    {
+      title: "List DYLLU promotion history",
+      description:
+        "Return immutable DYLLU promotion status revisions for audit and rollback.",
+      inputSchema: z
+        .object({
+          promotion_id: promotionIdSchema,
+          limit: z.number().int().min(1).max(50).default(20),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    ({ promotion_id: promotionId, limit }) =>
+      execute("list_promotion_history", () =>
+        application.listPromotionHistory(getContext(), promotionId, limit)
+      )
+  );
+
+  server.registerTool(
+    "propose_promotion_rollback",
+    {
+      title: "Propose a DYLLU promotion rollback",
+      description:
+        "Create a reviewable proposal that restores a historical DYLLU promotion status.",
+      inputSchema: z
+        .object({
+          revision_id: revisionIdSchema,
+          reason: z.string().trim().min(3).max(500),
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    ({ revision_id: revisionId, reason }) =>
+      execute("propose_promotion_rollback", () =>
+        application.proposePromotionRollback(getContext(), {
+          revisionId,
+          reason,
+        })
+      )
+  );
+
+  server.registerTool(
+    "publish_promotion_change",
+    {
+      title: "Publish a DYLLU promotion change",
+      description:
+        "Publish an exact stored DYLLU promotion proposal after the manager explicitly confirms it.",
+      inputSchema: z
+        .object({
+          proposal_id: proposalIdSchema,
+          confirmed_content_hash: contentHashSchema,
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: true,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    ({
+      proposal_id: proposalId,
+      confirmed_content_hash: confirmedContentHash,
+    }) =>
+      execute("publish_promotion_change", async () => {
+        const revision = await application.publishPromotionChange(
           getContext(),
           {
             proposalId,

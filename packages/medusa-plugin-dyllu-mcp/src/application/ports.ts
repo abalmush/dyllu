@@ -22,6 +22,8 @@ import {
   ProductCategoryDetails,
   ProductCategorySummary,
   ProductCategoryTarget,
+  PromotionDetails,
+  PromotionStatus,
 } from "../domain/types";
 
 export type ProductSearch = {
@@ -69,6 +71,15 @@ export interface MerchandisingDirectory {
     productIds: string[],
     categoryId: string
   ): Promise<ProductCategoryTarget[]>;
+}
+
+export interface PromotionDirectory {
+  list(input: {
+    status?: PromotionStatus;
+    limit: number;
+    offset: number;
+  }): Promise<{ promotions: PromotionDetails[]; count: number }>;
+  findById(promotionId: string): Promise<PromotionDetails | null>;
 }
 
 export type SaleListQuery = {
@@ -210,6 +221,15 @@ export interface SaleChangeExecutor {
 
 export interface MerchandisingChangeExecutor {
   publishCategoryAssignments(input: {
+    actor: Actor;
+    proposal: OperationProposal;
+    requestId: string;
+    confirmedAt: Date;
+  }): Promise<OperationRevision>;
+}
+
+export interface PromotionChangeExecutor {
+  publishStatus(input: {
     actor: Actor;
     proposal: OperationProposal;
     requestId: string;
