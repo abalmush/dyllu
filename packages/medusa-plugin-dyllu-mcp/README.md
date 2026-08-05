@@ -3,6 +3,9 @@
 Governed MCP tools for DYLLU managers. The DYLLU catalog remains the source of
 truth; an MCP client supplies the LLM.
 
+For operation, onboarding, ChatGPT setup, and tool development, read
+[`docs/dyllu-mcp.md`](../../docs/dyllu-mcp.md).
+
 ## Implemented scope
 
 - Read, search, and count products
