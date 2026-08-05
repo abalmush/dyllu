@@ -160,8 +160,8 @@ const OneCConnectionPage = () => {
         <div>
           <Heading level="h1">1C product sync</Heading>
           <Text className="text-ui-fg-subtle mt-1">
-            Receive and compare 1C catalog data. This page does not change site
-            products or prices.
+            Receive and compare DYLLU brand products from 1C. Other brands are
+            not included. This page does not change site products or prices.
           </Text>
         </div>
         <Button

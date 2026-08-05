@@ -67,7 +67,14 @@ export class OneCSyncApplication {
       const normalizationResults = productSnapshots.map((snapshot) =>
         normalizeProductFeed(snapshot.data)
       );
-      const normalized = normalizationResults.flatMap((result) => result.items);
+      const dylluBrandIds = getDylluBrandIds(feed.snapshots);
+      const normalized = normalizationResults
+        .flatMap((result) => result.items)
+        .filter(
+          (product) =>
+            product.brandExternalId !== null &&
+            dylluBrandIds.has(product.brandExternalId)
+        );
       const invalid = normalizationResults.reduce(
         (count, result) => count + result.issues.length,
         0
@@ -142,4 +149,40 @@ export class OneCSyncApplication {
       throw error;
     }
   }
+}
+
+function getDylluBrandIds(
+  snapshots: Awaited<ReturnType<OneCFeeds["fetchCatalog"]>>["snapshots"]
+) {
+  const brands = snapshots.find((snapshot) => snapshot.endpoint === "brands");
+  const items =
+    isRecord(brands?.data) && Array.isArray(brands.data.Items)
+      ? brands.data.Items
+      : [];
+  const ids = new Set<string>();
+
+  for (const item of items) {
+    if (!isRecord(item)) continue;
+    const id = item.id ?? item.Id;
+    const name = item.name ?? item.Name;
+    if (
+      (typeof id === "string" || typeof id === "number") &&
+      typeof name === "string" &&
+      name.trim().toLocaleLowerCase("en-US") === "dyllu"
+    ) {
+      ids.add(String(id).trim());
+    }
+  }
+
+  if (ids.size === 0) {
+    const error = new Error("The 1C brands feed has no DYLLU brand");
+    Object.assign(error, { code: "brand_scope_not_found" });
+    throw error;
+  }
+
+  return ids;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

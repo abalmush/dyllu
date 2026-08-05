@@ -4,6 +4,7 @@ const DEFAULT_MAX_RESPONSE_BYTES = 20 * 1024 * 1024;
 const DEFAULT_MAX_CATALOG_BYTES = 100 * 1024 * 1024;
 const DEFAULT_MAX_BATCHES = 1_000;
 const DEFAULT_CATALOG_TIMEOUT_MS = 60_000;
+const PRODUCT_BRAND_FILTER = "dyllu";
 
 export const ONE_C_ENDPOINTS = Object.freeze({
   productBatches: `${ONE_C_BASE_URL}/pit_site_batches`,
@@ -146,7 +147,11 @@ export class OneCFeedClient {
     let totalBytes = Buffer.byteLength(batchesResponse.rawBody, "utf8");
 
     for (const batch of batchNumbers) {
-      const url = `${ONE_C_ENDPOINTS.products}?batch=${batch}`;
+      const query = new URLSearchParams({
+        batch: String(batch),
+        brand: PRODUCT_BRAND_FILTER,
+      });
+      const url = `${ONE_C_ENDPOINTS.products}?${query.toString()}`;
       const response = await this.fetchJson(url, this.remainingTime(deadline));
       totalBytes += Buffer.byteLength(response.rawBody, "utf8");
       if (totalBytes > this.maxCatalogBytes) {

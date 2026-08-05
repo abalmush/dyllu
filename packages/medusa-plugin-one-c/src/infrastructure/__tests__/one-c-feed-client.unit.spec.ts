@@ -10,10 +10,10 @@ describe("OneCFeedClient", () => {
         if (url === ONE_C_ENDPOINTS.productBatches) {
           return jsonResponse({ Batches: [{ batch: 1 }, { batch: 2 }] });
         }
-        if (url.endsWith("pit_site_products?batch=1")) {
+        if (url.endsWith("pit_site_products?batch=1&brand=dyllu")) {
           return jsonResponse({ Items: [{ id: "A" }] });
         }
-        if (url.endsWith("pit_site_products?batch=2")) {
+        if (url.endsWith("pit_site_products?batch=2&brand=dyllu")) {
           return jsonResponse({ Items: [{ id: "B" }] });
         }
         throw new Error(`Unexpected URL ${url}`);
@@ -30,11 +30,11 @@ describe("OneCFeedClient", () => {
     expect(requested).toEqual([
       { url: ONE_C_ENDPOINTS.productBatches, redirect: "error" },
       {
-        url: `${ONE_C_ENDPOINTS.products}?batch=1`,
+        url: `${ONE_C_ENDPOINTS.products}?batch=1&brand=dyllu`,
         redirect: "error",
       },
       {
-        url: `${ONE_C_ENDPOINTS.products}?batch=2`,
+        url: `${ONE_C_ENDPOINTS.products}?batch=2&brand=dyllu`,
         redirect: "error",
       },
     ]);
