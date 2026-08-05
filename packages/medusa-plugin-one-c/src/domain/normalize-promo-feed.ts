@@ -12,8 +12,8 @@ const promoSchema = z
               .optional(),
             Action: z
               .object({
-                StartDate: z.string().optional(),
-                EndDate: z.string().optional(),
+                StartDate: z.string().nullable().optional(),
+                EndDate: z.string().nullable().optional(),
               })
               .passthrough()
               .optional(),
