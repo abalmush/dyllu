@@ -64,32 +64,69 @@ export class OneCSyncApplication {
       const productSnapshots = feed.snapshots.filter(
         (snapshot) => snapshot.endpoint === "products"
       );
-      const normalizationResults = productSnapshots.map((snapshot) =>
-        normalizeProductFeed(snapshot.data)
-      );
+      const normalizationResults = productSnapshots.map((snapshot) => ({
+        snapshot,
+        result: normalizeProductFeed(snapshot.data),
+      }));
       const dylluBrandIds = getDylluBrandIds(feed.snapshots);
       const normalized = normalizationResults
-        .flatMap((result) => result.items)
+        .flatMap(({ result }) => result.items)
         .filter(
           (product) =>
             product.brandExternalId !== null &&
             dylluBrandIds.has(product.brandExternalId)
         );
-      const invalid = normalizationResults.reduce(
-        (count, result) => count + result.issues.length,
-        0
-      );
       const comparisons = compareCatalog(normalized, variants);
+      const invalidItems = normalizationResults.flatMap(
+        ({ snapshot, result }) =>
+          result.issues
+            .filter((issue) => {
+              const brandExternalId = sourceBrandExternalId(issue.source);
+              return (
+                brandExternalId !== null && dylluBrandIds.has(brandExternalId)
+              );
+            })
+            .map((issue) => {
+              const externalId = sourceExternalId(issue.source);
+              const fallbackId = `invalid:${snapshot.batch ?? "unknown"}:${issue.index}`;
+              return {
+                id: this.dependencies.ids.next("onecitem"),
+                runId,
+                externalId: externalId ?? fallbackId,
+                sku: externalId ?? fallbackId,
+                name: sourceProductName(issue.source),
+                mappingStatus: "ambiguous" as const,
+                preparationStatus: "unreviewed" as const,
+                medusaProductId: null,
+                medusaVariantId: null,
+                medusaProductTitle: null,
+                source: issue.source,
+                normalized: {
+                  issueCode: issue.code,
+                  issueMessage: issue.message,
+                  brandExternalId: sourceBrandExternalId(issue.source),
+                },
+                differences: {
+                  fields: [
+                    { field: "source", source: "invalid", target: null },
+                  ],
+                  issue: issue.message,
+                },
+                hidden: issue.source.hidden === true,
+                deleted: issue.source.deleted === true,
+              };
+            })
+      );
 
-      await this.dependencies.store.createItems(
-        comparisons.map((comparison) => ({
+      await this.dependencies.store.createItems([
+        ...comparisons.map((comparison) => ({
           id: this.dependencies.ids.next("onecitem"),
           runId,
           externalId: comparison.externalId,
           sku: comparison.sku,
           name: comparison.source.name,
           mappingStatus: comparison.mappingStatus,
-          preparationStatus: "unreviewed",
+          preparationStatus: "unreviewed" as const,
           medusaProductId: comparison.medusaProductId,
           medusaVariantId: comparison.medusaVariantId,
           medusaProductTitle: comparison.medusaProductTitle,
@@ -98,9 +135,11 @@ export class OneCSyncApplication {
           differences: { fields: comparison.differences },
           hidden: comparison.source.hidden,
           deleted: comparison.source.deleted,
-        }))
-      );
+        })),
+        ...invalidItems,
+      ]);
 
+      const invalid = invalidItems.length;
       const counts: SyncRunCounts = {
         total: normalized.length + invalid,
         matched: comparisons.filter((item) => item.mappingStatus === "matched")
@@ -185,4 +224,25 @@ function getDylluBrandIds(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function sourceBrandExternalId(source: Record<string, unknown>) {
+  const value = source.BrandId;
+  return typeof value === "string" || typeof value === "number"
+    ? String(value).trim() || null
+    : null;
+}
+
+function sourceExternalId(source: Record<string, unknown>) {
+  const value = source.id;
+  return typeof value === "string" || typeof value === "number"
+    ? String(value).trim() || null
+    : null;
+}
+
+function sourceProductName(source: Record<string, unknown>) {
+  const value = source.name_ro ?? source.name;
+  return typeof value === "string" && value.trim()
+    ? value.trim()
+    : "Invalid 1C product";
 }

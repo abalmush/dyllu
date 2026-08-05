@@ -9,6 +9,7 @@ const item = {
   regularPriceMdl: 100,
   balance: 2,
   brandExternalId: "brand-1",
+  differences: { fields: [{ field: "price" }] },
   hidden: false,
   deleted: false,
 };
@@ -24,6 +25,7 @@ describe("sync item exports", () => {
     expect(csv).toContain("\uFEFFrun_id,exported_at,external_id");
     expect(csv).toContain("'\u003dCMD()");
     expect(csv).toContain('"Ciocan, mare"');
+    expect(csv).toContain('"{""fields""');
   });
 
   it("creates a versioned JSON document with normalized types", () => {

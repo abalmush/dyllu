@@ -49,6 +49,7 @@ export type ProductFeedIssue = {
   index: number;
   code: "invalid_product";
   message: string;
+  source: Record<string, unknown>;
 };
 
 export function normalizeProductFeed(input: unknown): {
@@ -66,6 +67,7 @@ export function normalizeProductFeed(input: unknown): {
         index,
         code: "invalid_product",
         message: parsed.error.issues[0]?.message ?? "Invalid 1C product",
+        source: isRecord(source) ? source : { value: source },
       });
       return;
     }
@@ -77,6 +79,7 @@ export function normalizeProductFeed(input: unknown): {
         index,
         code: "invalid_product",
         message: "1C product id is empty",
+        source: parsed.data,
       });
       return;
     }
@@ -117,4 +120,8 @@ function finiteNumber(value: string | number | null | undefined) {
     typeof value === "string" ? value.trim().replace(",", ".") : value
   );
   return Number.isFinite(number) ? number : null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

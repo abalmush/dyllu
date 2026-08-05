@@ -25,6 +25,7 @@ describe("OneCSyncApplication", () => {
                     BrandId: "brand-dyllu",
                     Prices: [{ typeId: "05", value: 250 }],
                   },
+                  { name_ro: "Invalid", BrandId: "brand-dyllu" },
                 ],
               },
               statusCode: 200,
@@ -62,20 +63,27 @@ describe("OneCSyncApplication", () => {
 
     expect(result.status).toBe("ready");
     expect(result.counts).toEqual({
-      total: 1,
+      total: 2,
       matched: 0,
       missingMedusa: 1,
       ambiguous: 0,
       excluded: 0,
-      invalid: 0,
+      invalid: 1,
       changed: 0,
     });
-    expect(stored.items).toEqual([
-      expect.objectContaining({
-        externalId: "SKU-404",
-        mappingStatus: "missing_medusa",
-      }),
-    ]);
+    expect(stored.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          externalId: "SKU-404",
+          mappingStatus: "missing_medusa",
+        }),
+        expect.objectContaining({
+          externalId: "invalid:1:1",
+          mappingStatus: "ambiguous",
+          name: "Invalid",
+        }),
+      ])
+    );
   });
 
   it("stores only products assigned to the DYLLU brand", async () => {

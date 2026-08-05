@@ -68,6 +68,7 @@ export async function POST(
     regularPriceMdl: item.regular_price_mdl,
     balance: item.balance,
     brandExternalId: item.brand_external_id,
+    differences: item.differences,
     hidden: item.hidden,
     deleted: item.deleted,
   }));
