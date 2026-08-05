@@ -56,4 +56,18 @@ describe("normalizeProductFeed", () => {
       expect.objectContaining({ regularPriceMdl: 100.5, balance: 7.5 })
     );
   });
+
+  it("keeps the source row for an invalid product", () => {
+    const result = normalizeProductFeed({
+      Items: [{ name_ro: "Invalid", BrandId: "brand-dyllu" }],
+    });
+
+    expect(result.issues).toEqual([
+      expect.objectContaining({
+        index: 0,
+        code: "invalid_product",
+        source: { name_ro: "Invalid", BrandId: "brand-dyllu" },
+      }),
+    ]);
+  });
 });

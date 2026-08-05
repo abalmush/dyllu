@@ -7,6 +7,7 @@ export type ExportSyncItem = {
   regularPriceMdl: number | null;
   balance: number | null;
   brandExternalId: string | null;
+  differences: Record<string, unknown>;
   hidden: boolean;
   deleted: boolean;
 };
@@ -28,6 +29,7 @@ const CSV_COLUMNS = [
   "regular_price_mdl",
   "balance",
   "brand_external_id",
+  "differences_json",
   "hidden",
   "deleted",
 ] as const;
@@ -44,6 +46,7 @@ export function createCsvExport(input: ExportInput) {
     item.regularPriceMdl,
     item.balance,
     item.brandExternalId,
+    JSON.stringify(item.differences),
     item.hidden,
     item.deleted,
   ]);

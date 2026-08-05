@@ -49,7 +49,7 @@ type SyncItem = {
   regular_price_mdl: number | null;
   balance: number | null;
   brand_external_id: string | null;
-  differences: { fields?: Array<{ field: string }> };
+  differences: { fields?: Array<{ field: string }>; issue?: string };
   hidden: boolean;
   deleted: boolean;
 };
@@ -284,9 +284,11 @@ const OneCConnectionPage = () => {
                         <StatusBadge status={item.mapping_status} />
                       </Table.Cell>
                       <Table.Cell>
-                        {item.differences.fields
-                          ?.map((field) => field.field)
-                          .join(", ") || "—"}
+                        {item.differences.issue ??
+                          item.differences.fields
+                            ?.map((field) => field.field)
+                            .join(", ") ??
+                          "—"}
                       </Table.Cell>
                     </Table.Row>
                   ))}
