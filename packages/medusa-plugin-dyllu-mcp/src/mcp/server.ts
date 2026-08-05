@@ -22,6 +22,7 @@ const orderStatusSchema = z.enum([
   "requires_action",
 ]);
 const saleStatusSchema = z.enum(["active", "draft"]);
+const categoryIdSchema = z.string().trim().min(1).max(100);
 
 export function createDylluMcpServer(
   application: ProductChangeApplication,
@@ -62,6 +63,7 @@ export function createDylluMcpServer(
         "Use audit_catalog_quality to find missing or weak DYLLU product data before proposing corrections.",
         "Use propose_product_description_batch for up to 20 corrections, then show every independent proposal before any publish call.",
         "Use get_inventory_exceptions to find missing, low, negative, or inconsistent DYLLU stock data.",
+        "Use list_product_categories and get_product_category before proposing a DYLLU category assignment change.",
         "Use list_sales and get_sale before proposing a DYLLU sale change.",
         "Use list_orders for a specific DYLLU calendar date and get_order for complete order information.",
         "Use get_daily_order_report for exact order totals, status groups, and exceptions for one DYLLU calendar date.",
@@ -71,6 +73,7 @@ export function createDylluMcpServer(
         "Call publish_product_description only after the manager asks to publish.",
         "Call publish_product_price only after the manager asks to publish the exact price proposal.",
         "Call publish_sale_change only after the manager asks to publish the exact sale proposal.",
+        "Call publish_merchandising_change only after the manager asks to publish the exact category proposal.",
         "Only call a publish tool after the manager explicitly confirms the exact proposal.",
         "Pass the exact stored content_hash as confirmed_content_hash when publishing.",
         "Rollback creates a new proposal and never removes audit history.",
@@ -190,6 +193,176 @@ export function createDylluMcpServer(
   );
 
   server.registerTool(
+    "list_product_categories",
+    {
+      title: "List DYLLU product categories",
+      description:
+        "List bounded DYLLU product categories in storefront navigation order.",
+      inputSchema: z
+        .object({
+          limit: z.number().int().min(1).max(50).default(20),
+          offset: z.number().int().min(0).max(10_000).default(0),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("list_product_categories", () =>
+        application.listProductCategories(getContext(), input)
+      )
+  );
+
+  server.registerTool(
+    "get_product_category",
+    {
+      title: "Get a DYLLU product category",
+      description:
+        "Return one DYLLU product category and a bounded page of assigned products.",
+      inputSchema: z
+        .object({
+          category_id: categoryIdSchema,
+          limit: z.number().int().min(1).max(50).default(20),
+          offset: z.number().int().min(0).max(10_000).default(0),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    ({ category_id: categoryId, limit, offset }) =>
+      execute("get_product_category", () =>
+        application.getProductCategory(getContext(), categoryId, {
+          limit,
+          offset,
+        })
+      )
+  );
+
+  server.registerTool(
+    "propose_product_category_assignments",
+    {
+      title: "Propose DYLLU product category assignments",
+      description:
+        "Store an exact proposal to add or remove up to 100 products in one DYLLU product category. This does not publish anything.",
+      inputSchema: z
+        .object({
+          category_id: categoryIdSchema,
+          add_product_ids: z.array(productIdSchema).max(100).default([]),
+          remove_product_ids: z.array(productIdSchema).max(100).default([]),
+          reason: z.string().trim().min(3).max(500),
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("propose_product_category_assignments", () =>
+        application.proposeProductCategoryAssignments(getContext(), {
+          categoryId: input.category_id,
+          addProductIds: input.add_product_ids,
+          removeProductIds: input.remove_product_ids,
+          reason: input.reason,
+        })
+      )
+  );
+
+  server.registerTool(
+    "list_product_category_history",
+    {
+      title: "List DYLLU product category history",
+      description:
+        "Return immutable DYLLU product category assignment revisions for audit and rollback.",
+      inputSchema: z
+        .object({
+          category_id: categoryIdSchema,
+          limit: z.number().int().min(1).max(50).default(20),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    ({ category_id: categoryId, limit }) =>
+      execute("list_product_category_history", () =>
+        application.listProductCategoryHistory(getContext(), categoryId, limit)
+      )
+  );
+
+  server.registerTool(
+    "propose_product_category_rollback",
+    {
+      title: "Propose a DYLLU product category rollback",
+      description:
+        "Create a reviewable proposal that restores historical product assignments for one DYLLU product category.",
+      inputSchema: z
+        .object({
+          revision_id: revisionIdSchema,
+          reason: z.string().trim().min(3).max(500),
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    ({ revision_id: revisionId, reason }) =>
+      execute("propose_product_category_rollback", () =>
+        application.proposeProductCategoryRollback(getContext(), {
+          revisionId,
+          reason,
+        })
+      )
+  );
+
+  server.registerTool(
+    "publish_merchandising_change",
+    {
+      title: "Publish a DYLLU merchandising change",
+      description:
+        "Publish an exact stored DYLLU product category proposal after the manager explicitly confirms it.",
+      inputSchema: z
+        .object({
+          proposal_id: proposalIdSchema,
+          confirmed_content_hash: contentHashSchema,
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: true,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    ({
+      proposal_id: proposalId,
+      confirmed_content_hash: confirmedContentHash,
+    }) =>
+      execute("publish_merchandising_change", async () => {
+        const revision = await application.publishMerchandisingChange(
+          getContext(),
+          {
+            proposalId,
+            confirmation: {
+              action: "accept",
+              proposalId,
+              contentHash: confirmedContentHash,
+              confirmedAt: new Date(),
+            },
+          }
+        );
+        return { published: true, revision };
+      })
+  );
+
+  server.registerTool(
     "list_sales",
     {
       title: "List DYLLU sales",
@@ -249,11 +422,7 @@ export function createDylluMcpServer(
               z
                 .object({
                   variant_id: z.string().trim().min(1).max(100),
-                  sale_amount: z
-                    .number()
-                    .int()
-                    .min(1)
-                    .max(100_000_000),
+                  sale_amount: z.number().int().min(1).max(100_000_000),
                 })
                 .strict()
             )
@@ -301,11 +470,7 @@ export function createDylluMcpServer(
               z
                 .object({
                   variant_id: z.string().trim().min(1).max(100),
-                  sale_amount: z
-                    .number()
-                    .int()
-                    .min(1)
-                    .max(100_000_000),
+                  sale_amount: z.number().int().min(1).max(100_000_000),
                 })
                 .strict()
             )
@@ -529,12 +694,7 @@ export function createDylluMcpServer(
       inputSchema: z
         .object({
           date: calendarDateSchema,
-          stale_after_minutes: z
-            .number()
-            .int()
-            .min(0)
-            .max(10_080)
-            .default(120),
+          stale_after_minutes: z.number().int().min(0).max(10_080).default(120),
           exception_limit: z.number().int().min(1).max(100).default(50),
         })
         .strict(),

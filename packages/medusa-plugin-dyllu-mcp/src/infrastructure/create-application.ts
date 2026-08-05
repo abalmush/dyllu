@@ -22,6 +22,9 @@ import {
 import { MedusaProductChangeExecutor } from "./medusa-product-change-executor";
 import { MedusaSaleChangeExecutor } from "./medusa-sale-change-executor";
 import { MedusaInventoryDirectory } from "./medusa-inventory-directory";
+import { MerchandisingApplication } from "../application/merchandising-application";
+import { MedusaMerchandisingDirectory } from "./medusa-merchandising-directory";
+import { MedusaMerchandisingChangeExecutor } from "./medusa-merchandising-change-executor";
 import { MedusaIdGenerator, SystemClock } from "./system";
 
 export function createProductChangeApplication(container: MedusaContainer) {
@@ -30,6 +33,14 @@ export function createProductChangeApplication(container: MedusaContainer) {
     DYLLU_MCP_GOVERNANCE_MODULE
   );
   const locking = container.resolve(Modules.LOCKING);
+  const operationGovernance = new MedusaOperationGovernanceStore(
+    governanceService
+  );
+  const merchandisingDirectory = new MedusaMerchandisingDirectory(query);
+  const merchandisingExecutor = new MedusaMerchandisingChangeExecutor(
+    container,
+    locking
+  );
 
   return new ProductChangeApplication({
     users: new MedusaUserDirectory(query),
@@ -52,9 +63,16 @@ export function createProductChangeApplication(container: MedusaContainer) {
       },
     }),
     governance: new MedusaGovernanceStore(governanceService),
-    operationGovernance: new MedusaOperationGovernanceStore(governanceService),
+    operationGovernance,
     executor: new MedusaProductChangeExecutor(container, locking),
     saleExecutor: new MedusaSaleChangeExecutor(container, locking),
+    merchandising: new MerchandisingApplication({
+      directory: merchandisingDirectory,
+      governance: operationGovernance,
+      executor: merchandisingExecutor,
+      clock: new SystemClock(),
+      ids: new MedusaIdGenerator(),
+    }),
     clock: new SystemClock(),
     ids: new MedusaIdGenerator(),
   });

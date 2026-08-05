@@ -252,6 +252,57 @@ describe("DYLLU MCP server", () => {
     }
   });
 
+  it("creates a reviewable DYLLU category assignment proposal", async () => {
+    const application = {
+      proposeProductCategoryAssignments: jest.fn().mockResolvedValue({
+        id: "operationProposal_1",
+        contentHash: "sha256:test",
+      }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_category" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "propose_product_category_assignments",
+        arguments: {
+          category_id: "pcat_tools",
+          add_product_ids: ["prod_drill"],
+          remove_product_ids: ["prod_hammer"],
+          reason: "Move the selected products",
+        },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(
+        application.proposeProductCategoryAssignments
+      ).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_category" },
+        {
+          categoryId: "pcat_tools",
+          addProductIds: ["prod_drill"],
+          removeProductIds: ["prod_hammer"],
+          reason: "Move the selected products",
+        }
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("gets one DYLLU sale with its exact items", async () => {
     const application = {
       getSale: jest.fn().mockResolvedValue({ id: "plist_summer", items: [] }),

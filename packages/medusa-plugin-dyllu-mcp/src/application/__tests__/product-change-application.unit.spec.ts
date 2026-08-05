@@ -13,6 +13,7 @@ import {
   InventoryDirectory,
 } from "../ports";
 import { ProductChangeApplication } from "../product-change-application";
+import { MerchandisingApplication } from "../merchandising-application";
 import {
   Actor,
   AuditEvent,
@@ -291,7 +292,10 @@ class TestSales implements SaleDirectory {
 
   constructor(
     private readonly targets: SaleVariantTarget[] = [],
-    private readonly overlaps: Array<{ saleId: string; variantId: string }> = [],
+    private readonly overlaps: Array<{
+      saleId: string;
+      variantId: string;
+    }> = [],
     private readonly sale: SaleDetails | null = null
   ) {}
 
@@ -315,11 +319,15 @@ class TestOperationGovernance implements OperationGovernanceStore {
   }
 
   async findProposal(proposalId: string) {
-    return this.proposals.find((proposal) => proposal.id === proposalId) ?? null;
+    return (
+      this.proposals.find((proposal) => proposal.id === proposalId) ?? null
+    );
   }
 
   async findRevision(revisionId: string) {
-    return this.revisions.find((revision) => revision.id === revisionId) ?? null;
+    return (
+      this.revisions.find((revision) => revision.id === revisionId) ?? null
+    );
   }
 
   async listRevisions(targetKey: string, limit: number) {
@@ -355,7 +363,6 @@ class TestSaleExecutor implements SaleChangeExecutor {
       createdAt: input.confirmedAt,
     };
   }
-
 
   async publishUpdate(
     input: Parameters<SaleChangeExecutor["publishUpdate"]>[0]
@@ -542,6 +549,70 @@ class TestIds implements IdGenerator {
 }
 
 describe("ProductChangeApplication", () => {
+  it("lists product categories for a manager with merchandising access", async () => {
+    const merchandising = {
+      listCategories: jest.fn().mockResolvedValue({ categories: [], count: 0 }),
+    } as unknown as MerchandisingApplication;
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["merchandising.read"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      merchandising,
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.listProductCategories(
+        { actorId: actor.id, requestId: "req_categories" },
+        { limit: 20, offset: 0 }
+      )
+    ).resolves.toEqual({ categories: [], count: 0 });
+    expect(merchandising.listCategories).toHaveBeenCalledWith({
+      limit: 20,
+      offset: 0,
+    });
+  });
+
+  it("denies product category access without merchandising.read", async () => {
+    const governance = new TestGovernance();
+    const merchandising = {
+      listCategories: jest.fn(),
+    } as unknown as MerchandisingApplication;
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities([]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      governance,
+      executor: new TestExecutor(),
+      merchandising,
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.listProductCategories(
+        { actorId: actor.id, requestId: "req_categories_denied" },
+        { limit: 20, offset: 0 }
+      )
+    ).rejects.toMatchObject({ code: "capability_denied" });
+    expect(merchandising.listCategories).not.toHaveBeenCalled();
+    expect(governance.events).toEqual([
+      expect.objectContaining({
+        name: "authorization.denied",
+        targetId: "product-categories",
+        details: {
+          capability: "merchandising.read",
+          reason: "capability_denied",
+        },
+      }),
+    ]);
+  });
+
   it("creates an exact sale proposal without publishing it", async () => {
     const target: SaleVariantTarget = {
       productId: "prod_tools",
@@ -657,9 +728,10 @@ describe("ProductChangeApplication", () => {
       capabilities: new TestCapabilities(["sale.update"]),
       products: new TestProducts(),
       orders: new TestOrders(),
-      sales: new TestSales([saleTarget], [
-        { saleId: "plist_existing", variantId: saleTarget.variantId },
-      ]),
+      sales: new TestSales(
+        [saleTarget],
+        [{ saleId: "plist_existing", variantId: saleTarget.variantId }]
+      ),
       operationGovernance,
       governance: new TestGovernance(),
       executor: new TestExecutor(),
@@ -944,9 +1016,7 @@ describe("ProductChangeApplication", () => {
         { status: "active", limit: 20, offset: 0 }
       )
     ).resolves.toEqual({ sales: [], count: 0 });
-    expect(sales.lists).toEqual([
-      { status: "active", limit: 20, offset: 0 },
-    ]);
+    expect(sales.lists).toEqual([{ status: "active", limit: 20, offset: 0 }]);
   });
 
   it("denies sale access without sale.read", async () => {

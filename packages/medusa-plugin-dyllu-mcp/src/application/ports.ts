@@ -19,6 +19,9 @@ import {
   OperationProposal,
   OperationRevision,
   InventoryVariantSnapshot,
+  ProductCategoryDetails,
+  ProductCategorySummary,
+  ProductCategoryTarget,
 } from "../domain/types";
 
 export type ProductSearch = {
@@ -47,6 +50,25 @@ export interface InventoryDirectory {
     variants: InventoryVariantSnapshot[];
     count: number;
   }>;
+}
+
+export interface MerchandisingDirectory {
+  listCategories(input: { limit: number; offset: number }): Promise<{
+    categories: ProductCategorySummary[];
+    count: number;
+  }>;
+  findCategoryById(categoryId: string): Promise<ProductCategoryDetails | null>;
+  listCategoryProducts(
+    categoryId: string,
+    input: { limit: number; offset: number }
+  ): Promise<{
+    products: ProductCategoryDetails["products"];
+    count: number;
+  }>;
+  findProductTargets(
+    productIds: string[],
+    categoryId: string
+  ): Promise<ProductCategoryTarget[]>;
 }
 
 export type SaleListQuery = {
@@ -179,6 +201,15 @@ export interface SaleChangeExecutor {
     confirmedAt: Date;
   }): Promise<OperationRevision>;
   publishUpdate(input: {
+    actor: Actor;
+    proposal: OperationProposal;
+    requestId: string;
+    confirmedAt: Date;
+  }): Promise<OperationRevision>;
+}
+
+export interface MerchandisingChangeExecutor {
+  publishCategoryAssignments(input: {
     actor: Actor;
     proposal: OperationProposal;
     requestId: string;

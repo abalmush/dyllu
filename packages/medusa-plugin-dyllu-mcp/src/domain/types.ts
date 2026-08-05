@@ -6,6 +6,9 @@ export const capabilities = [
   "sale.update",
   "sale.rollback",
   "inventory.read",
+  "merchandising.read",
+  "merchandising.update",
+  "merchandising.rollback",
   "product_content.update",
   "product_price.update",
   "product.rollback",
@@ -137,8 +140,7 @@ export const catalogQualityIssueCodes = [
   "invalid_mdl_price",
 ] as const;
 
-export type CatalogQualityIssueCode =
-  (typeof catalogQualityIssueCodes)[number];
+export type CatalogQualityIssueCode = (typeof catalogQualityIssueCodes)[number];
 
 export type CatalogQualityIssue = {
   code: CatalogQualityIssueCode;
@@ -196,8 +198,7 @@ export const inventoryExceptionCodes = [
   "reservation_exceeds_stock",
 ] as const;
 
-export type InventoryExceptionCode =
-  (typeof inventoryExceptionCodes)[number];
+export type InventoryExceptionCode = (typeof inventoryExceptionCodes)[number];
 
 export type InventoryExceptionReport = {
   scannedVariantCount: number;
@@ -215,6 +216,56 @@ export type InventoryExceptionReport = {
     allowBackorder: boolean;
     codes: InventoryExceptionCode[];
     items: InventoryItemSnapshot[];
+  }>;
+};
+
+export type ProductCategorySummary = {
+  id: string;
+  name: string;
+  handle: string;
+  parentCategoryId: string | null;
+  isActive: boolean;
+  isInternal: boolean;
+  rank: number;
+  updatedAt: Date;
+};
+
+export type ProductCategoryProduct = {
+  id: string;
+  title: string;
+  handle: string;
+  status: string;
+  updatedAt: Date;
+};
+
+export type ProductCategoryDetails = ProductCategorySummary & {
+  products: ProductCategoryProduct[];
+  productCount: number;
+};
+
+export type ProductCategoryTarget = {
+  productId: string;
+  productTitle: string;
+  productHandle: string;
+  productStatus: string;
+  productUpdatedAt: Date;
+  assigned: boolean;
+};
+
+export type CategoryAssignmentOperationValue = {
+  category: {
+    id: string;
+    name: string;
+    handle: string;
+    updatedAt: string;
+  };
+  products: Array<{
+    productId: string;
+    productTitle: string;
+    productHandle: string;
+    productStatus: string;
+    productUpdatedAt: string;
+    assigned: boolean;
   }>;
 };
 
@@ -374,11 +425,13 @@ export const operationKinds = [
   "sale_items_update",
   "sale_status_update",
   "sale_rollback",
+  "category_assignment_update",
+  "category_assignment_rollback",
 ] as const;
 
 export type OperationKind = (typeof operationKinds)[number];
 
-export const operationTargetTypes = ["sale"] as const;
+export const operationTargetTypes = ["sale", "product_category"] as const;
 
 export type OperationTargetType = (typeof operationTargetTypes)[number];
 

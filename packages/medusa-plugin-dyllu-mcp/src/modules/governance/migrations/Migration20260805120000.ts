@@ -17,6 +17,9 @@ export class Migration20260805120000 extends Migration {
         'sale.update',
         'sale.rollback',
         'inventory.read',
+        'merchandising.read',
+        'merchandising.update',
+        'merchandising.rollback',
         'product_content.update',
         'product_price.update',
         'product.rollback',
@@ -33,14 +36,17 @@ export class Migration20260805120000 extends Migration {
           'sale_create',
           'sale_items_update',
           'sale_status_update',
-          'sale_rollback'
+          'sale_rollback',
+          'category_assignment_update',
+          'category_assignment_rollback'
         )) not null,
         "status" text check ("status" in (
           'pending', 'applied', 'expired', 'rejected', 'superseded', 'failed'
         )) not null,
         "actor_id" text not null,
         "target_type" text check ("target_type" in (
-          'sale'
+          'sale',
+          'product_category'
         )) not null,
         "target_id" text null,
         "target_key" text not null,
@@ -84,14 +90,17 @@ export class Migration20260805120000 extends Migration {
           'sale_create',
           'sale_items_update',
           'sale_status_update',
-          'sale_rollback'
+          'sale_rollback',
+          'category_assignment_update',
+          'category_assignment_rollback'
         )) not null,
         "action" text check ("action" in ('update', 'rollback')) not null,
         "actor_id" text not null,
         "actor_email" text not null,
         "actor_name" text not null,
         "target_type" text check ("target_type" in (
-          'sale'
+          'sale',
+          'product_category'
         )) not null,
         "target_id" text not null,
         "target_key" text not null,
@@ -166,7 +175,8 @@ export class Migration20260805120000 extends Migration {
     this.addSql(`
       delete from "dyllu_mcp_capability_grant"
       where "capability" in (
-        'sale.read', 'sale.update', 'sale.rollback', 'inventory.read'
+        'sale.read', 'sale.update', 'sale.rollback', 'inventory.read',
+        'merchandising.read', 'merchandising.update', 'merchandising.rollback'
       );
     `);
     this.addSql(`
@@ -196,7 +206,9 @@ export class Migration20260805120000 extends Migration {
       drop trigger if exists "TRG_dyllu_mcp_operation_revision_immutable"
       on "dyllu_mcp_operation_revision";
     `);
-    this.addSql(`drop function if exists dyllu_mcp_protect_operation_proposal();`);
+    this.addSql(
+      `drop function if exists dyllu_mcp_protect_operation_proposal();`
+    );
     this.addSql(`drop table if exists "dyllu_mcp_operation_revision" cascade;`);
     this.addSql(`drop table if exists "dyllu_mcp_operation_proposal" cascade;`);
   }

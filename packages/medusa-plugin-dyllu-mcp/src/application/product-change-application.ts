@@ -43,6 +43,10 @@ import { createOperationHash } from "../domain/operation-hash";
 import { saleOperationValueSchema } from "./sale-operation-schema";
 import { createCatalogQualityReport } from "./catalog-quality";
 import { createInventoryExceptionReport } from "./inventory-exceptions";
+import {
+  MerchandisingApplication,
+  ProposeCategoryAssignmentsInput,
+} from "./merchandising-application";
 
 const PROPOSAL_TTL_MS = 30 * 60 * 1000;
 const MAX_DESCRIPTION_LENGTH = 20_000;
@@ -149,6 +153,7 @@ export type ProductChangeApplicationDependencies = {
   operationGovernance?: OperationGovernanceStore;
   saleExecutor?: SaleChangeExecutor;
   inventory?: InventoryDirectory;
+  merchandising?: MerchandisingApplication;
 };
 
 export class ProductChangeApplication {
@@ -466,6 +471,93 @@ export class ProductChangeApplication {
     return sale;
   }
 
+  async listProductCategories(
+    context: RequestContext,
+    input: { limit: number; offset: number }
+  ) {
+    await this.requireCapability(
+      context,
+      "merchandising.read",
+      "product-categories"
+    );
+    return this.requireMerchandising().listCategories(input);
+  }
+
+  async getProductCategory(
+    context: RequestContext,
+    categoryId: string,
+    input: { limit: number; offset: number }
+  ) {
+    await this.requireCapability(context, "merchandising.read", categoryId);
+    return this.requireMerchandising().getCategory(categoryId, input);
+  }
+
+  async proposeProductCategoryAssignments(
+    context: RequestContext,
+    input: ProposeCategoryAssignmentsInput
+  ) {
+    await this.requireCapability(
+      context,
+      "merchandising.update",
+      input.categoryId
+    );
+    return this.requireMerchandising().proposeCategoryAssignments(
+      context,
+      input
+    );
+  }
+
+  async listProductCategoryHistory(
+    context: RequestContext,
+    categoryId: string,
+    limit: number
+  ) {
+    await this.requireCapability(context, "audit.read", categoryId);
+    return this.requireMerchandising().listCategoryHistory(categoryId, limit);
+  }
+
+  async proposeProductCategoryRollback(
+    context: RequestContext,
+    input: ProposeRollbackInput
+  ) {
+    await this.requireCapability(
+      context,
+      "merchandising.rollback",
+      input.revisionId
+    );
+    return this.requireMerchandising().proposeCategoryRollback(context, input);
+  }
+
+  async publishMerchandisingChange(
+    context: RequestContext,
+    input: PublishDescriptionInput
+  ) {
+    const actor = await this.requireActiveActor(context, input.proposalId);
+    const governance = this.requireOperationGovernance();
+    const proposal = await governance.findProposal(input.proposalId);
+    if (
+      !proposal ||
+      proposal.targetType !== "product_category" ||
+      (proposal.kind !== "category_assignment_update" &&
+        proposal.kind !== "category_assignment_rollback")
+    ) {
+      throw new ApplicationError(
+        "proposal_not_found",
+        `Category proposal ${input.proposalId} was not found`
+      );
+    }
+    await this.requireCapabilityForActor(
+      context,
+      actor,
+      this.requiredCapabilityForOperation(proposal),
+      proposal.targetKey
+    );
+    return this.requireMerchandising().publishCategoryAssignments(actor, {
+      ...input,
+      requestId: context.requestId,
+    });
+  }
+
   async proposeSaleCreate(
     context: RequestContext,
     input: ProposeSaleCreateInput
@@ -644,7 +736,9 @@ export class ProductChangeApplication {
     const { sale, snapshot: beforeValue } = await this.loadSaleSnapshot(
       input.saleId
     );
-    if (sale.items.some((item) => item.hasRules || item.currencyCode !== "mdl")) {
+    if (
+      sale.items.some((item) => item.hasRules || item.currencyCode !== "mdl")
+    ) {
       throw new ApplicationError(
         "unsupported_sale_item",
         "This DYLLU sale has a price rule that the MCP cannot change"
@@ -772,14 +866,13 @@ export class ProductChangeApplication {
       );
     }
     if (input.action === "activate") {
-      const overlaps = await this.requireSaleDirectory().findOverlappingActiveSales(
-        {
+      const overlaps =
+        await this.requireSaleDirectory().findOverlappingActiveSales({
           variantIds: proposedValue.items.map((item) => item.variantId),
           startsAt: sale.startsAt,
           endsAt: sale.endsAt,
           excludeSaleId: sale.id,
-        }
-      );
+        });
       if (overlaps.length > 0) {
         throw new ApplicationError(
           "sale_overlap",
@@ -894,18 +987,15 @@ export class ProductChangeApplication {
       );
     }
     if (proposedValue.status === "active") {
-      const overlaps = await this.requireSaleDirectory().findOverlappingActiveSales(
-        {
+      const overlaps =
+        await this.requireSaleDirectory().findOverlappingActiveSales({
           variantIds: proposedValue.items.map((item) => item.variantId),
           startsAt: proposedValue.startsAt
             ? new Date(proposedValue.startsAt)
             : null,
-          endsAt: proposedValue.endsAt
-            ? new Date(proposedValue.endsAt)
-            : null,
+          endsAt: proposedValue.endsAt ? new Date(proposedValue.endsAt) : null,
           excludeSaleId: sale.id,
-        }
-      );
+        });
       if (overlaps.length > 0) {
         throw new ApplicationError(
           "sale_overlap",
@@ -1787,6 +1877,16 @@ export class ProductChangeApplication {
     return this.dependencies.sales;
   }
 
+  private requireMerchandising() {
+    if (!this.dependencies.merchandising) {
+      throw new ApplicationError(
+        "merchandising_unavailable",
+        "DYLLU merchandising control is unavailable"
+      );
+    }
+    return this.dependencies.merchandising;
+  }
+
   private requireOperationGovernance() {
     if (!this.dependencies.operationGovernance) {
       throw new ApplicationError(
@@ -2001,6 +2101,12 @@ export class ProductChangeApplication {
   private requiredCapabilityForOperation(
     proposal: OperationProposal
   ): Capability {
+    if (proposal.kind === "category_assignment_rollback") {
+      return "merchandising.rollback";
+    }
+    if (proposal.kind === "category_assignment_update") {
+      return "merchandising.update";
+    }
     if (proposal.kind === "sale_rollback") {
       return "sale.rollback";
     }
@@ -2122,21 +2228,17 @@ function getOrderExceptionCodes(
     "partially_captured",
     "partially_refunded",
   ].includes(order.paymentStatus);
-  const paid = ["captured", "partially_captured"].includes(
-    order.paymentStatus
+  const paid = ["captured", "partially_captured"].includes(order.paymentStatus);
+  const fulfillmentStarted = !["not_fulfilled", "canceled"].includes(
+    order.fulfillmentStatus
   );
-  const fulfillmentStarted = ![
-    "not_fulfilled",
-    "canceled",
-  ].includes(order.fulfillmentStatus);
   const notPaid = [
     "not_paid",
     "awaiting",
     "canceled",
     "requires_action",
   ].includes(order.paymentStatus);
-  const staleBefore =
-    now.getTime() - staleAfterMinutes * 60 * 1000;
+  const staleBefore = now.getTime() - staleAfterMinutes * 60 * 1000;
 
   if (
     order.status === "requires_action" ||

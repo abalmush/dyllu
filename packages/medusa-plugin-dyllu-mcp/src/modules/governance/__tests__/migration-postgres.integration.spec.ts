@@ -42,7 +42,8 @@ describe("DYLLU MCP governance migrations", () => {
         (id, user_id, capability, granted_by)
       values
         ('grant_sale', 'user_existing', 'sale.update', 'user_admin'),
-        ('grant_inventory', 'user_existing', 'inventory.read', 'user_admin');
+        ('grant_inventory', 'user_existing', 'inventory.read', 'user_admin'),
+        ('grant_merchandising', 'user_existing', 'merchandising.update', 'user_admin');
     `);
     await client.query(`
       insert into dyllu_mcp_operation_proposal
@@ -53,6 +54,18 @@ describe("DYLLU MCP governance migrations", () => {
         ('mcpop_test', 'sale_create', 'pending', 'user_existing', 'sale', null,
          'sale:new:mcpop_test', '{}'::jsonb, '{"title":"Test"}'::jsonb,
          null, 'sha256:test', 'Create a test sale', null, now() + interval '30 minutes');
+    `);
+    await client.query(`
+      insert into dyllu_mcp_operation_proposal
+        (id, kind, status, actor_id, target_type, target_id, target_key,
+         before_value, proposed_value, target_version, content_hash, reason,
+         source_revision_id, expires_at)
+      values
+        ('mcpop_category', 'category_assignment_update', 'pending',
+         'user_existing', 'product_category', 'pcat_test',
+         'product-category:pcat_test', '{}'::jsonb, '{}'::jsonb,
+         '2026-08-05T09:00:00.000Z', 'sha256:category',
+         'Update a category', null, now() + interval '30 minutes');
     `);
     await client.query(`
       insert into dyllu_mcp_operation_revision
@@ -96,6 +109,15 @@ describe("DYLLU MCP governance migrations", () => {
           (id, user_id, capability, granted_by)
         values
           ('grant_sale_after_down', 'user_existing', 'sale.update', 'user_admin');
+      `)
+    ).rejects.toThrow(/capability_check/i);
+    await expect(
+      client.query(`
+        insert into dyllu_mcp_capability_grant
+          (id, user_id, capability, granted_by)
+        values
+          ('grant_merchandising_after_down', 'user_existing',
+           'merchandising.update', 'user_admin');
       `)
     ).rejects.toThrow(/capability_check/i);
     await expect(
