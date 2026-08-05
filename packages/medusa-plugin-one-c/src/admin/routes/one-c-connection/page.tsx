@@ -121,14 +121,16 @@ const OneCConnectionPage = () => {
       requestJson<{ run: SyncRun }>("/admin/one-c-sync/runs", {
         method: "POST",
       }),
-    onSuccess: async () => {
+    onSuccess: () => {
       toast.success("1C data received");
-      await queryClient.invalidateQueries({ queryKey: ["one-c-sync"] });
     },
     onError: (error) => {
       toast.error("Could not receive 1C data", {
         description: error instanceof Error ? error.message : "Unknown error",
       });
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["one-c-sync"] });
     },
   });
 
