@@ -62,6 +62,7 @@ export async function listItems(
   input: {
     runId: string;
     mappingStatus?: "matched" | "missing_medusa" | "ambiguous" | "excluded";
+    sku?: string;
     limit: number;
     offset: number;
   }
@@ -70,6 +71,7 @@ export async function listItems(
     {
       run_id: input.runId,
       ...(input.mappingStatus ? { mapping_status: input.mappingStatus } : {}),
+      ...(input.sku ? { sku: input.sku } : {}),
     },
     {
       take: input.limit,

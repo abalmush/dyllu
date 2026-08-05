@@ -38,6 +38,7 @@ export function createOneCSyncAccess(
       const result = await listItems(service, {
         runId,
         mappingStatus: input.mappingStatus,
+        sku: input.sku,
         limit: input.limit,
         offset: input.offset,
       });

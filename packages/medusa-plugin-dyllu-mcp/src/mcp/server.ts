@@ -83,6 +83,7 @@ export function createDylluMcpServer(
         "Use get_order, list_returns, and get_return before proposing a DYLLU return request or cancellation.",
         "Use list_sales and get_sale before proposing a DYLLU sale change.",
         "Use stored 1C snapshots for analysis unless the manager explicitly asks for fresh 1C data.",
+        "Use get_mapped_one_c_product for 1C price or balance questions about a DYLLU SKU. Never infer a mapping from a product name.",
         "Call receive_one_c_catalog only after the manager explicitly asks for fresh 1C data.",
         "Use list_orders for a specific DYLLU calendar date and get_order for complete order information.",
         "Use get_daily_order_report for exact order totals, status groups, and exceptions for one DYLLU calendar date.",
@@ -194,6 +195,26 @@ export function createDylluMcpServer(
     () =>
       execute("get_one_c_sync_status", () =>
         application.getOneCSyncStatus(getContext())
+      )
+  );
+
+  server.registerTool(
+    "get_mapped_one_c_product",
+    {
+      title: "Get confirmed 1C product data",
+      description:
+        "Return stored 1C data only for an exact DYLLU SKU with a confirmed private 1C mapping. This does not call 1C. An empty result means that the SKU has no confirmed mapping in the latest snapshot.",
+      inputSchema: z
+        .object({
+          sku: z.string().trim().min(1).max(100),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("get_mapped_one_c_product", () =>
+        application.getMappedOneCProduct(getContext(), input.sku)
       )
   );
 

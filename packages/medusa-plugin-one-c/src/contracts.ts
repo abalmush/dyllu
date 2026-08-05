@@ -9,6 +9,7 @@ export type OneCMappingStatus =
 export type OneCSyncReadInput = {
   runId?: string;
   mappingStatus?: OneCMappingStatus;
+  sku?: string;
   limit: number;
   offset: number;
 };

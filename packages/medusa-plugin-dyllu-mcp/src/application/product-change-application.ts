@@ -377,6 +377,7 @@ export class ProductChangeApplication {
     input: {
       runId?: string;
       mappingStatus?: "matched" | "missing_medusa" | "ambiguous" | "excluded";
+      sku?: string;
       limit: number;
       offset: number;
     }
@@ -387,6 +388,16 @@ export class ProductChangeApplication {
       input.runId ?? "latest"
     );
     return this.requireOneCSync().listComparisons(input);
+  }
+
+  async getMappedOneCProduct(context: RequestContext, sku: string) {
+    await this.requireCapability(context, "one_c_sync.read", sku);
+    return this.requireOneCSync().listComparisons({
+      mappingStatus: "matched",
+      sku,
+      limit: 1,
+      offset: 0,
+    });
   }
 
   async receiveOneCCatalog(context: RequestContext) {
