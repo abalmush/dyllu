@@ -18,4 +18,23 @@ describe("normalizePromoFeed", () => {
       endsAt: "2026-08-31",
     });
   });
+
+  it("accepts promotions without date limits", () => {
+    const result = normalizePromoFeed({
+      Items: [
+        {
+          id: 51542,
+          discountPrice: 50,
+          Action: { StartDate: null, EndDate: null },
+        },
+      ],
+    });
+
+    expect(result.get("51542")).toEqual({
+      externalId: "51542",
+      salePriceMdl: 50,
+      startsAt: null,
+      endsAt: null,
+    });
+  });
 });
