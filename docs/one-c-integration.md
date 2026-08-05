@@ -95,6 +95,21 @@ boundary.
 The current implementation does not apply category assignments from the 1C
 category hierarchy.
 
+## Admin product review
+
+The product table shows the Medusa SKU and private 1C SKU as separate fields.
+It also shows the main comparison fields in a horizontally scrollable table.
+The **View 1C data** action loads the raw product record only when requested and
+shows the raw source, normalized values, and comparison data in an Admin-only
+drawer. Raw 1C product data is not added to MCP output or public exports.
+
+The **Review exact mappings** action prepares one bulk mapping plan. A mapping
+is eligible only when the 1C product name contains one exact Medusa SKU token,
+that SKU resolves to one Medusa variant, and neither side has a mapping
+conflict. The Admin must review and confirm the plan once. Missing, duplicate,
+hidden, deleted, and conflicting records are skipped and remain available for
+individual review.
+
 ## Receive flow
 
 ```text

@@ -5,6 +5,8 @@ import {
   Badge,
   Button,
   Container,
+  Drawer,
+  FocusModal,
   Heading,
   Input,
   Table,
@@ -68,6 +70,19 @@ type SyncItem = {
 
 type RunsResponse = { runs: SyncRun[]; count: number };
 type ItemsResponse = { items: SyncItem[]; count: number };
+type ItemDetailsResponse = {
+  item: SyncItem & { source: unknown; normalized: unknown };
+};
+type BulkMappingPreview = {
+  eligible_count: number;
+  skipped_count: number;
+  sample: Array<{
+    sync_item_id: string;
+    one_c_sku: string;
+    medusa_sku: string;
+    name: string;
+  }>;
+};
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, { credentials: "include", ...init });
@@ -109,12 +124,202 @@ function Metric({ label, value }: { label: string; value: number | string }) {
   );
 }
 
+function JsonPanel({ title, value }: { title: string; value: unknown }) {
+  return (
+    <section>
+      <Heading level="h3">{title}</Heading>
+      <pre className="bg-ui-bg-subtle border-ui-border-base mt-2 max-h-96 overflow-auto rounded-lg border p-4 text-xs break-all whitespace-pre-wrap">
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    </section>
+  );
+}
+
+function ProductDetailsDrawer({
+  runId,
+  item,
+  onClose,
+}: {
+  runId: string;
+  item: SyncItem | null;
+  onClose: () => void;
+}) {
+  const detailsQuery = useQuery({
+    queryKey: ["one-c-sync", "item-details", runId, item?.id],
+    queryFn: () =>
+      requestJson<ItemDetailsResponse>(
+        `/admin/one-c-sync/runs/${runId}/items/${item!.id}`
+      ),
+    enabled: Boolean(item),
+  });
+  const details = detailsQuery.data?.item;
+
+  return (
+    <Drawer open={Boolean(item)} onOpenChange={(open) => !open && onClose()}>
+      <Drawer.Content>
+        <Drawer.Header>
+          <Drawer.Title>{item?.name ?? "1C product data"}</Drawer.Title>
+          <Drawer.Description>
+            Complete stored 1C record and normalized comparison data.
+          </Drawer.Description>
+        </Drawer.Header>
+        <Drawer.Body className="flex flex-col gap-6 overflow-y-auto">
+          {detailsQuery.isLoading ? <Text>Loading product data…</Text> : null}
+          {detailsQuery.isError ? (
+            <Alert variant="error">Could not load the 1C product data.</Alert>
+          ) : null}
+          {details ? (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <Metric label="Medusa SKU" value={details.sku || "—"} />
+                <Metric label="1C SKU" value={details.external_id} />
+                <Metric
+                  label="1C base price"
+                  value={details.regular_price_mdl ?? "—"}
+                />
+                <Metric label="1C balance" value={details.balance ?? "—"} />
+                <Metric
+                  label="Brand ID"
+                  value={details.brand_external_id ?? "—"}
+                />
+                <Metric label="Mapping" value={details.mapping_status} />
+              </div>
+              <JsonPanel title="Raw 1C product" value={details.source} />
+              <JsonPanel title="Normalized data" value={details.normalized} />
+              <JsonPanel title="Comparison" value={details.differences} />
+            </>
+          ) : null}
+        </Drawer.Body>
+        <Drawer.Footer>
+          <Drawer.Close asChild>
+            <Button variant="secondary">Close</Button>
+          </Drawer.Close>
+        </Drawer.Footer>
+      </Drawer.Content>
+    </Drawer>
+  );
+}
+
+function BulkMappingModal({
+  runId,
+  open,
+  onOpenChange,
+}: {
+  runId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const previewQuery = useQuery({
+    queryKey: ["one-c-sync", "mapping-preview", runId],
+    queryFn: () =>
+      requestJson<BulkMappingPreview>(
+        `/admin/one-c-sync/mappings/bulk?run_id=${runId}`
+      ),
+    enabled: open,
+  });
+  const saveMappings = useMutation({
+    mutationFn: () =>
+      requestJson<{ mapped_count: number; skipped_count: number }>(
+        "/admin/one-c-sync/mappings/bulk",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ run_id: runId }),
+        }
+      ),
+    onSuccess: (result) => {
+      toast.success(`${result.mapped_count} exact mappings saved`, {
+        description: "Receive fresh 1C data to compare the mapped products.",
+      });
+      onOpenChange(false);
+    },
+    onError: (error) =>
+      toast.error("Could not save exact mappings", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      }),
+  });
+  const preview = previewQuery.data;
+
+  return (
+    <FocusModal open={open} onOpenChange={onOpenChange}>
+      <FocusModal.Content>
+        <FocusModal.Header>
+          <FocusModal.Title>Review exact 1C mappings</FocusModal.Title>
+        </FocusModal.Header>
+        <FocusModal.Body className="flex flex-col gap-4 overflow-y-auto p-6">
+          <Alert variant="warning">
+            Only one exact SKU token, one Medusa variant, and no existing
+            mapping conflict are accepted. All other products are skipped.
+          </Alert>
+          {previewQuery.isLoading ? (
+            <Text>Checking exact mappings…</Text>
+          ) : null}
+          {previewQuery.isError ? (
+            <Alert variant="error">Could not prepare the mapping review.</Alert>
+          ) : null}
+          {preview ? (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <Metric label="Ready to map" value={preview.eligible_count} />
+                <Metric label="Skipped" value={preview.skipped_count} />
+              </div>
+              <div className="border-ui-border-base overflow-auto rounded-lg border">
+                <Table>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.HeaderCell>Medusa SKU</Table.HeaderCell>
+                      <Table.HeaderCell>1C SKU</Table.HeaderCell>
+                      <Table.HeaderCell>1C product</Table.HeaderCell>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
+                    {preview.sample.map((mapping) => (
+                      <Table.Row key={mapping.sync_item_id}>
+                        <Table.Cell className="font-mono">
+                          {mapping.medusa_sku}
+                        </Table.Cell>
+                        <Table.Cell className="font-mono">
+                          {mapping.one_c_sku}
+                        </Table.Cell>
+                        <Table.Cell>{mapping.name}</Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table>
+              </div>
+              {preview.eligible_count > preview.sample.length ? (
+                <Text size="small" className="text-ui-fg-subtle">
+                  Showing the first {preview.sample.length} exact mappings.
+                </Text>
+              ) : null}
+            </>
+          ) : null}
+        </FocusModal.Body>
+        <FocusModal.Footer>
+          <FocusModal.Close asChild>
+            <Button variant="secondary">Cancel</Button>
+          </FocusModal.Close>
+          <Button
+            isLoading={saveMappings.isPending}
+            disabled={!preview?.eligible_count}
+            onClick={() => saveMappings.mutate()}
+          >
+            Save {preview?.eligible_count ?? 0} exact mappings
+          </Button>
+        </FocusModal.Footer>
+      </FocusModal.Content>
+    </FocusModal>
+  );
+}
+
 const OneCConnectionPage = () => {
   const pageSize = 50;
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<MappingStatus | "all">("missing_medusa");
   const [page, setPage] = useState(0);
   const [mappingSkus, setMappingSkus] = useState<Record<string, string>>({});
+  const [selectedItem, setSelectedItem] = useState<SyncItem | null>(null);
+  const [bulkMappingOpen, setBulkMappingOpen] = useState(false);
   const runsQuery = useQuery({
     queryKey: ["one-c-sync", "runs"],
     queryFn: () =>
@@ -277,6 +482,12 @@ const OneCConnectionPage = () => {
               <div className="flex gap-2">
                 <Button
                   variant="secondary"
+                  onClick={() => setBulkMappingOpen(true)}
+                >
+                  Review exact mappings
+                </Button>
+                <Button
+                  variant="secondary"
                   disabled
                   title="Locked while 1C uses plain HTTP"
                 >
@@ -306,28 +517,53 @@ const OneCConnectionPage = () => {
               </Tabs.List>
             </Tabs>
             <div className="border-ui-border-base overflow-x-auto border-t">
-              <Table>
+              <Table className="min-w-[2100px]">
                 <Table.Header>
                   <Table.Row>
                     <Table.HeaderCell>Medusa SKU</Table.HeaderCell>
+                    <Table.HeaderCell>1C SKU</Table.HeaderCell>
                     <Table.HeaderCell>1C product</Table.HeaderCell>
+                    <Table.HeaderCell>Medusa product</Table.HeaderCell>
+                    <Table.HeaderCell>Brand ID</Table.HeaderCell>
                     <Table.HeaderCell>Medusa base</Table.HeaderCell>
                     <Table.HeaderCell>1C base</Table.HeaderCell>
                     <Table.HeaderCell>1C sale</Table.HeaderCell>
                     <Table.HeaderCell>Balance</Table.HeaderCell>
+                    <Table.HeaderCell>1C state</Table.HeaderCell>
+                    <Table.HeaderCell>Workflow</Table.HeaderCell>
                     <Table.HeaderCell>Result</Table.HeaderCell>
-                    <Table.HeaderCell>Differences</Table.HeaderCell>
+                    <Table.HeaderCell>Mapping or differences</Table.HeaderCell>
+                    <Table.HeaderCell>Details</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
                   {(itemsQuery.data?.items ?? []).map((item) => (
                     <Table.Row key={item.id}>
-                      <Table.Cell className="font-mono">{item.sku}</Table.Cell>
-                      <Table.Cell>
-                        <Text weight="plus">{item.name}</Text>
-                        <Text size="xsmall" className="text-ui-fg-subtle">
-                          {item.external_id}
+                      <Table.Cell className="font-mono whitespace-nowrap">
+                        {item.sku || "—"}
+                      </Table.Cell>
+                      <Table.Cell className="font-mono whitespace-nowrap">
+                        {item.external_id}
+                      </Table.Cell>
+                      <Table.Cell className="max-w-80">
+                        <Text
+                          weight="plus"
+                          title={item.name}
+                          className="block truncate"
+                        >
+                          {item.name}
                         </Text>
+                      </Table.Cell>
+                      <Table.Cell className="max-w-80">
+                        <Text
+                          title={item.medusa_product_title ?? undefined}
+                          className="block truncate"
+                        >
+                          {item.medusa_product_title ?? "—"}
+                        </Text>
+                      </Table.Cell>
+                      <Table.Cell className="font-mono whitespace-nowrap">
+                        {item.brand_external_id ?? "—"}
                       </Table.Cell>
                       <Table.Cell>
                         {item.mapping_status === "matched"
@@ -349,6 +585,16 @@ const OneCConnectionPage = () => {
                         ) : null}
                       </Table.Cell>
                       <Table.Cell>{item.balance ?? "—"}</Table.Cell>
+                      <Table.Cell className="whitespace-nowrap">
+                        {item.deleted
+                          ? "Deleted"
+                          : item.hidden
+                            ? "Hidden"
+                            : "Visible"}
+                      </Table.Cell>
+                      <Table.Cell className="whitespace-nowrap">
+                        {item.preparation_status.replaceAll("_", " ")}
+                      </Table.Cell>
                       <Table.Cell>
                         <StatusBadge status={item.mapping_status} />
                       </Table.Cell>
@@ -399,6 +645,15 @@ const OneCConnectionPage = () => {
                           "—")
                         )}
                       </Table.Cell>
+                      <Table.Cell>
+                        <Button
+                          variant="secondary"
+                          size="small"
+                          onClick={() => setSelectedItem(item)}
+                        >
+                          View 1C data
+                        </Button>
+                      </Table.Cell>
                     </Table.Row>
                   ))}
                   {!itemsQuery.isLoading && !itemsQuery.data?.items.length ? (
@@ -439,6 +694,17 @@ const OneCConnectionPage = () => {
               </div>
             </div>
           </Container>
+
+          <ProductDetailsDrawer
+            runId={latestRun.id}
+            item={selectedItem}
+            onClose={() => setSelectedItem(null)}
+          />
+          <BulkMappingModal
+            runId={latestRun.id}
+            open={bulkMappingOpen}
+            onOpenChange={setBulkMappingOpen}
+          />
 
           <Container className="overflow-hidden p-0">
             <div className="px-6 py-4">
