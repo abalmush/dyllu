@@ -69,6 +69,48 @@ describe("DYLLU MCP server", () => {
     }
   });
 
+  it("runs a bounded DYLLU catalog quality audit", async () => {
+    const application = {
+      auditCatalogQuality: jest.fn().mockResolvedValue({
+        productCount: 137,
+        productsWithIssues: 4,
+      }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_catalog_audit" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "audit_catalog_quality",
+        arguments: {
+          minimum_description_length: 100,
+          result_limit: 75,
+        },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(application.auditCatalogQuality).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_catalog_audit" },
+        { minimumDescriptionLength: 100, resultLimit: 75 }
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("lists DYLLU sales with bounded pagination", async () => {
     const application = {
       listSales: jest.fn().mockResolvedValue({ sales: [], count: 0 }),

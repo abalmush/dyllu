@@ -47,6 +47,7 @@ const product: ProductSummary = {
   handle: "masina-de-gaurit",
   status: "published",
   description: "Descriere veche",
+  imageCount: 1,
   updatedAt: new Date("2026-07-29T09:00:00.000Z"),
   variants: [
     {
@@ -188,6 +189,7 @@ class TestCapabilities implements CapabilityStore {
 class TestProducts implements ProductCatalog {
   readonly values = new Map([[product.id, product]]);
   readonly searches: Array<{ query: string; limit: number }> = [];
+  readonly lists: Array<{ limit: number; offset: number }> = [];
   countCalls = 0;
   private currentPrice = priceTarget;
 
@@ -218,6 +220,17 @@ class TestProducts implements ProductCatalog {
   async count() {
     this.countCalls += 1;
     return this.values.size;
+  }
+
+  async list(input: { limit: number; offset: number }) {
+    this.lists.push(input);
+    return {
+      products: [...this.values.values()].slice(
+        input.offset,
+        input.offset + input.limit
+      ),
+      count: this.values.size,
+    };
   }
 }
 
@@ -1313,6 +1326,46 @@ describe("ProductChangeApplication", () => {
       })
     ).resolves.toEqual({ count: 1 });
     expect(products.countCalls).toBe(1);
+  });
+
+  it("audits the complete bounded DYLLU catalog for quality issues", async () => {
+    const products = new TestProducts();
+    products.values.set("prod_incomplete", {
+      ...product,
+      id: "prod_incomplete",
+      title: "Produs incomplet",
+      handle: "produs-incomplet",
+      description: null,
+      imageCount: 0,
+      variants: [],
+    });
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["product.read"]),
+      products,
+      orders: new TestOrders(),
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.auditCatalogQuality(
+        { actorId: actor.id, requestId: "req_catalog_quality" },
+        { minimumDescriptionLength: 10, resultLimit: 50 }
+      )
+    ).resolves.toMatchObject({
+      productCount: 2,
+      productsWithIssues: 1,
+      issueCounts: {
+        missing_description: 1,
+        missing_image: 1,
+        missing_variant: 1,
+      },
+      products: [{ productId: "prod_incomplete" }],
+    });
+    expect(products.lists).toEqual([{ limit: 100, offset: 0 }]);
   });
 
   it("denies and audits product count access without product.read", async () => {

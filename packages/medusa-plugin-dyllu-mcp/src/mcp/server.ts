@@ -59,6 +59,7 @@ export function createDylluMcpServer(
       instructions: [
         "Use search_products and get_product before proposing a change.",
         "Use count_products for the exact DYLLU catalog total.",
+        "Use audit_catalog_quality to find missing or weak DYLLU product data before proposing corrections.",
         "Use list_sales and get_sale before proposing a DYLLU sale change.",
         "Use list_orders for a specific DYLLU calendar date and get_order for complete order information.",
         "Use get_daily_order_report for exact order totals, status groups, and exceptions for one DYLLU calendar date.",
@@ -124,6 +125,35 @@ export function createDylluMcpServer(
     },
     () =>
       execute("count_products", () => application.countProducts(getContext()))
+  );
+
+  server.registerTool(
+    "audit_catalog_quality",
+    {
+      title: "Audit DYLLU catalog quality",
+      description:
+        "Scan the complete bounded DYLLU catalog for missing titles, handles, descriptions, images, variants, SKUs, duplicate SKUs, and invalid normal MDL prices.",
+      inputSchema: z
+        .object({
+          minimum_description_length: z
+            .number()
+            .int()
+            .min(0)
+            .max(1_000)
+            .default(80),
+          result_limit: z.number().int().min(1).max(200).default(50),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("audit_catalog_quality", () =>
+        application.auditCatalogQuality(getContext(), {
+          minimumDescriptionLength: input.minimum_description_length,
+          resultLimit: input.result_limit,
+        })
+      )
   );
 
   server.registerTool(

@@ -117,8 +117,46 @@ export type ProductSummary = {
   handle: string;
   status: string;
   description: string | null;
+  imageCount: number;
   updatedAt: Date;
   variants: ProductVariantSummary[];
+};
+
+export const catalogQualityIssueCodes = [
+  "missing_title",
+  "missing_handle",
+  "missing_description",
+  "short_description",
+  "missing_image",
+  "missing_variant",
+  "missing_sku",
+  "duplicate_sku",
+  "missing_mdl_price",
+  "duplicate_mdl_price",
+  "invalid_mdl_price",
+] as const;
+
+export type CatalogQualityIssueCode =
+  (typeof catalogQualityIssueCodes)[number];
+
+export type CatalogQualityIssue = {
+  code: CatalogQualityIssueCode;
+  variantIds: string[];
+  values: string[];
+};
+
+export type CatalogQualityReport = {
+  productCount: number;
+  productsWithIssues: number;
+  issueCounts: Partial<Record<CatalogQualityIssueCode, number>>;
+  resultsTruncated: boolean;
+  products: Array<{
+    productId: string;
+    title: string;
+    handle: string;
+    status: string;
+    issues: CatalogQualityIssue[];
+  }>;
 };
 
 export type SaleStatus = "active" | "draft";

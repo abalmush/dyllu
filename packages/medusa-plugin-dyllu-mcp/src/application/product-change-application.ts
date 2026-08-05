@@ -38,6 +38,7 @@ import { createProductDescriptionHash } from "../domain/product-description-hash
 import { createCatalogChangeHash } from "../domain/catalog-change-hash";
 import { createOperationHash } from "../domain/operation-hash";
 import { saleOperationValueSchema } from "./sale-operation-schema";
+import { createCatalogQualityReport } from "./catalog-quality";
 
 const PROPOSAL_TTL_MS = 30 * 60 * 1000;
 const MAX_DESCRIPTION_LENGTH = 20_000;
@@ -87,6 +88,11 @@ export type DailyOrderReportInput = {
   timeZone: "Europe/Chisinau";
   staleAfterMinutes: number;
   exceptionLimit: number;
+};
+
+export type CatalogQualityAuditInput = {
+  minimumDescriptionLength: number;
+  resultLimit: number;
 };
 
 export type ProposeSaleCreateInput = {
@@ -184,6 +190,77 @@ export class ProductChangeApplication {
   async countProducts(context: RequestContext) {
     await this.requireCapability(context, "product.read", "catalog");
     return { count: await this.dependencies.products.count() };
+  }
+
+  async auditCatalogQuality(
+    context: RequestContext,
+    input: CatalogQualityAuditInput
+  ) {
+    await this.requireCapability(context, "product.read", "catalog-quality");
+    if (
+      !Number.isSafeInteger(input.minimumDescriptionLength) ||
+      input.minimumDescriptionLength < 0 ||
+      input.minimumDescriptionLength > 1_000 ||
+      !Number.isSafeInteger(input.resultLimit) ||
+      input.resultLimit < 1 ||
+      input.resultLimit > 200
+    ) {
+      throw new ApplicationError(
+        "invalid_catalog_audit",
+        "The catalog quality limits are invalid"
+      );
+    }
+
+    const products = [];
+    const pageSize = 100;
+    const maximumProducts = 5_000;
+    let expectedCount: number | null = null;
+    while (expectedCount === null || products.length < expectedCount) {
+      const page = await this.dependencies.products.list({
+        limit: pageSize,
+        offset: products.length,
+      });
+      if (!Number.isSafeInteger(page.count) || page.count < 0) {
+        throw new ApplicationError(
+          "catalog_audit_unstable",
+          "The DYLLU catalog audit could not get a stable product count"
+        );
+      }
+      if (page.count > maximumProducts) {
+        throw new ApplicationError(
+          "catalog_audit_limit_exceeded",
+          `The DYLLU catalog audit exceeds ${maximumProducts} products`
+        );
+      }
+      if (expectedCount !== null && page.count !== expectedCount) {
+        throw new ApplicationError(
+          "catalog_audit_unstable",
+          "DYLLU products changed while the catalog audit was generated"
+        );
+      }
+      expectedCount = page.count;
+      if (page.products.length === 0 && products.length < expectedCount) {
+        throw new ApplicationError(
+          "catalog_audit_unstable",
+          "The DYLLU catalog audit returned an incomplete page"
+        );
+      }
+      products.push(...page.products);
+    }
+    if (
+      products.length !== expectedCount ||
+      new Set(products.map((product) => product.id)).size !== products.length
+    ) {
+      throw new ApplicationError(
+        "catalog_audit_unstable",
+        "DYLLU products changed while the catalog audit was generated"
+      );
+    }
+    return createCatalogQualityReport(
+      products,
+      input.minimumDescriptionLength,
+      input.resultLimit
+    );
   }
 
   async listOrders(context: RequestContext, input: OrderListQuery) {

@@ -25,6 +25,7 @@ const productSchema = z.object({
   handle: z.string(),
   status: z.string(),
   description: z.string().nullable(),
+  images: z.array(z.object({ id: z.string() })).optional(),
   updated_at: z.coerce.date(),
   variants: z
     .array(
@@ -44,6 +45,10 @@ const productSchema = z.object({
                   min_quantity: z.number().nullable().optional(),
                   max_quantity: z.number().nullable().optional(),
                   updated_at: z.coerce.date(),
+                  price_list: z
+                    .object({ id: z.string() })
+                    .nullable()
+                    .optional(),
                   rules: z.array(z.unknown()).optional(),
                 })
               )
@@ -235,6 +240,25 @@ export class MedusaProductCatalog implements ProductCatalog {
     return z.number().int().nonnegative().parse(metadata?.count);
   }
 
+  async list(input: { limit: number; offset: number }) {
+    const { data, metadata } = await this.query.graph({
+      entity: "product",
+      fields: productFields,
+      pagination: {
+        take: input.limit,
+        skip: input.offset,
+        order: { id: "ASC" },
+      },
+    });
+    return {
+      products: z
+        .array(productSchema)
+        .parse(data)
+        .map((product) => this.toProduct(product)),
+      count: z.number().int().nonnegative().parse(metadata?.count),
+    };
+  }
+
   async findById(productId: string) {
     const { data } = await this.query.graph({
       entity: "product",
@@ -298,6 +322,7 @@ export class MedusaProductCatalog implements ProductCatalog {
       handle: product.handle,
       status: product.status,
       description: product.description,
+      imageCount: product.images?.length ?? 0,
       updatedAt: product.updated_at,
       variants: (product.variants ?? []).map((variant) => ({
         id: variant.id,
@@ -309,6 +334,7 @@ export class MedusaProductCatalog implements ProductCatalog {
             (price) =>
               price.min_quantity == null &&
               price.max_quantity == null &&
+              price.price_list == null &&
               (price.rules?.length ?? 0) === 0
           )
           .map((price) => ({
@@ -855,6 +881,7 @@ const productFields = [
   "handle",
   "status",
   "description",
+  "images.id",
   "updated_at",
   "variants.id",
   "variants.title",
@@ -866,6 +893,7 @@ const productFields = [
   "variants.price_set.prices.min_quantity",
   "variants.price_set.prices.max_quantity",
   "variants.price_set.prices.updated_at",
+  "variants.price_set.prices.price_list.id",
   "variants.price_set.prices.rules.*",
 ];
 
