@@ -51,6 +51,7 @@ export type ApplicationErrorCode =
   | "sale_overlap"
   | "unsupported_sale_item"
   | "unchanged_sale"
+  | "one_c_sync_unavailable"
   | "unchanged_description"
   | "unchanged_price"
   | "price_not_found"

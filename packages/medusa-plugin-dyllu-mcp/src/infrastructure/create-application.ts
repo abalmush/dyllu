@@ -32,6 +32,7 @@ import { ReturnApplication } from "../application/return-application";
 import { MedusaReturnDirectory } from "./medusa-return-directory";
 import { MedusaReturnChangeExecutor } from "./medusa-return-change-executor";
 import { MedusaIdGenerator, SystemClock } from "./system";
+import { createOneCSyncAccess } from "@dyllu/medusa-plugin-one-c/access";
 
 export function createProductChangeApplication(container: MedusaContainer) {
   const query = container.resolve(ContainerRegistrationKeys.QUERY);
@@ -102,5 +103,6 @@ export function createProductChangeApplication(container: MedusaContainer) {
     }),
     clock: new SystemClock(),
     ids: new MedusaIdGenerator(),
+    oneCSync: createOneCSyncAccess(container),
   });
 }

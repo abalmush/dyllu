@@ -3,6 +3,8 @@ import { Client } from "pg";
 import { Migration20260729193201 } from "../migrations/Migration20260729193201";
 import { Migration20260802130000 } from "../migrations/Migration20260802130000";
 import { Migration20260805120000 } from "../migrations/Migration20260805120000";
+import { Migration20260805143000 } from "../migrations/Migration20260805143000";
+import { Migration20260805160000 } from "../migrations/Migration20260805160000";
 
 const databaseUrl = process.env.MCP_MIGRATION_DATABASE_URL;
 
@@ -34,8 +36,18 @@ describe("DYLLU MCP governance migrations", () => {
         ('grant_existing', 'user_existing', 'product.read', 'user_admin');
     `);
 
-    const migration = new Migration20260805120000(undefined!, undefined!);
-    await runUp(client, migration);
+    const operationMigration = new Migration20260805120000(
+      undefined!,
+      undefined!
+    );
+    const oneCMigration = new Migration20260805143000(undefined!, undefined!);
+    const capabilityMigration = new Migration20260805160000(
+      undefined!,
+      undefined!
+    );
+    await runUp(client, operationMigration);
+    await runUp(client, oneCMigration);
+    await runUp(client, capabilityMigration);
 
     await client.query(`
       insert into dyllu_mcp_capability_grant
@@ -45,7 +57,8 @@ describe("DYLLU MCP governance migrations", () => {
         ('grant_inventory', 'user_existing', 'inventory.read', 'user_admin'),
         ('grant_merchandising', 'user_existing', 'merchandising.update', 'user_admin'),
         ('grant_promotion', 'user_existing', 'promotion.update', 'user_admin'),
-        ('grant_return', 'user_existing', 'return.create', 'user_admin');
+        ('grant_return', 'user_existing', 'return.create', 'user_admin'),
+        ('grant_one_c', 'user_existing', 'one_c_sync.read', 'user_admin');
     `);
     await client.query(`
       insert into dyllu_mcp_operation_proposal
@@ -96,9 +109,20 @@ describe("DYLLU MCP governance migrations", () => {
       )
     ).rejects.toThrow(/audit records are immutable/i);
 
-    migration.reset();
-    await migration.down();
-    await runQueries(client, migration.getQueries());
+    capabilityMigration.reset();
+    await capabilityMigration.down();
+    await runQueries(client, capabilityMigration.getQueries());
+    const oneCGrant = await client.query(
+      "select capability from dyllu_mcp_capability_grant where id = 'grant_one_c'"
+    );
+    expect(oneCGrant.rows).toEqual([{ capability: "one_c_sync.read" }]);
+
+    oneCMigration.reset();
+    await oneCMigration.down();
+    await runQueries(client, oneCMigration.getQueries());
+    operationMigration.reset();
+    await operationMigration.down();
+    await runQueries(client, operationMigration.getQueries());
     const removedTables = await client.query(`
       select
         to_regclass('dyllu_mcp_operation_proposal') as proposal,
@@ -111,6 +135,15 @@ describe("DYLLU MCP governance migrations", () => {
           (id, user_id, capability, granted_by)
         values
           ('grant_sale_after_down', 'user_existing', 'sale.update', 'user_admin');
+      `)
+    ).rejects.toThrow(/capability_check/i);
+    await expect(
+      client.query(`
+        insert into dyllu_mcp_capability_grant
+          (id, user_id, capability, granted_by)
+        values
+          ('grant_one_c_after_down', 'user_existing',
+           'one_c_sync.read', 'user_admin');
       `)
     ).rejects.toThrow(/capability_check/i);
     await expect(

@@ -1,0 +1,5 @@
+.env
+.medusa
+coverage
+node_modules
+tsconfig.tsbuildinfo

@@ -26,6 +26,10 @@ module.exports = defineConfig({
   },
   plugins: [
     {
+      resolve: "@dyllu/medusa-plugin-one-c",
+      options: {},
+    },
+    {
       resolve: "@dyllu/medusa-plugin-mcp",
       options: {
         enabled: environment.mcp.enabled,

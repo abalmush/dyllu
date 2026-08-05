@@ -5,6 +5,75 @@ import { ProductChangeApplication } from "../../application/product-change-appli
 import { createDylluMcpServer } from "../server";
 
 describe("DYLLU MCP server", () => {
+  it("reads stored 1C mismatches without receiving fresh data", async () => {
+    const application = {
+      listOneCComparisons: jest.fn().mockResolvedValue({ items: [], count: 0 }),
+      receiveOneCCatalog: jest.fn(),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_one_c_read" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      await client.callTool({
+        name: "list_one_c_product_mismatches",
+        arguments: { mapping_status: "missing_dyllu", limit: 20, offset: 0 },
+      });
+
+      expect(application.listOneCComparisons).toHaveBeenCalled();
+      expect(application.receiveOneCCatalog).not.toHaveBeenCalled();
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
+  it("receives fresh 1C data only through the explicit receive tool", async () => {
+    const application = {
+      receiveOneCCatalog: jest.fn().mockResolvedValue({
+        id: "onecrun_test",
+        status: "ready",
+      }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_one_c_receive" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      await client.callTool({ name: "receive_one_c_catalog", arguments: {} });
+
+      expect(application.receiveOneCCatalog).toHaveBeenCalledWith({
+        actorId: "user_test",
+        requestId: "request_one_c_receive",
+      });
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("uses only DYLLU terminology in manager-visible tool metadata", async () => {
     const server = createDylluMcpServer(
       {} as ProductChangeApplication,
