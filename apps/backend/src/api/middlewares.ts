@@ -88,6 +88,13 @@ const middlewareConfig: MiddlewaresConfig = {
       ],
     },
     {
+      matcher: "/admin/one-c-connection-test",
+      methods: ["POST"],
+      bodyParser: false,
+      policies: [{ resource: "product", operation: PolicyOperation.read }],
+      middlewares: [adminAuthentication],
+    },
+    {
       matcher: "/store/compatible-accessories",
       methods: ["GET"],
       middlewares: [
