@@ -149,4 +149,97 @@ describe("compareCatalog", () => {
       })
     );
   });
+
+  it("uses the private 1C mapping instead of matching the internal id as SKU", () => {
+    const now = new Date("2026-08-05T10:00:00.000Z");
+    const product = {
+      externalId: "50683",
+      sku: "50683",
+      name: "Set surubelnita DYLLU DTSS45M1",
+      description: "",
+      regularPriceMdl: 30,
+      salePriceMdl: null,
+      saleStartsAt: null,
+      saleEndsAt: null,
+      balance: 6,
+      brandExternalId: "dyllu",
+      categoryExternalIds: [],
+      hidden: false,
+      deleted: false,
+      source: { id: "50683" },
+    };
+    const variants = [
+      {
+        productId: "prod_1",
+        productTitle: product.name,
+        productDescription: "",
+        productStatus: "published",
+        productUpdatedAt: now,
+        variantId: "variant_1",
+        variantTitle: "Default",
+        variantUpdatedAt: now,
+        sku: "DTSS45M1",
+        prices: [
+          { id: "price_1", currencyCode: "mdl", amount: 30, updatedAt: now },
+        ],
+      },
+    ];
+
+    expect(
+      compareCatalog([product], variants, [
+        {
+          externalId: "50683",
+          medusaVariantId: "variant_1",
+          medusaSku: "DTSS45M1",
+        },
+      ])
+    ).toEqual([
+      expect.objectContaining({
+        sku: "DTSS45M1",
+        mappingStatus: "matched",
+        medusaVariantId: "variant_1",
+      }),
+    ]);
+  });
+
+  it("suggests one exact Medusa SKU found in the 1C product name", () => {
+    const now = new Date("2026-08-05T10:00:00.000Z");
+    const product = {
+      externalId: "51542",
+      sku: "51542",
+      name: "Set pensule de vopsit DTPB1952",
+      description: "",
+      regularPriceMdl: 50,
+      balance: 5,
+      brandExternalId: "dyllu",
+      categoryExternalIds: [],
+      hidden: false,
+      deleted: false,
+      source: { id: "51542" },
+    };
+    const variants = [
+      {
+        productId: "prod_2",
+        productTitle: "Set pensule de vopsit, 5 buc.",
+        productDescription: "",
+        productStatus: "published",
+        productUpdatedAt: now,
+        variantId: "variant_2",
+        variantTitle: "Default",
+        variantUpdatedAt: now,
+        sku: "DTPB1952",
+        prices: [
+          { id: "price_2", currencyCode: "mdl", amount: 50, updatedAt: now },
+        ],
+      },
+    ];
+
+    expect(compareCatalog([product], variants, [])).toEqual([
+      expect.objectContaining({
+        sku: "",
+        mappingStatus: "missing_medusa",
+        suggestedMedusaSku: "DTPB1952",
+      }),
+    ]);
+  });
 });

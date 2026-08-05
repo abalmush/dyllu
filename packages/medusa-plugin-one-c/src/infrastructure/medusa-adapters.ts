@@ -119,6 +119,18 @@ export class MedusaOneCCatalogReader implements MedusaCatalogReader {
 export class MedusaOneCSyncStore implements OneCSyncStore {
   constructor(private readonly service: OneCSyncModuleService) {}
 
+  async listMappings() {
+    const mappings = await this.service.listOneCProductMappings(
+      { active: true },
+      { take: 100_000 }
+    );
+    return mappings.map((mapping) => ({
+      externalId: mapping.external_id,
+      medusaVariantId: mapping.medusa_variant_id,
+      medusaSku: mapping.medusa_sku,
+    }));
+  }
+
   createRun(input: Parameters<OneCSyncStore["createRun"]>[0]) {
     return this.service.createOneCSyncRuns({
       id: input.id,

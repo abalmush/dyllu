@@ -45,7 +45,6 @@ export function createOneCSyncAccess(
         run_id: runId,
         ...result,
         items: result.items.map((item) => ({
-          external_id: item.external_id,
           sku: item.sku,
           name: item.name,
           mapping_status:
@@ -57,7 +56,6 @@ export function createOneCSyncAccess(
           dyllu_product_title: item.medusa_product_title,
           regular_price_mdl: item.regular_price_mdl,
           balance: item.balance,
-          brand_external_id: item.brand_external_id,
           differences: item.differences,
           hidden: item.hidden,
           deleted: item.deleted,

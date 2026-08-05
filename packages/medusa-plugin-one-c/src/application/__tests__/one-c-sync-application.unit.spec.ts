@@ -45,6 +45,7 @@ describe("OneCSyncApplication", () => {
       },
       catalog: { listVariants: async () => [] },
       store: {
+        listMappings: async () => [],
         createRun: async (run) => stored.runs.push(run),
         updateRun: async () => undefined,
         createSnapshots: async (snapshots) =>
@@ -126,6 +127,7 @@ describe("OneCSyncApplication", () => {
       },
       catalog: { listVariants: async () => [] },
       store: {
+        listMappings: async () => [],
         createRun: async () => undefined,
         updateRun: async () => undefined,
         createSnapshots: async () => undefined,
@@ -177,6 +179,7 @@ describe("OneCSyncApplication", () => {
       },
       catalog: { listVariants: async () => [] },
       store: {
+        listMappings: async () => [],
         createRun: async () => undefined,
         updateRun,
         createSnapshots: async () => undefined,

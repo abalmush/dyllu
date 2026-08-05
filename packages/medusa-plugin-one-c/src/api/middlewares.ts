@@ -56,6 +56,12 @@ function privateHeaders(
 export default defineMiddlewares({
   routes: [
     {
+      matcher: "/admin/one-c-sync/mappings",
+      methods: ["POST"],
+      policies: [{ resource: "product", operation: PolicyOperation.update }],
+      middlewares: [privateHeaders, userAuthentication],
+    },
+    {
       matcher: /^\/admin\/one-c-sync\/runs(?:\/[^/]+(?:\/(?:items|export))?)?$/,
       methods: ["GET"],
       policies: [{ resource: "product", operation: PolicyOperation.read }],
