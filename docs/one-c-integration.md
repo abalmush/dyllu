@@ -76,9 +76,11 @@ boundary.
 
 ## Product interpretation
 
-- 1C `id` is used as both the external product ID and comparison SKU.
-- Matching against Medusa is exact and case-sensitive after Medusa SKU trim.
-- Zero matches can mean that Medusa SKUs and 1C IDs use different identifiers.
+- 1C `id` is the private external product ID.
+- A confirmed private mapping links the 1C `id` to one Medusa variant and SKU.
+- Product names can suggest a mapping for Admin review. They never create a
+  mapping and never authorize price or balance results.
+- Product comparison is exact and case-sensitive after Medusa SKU trim.
 - `name_ro`, then `name`, supplies the name.
 - `description_ro`, then `description_ru`, supplies the description.
 - Price type `05` supplies the regular MDL price.
@@ -116,6 +118,8 @@ is documented in `packages/medusa-plugin-dyllu-mcp/README.md`.
 Relevant MCP tools:
 
 - `get_one_c_sync_status`: read the latest stored status. It does not call 1C.
+- `get_mapped_one_c_product`: read stored price and balance only through an
+  exact confirmed Medusa SKU mapping. It does not call 1C.
 - `list_one_c_product_mismatches`: read stored comparisons. It does not call 1C.
 - `receive_one_c_catalog`: make a new read-only 1C call and store a snapshot.
 

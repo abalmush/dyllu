@@ -5,6 +5,44 @@ import { ProductChangeApplication } from "../../application/product-change-appli
 import { createDylluMcpServer } from "../server";
 
 describe("DYLLU MCP server", () => {
+  it("uses the confirmed mapping for an exact DYLLU SKU", async () => {
+    const application = {
+      getMappedOneCProduct: jest.fn().mockResolvedValue({
+        items: [{ sku: "DTPB1952", balance: 5 }],
+        count: 1,
+      }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_one_c_mapping" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      await client.callTool({
+        name: "get_mapped_one_c_product",
+        arguments: { sku: "DTPB1952" },
+      });
+
+      expect(application.getMappedOneCProduct).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_one_c_mapping" },
+        "DTPB1952"
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("reads stored 1C mismatches without receiving fresh data", async () => {
     const application = {
       listOneCComparisons: jest.fn().mockResolvedValue({ items: [], count: 0 }),
