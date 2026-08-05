@@ -8,6 +8,7 @@ export type ApplicationErrorCode =
   | "proposal_not_found"
   | "revision_not_found"
   | "invalid_description"
+  | "invalid_description_batch"
   | "invalid_price"
   | "invalid_revision_price"
   | "invalid_reason"

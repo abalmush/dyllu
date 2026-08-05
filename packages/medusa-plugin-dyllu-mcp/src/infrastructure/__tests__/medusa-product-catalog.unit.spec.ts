@@ -123,4 +123,35 @@ describe("MedusaProductCatalog", () => {
       },
     });
   });
+
+  it("gets an exact bounded product set by ID", async () => {
+    const graph = jest.fn().mockResolvedValue({
+      data: [
+        {
+          id: "prod_tools",
+          title: "Trusă de scule",
+          handle: "trusa-de-scule",
+          status: "published",
+          description: "Descriere",
+          images: [],
+          updated_at: "2026-08-05T08:00:00.000Z",
+          variants: [],
+        },
+      ],
+    });
+    const catalog = new MedusaProductCatalog({ graph } as Pick<
+      RemoteQueryFunction,
+      "graph"
+    >);
+
+    await expect(catalog.findByIds(["prod_tools"])).resolves.toMatchObject([
+      { id: "prod_tools" },
+    ]);
+    expect(graph).toHaveBeenCalledWith({
+      entity: "product",
+      fields: expect.any(Array),
+      filters: { id: ["prod_tools"] },
+      pagination: { take: 1, skip: 0 },
+    });
+  });
 });

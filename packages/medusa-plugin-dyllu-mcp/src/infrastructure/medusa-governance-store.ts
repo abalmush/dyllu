@@ -61,6 +61,12 @@ export class MedusaGovernanceStore implements GovernanceStore {
     await this.service.createCatalogProposal(input);
   }
 
+  async createProposals(
+    input: Parameters<GovernanceStore["createProposals"]>[0]
+  ) {
+    await this.service.createCatalogProposals(input);
+  }
+
   async findProposal(proposalId: string) {
     const proposals = await this.service.listDylluMcpChangeProposals(
       { id: proposalId },

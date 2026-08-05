@@ -111,6 +111,68 @@ describe("DYLLU MCP server", () => {
     }
   });
 
+  it("creates independent DYLLU description proposals in one batch", async () => {
+    const application = {
+      proposeDescriptionBatch: jest.fn().mockResolvedValue({
+        proposals: [{ id: "proposal_1" }, { id: "proposal_2" }],
+      }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_description_batch" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "propose_product_description_batch",
+        arguments: {
+          items: [
+            {
+              product_id: "prod_one",
+              proposed_description: "First corrected description",
+            },
+            {
+              product_id: "prod_two",
+              proposed_description: "Second corrected description",
+            },
+          ],
+          reason: "Correct incomplete descriptions",
+        },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(application.proposeDescriptionBatch).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_description_batch" },
+        {
+          items: [
+            {
+              productId: "prod_one",
+              proposedDescription: "First corrected description",
+            },
+            {
+              productId: "prod_two",
+              proposedDescription: "Second corrected description",
+            },
+          ],
+          reason: "Correct incomplete descriptions",
+        }
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("lists DYLLU sales with bounded pagination", async () => {
     const application = {
       listSales: jest.fn().mockResolvedValue({ sales: [], count: 0 }),

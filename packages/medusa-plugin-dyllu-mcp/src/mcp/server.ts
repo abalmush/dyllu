@@ -60,6 +60,7 @@ export function createDylluMcpServer(
         "Use search_products and get_product before proposing a change.",
         "Use count_products for the exact DYLLU catalog total.",
         "Use audit_catalog_quality to find missing or weak DYLLU product data before proposing corrections.",
+        "Use propose_product_description_batch for up to 20 corrections, then show every independent proposal before any publish call.",
         "Use list_sales and get_sale before proposing a DYLLU sale change.",
         "Use list_orders for a specific DYLLU calendar date and get_order for complete order information.",
         "Use get_daily_order_report for exact order totals, status groups, and exceptions for one DYLLU calendar date.",
@@ -598,6 +599,48 @@ export function createDylluMcpServer(
         application.proposeDescription(getContext(), {
           productId: input.product_id,
           proposedDescription: input.proposed_description,
+          reason: input.reason,
+        })
+      )
+  );
+
+  server.registerTool(
+    "propose_product_description_batch",
+    {
+      title: "Propose DYLLU product descriptions in a batch",
+      description:
+        "Atomically store 1 to 20 independent description proposals. This does not publish anything. Each approved proposal must use publish_product_description with its exact content hash.",
+      inputSchema: z
+        .object({
+          items: z
+            .array(
+              z
+                .object({
+                  product_id: productIdSchema,
+                  proposed_description: z.string().min(1).max(20_000),
+                })
+                .strict()
+            )
+            .min(1)
+            .max(20),
+          reason: z.string().trim().min(3).max(500),
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("propose_product_description_batch", () =>
+        application.proposeDescriptionBatch(getContext(), {
+          items: input.items.map((item) => ({
+            productId: item.product_id,
+            proposedDescription: item.proposed_description,
+          })),
           reason: input.reason,
         })
       )

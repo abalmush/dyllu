@@ -259,6 +259,22 @@ export class MedusaProductCatalog implements ProductCatalog {
     };
   }
 
+  async findByIds(productIds: string[]) {
+    if (productIds.length === 0) {
+      return [];
+    }
+    const { data } = await this.query.graph({
+      entity: "product",
+      fields: productFields,
+      filters: { id: productIds },
+      pagination: { take: productIds.length, skip: 0 },
+    });
+    return z
+      .array(productSchema)
+      .parse(data)
+      .map((product) => this.toProduct(product));
+  }
+
   async findById(productId: string) {
     const { data } = await this.query.graph({
       entity: "product",

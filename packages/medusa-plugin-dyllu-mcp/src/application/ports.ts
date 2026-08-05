@@ -105,6 +105,7 @@ export interface ProductCatalog {
     products: ProductSummary[];
     count: number;
   }>;
+  findByIds(productIds: string[]): Promise<ProductSummary[]>;
   findById(productId: string): Promise<ProductSummary | null>;
   findVariantPrice(input: {
     productId: string;
@@ -118,6 +119,10 @@ export interface ProductCatalog {
 export interface GovernanceStore {
   createProposal(input: {
     proposal: ProductChangeProposal;
+    requestId: string;
+  }): Promise<void>;
+  createProposals(input: {
+    proposals: ProductChangeProposal[];
     requestId: string;
   }): Promise<void>;
   findProposal(proposalId: string): Promise<ProductChangeProposal | null>;

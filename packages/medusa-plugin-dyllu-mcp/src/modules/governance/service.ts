@@ -55,6 +55,11 @@ export type CreateCatalogProposalInput = {
   requestId: string;
 };
 
+export type CreateCatalogProposalsInput = {
+  proposals: ProductChangeProposal[];
+  requestId: string;
+};
+
 export type CloseCatalogProposalInput = {
   actorId: string;
   proposalId: string;
@@ -387,6 +392,27 @@ export class DylluMcpGovernanceModuleService extends MedusaService({
     @MedusaContext() sharedContext?: Context<EntityManager>
   ) {
     return this.createCatalogProposal_(input, sharedContext);
+  }
+
+  @InjectTransactionManager()
+  protected async createCatalogProposals_(
+    input: CreateCatalogProposalsInput,
+    @MedusaContext() sharedContext?: Context<EntityManager>
+  ) {
+    for (const proposal of input.proposals) {
+      await this.createCatalogProposal_(
+        { proposal, requestId: input.requestId },
+        sharedContext
+      );
+    }
+  }
+
+  @InjectManager()
+  async createCatalogProposals(
+    input: CreateCatalogProposalsInput,
+    @MedusaContext() sharedContext?: Context<EntityManager>
+  ) {
+    return this.createCatalogProposals_(input, sharedContext);
   }
 
   @InjectTransactionManager()

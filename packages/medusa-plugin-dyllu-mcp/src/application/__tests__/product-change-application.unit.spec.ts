@@ -201,6 +201,13 @@ class TestProducts implements ProductCatalog {
     return this.values.get(productId) ?? null;
   }
 
+  async findByIds(productIds: string[]) {
+    return productIds.flatMap((productId) => {
+      const value = this.values.get(productId);
+      return value ? [value] : [];
+    });
+  }
+
   async findVariantPrice(
     input: Parameters<ProductCatalog["findVariantPrice"]>[0]
   ) {
@@ -375,6 +382,14 @@ class TestGovernance implements GovernanceStore {
     });
   }
 
+  async createProposals(
+    input: Parameters<GovernanceStore["createProposals"]>[0]
+  ) {
+    for (const proposal of input.proposals) {
+      await this.createProposal({ proposal, requestId: input.requestId });
+    }
+  }
+
   async findProposal(proposalId: string) {
     return (
       this.proposals.find((proposal) => proposal.id === proposalId) ?? null
@@ -494,6 +509,8 @@ class TestClock implements Clock {
 }
 
 class TestIds implements IdGenerator {
+  private readonly counts = new Map<string, number>();
+
   next(
     prefix:
       | "proposal"
@@ -502,7 +519,9 @@ class TestIds implements IdGenerator {
       | "operationRevision"
       | "event"
   ) {
-    return `${prefix}_1`;
+    const count = (this.counts.get(prefix) ?? 0) + 1;
+    this.counts.set(prefix, count);
+    return `${prefix}_${count}`;
   }
 }
 
@@ -1444,6 +1463,61 @@ describe("ProductChangeApplication", () => {
         proposalId: proposal.id,
       }),
     ]);
+  });
+
+  it("creates an atomic batch of independent description proposals", async () => {
+    const products = new TestProducts();
+    products.values.set("prod_saw", {
+      ...product,
+      id: "prod_saw",
+      title: "Ferăstrău",
+      handle: "ferastrau",
+      description: "Descriere veche pentru ferăstrău",
+    });
+    const governance = new TestGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["product_content.update"]),
+      products,
+      orders: new TestOrders(),
+      governance,
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    const result = await application.proposeDescriptionBatch(
+      { actorId: actor.id, requestId: "req_description_batch" },
+      {
+        items: [
+          {
+            productId: product.id,
+            proposedDescription: "Descriere nouă pentru mașina de găurit",
+          },
+          {
+            productId: "prod_saw",
+            proposedDescription: "Descriere nouă pentru ferăstrău",
+          },
+        ],
+        reason: "Correct incomplete product descriptions",
+      }
+    );
+
+    expect(result.proposals).toEqual([
+      expect.objectContaining({
+        id: "proposal_1",
+        productId: product.id,
+        beforeValue: product.description,
+        proposedValue: "Descriere nouă pentru mașina de găurit",
+      }),
+      expect.objectContaining({
+        id: "proposal_2",
+        productId: "prod_saw",
+        beforeValue: "Descriere veche pentru ferăstrău",
+        proposedValue: "Descriere nouă pentru ferăstrău",
+      }),
+    ]);
+    expect(governance.proposals).toEqual(result.proposals);
   });
 
   it("creates an MDL price proposal without changing the current price", async () => {

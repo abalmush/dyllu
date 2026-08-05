@@ -31,6 +31,7 @@ import {
   DailyOrderReport,
   OrderExceptionCode,
   OrderSummary,
+  ProductSummary,
   capabilities as availableCapabilities,
 } from "../domain/types";
 import { ApplicationError } from "./errors";
@@ -47,6 +48,14 @@ const MAX_REASON_LENGTH = 500;
 export type ProposeDescriptionInput = {
   productId: string;
   proposedDescription: string;
+  reason: string;
+};
+
+export type ProposeDescriptionBatchInput = {
+  items: Array<{
+    productId: string;
+    proposedDescription: string;
+  }>;
   reason: string;
 };
 
@@ -1072,39 +1081,14 @@ export class ProductChangeApplication {
       );
     }
 
-    const beforeValue = product.description ?? "";
-    if (beforeValue === input.proposedDescription) {
-      throw new ApplicationError(
-        "unchanged_description",
-        "The proposed description is identical to the current description"
-      );
-    }
-
     const createdAt = this.dependencies.clock.now();
-    const proposal: ProductDescriptionProposal = {
-      id: this.dependencies.ids.next("proposal"),
-      kind: "description_update",
-      status: "pending",
-      actorId: context.actorId,
-      productId: product.id,
-      productTitle: product.title,
-      variantId: null,
-      priceId: null,
-      currencyCode: null,
-      beforeValue,
-      proposedValue: input.proposedDescription,
-      targetUpdatedAt: product.updatedAt,
-      contentHash: createProductDescriptionHash({
-        productId: product.id,
-        productUpdatedAt: product.updatedAt,
-        beforeValue,
-        proposedValue: input.proposedDescription,
-      }),
+    const proposal = this.buildDescriptionProposal({
+      context,
+      product,
+      proposedDescription: input.proposedDescription,
       reason: input.reason,
-      sourceRevisionId: null,
       createdAt,
-      expiresAt: new Date(createdAt.getTime() + PROPOSAL_TTL_MS),
-    };
+    });
 
     await this.dependencies.governance.createProposal({
       proposal,
@@ -1112,6 +1096,62 @@ export class ProductChangeApplication {
     });
 
     return proposal;
+  }
+
+  async proposeDescriptionBatch(
+    context: RequestContext,
+    input: ProposeDescriptionBatchInput
+  ) {
+    await this.requireCapability(
+      context,
+      "product_content.update",
+      "catalog-descriptions"
+    );
+    this.validateReason(input.reason);
+    if (input.items.length < 1 || input.items.length > 20) {
+      throw new ApplicationError(
+        "invalid_description_batch",
+        "A description batch must contain 1 to 20 DYLLU products"
+      );
+    }
+    const productIds = input.items.map((item) => item.productId.trim());
+    if (
+      productIds.some((productId) => !productId) ||
+      new Set(productIds).size !== productIds.length
+    ) {
+      throw new ApplicationError(
+        "invalid_description_batch",
+        "Each DYLLU product must be present once in a description batch"
+      );
+    }
+    for (const item of input.items) {
+      this.validateDescription(item.proposedDescription);
+    }
+    const products = await this.dependencies.products.findByIds(productIds);
+    const productsById = new Map(
+      products.map((product) => [product.id, product])
+    );
+    if (productsById.size !== productIds.length) {
+      throw new ApplicationError(
+        "product_not_found",
+        "Each selected DYLLU product must exist"
+      );
+    }
+    const createdAt = this.dependencies.clock.now();
+    const proposals = input.items.map((item) =>
+      this.buildDescriptionProposal({
+        context,
+        product: productsById.get(item.productId.trim())!,
+        proposedDescription: item.proposedDescription,
+        reason: input.reason,
+        createdAt,
+      })
+    );
+    await this.dependencies.governance.createProposals({
+      proposals,
+      requestId: context.requestId,
+    });
+    return { proposals };
   }
 
   async proposePrice(
@@ -1776,6 +1816,46 @@ export class ProductChangeApplication {
       requestId: context.requestId,
     });
     return proposal;
+  }
+
+  private buildDescriptionProposal(input: {
+    context: RequestContext;
+    product: ProductSummary;
+    proposedDescription: string;
+    reason: string;
+    createdAt: Date;
+  }): ProductDescriptionProposal {
+    const beforeValue = input.product.description ?? "";
+    if (beforeValue === input.proposedDescription) {
+      throw new ApplicationError(
+        "unchanged_description",
+        "The proposed description is identical to the current description"
+      );
+    }
+    return {
+      id: this.dependencies.ids.next("proposal"),
+      kind: "description_update",
+      status: "pending",
+      actorId: input.context.actorId,
+      productId: input.product.id,
+      productTitle: input.product.title,
+      variantId: null,
+      priceId: null,
+      currencyCode: null,
+      beforeValue,
+      proposedValue: input.proposedDescription,
+      targetUpdatedAt: input.product.updatedAt,
+      contentHash: createProductDescriptionHash({
+        productId: input.product.id,
+        productUpdatedAt: input.product.updatedAt,
+        beforeValue,
+        proposedValue: input.proposedDescription,
+      }),
+      reason: input.reason.trim(),
+      sourceRevisionId: null,
+      createdAt: input.createdAt,
+      expiresAt: new Date(input.createdAt.getTime() + PROPOSAL_TTL_MS),
+    };
   }
 
   private validateDescription(value: string) {
