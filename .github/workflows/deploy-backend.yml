@@ -60,6 +60,13 @@ jobs:
       - name: Audit production dependencies
         run: pnpm audit --prod --audit-level high
 
+      - name: Validate 1C plugin
+        run: |
+          pnpm --filter @dyllu/medusa-plugin-one-c typecheck
+          pnpm --filter @dyllu/medusa-plugin-one-c lint
+          pnpm --filter @dyllu/medusa-plugin-one-c test
+          pnpm --filter @dyllu/medusa-plugin-one-c build
+
       - name: Validate MCP plugin
         run: |
           pnpm --filter @dyllu/medusa-plugin-mcp typecheck

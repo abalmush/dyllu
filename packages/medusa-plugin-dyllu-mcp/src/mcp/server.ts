@@ -21,6 +21,12 @@ const orderStatusSchema = z.enum([
   "canceled",
   "requires_action",
 ]);
+const oneCMappingStatusSchema = z.enum([
+  "missing_dyllu",
+  "matched",
+  "ambiguous",
+  "excluded",
+]);
 
 export function createDylluMcpServer(
   application: ProductChangeApplication,
@@ -58,6 +64,8 @@ export function createDylluMcpServer(
       instructions: [
         "Use search_products and get_product before proposing a change.",
         "Use count_products for the exact DYLLU catalog total.",
+        "Use stored 1C snapshots for analysis unless the manager explicitly asks for fresh 1C data.",
+        "Call receive_one_c_catalog only after the manager explicitly asks for fresh 1C data.",
         "Use list_orders for a specific DYLLU calendar date and get_order for complete order information.",
         "Interpret today, yesterday and calendar dates in Europe/Chisinau.",
         "Proposal tools never mutate public DYLLU catalog data.",
@@ -120,6 +128,72 @@ export function createDylluMcpServer(
     },
     () =>
       execute("count_products", () => application.countProducts(getContext()))
+  );
+
+  server.registerTool(
+    "get_one_c_sync_status",
+    {
+      title: "Get stored 1C sync status",
+      description:
+        "Return the latest stored 1C sync status and feed summary. This does not call 1C.",
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    () =>
+      execute("get_one_c_sync_status", () =>
+        application.getOneCSyncStatus(getContext())
+      )
+  );
+
+  server.registerTool(
+    "list_one_c_product_mismatches",
+    {
+      title: "List stored 1C product comparisons",
+      description:
+        "List products from a stored 1C snapshot by DYLLU match result. This does not call 1C.",
+      inputSchema: z
+        .object({
+          run_id: z.string().trim().min(1).max(100).optional(),
+          mapping_status: oneCMappingStatusSchema.default("missing_dyllu"),
+          limit: z.number().int().min(1).max(100).default(20),
+          offset: z.number().int().min(0).max(10_000).default(0),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("list_one_c_product_mismatches", () =>
+        application.listOneCComparisons(getContext(), {
+          ...(input.run_id ? { runId: input.run_id } : {}),
+          mappingStatus:
+            input.mapping_status === "missing_dyllu"
+              ? "missing_medusa"
+              : input.mapping_status,
+          limit: input.limit,
+          offset: input.offset,
+        })
+      )
+  );
+
+  server.registerTool(
+    "receive_one_c_catalog",
+    {
+      title: "Receive fresh 1C catalog data",
+      description:
+        "Make a new read-only call to the fixed 1C feed and store a comparison snapshot. This does not change DYLLU products or prices.",
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: true,
+      },
+      _meta: oauthToolMeta,
+    },
+    () =>
+      execute("receive_one_c_catalog", () =>
+        application.receiveOneCCatalog(getContext())
+      )
   );
 
   server.registerTool(

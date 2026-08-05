@@ -8,6 +8,7 @@ import {
   ProductChangeExecutor,
   UserDirectory,
   CapabilityStore,
+  OneCSyncDirectory,
 } from "./ports";
 import { ProductSearch } from "./ports";
 import {
@@ -77,6 +78,7 @@ export type ProductChangeApplicationDependencies = {
   executor: ProductChangeExecutor;
   clock: Clock;
   ids: IdGenerator;
+  oneCSync?: OneCSyncDirectory;
 };
 
 export class ProductChangeApplication {
@@ -137,6 +139,33 @@ export class ProductChangeApplication {
   async countProducts(context: RequestContext) {
     await this.requireCapability(context, "product.read", "catalog");
     return { count: await this.dependencies.products.count() };
+  }
+
+  async getOneCSyncStatus(context: RequestContext) {
+    await this.requireCapability(context, "one_c_sync.read", "latest");
+    return this.requireOneCSync().getLatest();
+  }
+
+  async listOneCComparisons(
+    context: RequestContext,
+    input: {
+      runId?: string;
+      mappingStatus?: "matched" | "missing_medusa" | "ambiguous" | "excluded";
+      limit: number;
+      offset: number;
+    }
+  ) {
+    await this.requireCapability(
+      context,
+      "one_c_sync.read",
+      input.runId ?? "latest"
+    );
+    return this.requireOneCSync().listComparisons(input);
+  }
+
+  async receiveOneCCatalog(context: RequestContext) {
+    await this.requireCapability(context, "one_c_sync.refresh", "1c");
+    return this.requireOneCSync().receive(context);
   }
 
   async listOrders(context: RequestContext, input: OrderListQuery) {
@@ -738,6 +767,16 @@ export class ProductChangeApplication {
     const actor = await this.requireActiveActor(context, targetId);
     await this.requireCapabilityForActor(context, actor, capability, targetId);
     return actor;
+  }
+
+  private requireOneCSync() {
+    if (!this.dependencies.oneCSync) {
+      throw new ApplicationError(
+        "one_c_sync_unavailable",
+        "The 1C sync service is unavailable"
+      );
+    }
+    return this.dependencies.oneCSync;
   }
 
   private async requireOwnedPendingProposal(

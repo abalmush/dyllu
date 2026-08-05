@@ -8,13 +8,16 @@ RUN corepack enable && corepack prepare pnpm@10.19.0 --activate
 COPY pnpm-lock.yaml pnpm-workspace.yaml .npmrc package.json ./
 COPY apps/backend/package.json apps/backend/package.json
 COPY packages/medusa-plugin-dyllu-mcp/package.json packages/medusa-plugin-dyllu-mcp/package.json
+COPY packages/medusa-plugin-one-c/package.json packages/medusa-plugin-one-c/package.json
 
 RUN pnpm install --frozen-lockfile --filter=@dyllu/backend...
 
 COPY apps/backend apps/backend
 COPY packages/medusa-plugin-dyllu-mcp packages/medusa-plugin-dyllu-mcp
+COPY packages/medusa-plugin-one-c packages/medusa-plugin-one-c
 
-RUN pnpm --filter=@dyllu/medusa-plugin-mcp build \
+RUN pnpm --filter=@dyllu/medusa-plugin-one-c build \
+  && pnpm --filter=@dyllu/medusa-plugin-mcp build \
   && pnpm --filter=@dyllu/backend build
 
 RUN HUSKY=0 pnpm --filter=@dyllu/backend deploy --prod /prod/backend

@@ -11,6 +11,7 @@ export type ApplicationErrorCode =
   | "invalid_audit_limit"
   | "invalid_order_date"
   | "order_not_found"
+  | "one_c_sync_unavailable"
   | "unchanged_description"
   | "unchanged_price"
   | "price_not_found"

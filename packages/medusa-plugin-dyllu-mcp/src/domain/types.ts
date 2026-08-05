@@ -8,6 +8,8 @@ export const capabilities = [
   "homepage_draft.update",
   "homepage.publish",
   "audit.read",
+  "one_c_sync.read",
+  "one_c_sync.refresh",
 ] as const;
 
 export type Capability = (typeof capabilities)[number];
