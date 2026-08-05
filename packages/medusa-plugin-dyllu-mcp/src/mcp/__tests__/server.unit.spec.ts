@@ -295,6 +295,55 @@ describe("DYLLU MCP server", () => {
     }
   });
 
+  it("returns a daily DYLLU order report", async () => {
+    const application = {
+      getDailyOrderReport: jest.fn().mockResolvedValue({
+        localDate: "2026-08-02",
+        orderCount: 3,
+        exceptionCount: 1,
+      }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_order_report" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "get_daily_order_report",
+        arguments: {
+          date: "2026-08-02",
+          stale_after_minutes: 180,
+          exception_limit: 25,
+        },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(application.getDailyOrderReport).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_order_report" },
+        {
+          localDate: "2026-08-02",
+          timeZone: "Europe/Chisinau",
+          staleAfterMinutes: 180,
+          exceptionLimit: 25,
+        }
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("gets complete DYLLU order information by order reference", async () => {
     const application = {
       getOrder: jest.fn().mockResolvedValue({

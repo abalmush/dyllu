@@ -225,9 +225,14 @@ class TestOrders implements OrderDirectory {
   readonly lists: Parameters<OrderDirectory["list"]>[0][] = [];
   readonly references: string[] = [];
 
+  constructor(private readonly summaries: OrderSummary[] = [order]) {}
+
   async list(input: Parameters<OrderDirectory["list"]>[0]) {
     this.lists.push(input);
-    return { orders: [order], count: 1 };
+    return {
+      orders: this.summaries.slice(input.offset, input.offset + input.limit),
+      count: this.summaries.length,
+    };
   }
 
   async findByReference(reference: string): Promise<OrderDetails | null> {
@@ -962,6 +967,130 @@ describe("ProductChangeApplication", () => {
         offset: 0,
       },
     ]);
+  });
+
+  it("builds an exact daily order report with clear exceptions", async () => {
+    const orders = new TestOrders([
+      {
+        ...order,
+        id: "order_paid_stale",
+        displayId: 43,
+        paymentStatus: "captured",
+        fulfillmentStatus: "not_fulfilled",
+        createdAt: new Date("2026-07-29T06:00:00.000Z"),
+      },
+      {
+        ...order,
+        id: "order_canceled_paid",
+        displayId: 44,
+        status: "canceled",
+        paymentStatus: "captured",
+        total: 200,
+      },
+      {
+        ...order,
+        id: "order_action",
+        displayId: 45,
+        status: "requires_action",
+        paymentStatus: "requires_action",
+        email: null,
+        total: 100,
+      },
+    ]);
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["order.read"]),
+      products: new TestProducts(),
+      orders,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.getDailyOrderReport(
+        { actorId: actor.id, requestId: "req_order_report" },
+        {
+          localDate: "2026-07-29",
+          timeZone: "Europe/Chisinau",
+          staleAfterMinutes: 120,
+          exceptionLimit: 20,
+        }
+      )
+    ).resolves.toEqual({
+      localDate: "2026-07-29",
+      timeZone: "Europe/Chisinau",
+      orderCount: 3,
+      currencyTotals: [
+        {
+          currencyCode: "mdl",
+          placedAmount: 729,
+          canceledAmount: 200,
+          netAmount: 529,
+        },
+      ],
+      statusCounts: { pending: 1, canceled: 1, requires_action: 1 },
+      paymentStatusCounts: { captured: 2, requires_action: 1 },
+      fulfillmentStatusCounts: { not_fulfilled: 3 },
+      exceptionCount: 3,
+      exceptionsTruncated: false,
+      exceptions: [
+        {
+          order: expect.objectContaining({ id: "order_paid_stale" }),
+          codes: ["paid_not_fulfilled"],
+        },
+        {
+          order: expect.objectContaining({ id: "order_canceled_paid" }),
+          codes: ["canceled_with_payment"],
+        },
+        {
+          order: expect.objectContaining({ id: "order_action" }),
+          codes: ["requires_action", "missing_customer_email"],
+        },
+      ],
+    });
+    expect(orders.lists).toEqual([
+      {
+        localDate: "2026-07-29",
+        timeZone: "Europe/Chisinau",
+        limit: 100,
+        offset: 0,
+      },
+    ]);
+  });
+
+  it("fails closed when a daily order report exceeds its safe limit", async () => {
+    const orders: OrderDirectory = {
+      async list() {
+        return { orders: [], count: 5_001 };
+      },
+      async findByReference() {
+        return null;
+      },
+    };
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["order.read"]),
+      products: new TestProducts(),
+      orders,
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.getDailyOrderReport(
+        { actorId: actor.id, requestId: "req_large_order_report" },
+        {
+          localDate: "2026-07-29",
+          timeZone: "Europe/Chisinau",
+          staleAfterMinutes: 120,
+          exceptionLimit: 20,
+        }
+      )
+    ).rejects.toMatchObject({ code: "order_report_limit_exceeded" });
   });
 
   it("returns complete order details by DYLLU order number", async () => {

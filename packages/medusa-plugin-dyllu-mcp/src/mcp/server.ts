@@ -61,6 +61,7 @@ export function createDylluMcpServer(
         "Use count_products for the exact DYLLU catalog total.",
         "Use list_sales and get_sale before proposing a DYLLU sale change.",
         "Use list_orders for a specific DYLLU calendar date and get_order for complete order information.",
+        "Use get_daily_order_report for exact order totals, status groups, and exceptions for one DYLLU calendar date.",
         "Interpret today, yesterday and calendar dates in Europe/Chisinau.",
         "Proposal tools never mutate public DYLLU catalog data.",
         "Show the complete before/after proposal to the manager.",
@@ -453,6 +454,38 @@ export function createDylluMcpServer(
     ({ order_reference: orderReference }) =>
       execute("get_order", () =>
         application.getOrder(getContext(), orderReference)
+      )
+  );
+
+  server.registerTool(
+    "get_daily_order_report",
+    {
+      title: "Get a daily DYLLU order report",
+      description:
+        "Return exact order totals, status groups, and clear exceptions for one calendar date in Europe/Chisinau. Paid orders without fulfillment are exceptions only after the selected age.",
+      inputSchema: z
+        .object({
+          date: calendarDateSchema,
+          stale_after_minutes: z
+            .number()
+            .int()
+            .min(0)
+            .max(10_080)
+            .default(120),
+          exception_limit: z.number().int().min(1).max(100).default(50),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("get_daily_order_report", () =>
+        application.getDailyOrderReport(getContext(), {
+          localDate: input.date,
+          timeZone: "Europe/Chisinau",
+          staleAfterMinutes: input.stale_after_minutes,
+          exceptionLimit: input.exception_limit,
+        })
       )
   );
 

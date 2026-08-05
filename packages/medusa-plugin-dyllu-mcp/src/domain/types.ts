@@ -80,6 +80,37 @@ export type OrderDetails = OrderSummary & {
   }>;
 };
 
+export const orderExceptionCodes = [
+  "requires_action",
+  "canceled_with_payment",
+  "paid_not_fulfilled",
+  "fulfilled_not_paid",
+  "missing_customer_email",
+] as const;
+
+export type OrderExceptionCode = (typeof orderExceptionCodes)[number];
+
+export type DailyOrderReport = {
+  localDate: string;
+  timeZone: "Europe/Chisinau";
+  orderCount: number;
+  currencyTotals: Array<{
+    currencyCode: string;
+    placedAmount: number;
+    canceledAmount: number;
+    netAmount: number;
+  }>;
+  statusCounts: Record<string, number>;
+  paymentStatusCounts: Record<string, number>;
+  fulfillmentStatusCounts: Record<string, number>;
+  exceptionCount: number;
+  exceptionsTruncated: boolean;
+  exceptions: Array<{
+    order: OrderSummary;
+    codes: OrderExceptionCode[];
+  }>;
+};
+
 export type ProductSummary = {
   id: string;
   title: string;

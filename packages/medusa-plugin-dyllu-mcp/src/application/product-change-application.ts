@@ -28,6 +28,9 @@ import {
   SaleOperationValue,
   SaleDetails,
   OperationKind,
+  DailyOrderReport,
+  OrderExceptionCode,
+  OrderSummary,
   capabilities as availableCapabilities,
 } from "../domain/types";
 import { ApplicationError } from "./errors";
@@ -77,6 +80,13 @@ export type AuditEventQuery = {
   actorId?: string;
   targetId?: string;
   limit: number;
+};
+
+export type DailyOrderReportInput = {
+  localDate: string;
+  timeZone: "Europe/Chisinau";
+  staleAfterMinutes: number;
+  exceptionLimit: number;
 };
 
 export type ProposeSaleCreateInput = {
@@ -179,6 +189,82 @@ export class ProductChangeApplication {
   async listOrders(context: RequestContext, input: OrderListQuery) {
     await this.requireCapability(context, "order.read", input.localDate);
     return this.dependencies.orders.list(input);
+  }
+
+  async getDailyOrderReport(
+    context: RequestContext,
+    input: DailyOrderReportInput
+  ): Promise<DailyOrderReport> {
+    await this.requireCapability(context, "order.read", input.localDate);
+    if (
+      !Number.isSafeInteger(input.staleAfterMinutes) ||
+      input.staleAfterMinutes < 0 ||
+      input.staleAfterMinutes > 10_080 ||
+      !Number.isSafeInteger(input.exceptionLimit) ||
+      input.exceptionLimit < 1 ||
+      input.exceptionLimit > 100
+    ) {
+      throw new ApplicationError(
+        "invalid_order_report",
+        "The order report limits are invalid"
+      );
+    }
+
+    const orders: OrderSummary[] = [];
+    const pageSize = 100;
+    const maximumOrders = 5_000;
+    let expectedCount: number | null = null;
+    while (expectedCount === null || orders.length < expectedCount) {
+      const page = await this.dependencies.orders.list({
+        localDate: input.localDate,
+        timeZone: input.timeZone,
+        limit: pageSize,
+        offset: orders.length,
+      });
+      if (!Number.isSafeInteger(page.count) || page.count < 0) {
+        throw new ApplicationError(
+          "order_report_unstable",
+          "The DYLLU order report could not get a stable order count"
+        );
+      }
+      if (page.count > maximumOrders) {
+        throw new ApplicationError(
+          "order_report_limit_exceeded",
+          `The DYLLU daily order report exceeds ${maximumOrders} orders`
+        );
+      }
+      if (expectedCount !== null && page.count !== expectedCount) {
+        throw new ApplicationError(
+          "order_report_unstable",
+          "DYLLU orders changed while the daily report was generated"
+        );
+      }
+      expectedCount = page.count;
+      if (page.orders.length === 0 && orders.length < expectedCount) {
+        throw new ApplicationError(
+          "order_report_unstable",
+          "The DYLLU order report returned an incomplete page"
+        );
+      }
+      orders.push(...page.orders);
+    }
+    if (
+      orders.length !== expectedCount ||
+      new Set(orders.map((order) => order.id)).size !== orders.length
+    ) {
+      throw new ApplicationError(
+        "order_report_unstable",
+        "DYLLU orders changed while the daily report was generated"
+      );
+    }
+    return buildDailyOrderReport({
+      localDate: input.localDate,
+      timeZone: input.timeZone,
+      orders,
+      now: this.dependencies.clock.now(),
+      staleAfterMinutes: input.staleAfterMinutes,
+      exceptionLimit: input.exceptionLimit,
+    });
   }
 
   async listSales(context: RequestContext, input: SaleListQuery) {
@@ -1714,4 +1800,125 @@ function parseOptionalDate(value: string | null) {
     );
   }
   return parsed;
+}
+
+function buildDailyOrderReport(input: {
+  localDate: string;
+  timeZone: "Europe/Chisinau";
+  orders: OrderSummary[];
+  now: Date;
+  staleAfterMinutes: number;
+  exceptionLimit: number;
+}): DailyOrderReport {
+  const currencyTotals = new Map<
+    string,
+    { placedAmount: number; canceledAmount: number }
+  >();
+  const statusCounts: Record<string, number> = {};
+  const paymentStatusCounts: Record<string, number> = {};
+  const fulfillmentStatusCounts: Record<string, number> = {};
+  const exceptions: DailyOrderReport["exceptions"] = [];
+
+  for (const order of input.orders) {
+    incrementCount(statusCounts, order.status);
+    incrementCount(paymentStatusCounts, order.paymentStatus);
+    incrementCount(fulfillmentStatusCounts, order.fulfillmentStatus);
+    const totals = currencyTotals.get(order.currencyCode) ?? {
+      placedAmount: 0,
+      canceledAmount: 0,
+    };
+    totals.placedAmount += order.total;
+    if (order.status === "canceled") {
+      totals.canceledAmount += order.total;
+    }
+    currencyTotals.set(order.currencyCode, totals);
+
+    const codes = getOrderExceptionCodes(
+      order,
+      input.now,
+      input.staleAfterMinutes
+    );
+    if (codes.length > 0) {
+      exceptions.push({ order, codes });
+    }
+  }
+
+  return {
+    localDate: input.localDate,
+    timeZone: input.timeZone,
+    orderCount: input.orders.length,
+    currencyTotals: [...currencyTotals.entries()]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([currencyCode, totals]) => ({
+        currencyCode,
+        placedAmount: totals.placedAmount,
+        canceledAmount: totals.canceledAmount,
+        netAmount: totals.placedAmount - totals.canceledAmount,
+      })),
+    statusCounts,
+    paymentStatusCounts,
+    fulfillmentStatusCounts,
+    exceptionCount: exceptions.length,
+    exceptionsTruncated: exceptions.length > input.exceptionLimit,
+    exceptions: exceptions.slice(0, input.exceptionLimit),
+  };
+}
+
+function incrementCount(counts: Record<string, number>, value: string) {
+  counts[value] = (counts[value] ?? 0) + 1;
+}
+
+function getOrderExceptionCodes(
+  order: OrderSummary,
+  now: Date,
+  staleAfterMinutes: number
+): OrderExceptionCode[] {
+  const codes: OrderExceptionCode[] = [];
+  const canceledWithPayment = [
+    "authorized",
+    "partially_authorized",
+    "captured",
+    "partially_captured",
+    "partially_refunded",
+  ].includes(order.paymentStatus);
+  const paid = ["captured", "partially_captured"].includes(
+    order.paymentStatus
+  );
+  const fulfillmentStarted = ![
+    "not_fulfilled",
+    "canceled",
+  ].includes(order.fulfillmentStatus);
+  const notPaid = [
+    "not_paid",
+    "awaiting",
+    "canceled",
+    "requires_action",
+  ].includes(order.paymentStatus);
+  const staleBefore =
+    now.getTime() - staleAfterMinutes * 60 * 1000;
+
+  if (
+    order.status === "requires_action" ||
+    order.paymentStatus === "requires_action"
+  ) {
+    codes.push("requires_action");
+  }
+  if (order.status === "canceled" && canceledWithPayment) {
+    codes.push("canceled_with_payment");
+  }
+  if (
+    order.status !== "canceled" &&
+    paid &&
+    order.fulfillmentStatus === "not_fulfilled" &&
+    order.createdAt.getTime() <= staleBefore
+  ) {
+    codes.push("paid_not_fulfilled");
+  }
+  if (order.status !== "canceled" && fulfillmentStarted && notPaid) {
+    codes.push("fulfilled_not_paid");
+  }
+  if (!order.email) {
+    codes.push("missing_customer_email");
+  }
+  return codes;
 }
