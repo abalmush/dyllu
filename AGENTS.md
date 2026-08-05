@@ -6,6 +6,13 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 <!-- END:nextjs-agent-rules -->
 
+# 1C integration context
+
+Before work on 1C connectivity, catalog sync, price sync, or MCP analysis, read
+[`docs/one-c-integration.md`](docs/one-c-integration.md). It contains the
+verified endpoints, data rules, security limits, live test results, and open
+questions.
+
 # Production safety — non-negotiable
 
 Production availability takes priority over cleanup, hardening, refactoring, and
