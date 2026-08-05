@@ -122,10 +122,24 @@ export function itemDto(
       typeof normalized.regularPriceMdl === "number"
         ? normalized.regularPriceMdl
         : null,
+    sale_price_mdl:
+      typeof normalized.salePriceMdl === "number"
+        ? normalized.salePriceMdl
+        : null,
+    sale_starts_at:
+      typeof normalized.saleStartsAt === "string"
+        ? normalized.saleStartsAt
+        : null,
+    sale_ends_at:
+      typeof normalized.saleEndsAt === "string" ? normalized.saleEndsAt : null,
     balance: typeof normalized.balance === "number" ? normalized.balance : null,
     brand_external_id:
       typeof normalized.brandExternalId === "string"
         ? normalized.brandExternalId
+        : null,
+    suggested_medusa_sku:
+      typeof normalized.suggestedMedusaSku === "string"
+        ? normalized.suggestedMedusaSku
         : null,
     differences: item.differences,
     hidden: item.hidden,

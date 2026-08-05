@@ -37,6 +37,9 @@ export type NormalizedOneCProduct = {
   name: string;
   description: string;
   regularPriceMdl: number | null;
+  salePriceMdl?: number | null;
+  saleStartsAt?: string | null;
+  saleEndsAt?: string | null;
   balance: number | null;
   brandExternalId: string | null;
   categoryExternalIds: string[];
@@ -94,6 +97,9 @@ export function normalizeProductFeed(input: unknown): {
         ""
       ).trim(),
       regularPriceMdl: regularPrice(product.Prices ?? []),
+      salePriceMdl: null,
+      saleStartsAt: null,
+      saleEndsAt: null,
       balance: finiteNumber(product.balance),
       brandExternalId:
         product.BrandId === null || product.BrandId === undefined

@@ -1,14 +1,14 @@
 import { createCsvExport, createJsonExport } from "../export-sync-items";
 
 const item = {
-  externalId: "=CMD()",
-  sku: "SKU-1",
+  referenceId: "=CMD()",
+  sku: "DTSS45M1",
   name: "Ciocan, mare",
   mappingStatus: "missing_medusa",
   preparationStatus: "unreviewed",
   regularPriceMdl: 100,
+  salePriceMdl: 80,
   balance: 2,
-  brandExternalId: "brand-1",
   differences: { fields: [{ field: "price" }] },
   hidden: false,
   deleted: false,
@@ -22,7 +22,7 @@ describe("sync item exports", () => {
       items: [item],
     });
 
-    expect(csv).toContain("\uFEFFrun_id,exported_at,external_id");
+    expect(csv).toContain("\uFEFFrun_id,exported_at,reference_id");
     expect(csv).toContain("'\u003dCMD()");
     expect(csv).toContain('"Ciocan, mare"');
     expect(csv).toContain('"{""fields""');
@@ -38,7 +38,7 @@ describe("sync item exports", () => {
         })
       )
     ).toEqual({
-      schema_version: "1.0",
+      schema_version: "1.1",
       run_id: "onecrun_1",
       exported_at: "2026-08-05T10:00:00.000Z",
       items: [item],

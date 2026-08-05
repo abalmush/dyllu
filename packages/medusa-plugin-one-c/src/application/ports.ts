@@ -32,6 +32,13 @@ export type SyncRunCounts = {
 };
 
 export interface OneCSyncStore {
+  listMappings(): Promise<
+    Array<{
+      externalId: string;
+      medusaVariantId: string;
+      medusaSku: string;
+    }>
+  >;
   createRun(input: {
     id: string;
     trigger: "manual" | "mcp";

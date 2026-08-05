@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 
 import { compareCatalog } from "../domain/compare-catalog";
 import { normalizeProductFeed } from "../domain/normalize-product-feed";
+import { normalizePromoFeed } from "../domain/normalize-promo-feed";
 import {
   Clock,
   IdGenerator,
@@ -41,9 +42,10 @@ export class OneCSyncApplication {
     });
 
     try {
-      const [feed, variants] = await Promise.all([
+      const [feed, variants, mappings] = await Promise.all([
         this.dependencies.feeds.fetchCatalog(),
         this.dependencies.catalog.listVariants(),
+        this.dependencies.store.listMappings(),
       ]);
       await this.dependencies.store.createSnapshots(
         feed.snapshots.map((snapshot) => ({
@@ -69,14 +71,29 @@ export class OneCSyncApplication {
         result: normalizeProductFeed(snapshot.data),
       }));
       const dylluBrandIds = getDylluBrandIds(feed.snapshots);
+      const promoSnapshot = feed.snapshots.find(
+        (snapshot) => snapshot.endpoint === "promo"
+      );
+      const promotions = normalizePromoFeed(
+        promoSnapshot?.data ?? { Items: [] }
+      );
       const normalized = normalizationResults
         .flatMap(({ result }) => result.items)
         .filter(
           (product) =>
             product.brandExternalId !== null &&
             dylluBrandIds.has(product.brandExternalId)
-        );
-      const comparisons = compareCatalog(normalized, variants);
+        )
+        .map((product) => {
+          const promotion = promotions.get(product.externalId);
+          return {
+            ...product,
+            salePriceMdl: promotion?.salePriceMdl ?? null,
+            saleStartsAt: promotion?.startsAt ?? null,
+            saleEndsAt: promotion?.endsAt ?? null,
+          };
+        });
+      const comparisons = compareCatalog(normalized, variants, mappings);
       const invalidItems = normalizationResults.flatMap(
         ({ snapshot, result }) =>
           result.issues
@@ -93,7 +110,7 @@ export class OneCSyncApplication {
                 id: this.dependencies.ids.next("onecitem"),
                 runId,
                 externalId: externalId ?? fallbackId,
-                sku: externalId ?? fallbackId,
+                sku: "",
                 name: sourceProductName(issue.source),
                 mappingStatus: "ambiguous" as const,
                 preparationStatus: "unreviewed" as const,
@@ -131,7 +148,10 @@ export class OneCSyncApplication {
           medusaVariantId: comparison.medusaVariantId,
           medusaProductTitle: comparison.medusaProductTitle,
           source: comparison.source.source,
-          normalized: comparison.source,
+          normalized: {
+            ...comparison.source,
+            suggestedMedusaSku: comparison.suggestedMedusaSku,
+          },
           differences: { fields: comparison.differences },
           hidden: comparison.source.hidden,
           deleted: comparison.source.deleted,

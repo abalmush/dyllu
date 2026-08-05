@@ -2,6 +2,7 @@ import { MedusaService } from "@medusajs/framework/utils";
 
 import {
   OneCFeedSnapshot,
+  OneCProductMapping,
   OneCSyncEvent,
   OneCSyncItem,
   OneCSyncRun,
@@ -9,6 +10,7 @@ import {
 
 class OneCSyncModuleService extends MedusaService({
   OneCFeedSnapshot,
+  OneCProductMapping,
   OneCSyncEvent,
   OneCSyncItem,
   OneCSyncRun,

@@ -1,12 +1,12 @@
 export type ExportSyncItem = {
-  externalId: string;
+  referenceId: string;
   sku: string;
   name: string;
   mappingStatus: string;
   preparationStatus: string;
   regularPriceMdl: number | null;
+  salePriceMdl: number | null;
   balance: number | null;
-  brandExternalId: string | null;
   differences: Record<string, unknown>;
   hidden: boolean;
   deleted: boolean;
@@ -21,14 +21,14 @@ type ExportInput = {
 const CSV_COLUMNS = [
   "run_id",
   "exported_at",
-  "external_id",
+  "reference_id",
   "sku",
   "name",
   "mapping_status",
   "preparation_status",
   "regular_price_mdl",
+  "sale_price_mdl",
   "balance",
-  "brand_external_id",
   "differences_json",
   "hidden",
   "deleted",
@@ -38,14 +38,14 @@ export function createCsvExport(input: ExportInput) {
   const rows = input.items.map((item) => [
     input.runId,
     input.exportedAt,
-    item.externalId,
+    item.referenceId,
     item.sku,
     item.name,
     item.mappingStatus,
     item.preparationStatus,
     item.regularPriceMdl,
+    item.salePriceMdl,
     item.balance,
-    item.brandExternalId,
     JSON.stringify(item.differences),
     item.hidden,
     item.deleted,
@@ -58,7 +58,7 @@ export function createCsvExport(input: ExportInput) {
 export function createJsonExport(input: ExportInput) {
   return JSON.stringify(
     {
-      schema_version: "1.0",
+      schema_version: "1.1",
       run_id: input.runId,
       exported_at: input.exportedAt,
       items: input.items,

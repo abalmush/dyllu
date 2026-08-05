@@ -6,6 +6,7 @@ import {
   Button,
   Container,
   Heading,
+  Input,
   Table,
   Tabs,
   Text,
@@ -47,9 +48,20 @@ type SyncItem = {
   preparation_status: string;
   medusa_product_title: string | null;
   regular_price_mdl: number | null;
+  sale_price_mdl: number | null;
+  sale_starts_at: string | null;
+  sale_ends_at: string | null;
   balance: number | null;
   brand_external_id: string | null;
-  differences: { fields?: Array<{ field: string }>; issue?: string };
+  suggested_medusa_sku: string | null;
+  differences: {
+    fields?: Array<{
+      field: string;
+      before?: string | number | boolean | null;
+      proposed?: string | number | boolean | null;
+    }>;
+    issue?: string;
+  };
   hidden: boolean;
   deleted: boolean;
 };
@@ -98,8 +110,11 @@ function Metric({ label, value }: { label: string; value: number | string }) {
 }
 
 const OneCConnectionPage = () => {
+  const pageSize = 50;
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<MappingStatus | "all">("missing_medusa");
+  const [page, setPage] = useState(0);
+  const [mappingSkus, setMappingSkus] = useState<Record<string, string>>({});
   const runsQuery = useQuery({
     queryKey: ["one-c-sync", "runs"],
     queryFn: () =>
@@ -109,12 +124,35 @@ const OneCConnectionPage = () => {
   const itemsUrl = useMemo(() => {
     if (!latestRun) return null;
     const status = filter === "all" ? "" : `&mapping_status=${filter}`;
-    return `/admin/one-c-sync/runs/${latestRun.id}/items?limit=100&offset=0${status}`;
-  }, [filter, latestRun]);
+    return `/admin/one-c-sync/runs/${latestRun.id}/items?limit=${pageSize}&offset=${page * pageSize}${status}`;
+  }, [filter, latestRun, page]);
   const itemsQuery = useQuery({
-    queryKey: ["one-c-sync", "items", latestRun?.id, filter],
+    queryKey: ["one-c-sync", "items", latestRun?.id, filter, page],
     queryFn: () => requestJson<ItemsResponse>(itemsUrl!),
     enabled: Boolean(itemsUrl),
+  });
+  const saveMapping = useMutation({
+    mutationFn: ({
+      itemId,
+      medusaSku,
+    }: {
+      itemId: string;
+      medusaSku: string;
+    }) =>
+      requestJson<{ mapping: { medusa_sku: string } }>(
+        "/admin/one-c-sync/mappings",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ sync_item_id: itemId, medusa_sku: medusaSku }),
+        }
+      ),
+    onSuccess: () =>
+      toast.success("Mapping saved. Receive fresh data to compare prices."),
+    onError: (error) =>
+      toast.error("Could not save mapping", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      }),
   });
   const receive = useMutation({
     mutationFn: () =>
@@ -232,10 +270,18 @@ const OneCConnectionPage = () => {
               <div>
                 <Heading level="h2">Product comparison</Heading>
                 <Text size="small" className="text-ui-fg-subtle mt-1">
-                  Exact, case-sensitive SKU matching. Showing up to 100 rows.
+                  Private 1C mappings to Medusa variants. Showing 50 rows per
+                  page.
                 </Text>
               </div>
               <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  disabled
+                  title="Locked while 1C uses plain HTTP"
+                >
+                  Apply all reviewed prices
+                </Button>
                 <Button variant="secondary" onClick={() => download("csv")}>
                   Export CSV
                 </Button>
@@ -246,7 +292,10 @@ const OneCConnectionPage = () => {
             </div>
             <Tabs
               value={filter}
-              onValueChange={(value) => setFilter(value as typeof filter)}
+              onValueChange={(value) => {
+                setFilter(value as typeof filter);
+                setPage(0);
+              }}
             >
               <Tabs.List className="px-6">
                 <Tabs.Trigger value="missing_medusa">Missing</Tabs.Trigger>
@@ -260,9 +309,11 @@ const OneCConnectionPage = () => {
               <Table>
                 <Table.Header>
                   <Table.Row>
-                    <Table.HeaderCell>SKU</Table.HeaderCell>
+                    <Table.HeaderCell>Medusa SKU</Table.HeaderCell>
                     <Table.HeaderCell>1C product</Table.HeaderCell>
-                    <Table.HeaderCell>Price, MDL</Table.HeaderCell>
+                    <Table.HeaderCell>Medusa base</Table.HeaderCell>
+                    <Table.HeaderCell>1C base</Table.HeaderCell>
+                    <Table.HeaderCell>1C sale</Table.HeaderCell>
                     <Table.HeaderCell>Balance</Table.HeaderCell>
                     <Table.HeaderCell>Result</Table.HeaderCell>
                     <Table.HeaderCell>Differences</Table.HeaderCell>
@@ -278,17 +329,75 @@ const OneCConnectionPage = () => {
                           {item.external_id}
                         </Text>
                       </Table.Cell>
+                      <Table.Cell>
+                        {item.mapping_status === "matched"
+                          ? (item.differences.fields?.find(
+                              (field) => field.field === "regular_price_mdl"
+                            )?.before ??
+                            item.regular_price_mdl ??
+                            "—")
+                          : "—"}
+                      </Table.Cell>
                       <Table.Cell>{item.regular_price_mdl ?? "—"}</Table.Cell>
+                      <Table.Cell>
+                        {item.sale_price_mdl ?? "—"}
+                        {item.sale_starts_at || item.sale_ends_at ? (
+                          <Text size="xsmall" className="text-ui-fg-subtle">
+                            {item.sale_starts_at ?? "…"} –{" "}
+                            {item.sale_ends_at ?? "…"}
+                          </Text>
+                        ) : null}
+                      </Table.Cell>
                       <Table.Cell>{item.balance ?? "—"}</Table.Cell>
                       <Table.Cell>
                         <StatusBadge status={item.mapping_status} />
                       </Table.Cell>
                       <Table.Cell>
-                        {item.differences.issue ??
+                        {item.mapping_status === "missing_medusa" ? (
+                          <div className="flex min-w-64 gap-2">
+                            <Input
+                              aria-label={`Medusa SKU for ${item.name}`}
+                              placeholder="Medusa SKU"
+                              value={
+                                mappingSkus[item.id] ??
+                                item.suggested_medusa_sku ??
+                                ""
+                              }
+                              onChange={(event) =>
+                                setMappingSkus((current) => ({
+                                  ...current,
+                                  [item.id]: event.target.value,
+                                }))
+                              }
+                            />
+                            <Button
+                              variant="secondary"
+                              disabled={
+                                !(
+                                  mappingSkus[item.id] ??
+                                  item.suggested_medusa_sku
+                                )?.trim() || saveMapping.isPending
+                              }
+                              onClick={() =>
+                                saveMapping.mutate({
+                                  itemId: item.id,
+                                  medusaSku: (
+                                    mappingSkus[item.id] ??
+                                    item.suggested_medusa_sku!
+                                  ).trim(),
+                                })
+                              }
+                            >
+                              Map
+                            </Button>
+                          </div>
+                        ) : (
+                          (item.differences.issue ??
                           item.differences.fields
                             ?.map((field) => field.field)
                             .join(", ") ??
-                          "—"}
+                          "—")
+                        )}
                       </Table.Cell>
                     </Table.Row>
                   ))}
@@ -302,10 +411,32 @@ const OneCConnectionPage = () => {
                 </Table.Body>
               </Table>
             </div>
-            <div className="border-ui-border-base border-t px-6 py-3">
+            <div className="border-ui-border-base flex items-center justify-between border-t px-6 py-3">
               <Text size="small" className="text-ui-fg-subtle">
-                {itemsQuery.data?.count ?? 0} products
+                {itemsQuery.data?.count ?? 0} products · Page {page + 1} of{" "}
+                {Math.max(
+                  1,
+                  Math.ceil((itemsQuery.data?.count ?? 0) / pageSize)
+                )}
               </Text>
+              <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  disabled={page === 0}
+                  onClick={() => setPage((value) => value - 1)}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="secondary"
+                  disabled={
+                    (page + 1) * pageSize >= (itemsQuery.data?.count ?? 0)
+                  }
+                  onClick={() => setPage((value) => value + 1)}
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           </Container>
 

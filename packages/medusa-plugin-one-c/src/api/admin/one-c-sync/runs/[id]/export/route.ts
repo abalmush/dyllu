@@ -60,14 +60,14 @@ export async function POST(
   }
   const exportedAt = new Date().toISOString();
   const exportItems = items.map(itemDto).map((item) => ({
-    externalId: item.external_id,
+    referenceId: item.id,
     sku: item.sku,
     name: item.name,
     mappingStatus: item.mapping_status,
     preparationStatus: item.preparation_status,
     regularPriceMdl: item.regular_price_mdl,
+    salePriceMdl: item.sale_price_mdl,
     balance: item.balance,
-    brandExternalId: item.brand_external_id,
     differences: item.differences,
     hidden: item.hidden,
     deleted: item.deleted,
