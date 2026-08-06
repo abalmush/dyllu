@@ -418,7 +418,15 @@ const OneCConnectionPage = () => {
         `/admin/one-c-sync/runs/${latestRun!.id}/items/${itemId}/apply`,
         { method: "POST" }
       ),
-    onSuccess: (result) => toast.success(`Item ${result.outcome}`),
+    onSuccess: (result) => {
+      const outcomeLabel = {
+        applied: "applied",
+        flagged: "flagged for review",
+        failed: "failed",
+        no_change: "already in sync",
+      }[result.outcome as "applied" | "flagged" | "failed" | "no_change"];
+      toast.success(`Item ${outcomeLabel ?? result.outcome}`);
+    },
     onError: (error) =>
       toast.error("Could not apply this item", {
         description: error instanceof Error ? error.message : "Unknown error",
@@ -427,6 +435,7 @@ const OneCConnectionPage = () => {
       await queryClient.invalidateQueries({ queryKey: ["one-c-sync"] });
     },
   });
+  const anyApplyInFlight = applyAll.isPending || applyItem.isPending;
 
   const download = async (format: "csv" | "json") => {
     if (!latestRun) return;
@@ -540,7 +549,16 @@ const OneCConnectionPage = () => {
                 <Button
                   variant="secondary"
                   isLoading={applyAll.isPending}
-                  onClick={() => applyAll.mutate()}
+                  disabled={anyApplyInFlight}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Apply all reviewed price, sale price, and stock updates for this run's matched products? This writes directly to the live catalog."
+                      )
+                    ) {
+                      applyAll.mutate();
+                    }
+                  }}
                 >
                   Apply all reviewed prices
                 </Button>
@@ -628,9 +646,13 @@ const OneCConnectionPage = () => {
                       </Table.Cell>
                       <Table.Cell>{item.regular_price_mdl ?? "—"}</Table.Cell>
                       <Table.Cell>
-                        {item.differences.fields?.find(
-                          (field) => field.field === "sale_price_mdl"
-                        )?.before ?? "—"}
+                        {item.mapping_status === "matched"
+                          ? (item.differences.fields?.find(
+                              (field) => field.field === "sale_price_mdl"
+                            )?.before ??
+                            item.sale_price_mdl ??
+                            "—")
+                          : "—"}
                       </Table.Cell>
                       <Table.Cell>
                         {item.sale_price_mdl ?? "—"}
@@ -715,7 +737,11 @@ const OneCConnectionPage = () => {
                             <Button
                               variant="secondary"
                               size="small"
-                              isLoading={applyItem.isPending}
+                              isLoading={
+                                applyItem.isPending &&
+                                applyItem.variables === item.id
+                              }
+                              disabled={anyApplyInFlight}
                               onClick={() => applyItem.mutate(item.id)}
                             >
                               Apply
