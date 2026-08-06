@@ -26,9 +26,9 @@ Full design: `docs/superpowers/specs/2026-08-06-algolia-search-design.md`. Read 
 - `src/modules/algolia/models/index.ts` — create
 - `src/modules/algolia/lib/normalize-brand.ts` — create (duplicated ~3-line rebrand regex)
 - `src/modules/algolia/lib/build-record.ts` — create (product → Algolia record, pure)
-- `src/modules/algolia/lib/build-record.unit.spec.ts` — create
+- `src/modules/algolia/lib/__tests__/build-record.unit.spec.ts` — create
 - `src/modules/algolia/lib/plan-reindex.ts` — create (diff-detection, pure)
-- `src/modules/algolia/lib/plan-reindex.unit.spec.ts` — create
+- `src/modules/algolia/lib/__tests__/plan-reindex.unit.spec.ts` — create
 - `src/modules/algolia/service.ts` — create
 - `src/modules/algolia/index.ts` — create
 - `medusa-config.ts` — modify: register module conditionally
@@ -263,12 +263,12 @@ git commit -m "DYLLU-000 Scaffold algolia module with sync-state tracking"
 **Files:**
 
 - Create: `apps/backend/src/modules/algolia/lib/normalize-brand.ts`
-- Test: `apps/backend/src/modules/algolia/lib/normalize-brand.unit.spec.ts`
+- Test: `apps/backend/src/modules/algolia/lib/__tests__/normalize-brand.unit.spec.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-import { normalizeCatalogBrand } from "./normalize-brand";
+import { normalizeCatalogBrand } from "../normalize-brand";
 
 describe("normalizeCatalogBrand", () => {
   it("replaces ingco with DYLLU case-insensitively", () => {
@@ -286,7 +286,7 @@ describe("normalizeCatalogBrand", () => {
 
 - [ ] **Step 2: Run to verify it fails**
 
-Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/normalize-brand.unit.spec.ts`
+Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/__tests__/normalize-brand.unit.spec.ts`
 Expected: FAIL — module not found.
 
 - [ ] **Step 3: Implement**
@@ -299,13 +299,13 @@ export function normalizeCatalogBrand(value: string): string {
 
 - [ ] **Step 4: Run to verify it passes**
 
-Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/normalize-brand.unit.spec.ts`
+Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/__tests__/normalize-brand.unit.spec.ts`
 Expected: PASS (2 tests).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add apps/backend/src/modules/algolia/lib/normalize-brand.ts apps/backend/src/modules/algolia/lib/normalize-brand.unit.spec.ts
+git add apps/backend/src/modules/algolia/lib/normalize-brand.ts apps/backend/src/modules/algolia/lib/__tests__/normalize-brand.unit.spec.ts
 git commit -m "DYLLU-000 Add backend copy of catalog brand normalization"
 ```
 
@@ -316,12 +316,12 @@ git commit -m "DYLLU-000 Add backend copy of catalog brand normalization"
 **Files:**
 
 - Create: `apps/backend/src/modules/algolia/lib/plan-reindex.ts`
-- Test: `apps/backend/src/modules/algolia/lib/plan-reindex.unit.spec.ts`
+- Test: `apps/backend/src/modules/algolia/lib/__tests__/plan-reindex.unit.spec.ts`
 
 - [ ] **Step 1: Write the failing tests**
 
 ```ts
-import { planReindex, type ReindexInput } from "./plan-reindex";
+import { planReindex, type ReindexInput } from "../plan-reindex";
 
 const base: ReindexInput = {
   id: "prod_1",
@@ -402,7 +402,7 @@ describe("planReindex", () => {
 
 - [ ] **Step 2: Run to verify it fails**
 
-Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/plan-reindex.unit.spec.ts`
+Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/__tests__/plan-reindex.unit.spec.ts`
 Expected: FAIL — module not found.
 
 - [ ] **Step 3: Implement**
@@ -454,13 +454,13 @@ export function planReindex<T extends ReindexInput>(
 
 - [ ] **Step 4: Run to verify it passes**
 
-Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/plan-reindex.unit.spec.ts`
+Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/__tests__/plan-reindex.unit.spec.ts`
 Expected: PASS (5 tests).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add apps/backend/src/modules/algolia/lib/plan-reindex.ts apps/backend/src/modules/algolia/lib/plan-reindex.unit.spec.ts
+git add apps/backend/src/modules/algolia/lib/plan-reindex.ts apps/backend/src/modules/algolia/lib/__tests__/plan-reindex.unit.spec.ts
 git commit -m "DYLLU-000 Add diff-detection for Algolia reindex"
 ```
 
@@ -471,12 +471,12 @@ git commit -m "DYLLU-000 Add diff-detection for Algolia reindex"
 **Files:**
 
 - Create: `apps/backend/src/modules/algolia/lib/build-record.ts`
-- Test: `apps/backend/src/modules/algolia/lib/build-record.unit.spec.ts`
+- Test: `apps/backend/src/modules/algolia/lib/__tests__/build-record.unit.spec.ts`
 
 - [ ] **Step 1: Write the failing tests**
 
 ```ts
-import { buildAlgoliaRecord, type ProductForIndexing } from "./build-record";
+import { buildAlgoliaRecord, type ProductForIndexing } from "../build-record";
 
 const product: ProductForIndexing = {
   id: "prod_1",
@@ -556,13 +556,13 @@ describe("buildAlgoliaRecord", () => {
 
 - [ ] **Step 2: Run to verify it fails**
 
-Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/build-record.unit.spec.ts`
+Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/__tests__/build-record.unit.spec.ts`
 Expected: FAIL — module not found.
 
 - [ ] **Step 3: Implement**
 
 ```ts
-import { normalizeCatalogBrand } from "./normalize-brand";
+import { normalizeCatalogBrand } from "../normalize-brand";
 
 export type ProductForIndexing = {
   id: string;
@@ -665,13 +665,13 @@ export function buildAlgoliaRecord(
 
 - [ ] **Step 4: Run to verify it passes**
 
-Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/build-record.unit.spec.ts`
+Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/__tests__/build-record.unit.spec.ts`
 Expected: PASS (7 tests).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add apps/backend/src/modules/algolia/lib/build-record.ts apps/backend/src/modules/algolia/lib/build-record.unit.spec.ts
+git add apps/backend/src/modules/algolia/lib/build-record.ts apps/backend/src/modules/algolia/lib/__tests__/build-record.unit.spec.ts
 git commit -m "DYLLU-000 Add product-to-Algolia-record mapping"
 ```
 
