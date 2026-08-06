@@ -133,4 +133,38 @@ describe("ApplyOneCUpdatesApplication", () => {
       expect.objectContaining({ field: "sale_price_mdl", status: "applied" }),
     ]);
   });
+
+  it("records the real error message when the workflow throws, without touching flagged rows", async () => {
+    const deps = buildDeps({
+      store: {
+        listItems: jest.fn().mockResolvedValue([
+          {
+            id: "onecitem_1",
+            runId: "onecrun_1",
+            medusaVariantId: "variant_1",
+            normalized: { regularPriceMdl: 850, salePriceMdl: null, balance: 500 },
+          },
+        ]),
+      },
+    });
+    deps.runWorkflow = jest
+      .fn()
+      .mockRejectedValue(new Error("price update failed: variant locked"));
+    const app = new ApplyOneCUpdatesApplication(deps as never);
+
+    const result = await app.applyRun({ runId: "onecrun_1", actorId: "user_1" });
+
+    expect(result.failedCount).toBe(1);
+    expect(deps.store.createAppliedChanges).toHaveBeenCalledWith([
+      expect.objectContaining({
+        field: "regular_price_mdl",
+        status: "failed",
+        errorMessage: "price update failed: variant locked",
+      }),
+      expect.objectContaining({
+        field: "balance",
+        status: "flagged",
+      }),
+    ]);
+  });
 });
