@@ -41,3 +41,4 @@ describe("Medusa module migration names", () => {
     expect(collisions).toEqual([]);
   });
 });
+
