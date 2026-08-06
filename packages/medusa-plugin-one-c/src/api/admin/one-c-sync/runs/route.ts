@@ -42,8 +42,8 @@ export async function POST(
   try {
     const result = await locking.execute(
       "dyllu-one-c:receive",
-      () =>
-        createOneCSyncApplication(req.scope).receive({
+      async () =>
+        (await createOneCSyncApplication(req.scope)).receive({
           actorId,
           requestId: req.requestId ?? randomUUID(),
           trigger: "manual",

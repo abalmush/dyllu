@@ -44,6 +44,9 @@ describe("OneCSyncApplication", () => {
         }),
       },
       catalog: { listVariants: async () => [] },
+      applyReader: {
+        ensureSalePriceList: async () => "plist_test",
+      },
       store: {
         listMappings: async () => [],
         createRun: async (run) => stored.runs.push(run),
@@ -51,6 +54,8 @@ describe("OneCSyncApplication", () => {
         createSnapshots: async (snapshots) =>
           stored.snapshots.push(...snapshots),
         createItems: async (items) => stored.items.push(...items),
+        createAppliedChanges: async () => undefined,
+        listLatestAppliedChanges: async () => [],
       },
       ids: { next: (prefix) => `${prefix}_1` },
       clock: { now: () => new Date("2026-08-05T10:00:00.000Z") },
@@ -126,12 +131,17 @@ describe("OneCSyncApplication", () => {
         }),
       },
       catalog: { listVariants: async () => [] },
+      applyReader: {
+        ensureSalePriceList: async () => "plist_test",
+      },
       store: {
         listMappings: async () => [],
         createRun: async () => undefined,
         updateRun: async () => undefined,
         createSnapshots: async () => undefined,
         createItems: async (items) => storedItems.push(...items),
+        createAppliedChanges: async () => undefined,
+        listLatestAppliedChanges: async () => [],
       },
       ids: { next: (prefix) => `${prefix}_1` },
       clock: { now: () => new Date("2026-08-05T10:00:00.000Z") },
@@ -178,12 +188,17 @@ describe("OneCSyncApplication", () => {
         }),
       },
       catalog: { listVariants: async () => [] },
+      applyReader: {
+        ensureSalePriceList: async () => "plist_test",
+      },
       store: {
         listMappings: async () => [],
         createRun: async () => undefined,
         updateRun,
         createSnapshots: async () => undefined,
         createItems: async () => undefined,
+        createAppliedChanges: async () => undefined,
+        listLatestAppliedChanges: async () => [],
       },
       ids: { next: (prefix) => `${prefix}_1` },
       clock: { now: () => new Date("2026-08-05T10:00:00.000Z") },
