@@ -1,5 +1,9 @@
 import { z } from "@medusajs/framework/zod";
 
+import {
+  AppliedChangeRecord,
+  deriveItemApplyStatus,
+} from "../domain/apply-status";
 import OneCSyncModuleService from "../modules/one-c-sync/service";
 
 export const listQuerySchema = z
@@ -79,8 +83,24 @@ export async function listItems(
       order: { sku: "ASC" },
     }
   );
+  const appliedChanges = await service.listOneCAppliedChanges(
+    { sync_item_id: items.map((item) => item.id) },
+    { take: 10_000, order: { applied_at: "DESC" } }
+  );
+  const latestByItem = new Map<string, AppliedChangeRecord[]>();
+  const seenKeys = new Set<string>();
+  for (const change of appliedChanges) {
+    const key = `${change.sync_item_id}:${change.field}`;
+    if (seenKeys.has(key)) continue;
+    seenKeys.add(key);
+    const records = latestByItem.get(change.sync_item_id) ?? [];
+    records.push({ field: change.field, status: change.status });
+    latestByItem.set(change.sync_item_id, records);
+  }
   return {
-    items: items.map(itemDto),
+    items: items.map((item) =>
+      itemDto(item, deriveItemApplyStatus(latestByItem.get(item.id) ?? []))
+    ),
     count,
     limit: input.limit,
     offset: input.offset,
@@ -106,7 +126,8 @@ export function runDto(
 }
 
 export function itemDto(
-  item: Awaited<ReturnType<OneCSyncModuleService["listOneCSyncItems"]>>[number]
+  item: Awaited<ReturnType<OneCSyncModuleService["listOneCSyncItems"]>>[number],
+  applyStatus: "not_applied" | "applied" | "flagged" | "failed" = "not_applied"
 ) {
   const normalized = item.normalized as Record<string, unknown>;
   return {
@@ -117,6 +138,7 @@ export function itemDto(
     name: item.name,
     mapping_status: item.mapping_status,
     preparation_status: item.preparation_status,
+    apply_status: applyStatus,
     medusa_product_id: item.medusa_product_id,
     medusa_variant_id: item.medusa_variant_id,
     medusa_product_title: item.medusa_product_title,

@@ -5,6 +5,7 @@ describe("1C read model", () => {
   it("filters a confirmed comparison by exact Medusa SKU", async () => {
     const service = {
       listAndCountOneCSyncItems: jest.fn().mockResolvedValue([[], 0]),
+      listOneCAppliedChanges: jest.fn().mockResolvedValue([]),
     } as unknown as OneCSyncModuleService;
 
     await listItems(service, {
