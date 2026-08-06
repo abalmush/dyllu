@@ -22,7 +22,7 @@ export function planReindex<T extends ReindexInput>(
 
   for (const product of products) {
     if (product.deletedAt) {
-      if (product.deletedAt > lastSyncedAt) toDelete.push(product);
+      if (product.deletedAt >= lastSyncedAt) toDelete.push(product);
       continue;
     }
 
@@ -35,7 +35,7 @@ export function planReindex<T extends ReindexInput>(
       current > latest ? current : latest
     );
 
-    if (changedAt > lastSyncedAt) toUpsert.push(product);
+    if (changedAt >= lastSyncedAt) toUpsert.push(product);
   }
 
   return { toUpsert, toDelete };

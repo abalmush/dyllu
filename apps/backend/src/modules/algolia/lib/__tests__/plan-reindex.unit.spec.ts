@@ -71,4 +71,62 @@ describe("planReindex", () => {
     expect(toUpsert).toEqual([]);
     expect(toDelete).toEqual([]);
   });
+
+  it("upserts a product whose changedAt is exactly equal to lastSyncedAt", () => {
+    const { toUpsert, toDelete } = planReindex(
+      [base],
+      new Date("2026-08-01T00:00:00Z")
+    );
+    expect(toUpsert.map((p) => p.id)).toEqual(["prod_1"]);
+    expect(toDelete).toEqual([]);
+  });
+
+  it("deletes a product whose deletedAt is exactly equal to lastSyncedAt", () => {
+    const product: ReindexInput = {
+      ...base,
+      deletedAt: new Date("2026-08-01T00:00:00Z"),
+    };
+    const { toUpsert, toDelete } = planReindex(
+      [product],
+      new Date("2026-08-01T00:00:00Z")
+    );
+    expect(toUpsert).toEqual([]);
+    expect(toDelete.map((p) => p.id)).toEqual(["prod_1"]);
+  });
+
+  it("handles multiple products in one call independently", () => {
+    const unchanged: ReindexInput = {
+      ...base,
+      id: "prod_unchanged",
+    };
+    const changed: ReindexInput = {
+      ...base,
+      id: "prod_changed",
+      updatedAt: new Date("2026-08-03T00:00:00Z"),
+    };
+    const deleted: ReindexInput = {
+      ...base,
+      id: "prod_deleted",
+      deletedAt: new Date("2026-08-03T00:00:00Z"),
+    };
+    const { toUpsert, toDelete } = planReindex(
+      [unchanged, changed, deleted],
+      new Date("2026-08-02T00:00:00Z")
+    );
+    expect(toUpsert.map((p) => p.id)).toEqual(["prod_changed"]);
+    expect(toDelete.map((p) => p.id)).toEqual(["prod_deleted"]);
+  });
+
+  it("handles a product with no variants without crashing", () => {
+    const product: ReindexInput = {
+      ...base,
+      variants: [],
+      updatedAt: new Date("2026-08-03T00:00:00Z"),
+    };
+    const { toUpsert } = planReindex(
+      [product],
+      new Date("2026-08-02T00:00:00Z")
+    );
+    expect(toUpsert.map((p) => p.id)).toEqual(["prod_1"]);
+  });
 });
