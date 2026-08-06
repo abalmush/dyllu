@@ -76,10 +76,10 @@ importers:
         version: 3.1036.0
       '@dyllu/medusa-plugin-mcp':
         specifier: workspace:*
-        version: file:packages/medusa-plugin-dyllu-mcp(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: file:packages/medusa-plugin-dyllu-mcp(5de4640cad33703463eb5cb4e3b4d210)
       '@dyllu/medusa-plugin-one-c':
         specifier: workspace:*
-        version: file:packages/medusa-plugin-one-c(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: file:packages/medusa-plugin-one-c(5de4640cad33703463eb5cb4e3b4d210)
       '@medusajs/admin-sdk':
         specifier: 2.18.0
         version: 2.18.0
@@ -445,7 +445,7 @@ importers:
     dependencies:
       '@dyllu/medusa-plugin-one-c':
         specifier: workspace:*
-        version: file:packages/medusa-plugin-one-c(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: file:packages/medusa-plugin-one-c(5de4640cad33703463eb5cb4e3b4d210)
       '@modelcontextprotocol/sdk':
         specifier: 1.30.0
         version: 1.30.0(zod@4.2.0)
@@ -470,16 +470,16 @@ importers:
         version: 2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3)
       '@medusajs/eslint-plugin':
         specifier: 2.18.0
-        version: 2.18.0(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3)
+        version: 2.18.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
       '@medusajs/framework':
         specifier: 2.18.0
-        version: 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
+        version: 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
       '@medusajs/medusa':
         specifier: 2.18.0
-        version: 2.18.0(52dc5f57dc25418936ea05901e1bfc02)
+        version: 2.18.0(07e02f85dcbda33033578b1ab2848a57)
       '@medusajs/test-utils':
         specifier: 2.18.0
-        version: 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
+        version: 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
       '@swc/core':
         specifier: ^1.7.28
         version: 1.15.30
@@ -506,7 +506,7 @@ importers:
         version: 18.3.7(@types/react@18.3.28)
       eslint:
         specifier: ^9.0.0
-        version: 9.39.4(jiti@1.21.7)
+        version: 9.39.4(jiti@2.7.0)
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@20.19.39)(ts-node@10.9.2(@swc/core@1.15.30)(@types/node@20.19.39)(typescript@5.9.3))
@@ -540,21 +540,24 @@ importers:
       '@medusajs/cli':
         specifier: 2.18.0
         version: 2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3)
+      '@medusajs/core-flows':
+        specifier: 2.18.0
+        version: 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
       '@medusajs/eslint-plugin':
         specifier: 2.18.0
-        version: 2.18.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
+        version: 2.18.0(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3)
       '@medusajs/framework':
         specifier: 2.18.0
-        version: 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
+        version: 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
       '@medusajs/icons':
         specifier: 2.18.0
         version: 2.18.0(react@18.3.1)
       '@medusajs/medusa':
         specifier: 2.18.0
-        version: 2.18.0(07e02f85dcbda33033578b1ab2848a57)
+        version: 2.18.0(52dc5f57dc25418936ea05901e1bfc02)
       '@medusajs/test-utils':
         specifier: 2.18.0
-        version: 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
+        version: 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
       '@medusajs/ui':
         specifier: 4.2.0
         version: 4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
@@ -1295,6 +1298,7 @@ packages:
       '@medusajs/admin-sdk': 2.18.0
       '@medusajs/admin-shared': 2.18.0
       '@medusajs/cli': 2.18.0
+      '@medusajs/core-flows': 2.18.0
       '@medusajs/framework': 2.18.0
       '@medusajs/icons': 2.18.0
       '@medusajs/medusa': 2.18.0
@@ -12204,9 +12208,9 @@ snapshots:
 
   '@drizzle-team/brocli@0.10.2': {}
 
-  '@dyllu/medusa-plugin-mcp@file:packages/medusa-plugin-dyllu-mcp(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+  '@dyllu/medusa-plugin-mcp@file:packages/medusa-plugin-dyllu-mcp(5de4640cad33703463eb5cb4e3b4d210)':
     dependencies:
-      '@dyllu/medusa-plugin-one-c': file:packages/medusa-plugin-one-c(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+      '@dyllu/medusa-plugin-one-c': file:packages/medusa-plugin-one-c(5de4640cad33703463eb5cb4e3b4d210)
       '@medusajs/admin-sdk': 2.18.0
       '@medusajs/admin-shared': 2.18.0
       '@medusajs/cli': 2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3)
@@ -12221,35 +12225,22 @@ snapshots:
       zod: 4.2.0
     transitivePeerDependencies:
       - '@cfworker/json-schema'
+      - '@medusajs/core-flows'
       - '@medusajs/icons'
       - '@medusajs/ui'
       - '@tanstack/react-query'
       - react-router-dom
       - supports-color
 
-  '@dyllu/medusa-plugin-one-c@file:packages/medusa-plugin-one-c(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+  '@dyllu/medusa-plugin-one-c@file:packages/medusa-plugin-one-c(5de4640cad33703463eb5cb4e3b4d210)':
     dependencies:
       '@medusajs/admin-sdk': 2.18.0
       '@medusajs/admin-shared': 2.18.0
       '@medusajs/cli': 2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3)
-      '@medusajs/framework': 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
-      '@medusajs/icons': 2.18.0(react@18.3.1)
-      '@medusajs/medusa': 2.18.0(52dc5f57dc25418936ea05901e1bfc02)
-      '@medusajs/test-utils': 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
-      '@medusajs/ui': 4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
-      '@tanstack/react-query': 5.64.2(react@18.3.1)
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      react-router-dom: 6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-
-  '@dyllu/medusa-plugin-one-c@file:packages/medusa-plugin-one-c(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@medusajs/admin-sdk': 2.18.0
-      '@medusajs/admin-shared': 2.18.0
-      '@medusajs/cli': 2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3)
+      '@medusajs/core-flows': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
       '@medusajs/framework': 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
       '@medusajs/icons': 2.18.0(react@18.3.1)
-      '@medusajs/medusa': 2.18.0(3aa503070f10d585d82b7fd12a05571b)
+      '@medusajs/medusa': 2.18.0(07e02f85dcbda33033578b1ab2848a57)
       '@medusajs/test-utils': 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
       '@medusajs/ui': 4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
       '@tanstack/react-query': 5.64.2(react@18.3.1)
@@ -19426,7 +19417,7 @@ snapshots:
       '@next/eslint-plugin-next': 16.2.10
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-react: 7.37.5(eslint@9.39.4(jiti@2.7.0))
@@ -19473,7 +19464,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0)):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.3
@@ -19488,11 +19479,36 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0)):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0)):
+    dependencies:
+      '@nolyfill/is-core-module': 1.0.39
+      debug: 4.4.3
+      eslint: 9.39.4(jiti@2.7.0)
+      get-tsconfig: 4.14.0
+      is-bun-module: 2.0.0
+      stable-hash: 0.0.5
+      tinyglobby: 0.2.16
+      unrs-resolver: 1.11.1
+    optionalDependencies:
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
+    transitivePeerDependencies:
+      - supports-color
+
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
+      eslint: 9.39.4(jiti@2.7.0)
+      eslint-import-resolver-node: 0.3.10
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
+    transitivePeerDependencies:
+      - supports-color
+
+  eslint-module-utils@2.12.1(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0)):
+    dependencies:
+      debug: 3.2.7
+    optionalDependencies:
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0))
@@ -19510,7 +19526,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
       hasown: 2.0.4
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -19539,7 +19555,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
+      eslint-module-utils: 2.12.1(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
       hasown: 2.0.4
       is-core-module: 2.16.1
       is-glob: 4.0.3
