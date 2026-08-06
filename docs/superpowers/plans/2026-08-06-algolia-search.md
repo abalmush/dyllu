@@ -562,7 +562,7 @@ Expected: FAIL — module not found.
 - [ ] **Step 3: Implement**
 
 ```ts
-import { normalizeCatalogBrand } from "../normalize-brand";
+import { normalizeCatalogBrand } from "./normalize-brand";
 
 export type ProductForIndexing = {
   id: string;
