@@ -148,11 +148,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           body=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" --jq '.[0].body // ""')
-          note=$(printf '%s' "$body" \
-            | sed -n '/<TelegramNotification>/,/<\/TelegramNotification>/p' \
-            | sed '1s/.*<TelegramNotification>//' \
-            | sed '$s/<\/TelegramNotification>.*//' \
-            | sed -e '/./,$!d' -e :a -e '/^\n*$/{$d;N;ba' -e '}')
+          note=$(printf '%s\n' "$body" | awk '
+            /^[[:space:]]*<TelegramNotification>[[:space:]]*$/ { capture=1; next }
+            /^[[:space:]]*<\/TelegramNotification>[[:space:]]*$/ { if (capture) { capture=0; exit } }
+            capture { print }
+          ' | sed -e '/./,$!d' -e :a -e '/^\n*$/{$d;N;ba' -e '}')
           if [ -n "$(printf '%s' "$note" | tr -d '[:space:]')" ]; then
             delimiter="telegram_note_$(openssl rand -hex 8)"
             echo "found=true" >> "$GITHUB_OUTPUT"
