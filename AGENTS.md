@@ -18,6 +18,29 @@ questions.
 Before MCP authentication, user onboarding, permission, ChatGPT setup, or tool
 work, read [`docs/dyllu-mcp.md`](docs/dyllu-mcp.md).
 
+# Concurrent sessions — work in a git worktree
+
+More than one agent session often runs against this repo at the same time. Do
+feature work in your own worktree, never in the shared checkout:
+
+```bash
+git worktree add ../DYLLU-<feature> -b codex/<feature>
+```
+
+The shared checkout has one git index and one set of dev-server ports, so a
+second session in it will collide with the first. Observed failures: commits
+landing on another session's feature branch, and `git commit` sweeping up a
+file another session had staged.
+
+When you must work in the shared checkout anyway:
+
+- Never `git add -A` or `git commit -a`. Stage explicit paths and prefer
+  `git commit --only <path>`, which ignores anything else already staged.
+- Run `git show --stat HEAD` after committing and confirm only your files
+  landed. If not, `git reset --soft HEAD~1` and redo it with `--only`.
+- Before killing a dev server or taking a port, check `ps -ef` for who owns it.
+  Start your own on a free port (`PORT=9091 …`) instead of reclaiming 9000.
+
 # Production safety — non-negotiable
 
 Production availability takes priority over cleanup, hardening, refactoring, and
