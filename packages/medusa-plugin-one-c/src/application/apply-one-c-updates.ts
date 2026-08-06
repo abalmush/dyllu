@@ -125,6 +125,7 @@ export class ApplyOneCUpdatesApplication {
       actorId: string;
       appliedAt: Date;
       status: "applied" | "flagged" | "failed";
+      errorMessage?: string | null;
     }> = [];
     const appliedAt = this.dependencies.clock.now();
 
@@ -248,9 +249,12 @@ export class ApplyOneCUpdatesApplication {
       }
       await this.dependencies.store.createAppliedChanges(auditRows);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       await this.dependencies.store.createAppliedChanges(
         auditRows.map((row) =>
-          row.status === "applied" ? { ...row, status: "failed" as const } : row
+          row.status === "applied"
+            ? { ...row, status: "failed" as const, errorMessage }
+            : row
         )
       );
       return "failed";
