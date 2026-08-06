@@ -127,6 +127,31 @@ describe("parseBackendEnvironment", () => {
     ).toThrow(/RESEND_FROM_EMAIL is required/);
   });
 
+  it("enables Algolia only when all four values are configured", () => {
+    const environment = parseBackendEnvironment({
+      NODE_ENV: "test",
+      ALGOLIA_APP_ID: "app123",
+      ALGOLIA_ADMIN_API_KEY: "admin-key",
+      ALGOLIA_SEARCH_API_KEY: "search-key",
+      ALGOLIA_PRODUCT_INDEX_NAME: "dyllu_products",
+    });
+
+    expect(environment.algolia).toEqual({
+      appId: "app123",
+      adminApiKey: "admin-key",
+      searchApiKey: "search-key",
+      indexName: "dyllu_products",
+    });
+    expect(() =>
+      parseBackendEnvironment({
+        NODE_ENV: "test",
+        ALGOLIA_APP_ID: "app123",
+      })
+    ).toThrow(
+      /ALGOLIA_ADMIN_API_KEY is required when Algolia search is configured/
+    );
+  });
+
   it("parses a complete disabled MCP configuration for staged rollout", () => {
     const environment = parseBackendEnvironment({
       ...productionEnvironment(),
@@ -183,6 +208,7 @@ describe("parseBackendEnvironment", () => {
     expect(environment.jwtSecret).not.toBe(environment.cookieSecret);
     expect(environment.s3).toBeUndefined();
     expect(environment.resend).toBeUndefined();
+    expect(environment.algolia).toBeUndefined();
     expect(environment.mcp).toEqual({
       enabled: false,
       bootstrapUserIds: [],
