@@ -87,6 +87,27 @@ export async function listItems(
   };
 }
 
+const FULL_RUN_SCAN_LIMIT = 10_000;
+
+export async function listSaleItems(
+  service: OneCSyncModuleService,
+  input: { runId: string; limit: number; offset: number }
+) {
+  const [items] = await service.listAndCountOneCSyncItems(
+    { run_id: input.runId },
+    { take: FULL_RUN_SCAN_LIMIT, order: { sku: "ASC" } }
+  );
+  const saleItems = items
+    .map((item) => itemDto(item))
+    .filter((item) => item.sale_price_mdl !== null);
+  return {
+    items: saleItems.slice(input.offset, input.offset + input.limit),
+    count: saleItems.length,
+    limit: input.limit,
+    offset: input.offset,
+  };
+}
+
 export function runDto(
   run: Awaited<ReturnType<OneCSyncModuleService["listOneCSyncRuns"]>>[number]
 ) {

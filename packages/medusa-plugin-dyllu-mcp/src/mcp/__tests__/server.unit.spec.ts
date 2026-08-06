@@ -77,6 +77,43 @@ describe("DYLLU MCP server", () => {
     }
   });
 
+  it("reads stored 1C sale prices without receiving fresh data", async () => {
+    const application = {
+      listOneCSales: jest.fn().mockResolvedValue({ items: [], count: 0 }),
+      receiveOneCCatalog: jest.fn(),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_one_c_sales" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      await client.callTool({
+        name: "list_one_c_sales",
+        arguments: { limit: 20, offset: 0 },
+      });
+
+      expect(application.listOneCSales).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_one_c_sales" },
+        { limit: 20, offset: 0 }
+      );
+      expect(application.receiveOneCCatalog).not.toHaveBeenCalled();
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("receives fresh 1C data only through the explicit receive tool", async () => {
     const application = {
       receiveOneCCatalog: jest.fn().mockResolvedValue({

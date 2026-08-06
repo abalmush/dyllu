@@ -84,6 +84,7 @@ export function createDylluMcpServer(
         "Use list_sales and get_sale before proposing a DYLLU sale change.",
         "Use stored 1C snapshots for analysis unless the manager explicitly asks for fresh 1C data.",
         "Use get_mapped_one_c_product for 1C price or balance questions about a DYLLU SKU. Never infer a mapping from a product name.",
+        "Use list_one_c_sales to find stored 1C promotion prices, validity dates, and mapped DYLLU variant IDs, then use propose_sale_create in batches of up to 100 variants.",
         "Call receive_one_c_catalog only after the manager explicitly asks for fresh 1C data.",
         "Use list_orders for a specific DYLLU calendar date and get_order for complete order information.",
         "Use get_daily_order_report for exact order totals, status groups, and exceptions for one DYLLU calendar date.",
@@ -243,6 +244,32 @@ export function createDylluMcpServer(
             input.mapping_status === "missing_dyllu"
               ? "missing_medusa"
               : input.mapping_status,
+          limit: input.limit,
+          offset: input.offset,
+        })
+      )
+  );
+
+  server.registerTool(
+    "list_one_c_sales",
+    {
+      title: "List stored 1C sale prices",
+      description:
+        "List products from a stored 1C snapshot that currently have a 1C promotion price, with the mapped DYLLU variant ID, regular and sale MDL prices, validity dates, and mapping status. This does not call 1C. Use before propose_sale_create.",
+      inputSchema: z
+        .object({
+          run_id: z.string().trim().min(1).max(100).optional(),
+          limit: z.number().int().min(1).max(100).default(20),
+          offset: z.number().int().min(0).max(10_000).default(0),
+        })
+        .strict(),
+      annotations: readOnlyAnnotations,
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("list_one_c_sales", () =>
+        application.listOneCSales(getContext(), {
+          ...(input.run_id ? { runId: input.run_id } : {}),
           limit: input.limit,
           offset: input.offset,
         })
