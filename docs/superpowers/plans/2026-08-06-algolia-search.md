@@ -869,7 +869,11 @@ git commit -m "DYLLU-000 Wire Algolia client into module service"
 
 ```ts
 import { MedusaContainer } from "@medusajs/framework/types";
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
+import {
+  ContainerRegistrationKeys,
+  Modules,
+  QueryContext,
+} from "@medusajs/framework/utils";
 
 import { ALGOLIA_MODULE } from "../modules/algolia";
 import type AlgoliaModuleService from "../modules/algolia/service";
@@ -891,8 +895,8 @@ const PRODUCT_FIELDS = [
   "deleted_at",
   "metadata",
   "tags.value",
+  "categories.id",
   "categories.name",
-  "categories.handle",
   "variants.sku",
   "variants.title",
   "variants.updated_at",
@@ -912,6 +916,17 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
 
   const query = container.resolve(ContainerRegistrationKeys.QUERY);
   const logger = container.resolve("logger");
+  const regionModuleService = container.resolve(Modules.REGION);
+
+  // calculated_price is a computed field — it resolves to null with no pricing
+  // context. DYLLU is single-region (spec: "Single region/currency (MDL)
+  // assumed"), so the first region stands in for "the" region, same as the
+  // store API would resolve from a request's region_id in the multi-region case.
+  const [region] = await regionModuleService.listRegions({}, { take: 1 });
+  if (!region) {
+    logger.warn("[algolia-reindex] no region configured, skipping");
+    return;
+  }
 
   const lastSyncedAt = (await algoliaModule.getLastSyncedAt()) ?? new Date(0);
   const runStartedAt = new Date();
@@ -920,6 +935,14 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
     entity: "product",
     fields: PRODUCT_FIELDS,
     filters: { status: ["published"] },
+    context: {
+      variants: {
+        calculated_price: QueryContext({
+          region_id: region.id,
+          currency_code: region.currency_code,
+        }),
+      },
+    },
     withDeleted: true,
   });
 
