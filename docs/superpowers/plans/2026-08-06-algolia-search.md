@@ -819,13 +819,11 @@ class AlgoliaModuleService extends MedusaService({
       facetFilters.push(["on_sale:true"]);
     }
 
-    const { results } = await this.searchClient.search([
-      {
-        indexName,
-        query: query ?? "",
-        params: { page, hitsPerPage, facetFilters },
-      },
-    ]);
+    const { results } = await this.searchClient.search({
+      requests: [
+        { indexName, query: query ?? "", page, hitsPerPage, facetFilters },
+      ],
+    });
 
     const [result] = results;
     return result;
@@ -845,9 +843,7 @@ export default AlgoliaModuleService;
 
 - [ ] **Step 2: Verify the installed `algoliasearch` API matches**
 
-Run: `grep -n "saveObjects\|deleteObjects\|export function search\b" node_modules/.pnpm/algoliasearch@*/node_modules/algoliasearch/dist/node.d.ts 2>/dev/null | head -20`
-(path may vary by pnpm layout — if not found, run `pnpm --filter @dyllu/backend exec node -e "console.log(Object.keys(require('algoliasearch').algoliasearch('x','y')))"` instead)
-Expected: `saveObjects`, `deleteObjects`, and `search` (or `searchSingleIndex`) appear. If the installed version exposes `searchSingleIndex` instead of a multi-query `search`, adjust the `search()` method to call `this.searchClient.searchSingleIndex({ indexName, searchParams: { query, page, hitsPerPage, facetFilters } })` and return that result directly (same field usage).
+**Resolved during implementation** (algoliasearch@5.56.0, checked against `@algolia/client-search`'s `.d.ts`): `saveObjects`/`deleteObjects` matched the plan's original guess exactly. `search` did not — v5's real signature is `search(searchMethodParams: { requests: SearchQuery[]; strategy? }, requestOptions?)`, with `query`/`page`/`hitsPerPage`/`facetFilters` as **flat fields on each request**, not nested under a `params` key (that nested shape was the deprecated v4-compat overload). The `search()` method above already reflects the corrected call. If `algoliasearch` is ever upgraded past 5.56.0, re-verify this shape hasn't changed again with `grep -n "saveObjects\|deleteObjects\|search(" node_modules/.pnpm/algoliasearch@*/node_modules/algoliasearch/dist/node.d.ts` before trusting this code unchanged.
 
 - [ ] **Step 3: Typecheck**
 
