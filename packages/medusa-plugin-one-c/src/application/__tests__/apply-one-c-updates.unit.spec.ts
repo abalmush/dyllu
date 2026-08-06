@@ -96,4 +96,41 @@ describe("ApplyOneCUpdatesApplication", () => {
       expect.objectContaining({ field: "regular_price_mdl", status: "flagged" }),
     ]);
   });
+
+  it("removes a stale sale price when 1C no longer reports a sale", async () => {
+    const deps = buildDeps({
+      store: {
+        listItems: jest.fn().mockResolvedValue([
+          {
+            id: "onecitem_1",
+            runId: "onecrun_1",
+            medusaVariantId: "variant_1",
+            normalized: { regularPriceMdl: 799, salePriceMdl: null, balance: 10 },
+          },
+        ]),
+      },
+      applyReader: {
+        getVariantForApply: jest.fn().mockResolvedValue({
+          variantId: "variant_1",
+          productId: "product_1",
+          regularPrice: { id: "price_1", amount: 799 },
+          salePriceListEntry: { id: "sale_price_1", amount: 699 },
+          inventoryItemId: "inv_1",
+          stockedQuantity: 10,
+        }),
+      },
+    });
+    const app = new ApplyOneCUpdatesApplication(deps as never);
+
+    const result = await app.applyRun({ runId: "onecrun_1", actorId: "user_1" });
+
+    expect(deps.workflowCalls).toHaveLength(1);
+    expect(deps.workflowCalls[0]).toMatchObject({
+      salePlan: { action: "remove", priceId: "sale_price_1" },
+    });
+    expect(result.appliedCount).toBe(1);
+    expect(deps.store.createAppliedChanges).toHaveBeenCalledWith([
+      expect.objectContaining({ field: "sale_price_mdl", status: "applied" }),
+    ]);
+  });
 });

@@ -1,4 +1,4 @@
-import { evaluateGuardrail } from "../domain/guardrail";
+import { evaluateGuardrail, GuardrailResult } from "../domain/guardrail";
 import { planSalePriceChange } from "../domain/plan-sale-price-change";
 import { ApplyOneCUpdatesInput } from "../workflows/apply-one-c-updates";
 import { Clock, IdGenerator, MedusaCatalogApplyReader, OneCSyncStore } from "./ports";
@@ -88,10 +88,19 @@ export class ApplyOneCUpdatesApplication {
       currentValue: variant.regularPrice?.amount ?? null,
       proposedValue: item.normalized.regularPriceMdl ?? null,
     });
-    const saleGuardrail = evaluateGuardrail({
-      currentValue: variant.salePriceListEntry?.amount ?? null,
-      proposedValue: item.normalized.salePriceMdl ?? null,
+    const salePlan = planSalePriceChange({
+      proposedSalePriceMdl: item.normalized.salePriceMdl ?? null,
+      currentSalePriceListEntry: variant.salePriceListEntry,
     });
+    const saleGuardrail: GuardrailResult =
+      salePlan.action === "none"
+        ? "no_change"
+        : salePlan.action === "remove"
+          ? "within_threshold"
+          : evaluateGuardrail({
+              currentValue: variant.salePriceListEntry?.amount ?? null,
+              proposedValue: salePlan.amount,
+            });
     const stockGuardrail = evaluateGuardrail({
       currentValue: variant.stockedQuantity,
       proposedValue: item.normalized.balance ?? null,
@@ -165,10 +174,7 @@ export class ApplyOneCUpdatesApplication {
     }
 
     if (saleGuardrail === "within_threshold") {
-      workflowInput.salePlan = planSalePriceChange({
-        proposedSalePriceMdl: item.normalized.salePriceMdl ?? null,
-        currentSalePriceListEntry: variant.salePriceListEntry,
-      });
+      workflowInput.salePlan = salePlan;
       if (workflowInput.salePlan.action !== "none") hasApplicableChange = true;
       auditRows.push({
         id: this.dependencies.ids.next("onecapplied"),
@@ -243,10 +249,9 @@ export class ApplyOneCUpdatesApplication {
       await this.dependencies.store.createAppliedChanges(auditRows);
     } catch (error) {
       await this.dependencies.store.createAppliedChanges(
-        auditRows.map((row) => ({
-          ...row,
-          status: "failed" as const,
-        }))
+        auditRows.map((row) =>
+          row.status === "applied" ? { ...row, status: "failed" as const } : row
+        )
       );
       return "failed";
     }
