@@ -17,8 +17,8 @@ Postgres product search:
 - The `/store` page (`apps/storefront/src/app/(main)/store/page.tsx`), which filters via
   a `q` query param passed straight to Medusa's `/store/products` endpoint
   (`apps/storefront/src/lib/data/products.ts`), plus an `on_sale` toggle computed
-  client-request-time from `calculated_price` vs `original_amount`. No faceting by
-  category/brand, no price sort.
+  client-request-time from `calculated_price` vs `original_amount`. Price-sort and the
+  on-sale filter fall back to an expensive full-catalogue scan (see Storefront section).
 
 The user wants both surfaces upgraded to Algolia-backed search, including a proper
 faceted/sortable PLP, and wants this shipped quickly without sacrificing correctness.
@@ -72,12 +72,11 @@ scheduling justification, not a code dependency.
                                                             ▲
                                                             │ search
 ┌──────────────────────────┐   POST   ┌──────────────────────────┐
-│ Storefront: /store PLP,   │─────────▶│ /store/products/search    │
-│ Cmd+K palette             │          │ (Medusa store API route,  │
-│ (react-instantsearch)     │◀─────────│  proxies to Algolia,      │
-└──────────────────────────┘  results  │  keeps Search key server- │
-                                        │  side)                    │
-                                        └──────────────────────────┘
+│ Storefront: /store PLP    │─────────▶│ /store/products/search    │
+│ (product-feed.ts), Cmd+K  │          │ (Medusa store API route,  │
+│ palette — plain fetch,    │◀─────────│  proxies to Algolia,      │
+│ no client Algolia SDK     │  results │  Search key server-side)  │
+└──────────────────────────┘          └──────────────────────────┘
 ```
 
 ### Backend: `src/modules/algolia`
@@ -132,65 +131,84 @@ feature has no import dependency on the 1C package.
 
 ### Algolia record shape (`dyllu_products` index)
 
-| Field              | Source                                                                        | Notes                                                        |
-| ------------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `objectID`         | `product.id`                                                                  |                                                              |
-| `title`            | `product.title`                                                               |                                                              |
-| `description`      | `product.description`                                                         |                                                              |
-| `handle`           | `product.handle`                                                              |                                                              |
-| `thumbnail`        | `product.thumbnail`                                                           |                                                              |
-| `skus`             | `variants[].sku`                                                              | array, searchable                                            |
-| `variant_titles`   | `variants[].title`                                                            | array, searchable                                            |
-| `category_names`   | `categories[].name`                                                           | facet                                                        |
-| `category_handles` | `categories[].handle`                                                         | for linking, not faceted                                     |
-| `brand`            | via existing `normalizeProductBrand` logic                                    | facet                                                        |
-| `tags`             | `tags[].value`                                                                | facet                                                        |
-| `metadata`         | flattened `product.metadata`                                                  | searchable text blob, no hardcoded keys                      |
-| `price`            | `min(variants[].calculated_price.calculated_amount)` (default region)         | numeric "from" price, for sort/facet                         |
-| `original_price`   | `original_amount` of the same variant selected for `price`                    | numeric — kept paired so strikethrough math stays consistent |
-| `on_sale`          | computed: `true` if **any** variant has `original_amount > calculated_amount` | boolean facet                                                |
-| `created_at`       | `product.created_at`                                                          | for "newest" sort                                            |
+| Field            | Source                                                                        | Notes                                                                                                                                                    |
+| ---------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `objectID`       | `product.id`                                                                  |                                                                                                                                                          |
+| `title`          | `product.title`                                                               |                                                                                                                                                          |
+| `description`    | `product.description`                                                         |                                                                                                                                                          |
+| `handle`         | `product.handle`                                                              |                                                                                                                                                          |
+| `thumbnail`      | `product.thumbnail`                                                           |                                                                                                                                                          |
+| `skus`           | `variants[].sku`                                                              | array, searchable                                                                                                                                        |
+| `variant_titles` | `variants[].title`                                                            | array, searchable                                                                                                                                        |
+| `category_names` | `categories[].name`                                                           | searchable text                                                                                                                                          |
+| `category_ids`   | `categories[].id`                                                             | facet — matches the Medusa category IDs already used by `/categories/[...category]` today, so existing category-page filtering needs no contract changes |
+| `tags`           | `tags[].value`                                                                | facet                                                                                                                                                    |
+| `metadata`       | flattened `product.metadata`                                                  | searchable text blob, no hardcoded keys                                                                                                                  |
+| `price`          | `min(variants[].calculated_price.calculated_amount)` (default region)         | numeric "from" price, for sort/facet                                                                                                                     |
+| `original_price` | `original_amount` of the same variant selected for `price`                    | numeric — kept paired so strikethrough math stays consistent                                                                                             |
+| `on_sale`        | computed: `true` if **any** variant has `original_amount > calculated_amount` | boolean facet                                                                                                                                            |
+| `created_at`     | `product.created_at`                                                          | for "newest" sort                                                                                                                                        |
+
+`title`/`description` get the same `ingco` → `DYLLU` text substitution the storefront
+already applies via `normalizeCatalogBrand`
+(`apps/storefront/src/lib/util/catalog-brand.ts`) — duplicated as a ~3-line pure
+function on the backend side (trivial regex, not worth a shared package for) so search
+results and typeahead never show the raw "Ingco" name.
 
 Index settings: `searchableAttributes` = title, description, skus, variant_titles,
-brand, category_names, metadata blob (in that priority order). `attributesForFaceting` =
-category_names, brand, tags, on_sale. Three replica indices for non-relevance sort:
+category_names, metadata blob (in that priority order). `attributesForFaceting` =
+category_ids, tags, on_sale. Three replica indices for non-relevance sort:
 `dyllu_products_price_asc`, `dyllu_products_price_desc`, `dyllu_products_newest`.
 
 ## Storefront
 
+**Revised after reading the actual PLP code** (`apps/storefront/src/modules/store/lib/product-feed.ts`):
+the storefront already has a complete filter/sort/pagination system — category routing,
+an on-sale toggle, a price/newest sort dropdown (`SortOptions` already includes
+`price_asc` / `price_desc` / `created_at`), infinite-scroll grid, filter sheet. Its own
+code comments admit the gap this feature should close: whenever sort is price-based or
+`onSale` is true, `fetchFullScanPage()` pulls the _entire_ catalogue and sorts/filters
+it in memory, "because calculated price isn't a sortable/filterable column" in Postgres.
+That's precisely what Algolia's indexed `price`/`on_sale` fields fix. So instead of
+installing `react-instantsearch` and rebuilding the filter UI, this feature replaces
+`fetchFullScanPage()`'s implementation with an Algolia-backed one and leaves every
+existing UI component (`PlpShell`, `RefinementList`, `SortProducts`,
+`InfiniteProductsGrid`) untouched. No `react-instantsearch` dependency, no new widgets,
+no `NEXT_PUBLIC_ALGOLIA_*` env vars — **all** Algolia traffic (indexing and search)
+stays server-side inside Medusa.
+
 ### `/store/products/search` (Medusa store API route)
 
-- `POST`, body `{ query, filters?, page?, hitsPerPage?, indexName? }` (validated with
-  zod, mirroring the existing storefront validation pattern).
-- Resolves `ALGOLIA_MODULE`, calls `search()`, returns hits + facet counts + pagination
-  info as-is from Algolia. This is the only place a key touches Algolia server-side from
-  the storefront path.
+- `POST`, body `{ query?, categoryIds?, onSale?, sort: "relevance" | "price_asc" | "price_desc" | "created_at", page, hitsPerPage }`
+  (validated with zod, mirroring the existing storefront validation pattern).
+- Resolves `ALGOLIA_MODULE`, calls `search()` against the base index (relevance/default)
+  or the matching replica (`price_asc` / `price_desc` / `created_at` sort), applying
+  `categoryIds`/`onSale` as `facetFilters`. Returns hits + `nbHits` + pagination as-is.
+- This is the only place any Algolia key is used — called server-side both by the
+  storefront's RSC data layer (PLP) and, via the same route, on each palette keystroke.
 
-### `/store` PLP rewrite
+### `/store` PLP: swap the full-scan path for Algolia
 
-- `StoreTemplate` (`apps/storefront/src/modules/store/templates`) switches from the
-  current Postgres-`q`-param flow to `react-instantsearch`'s `InstantSearch` wrapper
-  pointed at a custom search client that calls `/store/products/search` (same pattern as
-  the Medusa guide's storefront `searchClient` override in `src/lib/config.ts`, so the
-  Algolia Search key never reaches the browser).
-- Widgets: `RefinementList` for category and brand, a `ToggleRefinement`-style control
-  for on-sale, `RangeInput`/slider for price (from the numeric `price` facet), `SortBy`
-  mapped to the three replica indices + relevance default.
-- Existing `on_sale` / category-route filtering UI is replaced by Algolia facets — this
-  touches `StoreTemplate` and its refinement-list components directly; pagination
-  (`infinite-products-grid.tsx` / `paginated-products.tsx`) swaps its data source to
-  Algolia hits but keeps its existing rendering/skeleton components.
-- Product cards render straight from Algolia hit fields (title, thumbnail, price,
-  on_sale) — no secondary Medusa fetch, consistent with the "Algolia is the full source"
-  decision.
+- `product-feed.ts`: add `fetchAlgoliaPage(request)`, used wherever `usesBoundedFetch()`
+  is currently `false` (i.e. whenever `query`, `onSale`, or a price sort is requested) —
+  replacing `fetchFullScanPage()` entirely. Calls the search route above, passing
+  `categoryIds`/`onSale`/`sort`/pagination straight through from the already-normalized
+  request.
+- `to-plp-product.ts`: add `toPlpProductFromHit(hit)`, a sibling to the existing
+  `toPlpProduct()`, mapping an Algolia hit directly to the same `ProductFeedItem` shape
+  (reusing `convertToLocale` + `getPercentageDiff` for the `price` sub-object, since
+  Algolia hits carry raw numbers, not Medusa's `calculated_price` object).
+- Everything above `product-feed.ts` (`StoreTemplate`, `PaginatedProducts`, grid,
+  refinement list, sort dropdown) is unchanged — they already send exactly the request
+  shape (`categoryIds`, `onSale`, `sortBy`, `query`) this needs.
 
 ### Cmd+K palette
 
 - `search-command.tsx` gets a live-results section: as the user types (debounced),
-  query `/store/products/search` via the same client, render top ~5 hits (thumbnail,
-  title, price) linking straight to the PDP, replacing the current static
-  "Populare"/quick-links-only behavior for non-empty queries. Static quick links and
-  recent-search history remain for the empty-query state.
+  `POST /store/products/search` with `{ query, sort: "relevance", hitsPerPage: 5 }`,
+  render hits (thumbnail, title, price) linking straight to the PDP, replacing the
+  current static "Populare"/quick-links-only behavior for non-empty queries. Static
+  quick links and recent-search history remain for the empty-query state.
 
 ## Error handling
 
