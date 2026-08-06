@@ -104,20 +104,12 @@ export class MedusaOneCCatalogReader implements MedusaCatalogReader {
             variantTitle: variant.title,
             variantUpdatedAt: variant.updated_at,
             sku: variant.sku ?? null,
-            prices: prices
-              .filter(
-                (price) =>
-                  price.min_quantity == null &&
-                  price.max_quantity == null &&
-                  price.price_list_id == null &&
-                  (price.rules?.length ?? 0) === 0
-              )
-              .map((price) => ({
-                id: price.id,
-                currencyCode: price.currency_code.toLowerCase(),
-                amount: price.amount,
-                updatedAt: price.updated_at,
-              })),
+            prices: prices.filter(isDefaultPrice).map((price) => ({
+              id: price.id,
+              currencyCode: price.currency_code.toLowerCase(),
+              amount: price.amount,
+              updatedAt: price.updated_at,
+            })),
             salePriceListEntry: salePrice
               ? { id: salePrice.id, amount: salePrice.amount }
               : null,
@@ -138,6 +130,20 @@ export class MedusaOneCCatalogReader implements MedusaCatalogReader {
 }
 
 const ONE_C_SALE_PRICE_LIST_TITLE = "1C sale prices";
+
+function isDefaultPrice(price: {
+  min_quantity?: number | null;
+  max_quantity?: number | null;
+  price_list_id?: string | null;
+  rules?: unknown[];
+}) {
+  return (
+    price.min_quantity == null &&
+    price.max_quantity == null &&
+    price.price_list_id == null &&
+    (price.rules?.length ?? 0) === 0
+  );
+}
 
 const variantApplySchema = z.object({
   id: z.string(),
@@ -181,6 +187,7 @@ export class MedusaOneCApplyReader implements MedusaCatalogApplyReader {
   ) {}
 
   async ensureSalePriceList() {
+    // FilterablePriceListProps has no `title` filter, so narrow with fuzzy `q` and confirm an exact title match below.
     const candidates = await this.pricing.listPriceLists(
       { q: ONE_C_SALE_PRICE_LIST_TITLE },
       { take: 100 }
@@ -228,11 +235,7 @@ export class MedusaOneCApplyReader implements MedusaCatalogApplyReader {
     const prices = parsed.price_set?.prices ?? [];
     const regularPrice = prices.find(
       (price) =>
-        price.currency_code.toLowerCase() === "mdl" &&
-        price.price_list_id == null &&
-        price.min_quantity == null &&
-        price.max_quantity == null &&
-        (price.rules?.length ?? 0) === 0
+        price.currency_code.toLowerCase() === "mdl" && isDefaultPrice(price)
     );
     const salePrice = prices.find(
       (price) => price.price_list_id === salePriceListId
