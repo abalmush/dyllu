@@ -3,16 +3,52 @@ import {
   createWorkflow,
   StepResponse,
   WorkflowResponse,
+  transform,
+  when,
 } from "@medusajs/framework/workflows-sdk";
 import {
-  upsertVariantPricesWorkflow,
   createPriceListPricesWorkflow,
   updatePriceListPricesWorkflow,
   removePriceListPricesWorkflow,
   updateInventoryLevelsWorkflow,
 } from "@medusajs/core-flows";
+import type { MedusaContainer } from "@medusajs/framework/types";
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 
 import { SalePricePlan } from "../domain/plan-sale-price-change";
+
+/**
+ * upsertVariantPricesWorkflow's internal step chain (remote-query step ->
+ * transform -> updatePriceSetsStep) does not reliably execute in full when
+ * nested via .run() inside another step — confirmed by live testing against
+ * a real Medusa instance: the call reports zero errors but the price is left
+ * unchanged. Resolving the price set and calling the Pricing module directly
+ * avoids nesting a multi-step workflow inside this step.
+ */
+async function upsertRegularPrice(
+  container: MedusaContainer,
+  variantId: string,
+  priceId: string,
+  amount: number
+) {
+  const query = container.resolve(ContainerRegistrationKeys.QUERY);
+  const pricing = container.resolve(Modules.PRICING);
+  const { data: links } = await query.graph({
+    entity: "product_variant_price_set",
+    fields: ["variant_id", "price_set_id"],
+    filters: { variant_id: [variantId] },
+  });
+  const priceSetId = links[0]?.price_set_id;
+  if (!priceSetId) {
+    throw new Error(`No price set found for variant ${variantId}`);
+  }
+  await pricing.upsertPriceSets([
+    {
+      id: priceSetId,
+      prices: [{ id: priceId, amount, currency_code: "mdl" }],
+    },
+  ]);
+}
 
 export type ApplyOneCUpdatesInput = {
   variantId: string;
@@ -40,42 +76,17 @@ const updateRegularPriceStep = createStep(
     },
     { container }
   ) => {
-    await upsertVariantPricesWorkflow(container).run({
-      input: {
-        variantPrices: [
-          {
-            variant_id: input.variantId,
-            product_id: input.productId,
-            prices: [
-              { id: input.priceId, amount: input.newAmount, currency_code: "mdl" },
-            ],
-          },
-        ],
-        previousVariantIds: [input.variantId],
-      },
-    });
+    await upsertRegularPrice(container, input.variantId, input.priceId, input.newAmount);
     return new StepResponse(null, input);
   },
   async (input, { container }) => {
     if (!input) return;
-    await upsertVariantPricesWorkflow(container).run({
-      input: {
-        variantPrices: [
-          {
-            variant_id: input.variantId,
-            product_id: input.productId,
-            prices: [
-              {
-                id: input.priceId,
-                amount: input.previousAmount,
-                currency_code: "mdl",
-              },
-            ],
-          },
-        ],
-        previousVariantIds: [input.variantId],
-      },
-    });
+    await upsertRegularPrice(
+      container,
+      input.variantId,
+      input.priceId,
+      input.previousAmount
+    );
   }
 );
 
@@ -229,22 +240,35 @@ const updateStockStep = createStep(
 export const applyOneCUpdatesWorkflow = createWorkflow(
   "apply-one-c-updates",
   (input: ApplyOneCUpdatesInput) => {
-    if (input.price) {
-      updateRegularPriceStep({
-        ...input.price,
-        variantId: input.variantId,
-        productId: input.productId,
-      });
-    }
-    updateSalePriceStep({
-      salePlan: input.salePlan,
-      salePriceListId: input.salePriceListId,
-      salePreviousAmount: input.salePreviousAmount,
-      variantId: input.variantId,
+    // Medusa's workflow composer evaluates `input` fields lazily; plain JS
+    // `if`/spread on them does not carry through to steps as expected
+    // (confirmed by live testing: merged extra keys arrived as undefined).
+    // `when().then()` and `transform()` are the SDK's documented mechanism
+    // for conditionals and for combining input fields into a step's input.
+    when(input, (data) => Boolean(data.price)).then(() => {
+      const priceInput = transform({ input }, (data) => ({
+        priceId: data.input.price!.priceId,
+        previousAmount: data.input.price!.previousAmount,
+        newAmount: data.input.price!.newAmount,
+        variantId: data.input.variantId,
+        productId: data.input.productId,
+      }));
+      updateRegularPriceStep(priceInput);
     });
-    if (input.stock) {
-      updateStockStep(input.stock);
-    }
+
+    const saleInput = transform({ input }, (data) => ({
+      salePlan: data.input.salePlan,
+      salePriceListId: data.input.salePriceListId,
+      salePreviousAmount: data.input.salePreviousAmount,
+      variantId: data.input.variantId,
+    }));
+    updateSalePriceStep(saleInput);
+
+    when(input, (data) => Boolean(data.stock)).then(() => {
+      const stockInput = transform({ input }, (data) => data.input.stock!);
+      updateStockStep(stockInput);
+    });
+
     return new WorkflowResponse(null);
   }
 );
