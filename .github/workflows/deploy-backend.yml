@@ -153,3 +153,25 @@ jobs:
             --connect-timeout 10 --max-time 30 \
             --retry 12 --retry-delay 10 --retry-all-errors \
             https://api.dyllu.md/backend >/dev/null
+
+      - name: Prepare deployment summary
+        if: always()
+        id: summary
+        run: echo "subject=$(git log -1 --pretty=%s)" >> "$GITHUB_OUTPUT"
+
+      - name: Send Telegram notification
+        if: always()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            *Backend Deployment:* ${{ job.status == 'success' && '✅ Success' || '❌ Failed' }}
+
+            *Repository:* ${{ github.repository }}
+            *Branch:* `${{ github.ref_name }}`
+            *Commit:* [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+            *Summary:* ${{ steps.summary.outputs.subject }}
+            *Triggered by:* ${{ github.actor }}
+            *Run:* [logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
