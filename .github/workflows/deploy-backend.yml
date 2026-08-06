@@ -109,6 +109,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      pull-requests: read
 
     steps:
       - name: Checkout
@@ -153,3 +154,36 @@ jobs:
             --connect-timeout 10 --max-time 30 \
             --retry 12 --retry-delay 10 --retry-all-errors \
             https://api.dyllu.md/backend >/dev/null
+
+      - name: Extract Telegram notification from the merged PR
+        if: success()
+        id: telegram_note
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          body=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" --jq '.[0].body // ""')
+          note=$(printf '%s\n' "$body" | awk '
+            /^[[:space:]]*<TelegramNotification>[[:space:]]*$/ { capture=1; next }
+            /^[[:space:]]*<\/TelegramNotification>[[:space:]]*$/ { if (capture) { capture=0; exit } }
+            capture { print }
+          ' | sed -e '/./,$!d' -e :a -e '/^\n*$/{$d;N;ba' -e '}')
+          if [ -n "$(printf '%s' "$note" | tr -d '[:space:]')" ]; then
+            delimiter="telegram_note_$(openssl rand -hex 8)"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "text<<$delimiter"
+              printf '%s\n' "$note"
+              echo "$delimiter"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Send Telegram notification
+        if: success() && steps.telegram_note.outputs.found == 'true'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: ${{ steps.telegram_note.outputs.text }}

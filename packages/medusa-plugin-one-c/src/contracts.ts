@@ -14,8 +14,15 @@ export type OneCSyncReadInput = {
   offset: number;
 };
 
+export type OneCSyncSalesReadInput = {
+  runId?: string;
+  limit: number;
+  offset: number;
+};
+
 export interface OneCSyncAccess {
   getLatest(): Promise<unknown | null>;
   listComparisons(input: OneCSyncReadInput): Promise<unknown>;
+  listSales(input: OneCSyncSalesReadInput): Promise<unknown>;
   receive(input: { actorId: string; requestId: string }): Promise<unknown>;
 }

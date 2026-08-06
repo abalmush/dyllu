@@ -390,6 +390,18 @@ export class ProductChangeApplication {
     return this.requireOneCSync().listComparisons(input);
   }
 
+  async listOneCSales(
+    context: RequestContext,
+    input: { runId?: string; limit: number; offset: number }
+  ) {
+    await this.requireCapability(
+      context,
+      "one_c_sync.read",
+      input.runId ?? "latest"
+    );
+    return this.requireOneCSync().listSales(input);
+  }
+
   async getMappedOneCProduct(context: RequestContext, sku: string) {
     await this.requireCapability(context, "one_c_sync.read", sku);
     return this.requireOneCSync().listComparisons({
