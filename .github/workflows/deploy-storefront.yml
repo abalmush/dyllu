@@ -96,6 +96,7 @@ jobs:
     environment: production
     permissions:
       contents: read
+      pull-requests: read
     env:
       NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
       REVALIDATE_SECRET: ${{ secrets.MEDUSA_REVALIDATE_SECRET }}
@@ -140,24 +141,35 @@ jobs:
             --retry 12 --retry-delay 10 --retry-all-errors \
             https://api.dyllu.md/ready >/dev/null
 
-      - name: Prepare deployment summary
-        if: always()
-        id: summary
-        run: echo "subject=$(git log -1 --pretty=%s)" >> "$GITHUB_OUTPUT"
+      - name: Extract Telegram notification from the merged PR
+        if: success()
+        id: telegram_note
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          body=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" --jq '.[0].body // ""')
+          note=$(printf '%s' "$body" \
+            | sed -n '/<TelegramNotification>/,/<\/TelegramNotification>/p' \
+            | sed '1s/.*<TelegramNotification>//' \
+            | sed '$s/<\/TelegramNotification>.*//' \
+            | sed -e '/./,$!d' -e :a -e '/^\n*$/{$d;N;ba' -e '}')
+          if [ -n "$(printf '%s' "$note" | tr -d '[:space:]')" ]; then
+            delimiter="telegram_note_$(openssl rand -hex 8)"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "text<<$delimiter"
+              printf '%s\n' "$note"
+              echo "$delimiter"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Send Telegram notification
-        if: always()
+        if: success() && steps.telegram_note.outputs.found == 'true'
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
-          message: |
-            *Storefront Deployment:* ${{ job.status == 'success' && '✅ Success' || '❌ Failed' }}
-
-            *Repository:* ${{ github.repository }}
-            *Branch:* `${{ github.ref_name }}`
-            *Commit:* [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
-            *Summary:* ${{ steps.summary.outputs.subject }}
-            *Triggered by:* ${{ github.actor }}
-            *Run:* [logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          message: ${{ steps.telegram_note.outputs.text }}
