@@ -6,7 +6,7 @@
 
 **Architecture:** A new `algolia` Medusa module (backend) owns the Algolia client, a one-row sync-state table, and pure functions for change-detection and record-mapping. A daily scheduled job (+ a manual admin "Sync now" button) diffs and upserts. A single store API route (`/store/products/search`) proxies all search traffic; the storefront's existing `product-feed.ts` and the Cmd+K palette both call it — no new storefront dependency, no UI rewrite.
 
-**Tech Stack:** `algoliasearch` v5 JS client (backend only), Medusa v2 modules/jobs/scripts, Vitest for unit tests.
+**Tech Stack:** `algoliasearch` v5 JS client (backend only), Medusa v2 modules/jobs/scripts, Jest for backend unit tests (`pnpm --filter @dyllu/backend test:unit -- <path>`).
 
 **Runs in an isolated git worktree** (per user instruction) — set up via the `superpowers:using-git-worktrees` skill at execution time, not as a task below.
 
@@ -268,8 +268,6 @@ git commit -m "DYLLU-000 Scaffold algolia module with sync-state tracking"
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-import { describe, expect, it } from "vitest";
-
 import { normalizeCatalogBrand } from "./normalize-brand";
 
 describe("normalizeCatalogBrand", () => {
@@ -288,7 +286,7 @@ describe("normalizeCatalogBrand", () => {
 
 - [ ] **Step 2: Run to verify it fails**
 
-Run: `pnpm --filter @dyllu/backend exec vitest run src/modules/algolia/lib/normalize-brand.unit.spec.ts`
+Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/normalize-brand.unit.spec.ts`
 Expected: FAIL — module not found.
 
 - [ ] **Step 3: Implement**
@@ -301,7 +299,7 @@ export function normalizeCatalogBrand(value: string): string {
 
 - [ ] **Step 4: Run to verify it passes**
 
-Run: `pnpm --filter @dyllu/backend exec vitest run src/modules/algolia/lib/normalize-brand.unit.spec.ts`
+Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/normalize-brand.unit.spec.ts`
 Expected: PASS (2 tests).
 
 - [ ] **Step 5: Commit**
@@ -323,8 +321,6 @@ git commit -m "DYLLU-000 Add backend copy of catalog brand normalization"
 - [ ] **Step 1: Write the failing tests**
 
 ```ts
-import { describe, expect, it } from "vitest";
-
 import { planReindex, type ReindexInput } from "./plan-reindex";
 
 const base: ReindexInput = {
@@ -406,7 +402,7 @@ describe("planReindex", () => {
 
 - [ ] **Step 2: Run to verify it fails**
 
-Run: `pnpm --filter @dyllu/backend exec vitest run src/modules/algolia/lib/plan-reindex.unit.spec.ts`
+Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/plan-reindex.unit.spec.ts`
 Expected: FAIL — module not found.
 
 - [ ] **Step 3: Implement**
@@ -458,7 +454,7 @@ export function planReindex<T extends ReindexInput>(
 
 - [ ] **Step 4: Run to verify it passes**
 
-Run: `pnpm --filter @dyllu/backend exec vitest run src/modules/algolia/lib/plan-reindex.unit.spec.ts`
+Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/plan-reindex.unit.spec.ts`
 Expected: PASS (5 tests).
 
 - [ ] **Step 5: Commit**
@@ -480,8 +476,6 @@ git commit -m "DYLLU-000 Add diff-detection for Algolia reindex"
 - [ ] **Step 1: Write the failing tests**
 
 ```ts
-import { describe, expect, it } from "vitest";
-
 import { buildAlgoliaRecord, type ProductForIndexing } from "./build-record";
 
 const product: ProductForIndexing = {
@@ -562,7 +556,7 @@ describe("buildAlgoliaRecord", () => {
 
 - [ ] **Step 2: Run to verify it fails**
 
-Run: `pnpm --filter @dyllu/backend exec vitest run src/modules/algolia/lib/build-record.unit.spec.ts`
+Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/build-record.unit.spec.ts`
 Expected: FAIL — module not found.
 
 - [ ] **Step 3: Implement**
@@ -671,7 +665,7 @@ export function buildAlgoliaRecord(
 
 - [ ] **Step 4: Run to verify it passes**
 
-Run: `pnpm --filter @dyllu/backend exec vitest run src/modules/algolia/lib/build-record.unit.spec.ts`
+Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/build-record.unit.spec.ts`
 Expected: PASS (7 tests).
 
 - [ ] **Step 5: Commit**
@@ -1575,5 +1569,5 @@ git commit -m "DYLLU-000 Add live product results to Cmd+K search palette"
 ## Final check
 
 - [ ] Run `pnpm check` at the repo root — confirms lint/typecheck/test all pass across the storefront.
-- [ ] Run `pnpm --filter @dyllu/backend exec vitest run src/modules/algolia` — confirms all new backend unit tests pass together.
+- [ ] Run `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia` — confirms all new backend unit tests pass together.
 - [ ] Re-read `docs/superpowers/specs/2026-08-06-algolia-search-design.md` once more and confirm every decision in it has a corresponding task above (module, job, admin sync, store route, PLP integration, palette).
