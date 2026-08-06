@@ -73,19 +73,21 @@ export function createDylluMcpServer(
     },
     {
       instructions: [
+        "Never say the word Medusa to the manager, in any context, even to explain how something works internally. Always call the platform the DYLLU Website.",
         "Use search_products and get_product before proposing a change.",
         "Use count_products for the exact DYLLU catalog total.",
         "Use audit_catalog_quality to find missing or weak DYLLU product data before proposing corrections.",
         "Use propose_product_description_batch for up to 20 corrections, then show every independent proposal before any publish call.",
+        "Use propose_product_price_batch for up to 100 base-price corrections in one call instead of one propose_product_price call per variant, then show every independent proposal before any publish call.",
         "Use get_inventory_exceptions to find missing, low, negative, or inconsistent DYLLU stock data.",
         "Use list_product_categories and get_product_category before proposing a DYLLU category assignment change.",
         "Use list_promotions and get_promotion before proposing a DYLLU promotion status change.",
         "Use get_order, list_returns, and get_return before proposing a DYLLU return request or cancellation.",
         "Use list_sales and get_sale before proposing a DYLLU sale change.",
-        "Use stored 1C snapshots for analysis unless the manager explicitly asks for fresh 1C data.",
+        "Every 1C question uses the latest stored snapshot: get_one_c_sync_status, list_one_c_product_mismatches, get_mapped_one_c_product, and list_one_c_sales all read stored data only and never contact 1C.",
+        "Never call receive_one_c_catalog as a side effect of another request, and never call it automatically. Call it only when the manager's own words explicitly ask for a fresh 1C receive, refresh, or new snapshot (for example: create a new 1C snapshot, refresh the 1C feed, get fresh 1C data).",
         "Use get_mapped_one_c_product for 1C price or balance questions about a DYLLU SKU. Never infer a mapping from a product name.",
-        "Use list_one_c_sales to find stored 1C promotion prices, validity dates, and mapped DYLLU variant IDs, then use propose_sale_create in batches of up to 100 variants.",
-        "Call receive_one_c_catalog only after the manager explicitly asks for fresh 1C data.",
+        "Use list_one_c_sales to find stored 1C promotion prices, validity dates, mapped DYLLU variant IDs, and the DYLLU Website's current base price for each variant (dyllu_base_price_mdl, sale_valid). A sale_valid of false means the base price is stale and must be corrected with propose_product_price before that variant can go on sale.",
         "Use list_orders for a specific DYLLU calendar date and get_order for complete order information.",
         "Use get_daily_order_report for exact order totals, status groups, and exceptions for one DYLLU calendar date.",
         "Interpret today, yesterday and calendar dates in Europe/Chisinau.",
@@ -255,7 +257,7 @@ export function createDylluMcpServer(
     {
       title: "List stored 1C sale prices",
       description:
-        "List products from a stored 1C snapshot that currently have a 1C promotion price, with the mapped DYLLU variant ID, regular and sale MDL prices, validity dates, and mapping status. This does not call 1C. Use before propose_sale_create.",
+        "List products from a stored 1C snapshot that currently have a 1C promotion price, with the mapped DYLLU variant ID, regular and sale MDL prices, validity dates, mapping status, the DYLLU Website's current base price, and whether the sale price is valid against it. Always reads the latest stored snapshot; never contacts 1C. Use before propose_sale_create.",
       inputSchema: z
         .object({
           run_id: z.string().trim().min(1).max(100).optional(),
@@ -281,7 +283,7 @@ export function createDylluMcpServer(
     {
       title: "Receive fresh 1C catalog data",
       description:
-        "Make a new read-only call to the fixed 1C feed and store a comparison snapshot. This does not change DYLLU products or prices.",
+        "Make a new read-only call to the fixed 1C feed and store a comparison snapshot. This does not change DYLLU products or prices. Call this only when the manager explicitly asks for fresh 1C data, a refresh, or a new snapshot. Never call it automatically or as a side effect of any other request.",
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -1231,6 +1233,54 @@ export function createDylluMcpServer(
           priceId: input.price_id,
           currencyCode: input.currency_code,
           proposedAmount: input.proposed_amount,
+          reason: input.reason,
+        })
+      )
+  );
+
+  server.registerTool(
+    "propose_product_price_batch",
+    {
+      title: "Propose DYLLU product prices in a batch",
+      description:
+        "Atomically store 1 to 100 independent MDL base-price proposals in one call. This does not publish anything. Each approved proposal must use publish_product_price with its exact content hash. Use this to correct many stale base prices at once before creating a DYLLU sale for those variants with propose_sale_create.",
+      inputSchema: z
+        .object({
+          items: z
+            .array(
+              z
+                .object({
+                  product_id: productIdSchema,
+                  variant_id: z.string().trim().min(1).max(100),
+                  price_id: z.string().trim().min(1).max(100),
+                  currency_code: z.literal("mdl"),
+                  proposed_amount: z.number().int().min(1).max(100_000_000),
+                })
+                .strict()
+            )
+            .min(1)
+            .max(100),
+          reason: z.string().trim().min(3).max(500),
+        })
+        .strict(),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: oauthToolMeta,
+    },
+    (input) =>
+      execute("propose_product_price_batch", () =>
+        application.proposePriceBatch(getContext(), {
+          items: input.items.map((item) => ({
+            productId: item.product_id,
+            variantId: item.variant_id,
+            priceId: item.price_id,
+            currencyCode: item.currency_code,
+            proposedAmount: item.proposed_amount,
+          })),
           reason: input.reason,
         })
       )
