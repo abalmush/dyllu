@@ -8,7 +8,9 @@ tools.
 
 - The implementation is in `packages/medusa-plugin-one-c`.
 - The Admin manager is at `https://api.dyllu.md/backend/one-c-connection`.
-- It receives and compares data. It does not change Medusa products or prices.
+- It receives and compares data. An Admin can apply regular price, sale price, and
+  stock balance for confirmed-mapped products, bulk or per item, subject to a guardrail
+  (see "Applying updates" below). Name and description remain comparison-only.
 - Manual receive, sync history, comparison filters, and CSV and JSON exports are
   available.
 - The MCP implementation can analyze stored results. A separate MCP tool can
@@ -109,6 +111,27 @@ that SKU resolves to one Medusa variant, and neither side has a mapping
 conflict. The Admin must review and confirm the plan once. Missing, duplicate,
 hidden, deleted, and conflicting records are skipped and remain available for
 individual review.
+
+## Applying updates
+
+An Admin can push three fields from a confirmed 1C mapping into Medusa: regular price,
+sale price, and stock balance. Name and description are never written — they stay
+comparison-only.
+
+- **Guardrail:** a price or stock change exceeding 50% against the current Medusa value
+  is flagged instead of applied; a current value of zero or absent is always flagged.
+  Sale price uses the same check against the proposed sale amount.
+- **Sale price model:** one dedicated Price List ("1C sale prices", type `sale`, no
+  date fields) holds a row per variant currently on sale. A row exists exactly when 1C's
+  `/pit_site_promo` currently reports a promo for that product as of the last apply —
+  Medusa's own price-list date engine is not used, because it operates at the list level
+  and different products can have different, overlapping promo windows.
+- **Every apply attempt is audited** (`dyllu_one_c_applied_change`): before/after value,
+  actor, timestamp, and outcome (applied/flagged/failed) per field per item.
+- **Trigger:** manual only, bulk ("Apply all reviewed prices") or per item. There is no
+  scheduled or automatic apply, consistent with the plain-HTTP transport risk accepted
+  for this feature — see the design doc for the full reasoning:
+  `docs/superpowers/specs/2026-08-06-one-c-apply-updates-design.md`.
 
 ## Receive flow
 
