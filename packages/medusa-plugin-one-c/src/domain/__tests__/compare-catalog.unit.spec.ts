@@ -319,4 +319,40 @@ describe("compareCatalog", () => {
       comparison?.differences.some((diff) => diff.field === "sale_price_mdl")
     ).toBe(false);
   });
+
+  it("does not diff sale price when neither side has one", () => {
+    const product = {
+      externalId: "SALE-3",
+      sku: "SALE-3",
+      name: "No sale",
+      description: "",
+      regularPriceMdl: 799,
+      salePriceMdl: null,
+      balance: 1,
+      brandExternalId: null,
+      categoryExternalIds: [],
+      hidden: false,
+      deleted: false,
+      source: { id: "SALE-3" },
+    };
+    const variant = {
+      productId: "prod_3",
+      productTitle: "No sale",
+      productDescription: "",
+      productStatus: "published",
+      productUpdatedAt: new Date(),
+      variantId: "variant_3",
+      variantTitle: "No sale",
+      variantUpdatedAt: new Date(),
+      sku: "SALE-3",
+      prices: [{ id: "price_3", currencyCode: "mdl", amount: 799, updatedAt: new Date() }],
+      salePriceListEntry: null,
+    };
+
+    const [comparison] = compareCatalog([product], [variant]);
+
+    expect(
+      comparison?.differences.some((diff) => diff.field === "sale_price_mdl")
+    ).toBe(false);
+  });
 });

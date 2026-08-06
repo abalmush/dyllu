@@ -16,6 +16,7 @@ export type MedusaCatalogVariant = {
     amount: number;
     updatedAt: Date;
   }>;
+  // TODO(Task 7): medusa-adapters.ts MedusaOneCCatalogReader.listVariants must populate this; tsc fails there until it does.
   salePriceListEntry: { id: string; amount: number } | null;
 };
 
