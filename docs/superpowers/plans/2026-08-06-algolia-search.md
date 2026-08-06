@@ -516,7 +516,7 @@ describe("buildAlgoliaRecord", () => {
     expect(record.original_price).toBe(1200);
   });
 
-  it("flags on_sale true if any variant is discounted", () => {
+  it("flags on_sale true when the cheapest (displayed) variant is discounted", () => {
     expect(buildAlgoliaRecord(product).on_sale).toBe(true);
   });
 
@@ -532,6 +532,39 @@ describe("buildAlgoliaRecord", () => {
       ],
     };
     expect(buildAlgoliaRecord(noSale).on_sale).toBe(false);
+  });
+
+  it("flags on_sale false when a non-cheapest variant is discounted but the cheapest isn't", () => {
+    const cheapestNotDiscounted: ProductForIndexing = {
+      ...product,
+      variants: [
+        {
+          sku: "SKU-1",
+          title: "Default",
+          calculated_price: { calculated_amount: 900, original_amount: 900 },
+        },
+        {
+          sku: "SKU-2",
+          title: "Kit",
+          calculated_price: { calculated_amount: 1500, original_amount: 2000 },
+        },
+      ],
+    };
+    const record = buildAlgoliaRecord(cheapestNotDiscounted);
+    expect(record.price).toBe(900);
+    expect(record.original_price).toBe(900);
+    expect(record.on_sale).toBe(false);
+  });
+
+  it("handles zero priced variants without crashing", () => {
+    const noPricedVariants: ProductForIndexing = {
+      ...product,
+      variants: [],
+    };
+    const record = buildAlgoliaRecord(noPricedVariants);
+    expect(record.price).toBeNull();
+    expect(record.original_price).toBeNull();
+    expect(record.on_sale).toBe(false);
   });
 
   it("flattens metadata into a searchable string, including arbitrary keys like a 1C id", () => {
@@ -617,17 +650,20 @@ function flattenMetadata(metadata: Record<string, unknown> | null): string {
 export function buildAlgoliaRecord(
   product: ProductForIndexing
 ): AlgoliaProductRecord {
-  const pricedVariants = product.variants.filter(
-    (
-      v
-    ): v is typeof v & {
-      calculated_price: NonNullable<typeof v.calculated_price>;
-    } => v.calculated_price !== null
+type PricedVariant = ProductForIndexing["variants"][number] & {
+  calculated_price: NonNullable<
+    ProductForIndexing["variants"][number]["calculated_price"]
+  >;
+};
+
+export function buildAlgoliaRecord(
+  product: ProductForIndexing
+): AlgoliaProductRecord {
+  const pricedVariants: PricedVariant[] = product.variants.filter(
+    (variant): variant is PricedVariant => variant.calculated_price !== null
   );
 
-  const cheapest = pricedVariants.reduce<
-    (typeof pricedVariants)[number] | null
-  >(
+  const cheapest = pricedVariants.reduce<PricedVariant | null>(
     (lowest, variant) =>
       !lowest ||
       variant.calculated_price.calculated_amount <
@@ -644,29 +680,30 @@ export function buildAlgoliaRecord(
     handle: product.handle,
     thumbnail: product.thumbnail,
     skus: product.variants
-      .map((v) => v.sku)
+      .map((variant) => variant.sku)
       .filter((sku): sku is string => Boolean(sku)),
-    variant_titles: product.variants.map((v) => v.title),
-    category_names: product.categories.map((c) => c.name),
-    category_ids: product.categories.map((c) => c.id),
-    tags: product.tags.map((t) => t.value),
+    variant_titles: product.variants.map((variant) => variant.title),
+    category_names: product.categories.map((category) => category.name),
+    category_ids: product.categories.map((category) => category.id),
+    tags: product.tags.map((tag) => tag.value),
     metadata: flattenMetadata(product.metadata),
     price: cheapest?.calculated_price.calculated_amount ?? null,
     original_price: cheapest?.calculated_price.original_amount ?? null,
-    on_sale: pricedVariants.some(
-      (v) =>
-        v.calculated_price.original_amount >
-        v.calculated_price.calculated_amount
-    ),
+    on_sale: cheapest
+      ? cheapest.calculated_price.original_amount >
+        cheapest.calculated_price.calculated_amount
+      : false,
     created_at: new Date(product.created_at).getTime(),
   };
 }
 ```
 
+**Note:** `on_sale` is deliberately tied to the same `cheapest` variant used for `price`/`original_price` (not a `.some()` across all variants) — keeping all three fields consistent for one displayed variant, the same principle already applied to the price pairing itself. An earlier version of this task computed `on_sale` across all variants independently of the displayed price, which could show a "sale" badge next to a price with no visible discount; caught in code review and fixed before merge.
+
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `pnpm --filter @dyllu/backend test:unit -- src/modules/algolia/lib/__tests__/build-record.unit.spec.ts`
-Expected: PASS (7 tests).
+Expected: PASS (9 tests).
 
 - [ ] **Step 5: Commit**
 
