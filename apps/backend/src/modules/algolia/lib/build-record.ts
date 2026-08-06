@@ -89,11 +89,10 @@ export function buildAlgoliaRecord(
     metadata: flattenMetadata(product.metadata),
     price: cheapest?.calculated_price.calculated_amount ?? null,
     original_price: cheapest?.calculated_price.original_amount ?? null,
-    on_sale: pricedVariants.some(
-      (variant) =>
-        variant.calculated_price.original_amount >
-        variant.calculated_price.calculated_amount
-    ),
+    on_sale: cheapest
+      ? cheapest.calculated_price.original_amount >
+        cheapest.calculated_price.calculated_amount
+      : false,
     created_at: new Date(product.created_at).getTime(),
   };
 }

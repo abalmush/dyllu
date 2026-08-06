@@ -38,7 +38,7 @@ describe("buildAlgoliaRecord", () => {
     expect(record.original_price).toBe(1200);
   });
 
-  it("flags on_sale true if any variant is discounted", () => {
+  it("flags on_sale true when the cheapest (displayed) variant is discounted", () => {
     expect(buildAlgoliaRecord(product).on_sale).toBe(true);
   });
 
@@ -54,6 +54,39 @@ describe("buildAlgoliaRecord", () => {
       ],
     };
     expect(buildAlgoliaRecord(noSale).on_sale).toBe(false);
+  });
+
+  it("flags on_sale false when a non-cheapest variant is discounted but the cheapest isn't", () => {
+    const cheapestNotDiscounted: ProductForIndexing = {
+      ...product,
+      variants: [
+        {
+          sku: "SKU-1",
+          title: "Default",
+          calculated_price: { calculated_amount: 900, original_amount: 900 },
+        },
+        {
+          sku: "SKU-2",
+          title: "Kit",
+          calculated_price: { calculated_amount: 1500, original_amount: 2000 },
+        },
+      ],
+    };
+    const record = buildAlgoliaRecord(cheapestNotDiscounted);
+    expect(record.price).toBe(900);
+    expect(record.original_price).toBe(900);
+    expect(record.on_sale).toBe(false);
+  });
+
+  it("handles zero priced variants without crashing", () => {
+    const noPricedVariants: ProductForIndexing = {
+      ...product,
+      variants: [],
+    };
+    const record = buildAlgoliaRecord(noPricedVariants);
+    expect(record.price).toBeNull();
+    expect(record.original_price).toBeNull();
+    expect(record.on_sale).toBe(false);
   });
 
   it("flattens metadata into a searchable string, including arbitrary keys like a 1C id", () => {
