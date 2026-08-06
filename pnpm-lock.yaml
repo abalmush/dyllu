@@ -76,10 +76,10 @@ importers:
         version: 3.1036.0
       '@dyllu/medusa-plugin-mcp':
         specifier: workspace:*
-        version: file:packages/medusa-plugin-dyllu-mcp(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: file:packages/medusa-plugin-dyllu-mcp(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@dyllu/medusa-plugin-one-c':
         specifier: workspace:*
-        version: file:packages/medusa-plugin-one-c(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: file:packages/medusa-plugin-one-c(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@medusajs/admin-sdk':
         specifier: 2.18.0
         version: 2.18.0
@@ -88,7 +88,7 @@ importers:
         version: 2.18.0
       '@medusajs/caching':
         specifier: 2.18.0
-        version: 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(awilix@8.0.1)
+        version: 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(awilix@8.0.1)
       '@medusajs/cli':
         specifier: 2.18.0
         version: 2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3)
@@ -97,25 +97,28 @@ importers:
         version: 2.18.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(typescript@5.9.3)
       '@medusajs/draft-order':
         specifier: 2.18.0
-        version: 2.18.0(@medusajs/admin-sdk@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/dashboard@2.18.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 2.18.0(@medusajs/admin-sdk@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/dashboard@2.18.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@medusajs/file-s3':
         specifier: 2.18.0
-        version: 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
+        version: 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
       '@medusajs/framework':
         specifier: 2.18.0
-        version: 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
+        version: 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
       '@medusajs/icons':
         specifier: 2.18.0
         version: 2.18.0(react@18.3.1)
       '@medusajs/medusa':
         specifier: 2.18.0
-        version: 2.18.0(3aa503070f10d585d82b7fd12a05571b)
+        version: 2.18.0(9f3ffade5f60e443ff94536821853018)
       '@medusajs/ui':
         specifier: 4.2.0
         version: 4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
       '@tanstack/react-query':
         specifier: 5.64.2
         version: 5.64.2(react@18.3.1)
+      algoliasearch:
+        specifier: ^5.56.0
+        version: 5.56.0
       ioredis:
         specifier: 5.10.1
         version: 5.10.1
@@ -134,7 +137,7 @@ importers:
     devDependencies:
       '@medusajs/test-utils':
         specifier: 2.18.0
-        version: 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
+        version: 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
       '@swc/core':
         specifier: ^1.7.28
         version: 1.15.30
@@ -179,7 +182,7 @@ importers:
         version: 5.9.3
       vite:
         specifier: 6.4.3
-        version: 6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3)
+        version: 6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3)
       yalc:
         specifier: ^1.0.0-pre.53
         version: 1.0.0-pre.53
@@ -291,7 +294,7 @@ importers:
         version: 2.18.0
       '@opennextjs/cloudflare':
         specifier: ^1.20.2
-        version: 1.20.2(next@16.2.11(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(wrangler@4.114.0)
+        version: 1.20.2(next@16.2.11(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(wrangler@4.114.0)
       '@radix-ui/react-accordion':
         specifier: ^1.2.1
         version: 1.2.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -363,7 +366,7 @@ importers:
         version: 1.14.0(react@19.2.4)
       next:
         specifier: 16.2.11
-        version: 16.2.11(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 16.2.11(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       qs:
         specifier: ^6.15.3
         version: 6.15.3
@@ -427,7 +430,7 @@ importers:
         version: 4.1.3
       eslint-config-next:
         specifier: 16.2.11
-        version: 16.2.11(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
+        version: 16.2.11(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
       eslint-config-prettier:
         specifier: ^10.1.8
         version: 10.1.8(eslint@9.39.4(jiti@2.7.0))
@@ -445,7 +448,7 @@ importers:
     dependencies:
       '@dyllu/medusa-plugin-one-c':
         specifier: workspace:*
-        version: file:packages/medusa-plugin-one-c(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: link:../medusa-plugin-one-c
       '@modelcontextprotocol/sdk':
         specifier: 1.30.0
         version: 1.30.0(zod@4.2.0)
@@ -470,16 +473,16 @@ importers:
         version: 2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3)
       '@medusajs/eslint-plugin':
         specifier: 2.18.0
-        version: 2.18.0(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3)
+        version: 2.18.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
       '@medusajs/framework':
         specifier: 2.18.0
-        version: 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
+        version: 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
       '@medusajs/medusa':
         specifier: 2.18.0
-        version: 2.18.0(52dc5f57dc25418936ea05901e1bfc02)
+        version: 2.18.0(07e02f85dcbda33033578b1ab2848a57)
       '@medusajs/test-utils':
         specifier: 2.18.0
-        version: 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
+        version: 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
       '@swc/core':
         specifier: ^1.7.28
         version: 1.15.30
@@ -506,7 +509,7 @@ importers:
         version: 18.3.7(@types/react@18.3.28)
       eslint:
         specifier: ^9.0.0
-        version: 9.39.4(jiti@1.21.7)
+        version: 9.39.4(jiti@2.7.0)
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@20.19.39)(ts-node@10.9.2(@swc/core@1.15.30)(@types/node@20.19.39)(typescript@5.9.3))
@@ -602,6 +605,62 @@ importers:
         version: 1.0.0-pre.53
 
 packages:
+
+  '@algolia/abtesting@1.22.0':
+    resolution: {integrity: sha512-BFR6zNowNKcY7Ou7TaJc9QWexES4YKPbmf/OTFofpdsdhz4x6q0lbxp3duO0EHnyrN7rE4ba/TSXuY+BDGu4+g==}
+    engines: {node: '>= 14.0.0'}
+
+  '@algolia/client-abtesting@5.56.0':
+    resolution: {integrity: sha512-7r4Z3NC7yU1oAQVWJNA2HX7tX481F3pJvCGyLIXiTdBcthz4Q/o21jwcMYDFkuI92UWTNBQQmHYgwHo1zS5dzg==}
+    engines: {node: '>= 14.0.0'}
+
+  '@algolia/client-analytics@5.56.0':
+    resolution: {integrity: sha512-avmjXQSq+jadFO8Xl2em05/uQdQnEmHsJyOAdVbZkmVgpMfxL12aJwVVfGNwYr9nulcpuJN1X0lTaQ5wxuNGcA==}
+    engines: {node: '>= 14.0.0'}
+
+  '@algolia/client-common@5.56.0':
+    resolution: {integrity: sha512-v2TPStUhY//ripPjIVclZ8AWc7DEGooXULZGFlFu37zNatgHjw34oZZ+OSbbc/YHO+xZwPl62I1k8xH1m4S2eg==}
+    engines: {node: '>= 14.0.0'}
+
+  '@algolia/client-insights@5.56.0':
+    resolution: {integrity: sha512-P0ehROpM4Sem3Sqo5x2cKPgj67D3G3jy0rh1Amwkcvsfr6tkvIcdCmerieanqTF7NxUMPNFLkpIFeMO8Rpa50w==}
+    engines: {node: '>= 14.0.0'}
+
+  '@algolia/client-personalization@5.56.0':
+    resolution: {integrity: sha512-SXK3Vn3WVxyzbm31oePZBJkp1wpOyuWdd4B/Pv7n0aXDxmeSWhC1R1FC1517mMrFAIaPH4Rt0x6RUe7ZNjz8FA==}
+    engines: {node: '>= 14.0.0'}
+
+  '@algolia/client-query-suggestions@5.56.0':
+    resolution: {integrity: sha512-5+ZdX8garFnmycnZgKhtXHePEaLj5zqDxI/0lkhhluzCcvTn0/PvvTirTg8hHYetQHvn7GDyeAiqTAieMvMW4A==}
+    engines: {node: '>= 14.0.0'}
+
+  '@algolia/client-search@5.56.0':
+    resolution: {integrity: sha512-+mKUdYvqOi0BcvpAEyCEw49vSBptufIcfibtHz2bdr1pI789M46Yt0uQEk/sxtK3teh71OQvVFHaTDzShUWewQ==}
+    engines: {node: '>= 14.0.0'}
+
+  '@algolia/ingestion@1.56.0':
+    resolution: {integrity: sha512-9g/zj+AZx5moFcdFIrYQoVrueXivjUcc3MQHtCYT8WhIuk1lUh1AyEhvJCS0XBZld09cLvd1AZ3BvDBpVpX2UA==}
+    engines: {node: '>= 14.0.0'}
+
+  '@algolia/monitoring@1.56.0':
+    resolution: {integrity: sha512-Qf3Sr6f9A9uxCZUf3MXS0d2b877uYzEB5yxqpVGXAhcJnBCQjrRRon0KvefpGkxy+BshrIJs96OUoMtGqXTFDA==}
+    engines: {node: '>= 14.0.0'}
+
+  '@algolia/recommend@5.56.0':
+    resolution: {integrity: sha512-GXWG1rWc5wu8hY4N33Y3b6ernY6sAdAvmKWN/zHAiACOx40WnpG0TVX5YazCAr/9gOYGInSiM2A0y2jy2xbiDA==}
+    engines: {node: '>= 14.0.0'}
+
+  '@algolia/requester-browser-xhr@5.56.0':
+    resolution: {integrity: sha512-7t24cBxaInS3mZb7ddEaZT/tp6q+/aR4YttsQVyP1/i+LmwPR34atO35KjaLFCcRVrlP7sYOAqkCfg6lIRB+ew==}
+    engines: {node: '>= 14.0.0'}
+
+  '@algolia/requester-fetch@5.56.0':
+    resolution: {integrity: sha512-R7ePHgVYmDFjZpvrsVAfbDz/d4RxKAYZ5/vgLfIsCVRZRryjWl/3INOxpOICzitehQ5FjNtNjcLQTrmHPTcHBQ==}
+    engines: {node: '>= 14.0.0'}
+
+  '@algolia/requester-node-http@5.56.0':
+    resolution: {integrity: sha512-PIOUXlSnrqM0S+WOgDRb4RzotydJH7ZoT6tOyL7tAO7qJOfvX5wsEW8Pe+PMKMwvuI4/gIyK9cg2H7lJXqnc4Q==}
+    engines: {node: '>= 14.0.0'}
 
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
@@ -5823,6 +5882,10 @@ packages:
   ajv@8.18.0:
     resolution: {integrity: sha512-PlXPeEWMXMZ7sPYOHqmDyCJzcfNrUr3fGNKtezX14ykXOEIvyK81d+qydx89KY5O71FKMPaQ2vBfBFI5NHR63A==}
 
+  algoliasearch@5.56.0:
+    resolution: {integrity: sha512-PrqppUmhT4ENdas2pH9caE7efUcxy6EcSFhWzosiVuQBzu2tQ5yLTI6jwomT/1cuBnivzGfxiJCqDNN9FRRh+Q==}
+    engines: {node: '>= 14.0.0'}
+
   ansi-align@3.0.1:
     resolution: {integrity: sha512-IOfwwBF5iczOjp/WeY4YxyjqAFMQoZufdQWDd19SEExbVLNXqvpzSJ/M7Za4/sCPmQ0+GRquoA7bGcINcxew6w==}
 
@@ -10898,6 +10961,90 @@ packages:
 
 snapshots:
 
+  '@algolia/abtesting@1.22.0':
+    dependencies:
+      '@algolia/client-common': 5.56.0
+      '@algolia/requester-browser-xhr': 5.56.0
+      '@algolia/requester-fetch': 5.56.0
+      '@algolia/requester-node-http': 5.56.0
+
+  '@algolia/client-abtesting@5.56.0':
+    dependencies:
+      '@algolia/client-common': 5.56.0
+      '@algolia/requester-browser-xhr': 5.56.0
+      '@algolia/requester-fetch': 5.56.0
+      '@algolia/requester-node-http': 5.56.0
+
+  '@algolia/client-analytics@5.56.0':
+    dependencies:
+      '@algolia/client-common': 5.56.0
+      '@algolia/requester-browser-xhr': 5.56.0
+      '@algolia/requester-fetch': 5.56.0
+      '@algolia/requester-node-http': 5.56.0
+
+  '@algolia/client-common@5.56.0': {}
+
+  '@algolia/client-insights@5.56.0':
+    dependencies:
+      '@algolia/client-common': 5.56.0
+      '@algolia/requester-browser-xhr': 5.56.0
+      '@algolia/requester-fetch': 5.56.0
+      '@algolia/requester-node-http': 5.56.0
+
+  '@algolia/client-personalization@5.56.0':
+    dependencies:
+      '@algolia/client-common': 5.56.0
+      '@algolia/requester-browser-xhr': 5.56.0
+      '@algolia/requester-fetch': 5.56.0
+      '@algolia/requester-node-http': 5.56.0
+
+  '@algolia/client-query-suggestions@5.56.0':
+    dependencies:
+      '@algolia/client-common': 5.56.0
+      '@algolia/requester-browser-xhr': 5.56.0
+      '@algolia/requester-fetch': 5.56.0
+      '@algolia/requester-node-http': 5.56.0
+
+  '@algolia/client-search@5.56.0':
+    dependencies:
+      '@algolia/client-common': 5.56.0
+      '@algolia/requester-browser-xhr': 5.56.0
+      '@algolia/requester-fetch': 5.56.0
+      '@algolia/requester-node-http': 5.56.0
+
+  '@algolia/ingestion@1.56.0':
+    dependencies:
+      '@algolia/client-common': 5.56.0
+      '@algolia/requester-browser-xhr': 5.56.0
+      '@algolia/requester-fetch': 5.56.0
+      '@algolia/requester-node-http': 5.56.0
+
+  '@algolia/monitoring@1.56.0':
+    dependencies:
+      '@algolia/client-common': 5.56.0
+      '@algolia/requester-browser-xhr': 5.56.0
+      '@algolia/requester-fetch': 5.56.0
+      '@algolia/requester-node-http': 5.56.0
+
+  '@algolia/recommend@5.56.0':
+    dependencies:
+      '@algolia/client-common': 5.56.0
+      '@algolia/requester-browser-xhr': 5.56.0
+      '@algolia/requester-fetch': 5.56.0
+      '@algolia/requester-node-http': 5.56.0
+
+  '@algolia/requester-browser-xhr@5.56.0':
+    dependencies:
+      '@algolia/client-common': 5.56.0
+
+  '@algolia/requester-fetch@5.56.0':
+    dependencies:
+      '@algolia/client-common': 5.56.0
+
+  '@algolia/requester-node-http@5.56.0':
+    dependencies:
+      '@algolia/client-common': 5.56.0
+
   '@alloc/quick-lru@5.2.0': {}
 
   '@ardatan/relay-compiler@13.0.1(graphql@16.13.2)':
@@ -12204,15 +12351,15 @@ snapshots:
 
   '@drizzle-team/brocli@0.10.2': {}
 
-  '@dyllu/medusa-plugin-mcp@file:packages/medusa-plugin-dyllu-mcp(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+  '@dyllu/medusa-plugin-mcp@file:packages/medusa-plugin-dyllu-mcp(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@dyllu/medusa-plugin-one-c': file:packages/medusa-plugin-one-c(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+      '@dyllu/medusa-plugin-one-c': file:packages/medusa-plugin-one-c(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@medusajs/admin-sdk': 2.18.0
       '@medusajs/admin-shared': 2.18.0
       '@medusajs/cli': 2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3)
-      '@medusajs/framework': 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
-      '@medusajs/medusa': 2.18.0(3aa503070f10d585d82b7fd12a05571b)
-      '@medusajs/test-utils': 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
+      '@medusajs/framework': 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
+      '@medusajs/medusa': 2.18.0(9f3ffade5f60e443ff94536821853018)
+      '@medusajs/test-utils': 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
       '@modelcontextprotocol/sdk': 1.30.0(zod@4.2.0)
       jsonwebtoken: 9.0.3
       jwks-rsa: 3.2.2
@@ -12234,23 +12381,8 @@ snapshots:
       '@medusajs/cli': 2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3)
       '@medusajs/framework': 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
       '@medusajs/icons': 2.18.0(react@18.3.1)
-      '@medusajs/medusa': 2.18.0(52dc5f57dc25418936ea05901e1bfc02)
+      '@medusajs/medusa': 2.18.0(9f3ffade5f60e443ff94536821853018)
       '@medusajs/test-utils': 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
-      '@medusajs/ui': 4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
-      '@tanstack/react-query': 5.64.2(react@18.3.1)
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      react-router-dom: 6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-
-  '@dyllu/medusa-plugin-one-c@file:packages/medusa-plugin-one-c(@medusajs/admin-sdk@2.18.0)(@medusajs/admin-shared@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/medusa@2.18.0)(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@tanstack/react-query@5.64.2(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@medusajs/admin-sdk': 2.18.0
-      '@medusajs/admin-shared': 2.18.0
-      '@medusajs/cli': 2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3)
-      '@medusajs/framework': 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
-      '@medusajs/icons': 2.18.0(react@18.3.1)
-      '@medusajs/medusa': 2.18.0(3aa503070f10d585d82b7fd12a05571b)
-      '@medusajs/test-utils': 2.18.0(@medusajs/core-flows@2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/medusa@2.18.0)
       '@medusajs/ui': 4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
       '@tanstack/react-query': 5.64.2(react@18.3.1)
       react: 18.3.1
@@ -12579,11 +12711,6 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.1':
     optional: true
-
-  '@eslint-community/eslint-utils@4.9.1(eslint@9.39.4(jiti@1.21.7))':
-    dependencies:
-      eslint: 9.39.4(jiti@1.21.7)
-      eslint-visitor-keys: 3.4.3
 
   '@eslint-community/eslint-utils@4.9.1(eslint@9.39.4(jiti@2.7.0))':
     dependencies:
@@ -13350,10 +13477,10 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
-  '@medusajs/admin-bundler@2.18.0(@types/node@20.19.39)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(typescript@5.9.3)(yaml@2.8.3)':
+  '@medusajs/admin-bundler@2.18.0(@types/node@20.19.39)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(jiti@1.21.7)(lightningcss@1.32.0)(picomatch@4.0.4)(terser@5.16.9)(tsx@4.22.0)(typescript@5.9.3)(yaml@2.8.3)':
     dependencies:
       '@medusajs/admin-shared': 2.18.0
-      '@medusajs/admin-vite-plugin': 2.18.0(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))
+      '@medusajs/admin-vite-plugin': 2.18.0(picomatch@4.0.4)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))
       '@medusajs/dashboard': 2.18.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(typescript@5.9.3)
       '@vitejs/plugin-react': 4.7.0(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))
       autoprefixer: 10.5.0(postcss@8.5.18)
@@ -13365,41 +13492,6 @@ snapshots:
       postcss: 8.5.18
       tailwindcss: 3.4.19(tsx@4.22.0)(yaml@2.8.3)
       vite: 6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3)
-    transitivePeerDependencies:
-      - '@emotion/is-prop-valid'
-      - '@types/node'
-      - '@types/react'
-      - '@types/react-dom'
-      - jiti
-      - less
-      - lightningcss
-      - picomatch
-      - react-native
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-      - tsx
-      - typescript
-      - yaml
-
-  '@medusajs/admin-bundler@2.18.0(@types/node@20.19.39)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(jiti@2.7.0)(lightningcss@1.32.0)(picomatch@4.0.4)(terser@5.16.9)(tsx@4.22.0)(typescript@5.9.3)(yaml@2.8.3)':
-    dependencies:
-      '@medusajs/admin-shared': 2.18.0
-      '@medusajs/admin-vite-plugin': 2.18.0(picomatch@4.0.4)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))
-      '@medusajs/dashboard': 2.18.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(typescript@5.9.3)
-      '@vitejs/plugin-react': 4.7.0(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))
-      autoprefixer: 10.5.0(postcss@8.5.18)
-      compression: 1.8.1
-      express: 4.22.1
-      get-port: 5.1.1
-      glob: 13.0.6
-      outdent: 0.8.0
-      postcss: 8.5.18
-      tailwindcss: 3.4.19(tsx@4.22.0)(yaml@2.8.3)
-      vite: 6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3)
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
       - '@types/node'
@@ -13462,23 +13554,7 @@ snapshots:
 
   '@medusajs/admin-shared@2.18.0': {}
 
-  '@medusajs/admin-vite-plugin@2.18.0(picomatch@4.0.4)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))':
-    dependencies:
-      '@babel/parser': 7.25.6
-      '@babel/traverse': 7.25.6
-      '@babel/types': 7.25.6
-      '@medusajs/admin-shared': 2.18.0
-      chokidar: 3.6.0
-      fdir: 6.1.1(picomatch@4.0.4)
-      magic-string: 0.30.5
-      outdent: 0.8.0
-      picocolors: 1.1.1
-      vite: 6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3)
-    transitivePeerDependencies:
-      - picomatch
-      - supports-color
-
-  '@medusajs/admin-vite-plugin@2.18.0(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))':
+  '@medusajs/admin-vite-plugin@2.18.0(picomatch@4.0.4)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))':
     dependencies:
       '@babel/parser': 7.25.6
       '@babel/traverse': 7.25.6
@@ -13872,16 +13948,6 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@medusajs/eslint-plugin@2.18.0(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3)':
-    dependencies:
-      '@typescript-eslint/parser': 8.59.0(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3)
-      '@typescript-eslint/utils': 8.59.0(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3)
-      cron-parser: 4.9.0
-      eslint: 9.39.4(jiti@1.21.7)
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - supports-color
-
   '@medusajs/eslint-plugin@2.18.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)':
     dependencies:
       '@typescript-eslint/parser': 8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
@@ -14238,119 +14304,12 @@ snapshots:
       - typescript
       - yaml
 
-  '@medusajs/medusa@2.18.0(3aa503070f10d585d82b7fd12a05571b)':
+  '@medusajs/medusa@2.18.0(9f3ffade5f60e443ff94536821853018)':
     dependencies:
       '@inquirer/checkbox': 2.5.0
       '@inquirer/confirm': 2.0.17
       '@inquirer/input': 2.3.0
-      '@medusajs/admin-bundler': 2.18.0(@types/node@20.19.39)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(jiti@2.7.0)(lightningcss@1.32.0)(picomatch@4.0.4)(terser@5.16.9)(tsx@4.22.0)(typescript@5.9.3)(yaml@2.8.3)
-      '@medusajs/analytics': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/analytics-local': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/analytics-posthog': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(posthog-node@5.30.1(rxjs@7.8.2))
-      '@medusajs/api-key': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/auth': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/auth-emailpass': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/auth-github': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/auth-google': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/cache-inmemory': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/cache-redis': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/caching': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(awilix@8.0.1)
-      '@medusajs/caching-redis': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/cart': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/core-flows': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/currency': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/customer': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/draft-order': 2.18.0(@medusajs/admin-sdk@2.18.0)(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@medusajs/dashboard@2.18.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(typescript@5.9.3))(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@medusajs/icons@2.18.0(react@18.3.1))(@medusajs/test-utils@2.18.0)(@medusajs/ui@4.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
-      '@medusajs/event-bus-local': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/event-bus-redis': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/file': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/file-local': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/file-s3': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/framework': 2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0)
-      '@medusajs/fulfillment': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/fulfillment-manual': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/index': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/inventory': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/link-modules': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/locking': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/locking-postgres': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/locking-redis': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/notification': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/notification-local': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/notification-sendgrid': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/order': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/payment': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(@types/node@20.19.39)
-      '@medusajs/payment-stripe': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/pricing': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/product': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/promotion': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/rbac': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/region': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/sales-channel': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/settings': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/stock-location': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/store': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/tax': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/telemetry': 2.18.0
-      '@medusajs/translation': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/user': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/workflow-engine-inmemory': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/workflow-engine-redis': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      boxen: 5.1.2
-      chalk: 4.1.2
-      chokidar: 4.0.3
-      compression: 1.8.1
-      express: 4.22.1
-      fs-exists-cached: 1.0.0
-      jsonwebtoken: 9.0.3
-      multer: 2.2.0
-      node-schedule: 2.1.1
-      qs: 6.15.3
-      request-ip: 3.3.0
-      slugify: 1.6.9
-      uuid: 11.1.1
-    optionalDependencies:
-      '@swc/core': 1.15.30
-      posthog-node: 5.30.1(rxjs@7.8.2)
-      react-dom: 18.3.1(react@18.3.1)
-      yalc: 1.0.0-pre.53
-    transitivePeerDependencies:
-      - '@emotion/is-prop-valid'
-      - '@medusajs/admin-sdk'
-      - '@medusajs/cli'
-      - '@medusajs/dashboard'
-      - '@medusajs/icons'
-      - '@medusajs/test-utils'
-      - '@medusajs/ui'
-      - '@types/node'
-      - '@types/react'
-      - '@types/react-dom'
-      - awilix
-      - aws-crt
-      - debug
-      - jiti
-      - less
-      - lightningcss
-      - picomatch
-      - react
-      - react-native
-      - react-router-dom
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-      - tsx
-      - typescript
-      - yaml
-
-  '@medusajs/medusa@2.18.0(52dc5f57dc25418936ea05901e1bfc02)':
-    dependencies:
-      '@inquirer/checkbox': 2.5.0
-      '@inquirer/confirm': 2.0.17
-      '@inquirer/input': 2.3.0
-      '@medusajs/admin-bundler': 2.18.0(@types/node@20.19.39)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(typescript@5.9.3)(yaml@2.8.3)
+      '@medusajs/admin-bundler': 2.18.0(@types/node@20.19.39)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(jiti@1.21.7)(lightningcss@1.32.0)(picomatch@4.0.4)(terser@5.16.9)(tsx@4.22.0)(typescript@5.9.3)(yaml@2.8.3)
       '@medusajs/analytics': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
       '@medusajs/analytics-local': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
       '@medusajs/analytics-posthog': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))(posthog-node@5.30.1(rxjs@7.8.2))
@@ -14677,7 +14636,7 @@ snapshots:
       ulid: 2.4.0
     optionalDependencies:
       '@medusajs/core-flows': 2.18.0(@medusajs/framework@2.18.0(@medusajs/cli@2.18.0(@swc/core@1.15.30)(@types/node@20.19.39)(better-sqlite3@11.10.0)(typescript@5.9.3))(@types/node@20.19.39)(better-sqlite3@11.10.0)(ioredis@5.10.1)(vite@6.4.3(@types/node@20.19.39)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.0)(yaml@2.8.3))(zod@4.2.0))
-      '@medusajs/medusa': 2.18.0(52dc5f57dc25418936ea05901e1bfc02)
+      '@medusajs/medusa': 2.18.0(9f3ffade5f60e443ff94536821853018)
     transitivePeerDependencies:
       - debug
       - supports-color
@@ -15075,7 +15034,7 @@ snapshots:
 
   '@nolyfill/is-core-module@1.0.39': {}
 
-  '@opennextjs/aws@4.1.0(next@16.2.11(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))':
+  '@opennextjs/aws@4.1.0(next@16.2.11(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))':
     dependencies:
       '@ast-grep/napi': 0.40.5
       '@aws-sdk/client-cloudfront': 3.984.0
@@ -15091,7 +15050,7 @@ snapshots:
       cookie: 1.1.1
       esbuild: 0.25.4
       express: 5.2.1
-      next: 16.2.11(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      next: 16.2.11(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       path-to-regexp: 6.3.0
       urlpattern-polyfill: 10.1.0
       yaml: 2.8.3
@@ -15099,17 +15058,17 @@ snapshots:
       - aws-crt
       - supports-color
 
-  '@opennextjs/cloudflare@1.20.2(next@16.2.11(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(wrangler@4.114.0)':
+  '@opennextjs/cloudflare@1.20.2(next@16.2.11(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(wrangler@4.114.0)':
     dependencies:
       '@ast-grep/napi': 0.40.5
       '@dotenvx/dotenvx': 1.31.0
-      '@opennextjs/aws': 4.1.0(next@16.2.11(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
+      '@opennextjs/aws': 4.1.0(next@16.2.11(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
       ci-info: 4.4.0
       cloudflare: 4.5.0
       comment-json: 4.6.2
       enquirer: 2.4.1
       glob: 12.0.0
-      next: 16.2.11(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      next: 16.2.11(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       ts-tqdm: 0.8.6
       wrangler: 4.114.0
       yargs: 18.0.0
@@ -17794,18 +17753,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3)':
-    dependencies:
-      '@typescript-eslint/scope-manager': 8.59.0
-      '@typescript-eslint/types': 8.59.0
-      '@typescript-eslint/typescript-estree': 8.59.0(typescript@5.9.3)
-      '@typescript-eslint/visitor-keys': 8.59.0
-      debug: 4.4.3
-      eslint: 9.39.4(jiti@1.21.7)
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - supports-color
-
   '@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)':
     dependencies:
       '@typescript-eslint/scope-manager': 8.59.0
@@ -17861,17 +17808,6 @@ snapshots:
       semver: 7.8.5
       tinyglobby: 0.2.16
       ts-api-utils: 2.5.0(typescript@5.9.3)
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - supports-color
-
-  '@typescript-eslint/utils@8.59.0(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3)':
-    dependencies:
-      '@eslint-community/eslint-utils': 4.9.1(eslint@9.39.4(jiti@1.21.7))
-      '@typescript-eslint/scope-manager': 8.59.0
-      '@typescript-eslint/types': 8.59.0
-      '@typescript-eslint/typescript-estree': 8.59.0(typescript@5.9.3)
-      eslint: 9.39.4(jiti@1.21.7)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
@@ -18088,6 +18024,23 @@ snapshots:
       fast-uri: 3.1.5
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
+
+  algoliasearch@5.56.0:
+    dependencies:
+      '@algolia/abtesting': 1.22.0
+      '@algolia/client-abtesting': 5.56.0
+      '@algolia/client-analytics': 5.56.0
+      '@algolia/client-common': 5.56.0
+      '@algolia/client-insights': 5.56.0
+      '@algolia/client-personalization': 5.56.0
+      '@algolia/client-query-suggestions': 5.56.0
+      '@algolia/client-search': 5.56.0
+      '@algolia/ingestion': 1.56.0
+      '@algolia/monitoring': 1.56.0
+      '@algolia/recommend': 5.56.0
+      '@algolia/requester-browser-xhr': 5.56.0
+      '@algolia/requester-fetch': 5.56.0
+      '@algolia/requester-node-http': 5.56.0
 
   ansi-align@3.0.1:
     dependencies:
@@ -19441,13 +19394,13 @@ snapshots:
       - eslint-plugin-import-x
       - supports-color
 
-  eslint-config-next@16.2.11(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3):
+  eslint-config-next@16.2.11(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3):
     dependencies:
       '@next/eslint-plugin-next': 16.2.11
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0))
-      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-react: 7.37.5(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-react-hooks: 7.1.1(eslint@9.39.4(jiti@2.7.0))
@@ -19528,33 +19481,6 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0)):
-    dependencies:
-      '@rtsao/scc': 1.1.0
-      array-includes: 3.1.9
-      array.prototype.findlastindex: 1.2.6
-      array.prototype.flat: 1.3.3
-      array.prototype.flatmap: 1.3.3
-      debug: 3.2.7
-      doctrine: 2.1.0
-      eslint: 9.39.4(jiti@2.7.0)
-      eslint-import-resolver-node: 0.3.10
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
-      hasown: 2.0.4
-      is-core-module: 2.16.1
-      is-glob: 4.0.3
-      minimatch: 3.1.5
-      object.fromentries: 2.0.8
-      object.groupby: 1.0.3
-      object.values: 1.2.1
-      semver: 6.3.1
-      string.prototype.trimend: 1.0.9
-      tsconfig-paths: 3.15.0
-    transitivePeerDependencies:
-      - eslint-import-resolver-typescript
-      - eslint-import-resolver-webpack
-      - supports-color
-
   eslint-plugin-jsx-a11y@6.10.2(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       aria-query: 5.3.2
@@ -19617,47 +19543,6 @@ snapshots:
   eslint-visitor-keys@4.2.1: {}
 
   eslint-visitor-keys@5.0.1: {}
-
-  eslint@9.39.4(jiti@1.21.7):
-    dependencies:
-      '@eslint-community/eslint-utils': 4.9.1(eslint@9.39.4(jiti@1.21.7))
-      '@eslint-community/regexpp': 4.12.2
-      '@eslint/config-array': 0.21.2
-      '@eslint/config-helpers': 0.4.2
-      '@eslint/core': 0.17.0
-      '@eslint/eslintrc': 3.3.5
-      '@eslint/js': 9.39.4
-      '@eslint/plugin-kit': 0.4.1
-      '@humanfs/node': 0.16.8
-      '@humanwhocodes/module-importer': 1.0.1
-      '@humanwhocodes/retry': 0.4.3
-      '@types/estree': 1.0.8
-      ajv: 6.14.0
-      chalk: 4.1.2
-      cross-spawn: 7.0.6
-      debug: 4.4.3
-      escape-string-regexp: 4.0.0
-      eslint-scope: 8.4.0
-      eslint-visitor-keys: 4.2.1
-      espree: 10.4.0
-      esquery: 1.7.0
-      esutils: 2.0.3
-      fast-deep-equal: 3.1.3
-      file-entry-cache: 8.0.0
-      find-up: 5.0.0
-      glob-parent: 6.0.2
-      ignore: 5.3.2
-      imurmurhash: 0.1.4
-      is-glob: 4.0.3
-      json-stable-stringify-without-jsonify: 1.0.1
-      lodash.merge: 4.6.2
-      minimatch: 3.1.5
-      natural-compare: 1.4.0
-      optionator: 0.9.4
-    optionalDependencies:
-      jiti: 1.21.7
-    transitivePeerDependencies:
-      - supports-color
 
   eslint@9.39.4(jiti@2.7.0):
     dependencies:
@@ -21565,6 +21450,33 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
+  next@16.2.11(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+    dependencies:
+      '@next/env': 16.2.11
+      '@swc/helpers': 0.5.15
+      baseline-browser-mapping: 2.10.21
+      caniuse-lite: 1.0.30001790
+      postcss: 8.5.18
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.4)
+    optionalDependencies:
+      '@next/swc-darwin-arm64': 16.2.11
+      '@next/swc-darwin-x64': 16.2.11
+      '@next/swc-linux-arm64-gnu': 16.2.11
+      '@next/swc-linux-arm64-musl': 16.2.11
+      '@next/swc-linux-x64-gnu': 16.2.11
+      '@next/swc-linux-x64-musl': 16.2.11
+      '@next/swc-win32-arm64-msvc': 16.2.11
+      '@next/swc-win32-x64-msvc': 16.2.11
+      '@opentelemetry/api': 1.9.1
+      '@playwright/test': 1.61.1
+      sharp: 0.35.3(@types/node@20.19.39)
+    transitivePeerDependencies:
+      - '@babel/core'
+      - '@types/node'
+      - babel-plugin-macros
+
   next@16.2.11(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@22.19.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@next/env': 16.2.11
@@ -21587,33 +21499,6 @@ snapshots:
       '@opentelemetry/api': 1.9.1
       '@playwright/test': 1.61.1
       sharp: 0.35.3(@types/node@22.19.17)
-    transitivePeerDependencies:
-      - '@babel/core'
-      - '@types/node'
-      - babel-plugin-macros
-
-  next@16.2.11(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
-    dependencies:
-      '@next/env': 16.2.11
-      '@swc/helpers': 0.5.15
-      baseline-browser-mapping: 2.10.21
-      caniuse-lite: 1.0.30001790
-      postcss: 8.5.18
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.4)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 16.2.11
-      '@next/swc-darwin-x64': 16.2.11
-      '@next/swc-linux-arm64-gnu': 16.2.11
-      '@next/swc-linux-arm64-musl': 16.2.11
-      '@next/swc-linux-x64-gnu': 16.2.11
-      '@next/swc-linux-x64-musl': 16.2.11
-      '@next/swc-win32-arm64-msvc': 16.2.11
-      '@next/swc-win32-x64-msvc': 16.2.11
-      '@opentelemetry/api': 1.9.1
-      '@playwright/test': 1.61.1
-      sharp: 0.35.3(@types/node@20.19.39)
     transitivePeerDependencies:
       - '@babel/core'
       - '@types/node'

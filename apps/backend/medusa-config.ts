@@ -121,5 +121,13 @@ module.exports = defineConfig({
           },
         ]
       : []),
+    ...(environment.algolia
+      ? [
+          {
+            resolve: "./src/modules/algolia",
+            options: environment.algolia,
+          },
+        ]
+      : []),
   ],
 });
