@@ -317,6 +317,80 @@ describe("DYLLU MCP server", () => {
     }
   });
 
+  it("creates independent DYLLU price proposals in one batch", async () => {
+    const application = {
+      proposePriceBatch: jest.fn().mockResolvedValue({
+        proposals: [{ id: "proposal_1" }, { id: "proposal_2" }],
+      }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_price_batch" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "propose_product_price_batch",
+        arguments: {
+          items: [
+            {
+              product_id: "prod_one",
+              variant_id: "variant_one",
+              price_id: "price_one",
+              currency_code: "mdl",
+              proposed_amount: 5799,
+            },
+            {
+              product_id: "prod_two",
+              variant_id: "variant_two",
+              price_id: "price_two",
+              currency_code: "mdl",
+              proposed_amount: 999,
+            },
+          ],
+          reason: "Correct base prices before creating a sale",
+        },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(application.proposePriceBatch).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_price_batch" },
+        {
+          items: [
+            {
+              productId: "prod_one",
+              variantId: "variant_one",
+              priceId: "price_one",
+              currencyCode: "mdl",
+              proposedAmount: 5799,
+            },
+            {
+              productId: "prod_two",
+              variantId: "variant_two",
+              priceId: "price_two",
+              currencyCode: "mdl",
+              proposedAmount: 999,
+            },
+          ],
+          reason: "Correct base prices before creating a sale",
+        }
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("returns a bounded DYLLU inventory exception report", async () => {
     const application = {
       getInventoryExceptions: jest.fn().mockResolvedValue({
