@@ -1,5 +1,11 @@
 import { z } from "@medusajs/framework/zod";
 
+import {
+  APPLIED_CHANGES_LOOKUP_LIMIT,
+  AppliedChangeRecord,
+  dedupeLatestAppliedChanges,
+  deriveItemApplyStatus,
+} from "../domain/apply-status";
 import OneCSyncModuleService from "../modules/one-c-sync/service";
 
 export const listQuerySchema = z
@@ -79,8 +85,27 @@ export async function listItems(
       order: { sku: "ASC" },
     }
   );
+  const appliedChanges = await service.listOneCAppliedChanges(
+    { sync_item_id: items.map((item) => item.id) },
+    { take: APPLIED_CHANGES_LOOKUP_LIMIT, order: { applied_at: "DESC" } }
+  );
+  const latestChanges = dedupeLatestAppliedChanges(
+    appliedChanges.map((change) => ({
+      syncItemId: change.sync_item_id,
+      field: change.field,
+      status: change.status,
+    }))
+  );
+  const latestByItem = new Map<string, AppliedChangeRecord[]>();
+  for (const change of latestChanges) {
+    const records = latestByItem.get(change.syncItemId) ?? [];
+    records.push({ field: change.field, status: change.status });
+    latestByItem.set(change.syncItemId, records);
+  }
   return {
-    items: items.map(itemDto),
+    items: items.map((item) =>
+      itemDto(item, deriveItemApplyStatus(latestByItem.get(item.id) ?? []))
+    ),
     count,
     limit: input.limit,
     offset: input.offset,
@@ -127,7 +152,8 @@ export function runDto(
 }
 
 export function itemDto(
-  item: Awaited<ReturnType<OneCSyncModuleService["listOneCSyncItems"]>>[number]
+  item: Awaited<ReturnType<OneCSyncModuleService["listOneCSyncItems"]>>[number],
+  applyStatus: "not_applied" | "applied" | "flagged" | "failed" = "not_applied"
 ) {
   const normalized = item.normalized as Record<string, unknown>;
   return {
@@ -138,6 +164,7 @@ export function itemDto(
     name: item.name,
     mapping_status: item.mapping_status,
     preparation_status: item.preparation_status,
+    apply_status: applyStatus,
     medusa_product_id: item.medusa_product_id,
     medusa_variant_id: item.medusa_variant_id,
     medusa_product_title: item.medusa_product_title,

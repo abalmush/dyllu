@@ -104,8 +104,8 @@ export function createOneCSyncAccess(
       const locking = container.resolve(Modules.LOCKING);
       return locking.execute(
         "dyllu-one-c:receive",
-        () =>
-          createOneCSyncApplication(container).receive({
+        async () =>
+          (await createOneCSyncApplication(container)).receive({
             actorId: input.actorId,
             requestId: input.requestId,
             trigger: "mcp",

@@ -59,7 +59,7 @@ export async function POST(
     return;
   }
   const exportedAt = new Date().toISOString();
-  const exportItems = items.map(itemDto).map((item) => ({
+  const exportItems = items.map((item) => itemDto(item)).map((item) => ({
     referenceId: item.id,
     sku: item.sku,
     name: item.name,
