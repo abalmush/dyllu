@@ -1,7 +1,9 @@
 import { z } from "@medusajs/framework/zod";
 
 import {
+  APPLIED_CHANGES_LOOKUP_LIMIT,
   AppliedChangeRecord,
+  dedupeLatestAppliedChanges,
   deriveItemApplyStatus,
 } from "../domain/apply-status";
 import OneCSyncModuleService from "../modules/one-c-sync/service";
@@ -85,17 +87,20 @@ export async function listItems(
   );
   const appliedChanges = await service.listOneCAppliedChanges(
     { sync_item_id: items.map((item) => item.id) },
-    { take: 10_000, order: { applied_at: "DESC" } }
+    { take: APPLIED_CHANGES_LOOKUP_LIMIT, order: { applied_at: "DESC" } }
+  );
+  const latestChanges = dedupeLatestAppliedChanges(
+    appliedChanges.map((change) => ({
+      syncItemId: change.sync_item_id,
+      field: change.field,
+      status: change.status,
+    }))
   );
   const latestByItem = new Map<string, AppliedChangeRecord[]>();
-  const seenKeys = new Set<string>();
-  for (const change of appliedChanges) {
-    const key = `${change.sync_item_id}:${change.field}`;
-    if (seenKeys.has(key)) continue;
-    seenKeys.add(key);
-    const records = latestByItem.get(change.sync_item_id) ?? [];
+  for (const change of latestChanges) {
+    const records = latestByItem.get(change.syncItemId) ?? [];
     records.push({ field: change.field, status: change.status });
-    latestByItem.set(change.sync_item_id, records);
+    latestByItem.set(change.syncItemId, records);
   }
   return {
     items: items.map((item) =>

@@ -29,4 +29,55 @@ describe("1C read model", () => {
       }
     );
   });
+
+  it("derives apply_status from the latest applied-change rows per field", async () => {
+    const item = {
+      id: "onecitem_1",
+      run_id: "onecrun_test",
+      external_id: "ext-1",
+      sku: "DTPB1952",
+      name: "Test product",
+      mapping_status: "matched",
+      preparation_status: "created",
+      medusa_product_id: "prod_1",
+      medusa_variant_id: "variant_1",
+      medusa_product_title: "Test product",
+      normalized: {},
+      differences: [],
+      hidden: false,
+      deleted: false,
+      created_at: new Date("2026-01-01T00:00:00Z"),
+    };
+    const service = {
+      listAndCountOneCSyncItems: jest.fn().mockResolvedValue([[item], 1]),
+      listOneCAppliedChanges: jest.fn().mockResolvedValue([
+        {
+          sync_item_id: "onecitem_1",
+          field: "regular_price_mdl",
+          status: "applied",
+          applied_at: new Date("2026-01-02T00:00:00Z"),
+        },
+        {
+          sync_item_id: "onecitem_1",
+          field: "regular_price_mdl",
+          status: "failed",
+          applied_at: new Date("2026-01-01T00:00:00Z"),
+        },
+        {
+          sync_item_id: "onecitem_1",
+          field: "balance",
+          status: "flagged",
+          applied_at: new Date("2026-01-02T00:00:00Z"),
+        },
+      ]),
+    } as unknown as OneCSyncModuleService;
+
+    const result = await listItems(service, {
+      runId: "onecrun_test",
+      limit: 25,
+      offset: 0,
+    });
+
+    expect(result.items[0]?.apply_status).toBe("flagged");
+  });
 });

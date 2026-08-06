@@ -15,3 +15,25 @@ export function deriveItemApplyStatus(
   if (records.some((record) => record.status === "flagged")) return "flagged";
   return "applied";
 }
+
+export const APPLIED_CHANGES_LOOKUP_LIMIT = 10_000;
+
+export type AppliedChangeRow = {
+  syncItemId: string;
+  field: string;
+  status: AppliedChangeStatus;
+};
+
+export function dedupeLatestAppliedChanges<T extends AppliedChangeRow>(
+  changesOrderedNewestFirst: T[]
+): T[] {
+  const seenKeys = new Set<string>();
+  const latest: T[] = [];
+  for (const change of changesOrderedNewestFirst) {
+    const key = `${change.syncItemId}:${change.field}`;
+    if (seenKeys.has(key)) continue;
+    seenKeys.add(key);
+    latest.push(change);
+  }
+  return latest;
+}

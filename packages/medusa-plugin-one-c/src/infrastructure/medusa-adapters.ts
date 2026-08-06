@@ -7,13 +7,15 @@ import { MedusaError } from "@medusajs/framework/utils";
 import { z } from "@medusajs/framework/zod";
 
 import {
-  AppliedChangeField,
-  AppliedChangeStatus,
   MedusaCatalogApplyReader,
   MedusaCatalogReader,
   OneCSyncStore,
   VariantApplyData,
 } from "../application/ports";
+import {
+  APPLIED_CHANGES_LOOKUP_LIMIT,
+  dedupeLatestAppliedChanges,
+} from "../domain/apply-status";
 import OneCSyncModuleService from "../modules/one-c-sync/service";
 
 const PAGE_SIZE = 200;
@@ -373,26 +375,14 @@ export class MedusaOneCSyncStore implements OneCSyncStore {
     if (syncItemIds.length === 0) return [];
     const changes = await this.service.listOneCAppliedChanges(
       { sync_item_id: syncItemIds },
-      { take: 10_000, order: { applied_at: "DESC" } }
+      { take: APPLIED_CHANGES_LOOKUP_LIMIT, order: { applied_at: "DESC" } }
     );
-    const latestByKey = new Map<
-      string,
-      {
-        syncItemId: string;
-        field: AppliedChangeField;
-        status: AppliedChangeStatus;
-      }
-    >();
-    for (const change of changes) {
-      const key = `${change.sync_item_id}:${change.field}`;
-      if (!latestByKey.has(key)) {
-        latestByKey.set(key, {
-          syncItemId: change.sync_item_id,
-          field: change.field,
-          status: change.status,
-        });
-      }
-    }
-    return [...latestByKey.values()];
+    return dedupeLatestAppliedChanges(
+      changes.map((change) => ({
+        syncItemId: change.sync_item_id,
+        field: change.field,
+        status: change.status,
+      }))
+    );
   }
 }
