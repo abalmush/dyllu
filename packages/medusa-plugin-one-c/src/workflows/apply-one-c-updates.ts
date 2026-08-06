@@ -46,10 +46,12 @@ const updateRegularPriceStep = createStep(
           {
             variant_id: input.variantId,
             product_id: input.productId,
-            prices: [{ id: input.priceId, amount: input.newAmount }],
+            prices: [
+              { id: input.priceId, amount: input.newAmount, currency_code: "mdl" },
+            ],
           },
         ],
-        previousVariantIds: [],
+        previousVariantIds: [input.variantId],
       },
     });
     return new StepResponse(null, input);
@@ -62,10 +64,16 @@ const updateRegularPriceStep = createStep(
           {
             variant_id: input.variantId,
             product_id: input.productId,
-            prices: [{ id: input.priceId, amount: input.previousAmount }],
+            prices: [
+              {
+                id: input.priceId,
+                amount: input.previousAmount,
+                currency_code: "mdl",
+              },
+            ],
           },
         ],
-        previousVariantIds: [],
+        previousVariantIds: [input.variantId],
       },
     });
   }
