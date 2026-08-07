@@ -89,6 +89,11 @@ const middlewareConfig: MiddlewaresConfig = {
       ],
     },
     {
+      matcher: "/admin/algolia/sync",
+      methods: ["POST"],
+      middlewares: [adminAuthentication],
+    },
+    {
       matcher: "/store/compatible-accessories",
       methods: ["GET"],
       middlewares: [
