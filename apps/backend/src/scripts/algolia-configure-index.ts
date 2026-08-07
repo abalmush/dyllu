@@ -19,6 +19,8 @@ export default async function algoliaConfigureIndex({
   const { appId, adminApiKey, indexName } = environment.algolia;
   const client = algoliasearch(appId, adminApiKey);
 
+  const attributesForFaceting = ["category_ids", "on_sale"];
+
   await client.setSettings({
     indexName,
     indexSettings: {
@@ -30,7 +32,7 @@ export default async function algoliaConfigureIndex({
         "category_names",
         "metadata",
       ],
-      attributesForFaceting: ["category_ids", "on_sale"],
+      attributesForFaceting,
       customRanking: ["asc(is_accessory)"],
       replicas: [
         `${indexName}_price_asc`,
@@ -42,15 +44,18 @@ export default async function algoliaConfigureIndex({
 
   await client.setSettings({
     indexName: `${indexName}_price_asc`,
-    indexSettings: { customRanking: ["asc(price)"] },
+    indexSettings: { attributesForFaceting, customRanking: ["asc(price)"] },
   });
   await client.setSettings({
     indexName: `${indexName}_price_desc`,
-    indexSettings: { customRanking: ["desc(price)"] },
+    indexSettings: { attributesForFaceting, customRanking: ["desc(price)"] },
   });
   await client.setSettings({
     indexName: `${indexName}_created_at`,
-    indexSettings: { customRanking: ["asc(is_accessory)", "desc(created_at)"] },
+    indexSettings: {
+      attributesForFaceting,
+      customRanking: ["asc(is_accessory)", "desc(created_at)"],
+    },
   });
 
   logger.info(`Configured index "${indexName}" and its 3 replicas.`);
