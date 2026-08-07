@@ -5,6 +5,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cva, type VariantProps } from "class-variance-authority";
 import { X } from "lucide-react";
 
+import useLockHtmlScroll from "@lib/hooks/use-lock-html-scroll";
 import { cn } from "@lib/utils";
 
 export const Sheet = DialogPrimitive.Root;
@@ -52,22 +53,46 @@ export interface SheetContentProps
 export const SheetContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   SheetContentProps
->(({ side = "right", className, children, ...props }, ref) => (
-  <SheetPortal>
-    <SheetOverlay />
-    <DialogPrimitive.Content
-      ref={ref}
-      className={cn(sheetVariants({ side }), className)}
-      {...props}
-    >
-      {children}
-      <DialogPrimitive.Close className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring absolute top-2 right-2 grid size-11 place-items-center rounded-md transition-[background-color,color,opacity] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none">
-        <X aria-hidden="true" className="size-5" />
-        <span className="sr-only">Închide</span>
-      </DialogPrimitive.Close>
-    </DialogPrimitive.Content>
-  </SheetPortal>
-));
+>(
+  (
+    {
+      side = "right",
+      className,
+      children,
+      onOpenAutoFocus,
+      onCloseAutoFocus,
+      ...props
+    },
+    ref
+  ) => {
+    const { lock, unlock } = useLockHtmlScroll();
+    return (
+      <SheetPortal>
+        <SheetOverlay />
+        <DialogPrimitive.Content
+          ref={ref}
+          data-lenis-prevent
+          onOpenAutoFocus={(e) => {
+            lock();
+            onOpenAutoFocus?.(e);
+          }}
+          onCloseAutoFocus={(e) => {
+            unlock();
+            onCloseAutoFocus?.(e);
+          }}
+          className={cn(sheetVariants({ side }), className)}
+          {...props}
+        >
+          {children}
+          <DialogPrimitive.Close className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring absolute top-2 right-2 grid size-11 place-items-center rounded-md transition-[background-color,color,opacity] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none">
+            <X aria-hidden="true" className="size-5" />
+            <span className="sr-only">Închide</span>
+          </DialogPrimitive.Close>
+        </DialogPrimitive.Content>
+      </SheetPortal>
+    );
+  }
+);
 SheetContent.displayName = DialogPrimitive.Content.displayName;
 
 export const SheetHeader = ({
