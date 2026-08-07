@@ -1,12 +1,13 @@
 import "server-only";
 
+import { getLocale } from "next-intl/server";
 import { sdk } from "@lib/config";
 import { getCacheOptions } from "@lib/data/cookies";
+import { toMedusaLocale } from "@/i18n/medusa-locale";
 
 const PAGE_LIMIT = 100;
 const PAGE_CONCURRENCY = 4;
 const CANDIDATES_REVALIDATE_SECONDS = 300;
-const CANDIDATES_LOCALE = "ro";
 
 export type HomepageProductCandidate = {
   id: string;
@@ -17,6 +18,7 @@ async function fetchCandidatePage(
   collectionId: string,
   regionId: string,
   offset: number,
+  locale: string,
   tags: string[]
 ) {
   return sdk.client.fetch<{
@@ -30,8 +32,8 @@ async function fetchCandidatePage(
       collection_id: collectionId,
       region_id: regionId,
       fields: "id,title",
+      locale,
     },
-    headers: { "x-medusa-locale": CANDIDATES_LOCALE },
     cache: "force-cache",
     next: { tags, revalidate: CANDIDATES_REVALIDATE_SECONDS },
   });
@@ -53,7 +55,14 @@ export async function listCollectionProductCandidates(
     ]),
   ];
 
-  const firstPage = await fetchCandidatePage(collectionId, regionId, 0, tags);
+  const locale = toMedusaLocale(await getLocale());
+  const firstPage = await fetchCandidatePage(
+    collectionId,
+    regionId,
+    0,
+    locale,
+    tags
+  );
   const products = [...firstPage.products];
   const totalPages = Math.ceil(firstPage.count / PAGE_LIMIT);
 
@@ -70,6 +79,7 @@ export async function listCollectionProductCandidates(
           collectionId,
           regionId,
           (nextPageIndex + index) * PAGE_LIMIT,
+          locale,
           tags
         )
       )

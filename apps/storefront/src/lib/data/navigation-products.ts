@@ -1,13 +1,14 @@
 import "server-only";
 
+import { getLocale } from "next-intl/server";
 import { sdk } from "@lib/config";
 import { getCacheOptions } from "@lib/data/cookies";
 import { getRegion } from "@lib/data/regions";
+import { toMedusaLocale } from "@/i18n/medusa-locale";
 
 const PAGE_LIMIT = 100;
 const PAGE_CONCURRENCY = 4;
 const NAVIGATION_REVALIDATE_SECONDS = 300;
-const NAVIGATION_LOCALE = "ro";
 
 export type NavigationProduct = {
   id: string;
@@ -19,6 +20,7 @@ export type NavigationProduct = {
 async function fetchNavigationProductPage(
   offset: number,
   regionId: string,
+  locale: string,
   cacheOptions: { tags: string[] } | Record<string, never>
 ) {
   return sdk.client.fetch<{
@@ -31,8 +33,8 @@ async function fetchNavigationProductPage(
       offset,
       region_id: regionId,
       fields: "id,thumbnail,categories.id,variants.sku",
+      locale,
     },
-    headers: { "x-medusa-locale": NAVIGATION_LOCALE },
     cache: "force-cache",
     next: { ...cacheOptions, revalidate: NAVIGATION_REVALIDATE_SECONDS },
   });
@@ -43,10 +45,12 @@ export async function listNavigationProducts(): Promise<NavigationProduct[]> {
   if (!region) return [];
 
   const cacheOptions = await getCacheOptions("products");
+  const locale = toMedusaLocale(await getLocale());
 
   const firstPage = await fetchNavigationProductPage(
     0,
     region.id,
+    locale,
     cacheOptions
   );
   const products = [...firstPage.products];
@@ -64,6 +68,7 @@ export async function listNavigationProducts(): Promise<NavigationProduct[]> {
         fetchNavigationProductPage(
           (nextPageIndex + index) * PAGE_LIMIT,
           region.id,
+          locale,
           cacheOptions
         )
       )

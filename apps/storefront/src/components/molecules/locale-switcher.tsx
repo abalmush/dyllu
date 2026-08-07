@@ -7,6 +7,7 @@ import { updateLocale } from "@lib/data/locale-actions";
 import { cn } from "@lib/utils";
 import { Link, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { toMedusaLocale } from "@/i18n/medusa-locale";
 
 export function LocaleSwitcher() {
   const activeLocale = useLocale();
@@ -28,7 +29,7 @@ export function LocaleSwitcher() {
           aria-current={locale === activeLocale ? "true" : undefined}
           onClick={() => {
             startTransition(() => {
-              void updateLocale(locale);
+              void updateLocale(toMedusaLocale(locale));
             });
           }}
           className={cn(
