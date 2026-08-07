@@ -145,16 +145,16 @@ export function SearchCommand({
                     <Image
                       src={hit.thumbnail}
                       alt=""
-                      width={48}
-                      height={48}
-                      className="bg-muted size-12 shrink-0 rounded-md object-contain"
+                      width={64}
+                      height={64}
+                      className="bg-muted size-16 shrink-0 rounded-md object-contain"
                     />
                   ) : (
-                    <span className="bg-muted flex size-12 shrink-0 items-center justify-center rounded-md">
-                      <Search className="text-muted-foreground size-5" />
+                    <span className="bg-muted flex size-16 shrink-0 items-center justify-center rounded-md">
+                      <Search className="text-muted-foreground size-6" />
                     </span>
                   )}
-                  <span className="flex-1 truncate">{hit.title}</span>
+                  <span className="flex-1">{hit.title}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
