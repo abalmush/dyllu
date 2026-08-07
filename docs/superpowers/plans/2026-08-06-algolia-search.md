@@ -1120,18 +1120,24 @@ git commit -m "DYLLU-000 Add daily diff-based Algolia reindex job"
 In `apps/backend/src/api/_shared/contracts.ts`, add (near the other schemas, using the same `z` import already in that file):
 
 ```ts
-export const ProductSearchBodySchema = z.object({
-  query: z.string().trim().max(120).optional(),
-  categoryIds: z.array(z.string()).max(50).optional(),
-  onSale: z.boolean().optional(),
-  sort: z
-    .enum(["relevance", "price_asc", "price_desc", "created_at"])
-    .default("relevance"),
-  page: z.number().int().min(0).max(1000).default(0),
-  hitsPerPage: z.number().int().min(1).max(50).default(20),
-});
+export const ProductSearchBodySchema = z
+  .object({
+    query: z.string().trim().max(120).optional(),
+    categoryIds: z.array(z.string()).max(50).optional(),
+    onSale: z.boolean().optional(),
+    sort: z
+      .enum(["relevance", "price_asc", "price_desc", "created_at"])
+      .default("relevance"),
+    page: z.number().int().min(0).max(1000).default(0),
+    hitsPerPage: z.number().int().min(1).max(50).default(20),
+  })
+  .strict();
 export type ProductSearchBody = z.infer<typeof ProductSearchBodySchema>;
 ```
+
+`.strict()` matches every other object schema in this file (`NewsletterSubscriptionSchema`,
+`CompatibleAccessoriesQuerySchema`, etc.) — rejects unknown keys with a 400 instead of silently
+stripping them. Caught in Task 8's code review as a plan-inherited inconsistency.
 
 This codebase's convention (see `NewsletterSubscription`/`NewsletterSubscriptionSchema` in the
 same file) is to export the `z.infer` type alias from `contracts.ts` itself, not recompute it

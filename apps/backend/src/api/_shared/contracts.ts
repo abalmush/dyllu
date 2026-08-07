@@ -116,16 +116,18 @@ export const NewsletterConfirmationQuerySchema = z
   })
   .strict();
 
-export const ProductSearchBodySchema = z.object({
-  query: z.string().trim().max(120).optional(),
-  categoryIds: z.array(z.string()).max(50).optional(),
-  onSale: z.boolean().optional(),
-  sort: z
-    .enum(["relevance", "price_asc", "price_desc", "created_at"])
-    .default("relevance"),
-  page: z.number().int().min(0).max(1000).default(0),
-  hitsPerPage: z.number().int().min(1).max(50).default(20),
-});
+export const ProductSearchBodySchema = z
+  .object({
+    query: z.string().trim().max(120).optional(),
+    categoryIds: z.array(z.string()).max(50).optional(),
+    onSale: z.boolean().optional(),
+    sort: z
+      .enum(["relevance", "price_asc", "price_desc", "created_at"])
+      .default("relevance"),
+    page: z.number().int().min(0).max(1000).default(0),
+    hitsPerPage: z.number().int().min(1).max(50).default(20),
+  })
+  .strict();
 export type ProductSearchBody = z.infer<typeof ProductSearchBodySchema>;
 
 export type AiProposal = z.infer<typeof AiProposalSchema>;
