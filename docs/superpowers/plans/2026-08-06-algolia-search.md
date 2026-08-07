@@ -1014,13 +1014,16 @@ Expected: no errors.
 
 - [ ] **Step 3: Manual verification against local dev**
 
-With local Postgres up, a `.env` configured with real Algolia dev credentials (throwaway index name, e.g. `dyllu_products_dev`), and at least one published product locally:
+**Correction found during implementation:** `medusa exec <file>` invokes a script's default export as `({ container, args })`, not `container` directly (confirmed against `@medusajs/medusa/dist/commands/exec.js`) — that calling convention is for `src/scripts/*`, not `src/jobs/*`. A scheduled job's default export takes `container` directly, per Medusa's own convention (`src/jobs/README.md`) and this file's own signature. So `medusa exec ./src/jobs/algolia-reindex.ts` will throw immediately (`container.resolve is not a function`) — don't run it that way.
 
-Run: `pnpm --filter @dyllu/backend exec medusa exec ./src/jobs/algolia-reindex.ts`
-Expected: log line `[algolia-reindex] upserted N, deleted 0`. Check the Algolia dashboard for the index — confirm the record's `title`/`price`/`on_sale` look right for a known product.
+Real end-to-end verification (Algolia dashboard contents, second-run no-op behavior) happens naturally once Task 9 lands: its admin "Sync now" route calls `algoliaReindexJob(req.scope)` directly, which is the correct calling convention for this job. Verify there instead, with real Algolia dev credentials (throwaway index name, e.g. `dyllu_products_dev`) and at least one published product locally:
 
-Run the same command again immediately.
-Expected: `[algolia-reindex] no changes since last sync, skipping` — confirms diff-detection and `last_synced_at` persistence both work.
+1. Click "Sync now" in Settings → Algolia.
+2. Expected: success toast, backend log line `[algolia-reindex] upserted N, deleted 0`. Check the Algolia dashboard for the index — confirm a known product's `title`/`price`/`on_sale` look right.
+3. Click "Sync now" again immediately.
+4. Expected: `[algolia-reindex] no changes since last sync, skipping` — confirms diff-detection and `last_synced_at` persistence both work.
+
+Without real Algolia credentials, the job's logic up to the network call can still be sanity-checked locally: it should reach a real `query.graph()` call, resolve `calculated_price` for actual local products (non-null, matching a known product's real price), then fail cleanly on the Algolia network call (e.g. `RetryError: Unreachable hosts` for a placeholder app ID) without swallowing the error — and `last_synced_at` must NOT advance on that failure (check `dyllu_algolia_sync_state` stays empty/unchanged), so the next run retries the same diff window.
 
 - [ ] **Step 4: Commit**
 
