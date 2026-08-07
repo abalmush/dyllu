@@ -4,6 +4,7 @@ import { Clock, MapPin, Phone, Wrench } from "lucide-react";
 
 import { SITE_CONTACT } from "@lib/site-content";
 import { Container } from "@/components/atoms/container";
+import { LocaleSwitcher } from "@/components/molecules/locale-switcher";
 
 export function UtilityBar() {
   return (
@@ -38,6 +39,7 @@ export function UtilityBar() {
               <Wrench aria-hidden="true" className="size-4" />
               Service și piese de schimb
             </Link>
+            <LocaleSwitcher />
           </nav>
         </div>
       </Container>
