@@ -963,15 +963,18 @@ const indexableProductSchema = z.object({
 type IndexableProduct = z.infer<typeof indexableProductSchema>;
 ```
 
-**Also a genuine bug, not just a typing gap:** the field path `"variants.prices.updated_at"`
-is invalid — `ProductVariant` has no direct `prices` relation. Prices live under
-`variants.price_set.prices` (confirmed against the working, already-shipped 1C reader above,
-and empirically verified against real local data — `price_set.prices[].updated_at` returns
-real timestamps; the original path would have silently returned nothing). Since price changes
-are the single most common real-world trigger for this feature (per the design spec — "changes
-for 1c will be mainly price"), the original field path would have made **price-only changes
-silently never trigger a reindex at all**, defeating the core purpose of the diff. This is why
-`PRODUCT_FIELDS` above already uses the corrected `variants.price_set.prices.updated_at` path.
+**Correction (2026-08-06, after independent re-review):** an earlier version of this note
+claimed `"variants.prices.updated_at"` was an invalid path that would have silently broken
+price-change detection entirely. That claim was checked empirically and does **not** hold —
+`query.graph()` resolves `variants.prices` transparently to the same joined data as
+`variants.price_set.prices` (confirmed by directly comparing both paths against real local
+data: identical results). There was no data-correctness bug here, only the same category of
+typing gap as `calculated_price` (a query-time computed alias invisible to the static DTO
+type). `PRODUCT_FIELDS` still uses `variants.price_set.prices.updated_at` because it's the
+fully-typed, structurally-real relation path (no DB column links `product_variant` directly to
+`price`) and matches the established pattern in
+`packages/medusa-plugin-one-c/src/infrastructure/medusa-adapters.ts` — that's a legitimate
+consistency/type-safety improvement, just not a fix for a bug that was actually present.
 
 ```ts
 export default async function algoliaReindexJob(container: MedusaContainer) {
