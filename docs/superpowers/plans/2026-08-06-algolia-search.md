@@ -1716,7 +1716,19 @@ Add a results group right after `<CommandInput .../>` and before `<CommandList>`
             value={hit.title}
             onSelect={() => go(`/products/${hit.handle}`, query.trim())}
           >
-            <Search className="text-muted-foreground size-4" />
+            {hit.thumbnail ? (
+              <Image
+                src={hit.thumbnail}
+                alt=""
+                width={32}
+                height={32}
+                className="bg-muted size-8 shrink-0 rounded-md object-contain"
+              />
+            ) : (
+              <span className="bg-muted flex size-8 shrink-0 items-center justify-center rounded-md">
+                <Search className="text-muted-foreground size-4" />
+              </span>
+            )}
             <span className="flex-1 truncate">{hit.title}</span>
           </CommandItem>
         ))}
@@ -1726,6 +1738,13 @@ Add a results group right after `<CommandInput .../>` and before `<CommandList>`
   );
 }
 ```
+
+**Follow-up found during local testing:** the original code above never rendered
+`hit.thumbnail` at all, even though the data was already there — every row showed a
+generic search icon regardless of the real product image. Added a `next/image` thumbnail
+(32×32, matching the codebase's custom image loader — no domain allow-listing needed),
+falling back to the same search icon only when a hit genuinely has no thumbnail (e.g.
+temporary test products with no image uploaded).
 
 - [ ] **Step 3: Typecheck**
 
