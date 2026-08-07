@@ -181,13 +181,13 @@ export function SearchCommand({
                   onSelect={() => go(`/products/${hit.handle}`, query.trim())}
                   className="!py-1.5"
                 >
-                  <span className="bg-muted relative aspect-square size-14 shrink-0 overflow-hidden rounded-md">
+                  <span className="bg-muted relative aspect-square size-20 shrink-0 overflow-hidden rounded-md">
                     {hit.thumbnail ? (
                       <Image
                         src={hit.thumbnail}
                         alt=""
                         fill
-                        sizes="56px"
+                        sizes="80px"
                         className="object-contain p-1"
                       />
                     ) : (
