@@ -2,7 +2,14 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, History, Layers, Sparkles, Tag } from "lucide-react";
+import {
+  ArrowRight,
+  History,
+  Layers,
+  Search,
+  Sparkles,
+  Tag,
+} from "lucide-react";
 
 import {
   CommandDialog,
@@ -32,6 +39,14 @@ const POPULAR = [
 
 const RECENT_KEY = "dyllu_recent_search";
 
+type LiveHit = {
+  objectID: string;
+  title: string;
+  thumbnail: string | null;
+  handle: string;
+  price: number | null;
+};
+
 export interface SearchCommandProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -46,6 +61,28 @@ export function SearchCommand({
   const router = useRouter();
   const [query, setQuery] = React.useState("");
   const [recent, setRecent] = React.useState<string[]>([]);
+  const [liveHits, setLiveHits] = React.useState<LiveHit[]>([]);
+
+  React.useEffect(() => {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
+      setLiveHits([]);
+      return;
+    }
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+      fetch(`/api/search?q=${encodeURIComponent(trimmed)}`, {
+        signal: controller.signal,
+      })
+        .then((res) => res.json())
+        .then((data: { hits: LiveHit[] }) => setLiveHits(data.hits))
+        .catch(() => {});
+    }, 200);
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [query]);
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
@@ -94,6 +131,23 @@ export function SearchCommand({
         <CommandEmpty>
           Niciun rezultat. Apasă Enter ca să cauți „{query}”.
         </CommandEmpty>
+        {liveHits.length > 0 && (
+          <>
+            <CommandGroup heading="Produse">
+              {liveHits.map((hit) => (
+                <CommandItem
+                  key={hit.objectID}
+                  value={hit.title}
+                  onSelect={() => go(`/products/${hit.handle}`, query.trim())}
+                >
+                  <Search className="text-muted-foreground size-4" />
+                  <span className="flex-1 truncate">{hit.title}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        )}
         {recent.length > 0 && (
           <>
             <CommandGroup heading="Căutări recente">
