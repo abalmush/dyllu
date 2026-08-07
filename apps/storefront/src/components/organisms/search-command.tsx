@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -140,7 +141,19 @@ export function SearchCommand({
                   value={hit.title}
                   onSelect={() => go(`/products/${hit.handle}`, query.trim())}
                 >
-                  <Search className="text-muted-foreground size-4" />
+                  {hit.thumbnail ? (
+                    <Image
+                      src={hit.thumbnail}
+                      alt=""
+                      width={32}
+                      height={32}
+                      className="bg-muted size-8 shrink-0 rounded-md object-contain"
+                    />
+                  ) : (
+                    <span className="bg-muted flex size-8 shrink-0 items-center justify-center rounded-md">
+                      <Search className="text-muted-foreground size-4" />
+                    </span>
+                  )}
                   <span className="flex-1 truncate">{hit.title}</span>
                 </CommandItem>
               ))}
