@@ -28,6 +28,7 @@ const PRODUCT_FIELDS = [
   "tags.value",
   "categories.id",
   "categories.name",
+  "variants.id",
   "variants.sku",
   "variants.title",
   "variants.updated_at",
@@ -54,6 +55,7 @@ const indexableProductSchema = z.object({
   variants: z
     .array(
       z.object({
+        id: z.string(),
         sku: z.string().nullable(),
         title: z.string(),
         updated_at: z.coerce.date(),
@@ -153,6 +155,7 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
       tags: raw.tags ?? [],
       categories: raw.categories ?? [],
       variants: (raw.variants ?? []).map((v) => ({
+        id: v.id,
         sku: v.sku,
         title: v.title,
         calculated_price: v.calculated_price

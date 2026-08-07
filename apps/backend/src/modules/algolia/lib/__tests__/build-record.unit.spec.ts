@@ -13,11 +13,13 @@ const product: ProductForIndexing = {
   categories: [{ id: "pcat_1", name: "Scule electrice" }],
   variants: [
     {
+      id: "variant_1",
       sku: "SKU-1",
       title: "Default",
       calculated_price: { calculated_amount: 900, original_amount: 1200 },
     },
     {
+      id: "variant_2",
       sku: "SKU-2",
       title: "Kit",
       calculated_price: { calculated_amount: 1500, original_amount: 1500 },
@@ -47,6 +49,7 @@ describe("buildAlgoliaRecord", () => {
       ...product,
       variants: [
         {
+          id: "variant_1",
           sku: "SKU-1",
           title: "Default",
           calculated_price: { calculated_amount: 900, original_amount: 900 },
@@ -61,11 +64,13 @@ describe("buildAlgoliaRecord", () => {
       ...product,
       variants: [
         {
+          id: "variant_1",
           sku: "SKU-1",
           title: "Default",
           calculated_price: { calculated_amount: 900, original_amount: 900 },
         },
         {
+          id: "variant_2",
           sku: "SKU-2",
           title: "Kit",
           calculated_price: { calculated_amount: 1500, original_amount: 2000 },
@@ -105,5 +110,21 @@ describe("buildAlgoliaRecord", () => {
 
   it("uses the product id as objectID", () => {
     expect(buildAlgoliaRecord(product).objectID).toBe("prod_1");
+  });
+
+  it("carries the cheapest variant's id and title for add-to-cart", () => {
+    const record = buildAlgoliaRecord(product);
+    expect(record.variant_id).toBe("variant_1");
+    expect(record.variant_title).toBe("Default");
+  });
+
+  it("has null variant_id/variant_title when there are no priced variants", () => {
+    const noPricedVariants: ProductForIndexing = {
+      ...product,
+      variants: [],
+    };
+    const record = buildAlgoliaRecord(noPricedVariants);
+    expect(record.variant_id).toBeNull();
+    expect(record.variant_title).toBeNull();
   });
 });

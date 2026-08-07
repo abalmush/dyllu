@@ -12,6 +12,7 @@ export type ProductForIndexing = {
   tags: { value: string }[];
   categories: { id: string; name: string }[];
   variants: {
+    id: string;
     sku: string | null;
     title: string;
     calculated_price: {
@@ -37,6 +38,8 @@ export type AlgoliaProductRecord = {
   original_price: number | null;
   on_sale: boolean;
   created_at: number;
+  variant_id: string | null;
+  variant_title: string | null;
 };
 
 type PricedVariant = ProductForIndexing["variants"][number] & {
@@ -94,5 +97,7 @@ export function buildAlgoliaRecord(
         cheapest.calculated_price.calculated_amount
       : false,
     created_at: new Date(product.created_at).getTime(),
+    variant_id: cheapest?.id ?? null,
+    variant_title: cheapest?.title ?? null,
   };
 }
