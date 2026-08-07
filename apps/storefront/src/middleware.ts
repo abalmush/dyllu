@@ -1,18 +1,18 @@
-import { NextResponse } from "next/server";
+import createMiddleware from "next-intl/middleware";
 import type { NextRequest } from "next/server";
+import { routing } from "@/i18n/routing";
 
 // opennextjs-cloudflare#962: the adapter rejects proxy.ts ("Node.js middleware is not currently supported") — revert to proxy.ts once supported
+const handleI18nRouting = createMiddleware(routing);
+
 export function middleware(request: NextRequest) {
+  const response = handleI18nRouting(request);
+
   if (request.cookies.get("_medusa_cache_id")) {
-    return NextResponse.next();
+    return response;
   }
 
   const cacheId = crypto.randomUUID();
-  request.cookies.set("_medusa_cache_id", cacheId);
-
-  const response = NextResponse.next({
-    request: { headers: request.headers },
-  });
 
   response.cookies.set({
     name: "_medusa_cache_id",
