@@ -11,6 +11,7 @@ import {
 import { SmoothScrollProvider } from "@/components/atoms/smooth-scroll-provider";
 import { Toaster } from "@/components/atoms/sonner";
 import { ScrollToTopButton } from "@/components/molecules/scroll-to-top-button";
+import { AiAssistantWidget } from "@/components/organisms/ai-assistant-widget";
 
 import "styles/globals.css";
 
@@ -81,6 +82,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         </SmoothScrollProvider>
         <Toaster richColors closeButton position="top-right" />
         <ScrollToTopButton />
+        <AiAssistantWidget />
       </body>
     </html>
   );
