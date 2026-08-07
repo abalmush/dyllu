@@ -11,18 +11,12 @@ import {
 import { SmoothScrollProvider } from "@/components/atoms/smooth-scroll-provider";
 import { Toaster } from "@/components/atoms/sonner";
 import { ScrollToTopButton } from "@/components/molecules/scroll-to-top-button";
-import { AiAssistantWidget } from "@/components/organisms/ai-assistant-widget";
 
 import "styles/globals.css";
 
 const smoothScrollEnabled = process.env.NEXT_PUBLIC_SMOOTH_SCROLL !== "off";
 const smoothScrollDisableOnTouch =
   process.env.NEXT_PUBLIC_SMOOTH_SCROLL_TOUCH === "off";
-const aiAssistantEnabled = Boolean(
-  process.env.ALGOLIA_APP_ID &&
-  process.env.ALGOLIA_AGENT_ID &&
-  process.env.ALGOLIA_SEARCH_API_KEY
-);
 
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
@@ -87,7 +81,6 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         </SmoothScrollProvider>
         <Toaster richColors closeButton position="top-right" />
         <ScrollToTopButton />
-        {aiAssistantEnabled && <AiAssistantWidget />}
       </body>
     </html>
   );
