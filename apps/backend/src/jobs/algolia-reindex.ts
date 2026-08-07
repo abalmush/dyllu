@@ -126,6 +126,44 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
   });
   const products = z.array(indexableProductSchema).parse(data);
 
+  // A second, ru-RU-locale pass of the same entities. Medusa's translation
+  // module substitutes translated text transparently when a `locale`
+  // option is passed to query.graph, silently falling back to the
+  // Romanian value when no translation row exists — buildAlgoliaRecord is
+  // the one that decides whether a value actually differs (see its
+  // comment) and is worth carrying as a separate _ru field.
+  const { data: ruData } = await query.graph(
+    {
+      entity: "product",
+      fields: [
+        "id",
+        "title",
+        "description",
+        "categories.id",
+        "categories.name",
+      ],
+      withDeleted: true,
+    },
+    { locale: "ru-RU" }
+  );
+  const ruTranslationSchema = z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      description: z.string().nullable(),
+      categories: z
+        .array(z.object({ id: z.string(), name: z.string() }))
+        .optional(),
+    })
+  );
+  const ruProducts = ruTranslationSchema.parse(ruData);
+  const ruByProductId = new Map(ruProducts.map((p) => [p.id, p]));
+  const ruCategoryNameById = new Map(
+    ruProducts.flatMap((p) =>
+      (p.categories ?? []).map((c): [string, string] => [c.id, c.name])
+    )
+  );
+
   const reindexInputs: (ReindexInput & { raw: IndexableProduct })[] =
     products.map((product) => ({
       id: product.id,
@@ -149,11 +187,14 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
     return;
   }
 
-  const records = toUpsert.map(({ raw }) =>
-    buildAlgoliaRecord({
+  const records = toUpsert.map(({ raw }) => {
+    const ru = ruByProductId.get(raw.id);
+    return buildAlgoliaRecord({
       id: raw.id,
       title: raw.title,
       description: raw.description,
+      titleRu: ru?.title ?? null,
+      descriptionRu: ru?.description ?? null,
       handle: raw.handle,
       thumbnail: raw.thumbnail,
       status: raw.status,
@@ -163,6 +204,7 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
       categories: (raw.categories ?? []).map((c) => ({
         id: c.id,
         name: c.name,
+        nameRu: ruCategoryNameById.get(c.id) ?? null,
         parentCategoryName: c.parent_category?.name ?? null,
       })),
       variants: (raw.variants ?? []).map((v) => ({
@@ -176,8 +218,8 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
             }
           : null,
       })),
-    })
-  );
+    });
+  });
 
   await algoliaModule.indexData(records);
   await algoliaModule.deleteFromIndex(toDelete.map((p) => p.id));

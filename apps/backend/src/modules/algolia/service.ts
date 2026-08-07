@@ -18,7 +18,25 @@ type SearchArgs = {
   sort?: "relevance" | "price_asc" | "price_desc" | "created_at";
   page?: number;
   hitsPerPage?: number;
+  locale?: string | null;
 };
+
+type IndexedHit = {
+  title: string;
+  description: string;
+  title_ru?: string;
+  description_ru?: string;
+  [key: string]: unknown;
+};
+
+function localizeHit(hit: IndexedHit, locale?: string | null) {
+  if (!locale?.toLowerCase().startsWith("ru")) return hit;
+  return {
+    ...hit,
+    title: hit.title_ru ?? hit.title,
+    description: hit.description_ru ?? hit.description,
+  };
+}
 
 class AlgoliaModuleService extends MedusaService({
   AlgoliaSyncState,
@@ -80,6 +98,7 @@ class AlgoliaModuleService extends MedusaService({
     sort = "relevance",
     page = 0,
     hitsPerPage = 20,
+    locale,
   }: SearchArgs) {
     const indexName =
       sort === "relevance" ? this.indexName : `${this.indexName}_${sort}`;
@@ -105,7 +124,14 @@ class AlgoliaModuleService extends MedusaService({
     });
 
     const [result] = results;
-    return result;
+    if (!result || !("hits" in result)) return result;
+
+    return {
+      ...result,
+      hits: result.hits.map((hit) =>
+        localizeHit(hit as unknown as IndexedHit, locale)
+      ),
+    };
   }
 }
 

@@ -9,6 +9,12 @@ export type AlgoliaSearchRequest = {
   sort?: "relevance" | "price_asc" | "price_desc" | "created_at";
   page?: number;
   hitsPerPage?: number;
+  // Route Handlers under app/api/** sit outside the [locale] segment, so
+  // next-intl's request-scoped locale isn't resolvable there the way it is
+  // in Server Components — callers reached from a Route Handler must pass
+  // the active locale through explicitly instead of relying on the SDK's
+  // usual global x-medusa-locale default.
+  locale?: string;
 };
 
 export type AlgoliaProductHit = {
@@ -31,12 +37,14 @@ export type AlgoliaSearchResponse = {
   nbPages: number;
 };
 
-export async function searchProducts(
-  request: AlgoliaSearchRequest
-): Promise<AlgoliaSearchResponse> {
+export async function searchProducts({
+  locale,
+  ...body
+}: AlgoliaSearchRequest): Promise<AlgoliaSearchResponse> {
   return sdk.client.fetch<AlgoliaSearchResponse>("/store/products/search", {
     method: "POST",
-    body: request,
+    body,
     cache: "no-store",
+    ...(locale ? { headers: { "x-medusa-locale": locale } } : {}),
   });
 }

@@ -4,13 +4,20 @@ export type ProductForIndexing = {
   id: string;
   title: string;
   description: string | null;
+  titleRu?: string | null;
+  descriptionRu?: string | null;
   handle: string;
   thumbnail: string | null;
   status: string;
   created_at: string;
   metadata: Record<string, unknown> | null;
   tags: { value: string }[];
-  categories: { id: string; name: string; parentCategoryName: string | null }[];
+  categories: {
+    id: string;
+    name: string;
+    nameRu?: string | null;
+    parentCategoryName: string | null;
+  }[];
   variants: {
     id: string;
     sku: string | null;
@@ -26,11 +33,14 @@ export type AlgoliaProductRecord = {
   objectID: string;
   title: string;
   description: string;
+  title_ru?: string;
+  description_ru?: string;
   handle: string;
   thumbnail: string | null;
   skus: string[];
   variant_titles: string[];
   category_names: string[];
+  category_names_ru?: string[];
   category_ids: string[];
   tags: string[];
   metadata: string;
@@ -79,10 +89,30 @@ export function buildAlgoliaRecord(
     null
   );
 
+  // The reindex job fetches a second, ru-RU-locale pass of the same query;
+  // when a product/category has no Russian translation row, Medusa's
+  // translation module silently returns the same Romanian text rather than
+  // null — so only treat it as "actually translated" when it differs from
+  // the Romanian value, otherwise every untranslated record would carry a
+  // duplicate _ru field.
+  const titleRu =
+    product.titleRu && product.titleRu !== product.title
+      ? normalizeCatalogBrand(product.titleRu)
+      : null;
+  const descriptionRu =
+    product.descriptionRu && product.descriptionRu !== product.description
+      ? normalizeCatalogBrand(product.descriptionRu)
+      : null;
+  const categoryNamesRu = product.categories
+    .filter((category) => category.nameRu && category.nameRu !== category.name)
+    .map((category) => category.nameRu as string);
+
   return {
     objectID: product.id,
     title: normalizeCatalogBrand(product.title),
     description: normalizeCatalogBrand(product.description ?? ""),
+    ...(titleRu ? { title_ru: titleRu } : {}),
+    ...(descriptionRu ? { description_ru: descriptionRu } : {}),
     handle: product.handle,
     thumbnail: product.thumbnail,
     skus: product.variants
@@ -90,6 +120,7 @@ export function buildAlgoliaRecord(
       .filter((sku): sku is string => Boolean(sku)),
     variant_titles: product.variants.map((variant) => variant.title),
     category_names: product.categories.map((category) => category.name),
+    ...(categoryNamesRu.length ? { category_names_ru: categoryNamesRu } : {}),
     category_ids: product.categories.map((category) => category.id),
     tags: product.tags.map((tag) => tag.value),
     metadata: flattenMetadata(product.metadata),
