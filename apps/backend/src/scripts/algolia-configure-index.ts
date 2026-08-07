@@ -31,6 +31,7 @@ export default async function algoliaConfigureIndex({
         "metadata",
       ],
       attributesForFaceting: ["category_ids", "on_sale"],
+      customRanking: ["asc(is_accessory)"],
       replicas: [
         `${indexName}_price_asc`,
         `${indexName}_price_desc`,
@@ -49,7 +50,7 @@ export default async function algoliaConfigureIndex({
   });
   await client.setSettings({
     indexName: `${indexName}_created_at`,
-    indexSettings: { customRanking: ["desc(created_at)"] },
+    indexSettings: { customRanking: ["asc(is_accessory)", "desc(created_at)"] },
   });
 
   logger.info(`Configured index "${indexName}" and its 3 replicas.`);

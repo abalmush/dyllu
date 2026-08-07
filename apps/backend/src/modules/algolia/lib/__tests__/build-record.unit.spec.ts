@@ -10,7 +10,9 @@ const product: ProductForIndexing = {
   created_at: "2026-01-01T00:00:00Z",
   metadata: { one_c_external_id: "51542", note: "featured" },
   tags: [{ value: "power-tools" }],
-  categories: [{ id: "pcat_1", name: "Scule electrice" }],
+  categories: [
+    { id: "pcat_1", name: "Scule electrice", parentCategoryName: null },
+  ],
   variants: [
     {
       id: "variant_1",
@@ -126,5 +128,37 @@ describe("buildAlgoliaRecord", () => {
     const record = buildAlgoliaRecord(noPricedVariants);
     expect(record.variant_id).toBeNull();
     expect(record.variant_title).toBeNull();
+  });
+
+  it("flags is_accessory false for a product under a non-accessory category", () => {
+    expect(buildAlgoliaRecord(product).is_accessory).toBe(false);
+  });
+
+  it("flags is_accessory true when the category itself is Accesorii și consumabile", () => {
+    const accessory: ProductForIndexing = {
+      ...product,
+      categories: [
+        {
+          id: "pcat_2",
+          name: "Accesorii și consumabile",
+          parentCategoryName: null,
+        },
+      ],
+    };
+    expect(buildAlgoliaRecord(accessory).is_accessory).toBe(true);
+  });
+
+  it("flags is_accessory true when a category's parent is Accesorii și consumabile", () => {
+    const accessory: ProductForIndexing = {
+      ...product,
+      categories: [
+        {
+          id: "pcat_3",
+          name: "Găurire și înșurubare",
+          parentCategoryName: "Accesorii și consumabile",
+        },
+      ],
+    };
+    expect(buildAlgoliaRecord(accessory).is_accessory).toBe(true);
   });
 });

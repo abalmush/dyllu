@@ -10,7 +10,7 @@ export type ProductForIndexing = {
   created_at: string;
   metadata: Record<string, unknown> | null;
   tags: { value: string }[];
-  categories: { id: string; name: string }[];
+  categories: { id: string; name: string; parentCategoryName: string | null }[];
   variants: {
     id: string;
     sku: string | null;
@@ -40,7 +40,10 @@ export type AlgoliaProductRecord = {
   created_at: number;
   variant_id: string | null;
   variant_title: string | null;
+  is_accessory: boolean;
 };
+
+const ACCESSORY_CATEGORY_NAME = "Accesorii și consumabile";
 
 type PricedVariant = ProductForIndexing["variants"][number] & {
   calculated_price: NonNullable<
@@ -99,5 +102,10 @@ export function buildAlgoliaRecord(
     created_at: new Date(product.created_at).getTime(),
     variant_id: cheapest?.id ?? null,
     variant_title: cheapest?.title ?? null,
+    is_accessory: product.categories.some(
+      (category) =>
+        category.name === ACCESSORY_CATEGORY_NAME ||
+        category.parentCategoryName === ACCESSORY_CATEGORY_NAME
+    ),
   };
 }

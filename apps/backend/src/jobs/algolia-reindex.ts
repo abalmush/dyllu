@@ -28,6 +28,7 @@ const PRODUCT_FIELDS = [
   "tags.value",
   "categories.id",
   "categories.name",
+  "categories.parent_category.name",
   "variants.id",
   "variants.sku",
   "variants.title",
@@ -50,7 +51,13 @@ const indexableProductSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).nullable(),
   tags: z.array(z.object({ value: z.string() })).optional(),
   categories: z
-    .array(z.object({ id: z.string(), name: z.string() }))
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        parent_category: z.object({ name: z.string() }).nullable().optional(),
+      })
+    )
     .optional(),
   variants: z
     .array(
@@ -153,7 +160,11 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
       created_at: raw.created_at.toISOString(),
       metadata: raw.metadata,
       tags: raw.tags ?? [],
-      categories: raw.categories ?? [],
+      categories: (raw.categories ?? []).map((c) => ({
+        id: c.id,
+        name: c.name,
+        parentCategoryName: c.parent_category?.name ?? null,
+      })),
       variants: (raw.variants ?? []).map((v) => ({
         id: v.id,
         sku: v.sku,
