@@ -4,6 +4,7 @@ import {
   Modules,
   QueryContext,
 } from "@medusajs/framework/utils";
+import { z } from "@medusajs/framework/zod";
 
 import { ALGOLIA_MODULE } from "../modules/algolia";
 import type AlgoliaModuleService from "../modules/algolia/service";
@@ -32,8 +33,49 @@ const PRODUCT_FIELDS = [
   "variants.updated_at",
   "variants.calculated_price.calculated_amount",
   "variants.calculated_price.original_amount",
-  "variants.prices.updated_at",
+  "variants.price_set.prices.updated_at",
 ];
+
+const indexableProductSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  handle: z.string(),
+  thumbnail: z.string().nullable(),
+  status: z.string(),
+  created_at: z.coerce.date(),
+  updated_at: z.coerce.date(),
+  deleted_at: z.coerce.date().nullable(),
+  metadata: z.record(z.string(), z.unknown()).nullable(),
+  tags: z.array(z.object({ value: z.string() })).optional(),
+  categories: z
+    .array(z.object({ id: z.string(), name: z.string() }))
+    .optional(),
+  variants: z
+    .array(
+      z.object({
+        sku: z.string().nullable(),
+        title: z.string(),
+        updated_at: z.coerce.date(),
+        calculated_price: z
+          .object({
+            calculated_amount: z.number(),
+            original_amount: z.number(),
+          })
+          .nullable()
+          .optional(),
+        price_set: z
+          .object({
+            prices: z.array(z.object({ updated_at: z.coerce.date() })).optional(),
+          })
+          .nullable()
+          .optional(),
+      })
+    )
+    .optional(),
+});
+
+type IndexableProduct = z.infer<typeof indexableProductSchema>;
 
 export default async function algoliaReindexJob(container: MedusaContainer) {
   let algoliaModule: AlgoliaModuleService;
@@ -60,7 +102,7 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
   const lastSyncedAt = (await algoliaModule.getLastSyncedAt()) ?? new Date(0);
   const runStartedAt = new Date();
 
-  const { data: products } = await query.graph({
+  const { data } = await query.graph({
     entity: "product",
     fields: PRODUCT_FIELDS,
     context: {
@@ -73,20 +115,19 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
     },
     withDeleted: true,
   });
+  const products = z.array(indexableProductSchema).parse(data);
 
-  const reindexInputs: (ReindexInput & { raw: (typeof products)[number] })[] =
+  const reindexInputs: (ReindexInput & { raw: IndexableProduct })[] =
     products.map((product) => ({
       id: product.id,
-      updatedAt: new Date(product.updated_at),
-      deletedAt: product.deleted_at
-        ? new Date(product.deleted_at)
-        : product.status !== "published"
-          ? new Date(product.updated_at)
-          : null,
+      updatedAt: product.updated_at,
+      deletedAt:
+        product.deleted_at ??
+        (product.status !== "published" ? product.updated_at : null),
       variants: (product.variants ?? []).map((variant) => ({
-        updatedAt: new Date(variant.updated_at),
-        prices: (variant.prices ?? []).map((price) => ({
-          updatedAt: new Date(price.updated_at),
+        updatedAt: variant.updated_at,
+        prices: (variant.price_set?.prices ?? []).map((price) => ({
+          updatedAt: price.updated_at,
         })),
       })),
       raw: product,
@@ -107,7 +148,7 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
       handle: raw.handle,
       thumbnail: raw.thumbnail,
       status: raw.status,
-      created_at: raw.created_at,
+      created_at: raw.created_at.toISOString(),
       metadata: raw.metadata,
       tags: raw.tags ?? [],
       categories: raw.categories ?? [],
