@@ -1057,7 +1057,12 @@ export const ProductSearchBodySchema = z.object({
   page: z.number().int().min(0).max(1000).default(0),
   hitsPerPage: z.number().int().min(1).max(50).default(20),
 });
+export type ProductSearchBody = z.infer<typeof ProductSearchBodySchema>;
 ```
+
+This codebase's convention (see `NewsletterSubscription`/`NewsletterSubscriptionSchema` in the
+same file) is to export the `z.infer` type alias from `contracts.ts` itself, not recompute it
+inline in the route file — routes import the type directly. Follow that here too.
 
 - [ ] **Step 2: Implement the route**
 
@@ -1068,13 +1073,10 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 
 import { ALGOLIA_MODULE } from "../../../../modules/algolia";
 import type AlgoliaModuleService from "../../../../modules/algolia/service";
-import type { ProductSearchBodySchema } from "../../../_shared/contracts";
-import type { z } from "@medusajs/framework/zod";
-
-type Body = z.infer<typeof ProductSearchBodySchema>;
+import type { ProductSearchBody } from "../../../_shared/contracts";
 
 export async function POST(
-  req: MedusaRequest<Body>,
+  req: MedusaRequest<ProductSearchBody>,
   res: MedusaResponse
 ): Promise<void> {
   let algoliaModule: AlgoliaModuleService;
