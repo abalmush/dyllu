@@ -47,11 +47,11 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
   const logger = container.resolve("logger");
   const regionModuleService = container.resolve(Modules.REGION);
 
-  // calculated_price is a computed field — it resolves to null with no pricing
-  // context. DYLLU is single-region (spec: "Single region/currency (MDL)
-  // assumed"), so the first region stands in for "the" region, same as the
-  // store API would resolve from a request's region_id in the multi-region case.
-  const [region] = await regionModuleService.listRegions({}, { take: 1 });
+  // calculated_price needs pricing context or it resolves to null; DYLLU is single-region, so first region == the region.
+  const [region] = await regionModuleService.listRegions(
+    {},
+    { take: 1, order: { created_at: "ASC" } }
+  );
   if (!region) {
     logger.warn("[algolia-reindex] no region configured, skipping");
     return;
@@ -63,7 +63,6 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
   const { data: products } = await query.graph({
     entity: "product",
     fields: PRODUCT_FIELDS,
-    filters: { status: ["published"] },
     context: {
       variants: {
         calculated_price: QueryContext({
@@ -79,7 +78,11 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
     products.map((product) => ({
       id: product.id,
       updatedAt: new Date(product.updated_at),
-      deletedAt: product.deleted_at ? new Date(product.deleted_at) : null,
+      deletedAt: product.deleted_at
+        ? new Date(product.deleted_at)
+        : product.status !== "published"
+          ? new Date(product.updated_at)
+          : null,
       variants: (product.variants ?? []).map((variant) => ({
         updatedAt: new Date(variant.updated_at),
         prices: (variant.prices ?? []).map((price) => ({
