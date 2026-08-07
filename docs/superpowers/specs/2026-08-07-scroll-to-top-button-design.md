@@ -31,7 +31,11 @@ element to observe across every route.
 
 New file: `src/components/molecules/scroll-to-top-button.tsx` — a
 self-contained client component (`"use client"`), no props. Mounted once in
-`src/app/[countryCode]/layout.tsx` alongside the header/footer.
+the true root layout (`src/app/layout.tsx`, alongside `<Toaster />`) rather
+than the `(main)` route group's layout, so it also covers the `(checkout)`
+route group — genuinely site-wide, and resilient to a nested route's data
+fetch failing (Next keeps the root layout rendering even when a nested
+segment hits its `error.tsx` boundary).
 
 ## Visual style
 
@@ -60,21 +64,24 @@ Fade + slide, same idiom as `FreeShippingPopup`:
 
 ## Placement & collision handling
 
-`fixed bottom-6 right-4 sm:right-6 z-40`.
+`fixed right-4 bottom-24 small:right-6 small:bottom-6 z-40` — note the
+codebase's custom `small` breakpoint is **1024px**, not Tailwind's default
+`sm` (640px); using `sm:` here would drop the offset while the mobile sticky
+bar (below) is still visible on tablet-width viewports.
 
 Two existing floating elements share bottom-right screen space:
 
 - `FreeShippingPopup` (`fixed right-5 bottom-5 z-10`)
-- The mobile PDP sticky add-to-cart bar (`fixed inset-x-0 bottom-0 z-40`,
-  full-width, `small:hidden` above the `small` breakpoint)
+- The mobile/tablet PDP sticky add-to-cart bar (`fixed inset-x-0 bottom-0
+z-40`, full-width, `small:hidden` — i.e. visible below 1024px)
 
-The button's exact bottom offset will be tuned during implementation and
-checked visually (dev server) against both, rather than guessed here. Target:
-never visually overlap either at common viewport sizes. If a clean offset
-isn't achievable for the mobile sticky-bar case, fall back to hiding the
-scroll-to-top button while the sticky add-to-cart bar is visible (same
-`useIntersection`-driven `show` flag pattern) rather than stacking on top of
-it — this is one plausible outcome, decided during implementation.
+The larger `bottom-24` offset below the `small` breakpoint clears the sticky
+bar's rendered height (~77px) with margin. The button renders at `z-40`,
+above the free-shipping popup's `z-10`, so it stays clickable even in the
+rare case both are visible at once; a visual overlap with the popup's card on
+narrow viewports in that rare, transient, dismissible state is an accepted
+trade-off, not a regression to chase — no cross-component visibility
+coordination is built for it.
 
 ## Accessibility
 
