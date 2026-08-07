@@ -1,8 +1,12 @@
 import "server-only";
 
-import { listProducts, listProductsWithSort } from "@lib/data/products";
+import { searchProducts } from "@lib/data/algolia-search";
+import { listProducts } from "@lib/data/products";
 import { HttpTypes } from "@medusajs/types";
-import { toPlpProducts } from "@modules/store/lib/to-plp-product";
+import {
+  toPlpProductFromHit,
+  toPlpProducts,
+} from "@modules/store/lib/to-plp-product";
 import {
   PRODUCT_LIMIT,
   normalizeProductFeedRequest,
@@ -76,7 +80,7 @@ function buildProductQueryParams(
 }
 
 function usesBoundedFetch(request: NormalizedProductFeedRequest): boolean {
-  return request.sortBy === "created_at" && !request.onSale;
+  return request.sortBy === "created_at" && !request.onSale && !request.query;
 }
 
 async function fetchProductFeedPage(
@@ -144,50 +148,21 @@ async function fetchBoundedCreatedAtPage(
 async function fetchFullScanPage(
   request: NormalizedProductFeedRequest
 ): Promise<ProductFeedResponse> {
-  const {
-    response: { products },
-  } = await listProductsWithSort({
-    page: 1,
-    queryParams: buildProductQueryParams(request),
-    sortBy: request.sortBy,
-    fetchAll: true,
+  const result = await searchProducts({
+    query: request.query,
+    categoryIds: request.categoryIds,
+    onSale: request.onSale,
+    sort: request.sortBy,
+    page: request.page - 1,
+    hitsPerPage: PRODUCT_LIMIT,
   });
-
-  const expandedProducts = products.flatMap(toPlpProducts);
-  const filteredProducts = request.onSale
-    ? expandedProducts.filter((product) => product.price?.price_type === "sale")
-    : expandedProducts;
-  const sortedProducts = sortProductFeedItems(filteredProducts, request.sortBy);
-  const count = sortedProducts.length;
-  const totalPages = count > 0 ? Math.ceil(count / PRODUCT_LIMIT) : 0;
-  const offset = (request.page - 1) * PRODUCT_LIMIT;
 
   return {
-    products: sortedProducts.slice(offset, offset + PRODUCT_LIMIT),
-    count,
+    products: result.hits.map(toPlpProductFromHit),
+    count: result.nbHits,
     currentPage: request.page,
-    nextPage:
-      totalPages > 0 && request.page < totalPages ? request.page + 1 : null,
-    totalPages,
+    nextPage: request.page < result.nbPages ? request.page + 1 : null,
+    totalPages: result.nbPages,
     pageSize: PRODUCT_LIMIT,
   };
-}
-
-function sortProductFeedItems(
-  products: ReturnType<typeof toPlpProducts>,
-  sortBy: NormalizedProductFeedRequest["sortBy"]
-) {
-  if (sortBy === "created_at") return products;
-
-  return products.toSorted((left, right) => {
-    const leftPrice = left.price?.calculated_price_number;
-    const rightPrice = right.price?.calculated_price_number;
-
-    if (typeof leftPrice !== "number") return 1;
-    if (typeof rightPrice !== "number") return -1;
-
-    return sortBy === "price_asc"
-      ? leftPrice - rightPrice
-      : rightPrice - leftPrice;
-  });
 }

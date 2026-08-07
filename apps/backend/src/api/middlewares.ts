@@ -17,6 +17,7 @@ import {
   CompatibleAccessoriesQuerySchema,
   NewsletterConfirmationQuerySchema,
   NewsletterSubscriptionSchema,
+  ProductSearchBodySchema,
 } from "./_shared/contracts";
 
 const adminAuthentication = authenticate("user", [
@@ -88,6 +89,11 @@ const middlewareConfig: MiddlewaresConfig = {
       ],
     },
     {
+      matcher: "/admin/algolia/sync",
+      methods: ["POST"],
+      middlewares: [adminAuthentication],
+    },
+    {
       matcher: "/store/compatible-accessories",
       methods: ["GET"],
       middlewares: [
@@ -102,6 +108,12 @@ const middlewareConfig: MiddlewaresConfig = {
       methods: ["POST"],
       bodyParser: { sizeLimit: "4kb" },
       middlewares: [validateAndTransformBody(NewsletterSubscriptionSchema)],
+    },
+    {
+      matcher: "/store/products/search",
+      methods: ["POST"],
+      bodyParser: { sizeLimit: "4kb" },
+      middlewares: [validateAndTransformBody(ProductSearchBodySchema)],
     },
     {
       matcher: "/newsletter/confirm",

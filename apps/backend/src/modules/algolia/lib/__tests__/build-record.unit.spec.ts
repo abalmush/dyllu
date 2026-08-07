@@ -1,0 +1,164 @@
+import { buildAlgoliaRecord, type ProductForIndexing } from "../build-record";
+
+const product: ProductForIndexing = {
+  id: "prod_1",
+  title: "Ingco Impact Drill",
+  description: "Powerful Ingco drill",
+  handle: "impact-drill",
+  thumbnail: "https://cdn.dyllu.md/thumb.jpg",
+  status: "published",
+  created_at: "2026-01-01T00:00:00Z",
+  metadata: { one_c_external_id: "51542", note: "featured" },
+  tags: [{ value: "power-tools" }],
+  categories: [
+    { id: "pcat_1", name: "Scule electrice", parentCategoryName: null },
+  ],
+  variants: [
+    {
+      id: "variant_1",
+      sku: "SKU-1",
+      title: "Default",
+      calculated_price: { calculated_amount: 900, original_amount: 1200 },
+    },
+    {
+      id: "variant_2",
+      sku: "SKU-2",
+      title: "Kit",
+      calculated_price: { calculated_amount: 1500, original_amount: 1500 },
+    },
+  ],
+};
+
+describe("buildAlgoliaRecord", () => {
+  it("normalizes the brand in title and description", () => {
+    const record = buildAlgoliaRecord(product);
+    expect(record.title).toBe("DYLLU Impact Drill");
+    expect(record.description).toBe("Powerful DYLLU drill");
+  });
+
+  it("picks the minimum-price variant for price/original_price, paired", () => {
+    const record = buildAlgoliaRecord(product);
+    expect(record.price).toBe(900);
+    expect(record.original_price).toBe(1200);
+  });
+
+  it("flags on_sale true when the cheapest (displayed) variant is discounted", () => {
+    expect(buildAlgoliaRecord(product).on_sale).toBe(true);
+  });
+
+  it("flags on_sale false if no variant is discounted", () => {
+    const noSale: ProductForIndexing = {
+      ...product,
+      variants: [
+        {
+          id: "variant_1",
+          sku: "SKU-1",
+          title: "Default",
+          calculated_price: { calculated_amount: 900, original_amount: 900 },
+        },
+      ],
+    };
+    expect(buildAlgoliaRecord(noSale).on_sale).toBe(false);
+  });
+
+  it("flags on_sale false when a non-cheapest variant is discounted but the cheapest isn't", () => {
+    const cheapestNotDiscounted: ProductForIndexing = {
+      ...product,
+      variants: [
+        {
+          id: "variant_1",
+          sku: "SKU-1",
+          title: "Default",
+          calculated_price: { calculated_amount: 900, original_amount: 900 },
+        },
+        {
+          id: "variant_2",
+          sku: "SKU-2",
+          title: "Kit",
+          calculated_price: { calculated_amount: 1500, original_amount: 2000 },
+        },
+      ],
+    };
+    const record = buildAlgoliaRecord(cheapestNotDiscounted);
+    expect(record.price).toBe(900);
+    expect(record.original_price).toBe(900);
+    expect(record.on_sale).toBe(false);
+  });
+
+  it("handles zero priced variants without crashing", () => {
+    const noPricedVariants: ProductForIndexing = {
+      ...product,
+      variants: [],
+    };
+    const record = buildAlgoliaRecord(noPricedVariants);
+    expect(record.price).toBeNull();
+    expect(record.original_price).toBeNull();
+    expect(record.on_sale).toBe(false);
+  });
+
+  it("flattens metadata into a searchable string, including arbitrary keys like a 1C id", () => {
+    const record = buildAlgoliaRecord(product);
+    expect(record.metadata).toContain("51542");
+    expect(record.metadata).toContain("featured");
+  });
+
+  it("collects skus, variant titles, category names and ids", () => {
+    const record = buildAlgoliaRecord(product);
+    expect(record.skus).toEqual(["SKU-1", "SKU-2"]);
+    expect(record.variant_titles).toEqual(["Default", "Kit"]);
+    expect(record.category_names).toEqual(["Scule electrice"]);
+    expect(record.category_ids).toEqual(["pcat_1"]);
+  });
+
+  it("uses the product id as objectID", () => {
+    expect(buildAlgoliaRecord(product).objectID).toBe("prod_1");
+  });
+
+  it("carries the cheapest variant's id and title for add-to-cart", () => {
+    const record = buildAlgoliaRecord(product);
+    expect(record.variant_id).toBe("variant_1");
+    expect(record.variant_title).toBe("Default");
+  });
+
+  it("has null variant_id/variant_title when there are no priced variants", () => {
+    const noPricedVariants: ProductForIndexing = {
+      ...product,
+      variants: [],
+    };
+    const record = buildAlgoliaRecord(noPricedVariants);
+    expect(record.variant_id).toBeNull();
+    expect(record.variant_title).toBeNull();
+  });
+
+  it("flags is_accessory false for a product under a non-accessory category", () => {
+    expect(buildAlgoliaRecord(product).is_accessory).toBe(false);
+  });
+
+  it("flags is_accessory true when the category itself is Accesorii și consumabile", () => {
+    const accessory: ProductForIndexing = {
+      ...product,
+      categories: [
+        {
+          id: "pcat_2",
+          name: "Accesorii și consumabile",
+          parentCategoryName: null,
+        },
+      ],
+    };
+    expect(buildAlgoliaRecord(accessory).is_accessory).toBe(true);
+  });
+
+  it("flags is_accessory true when a category's parent is Accesorii și consumabile", () => {
+    const accessory: ProductForIndexing = {
+      ...product,
+      categories: [
+        {
+          id: "pcat_3",
+          name: "Găurire și înșurubare",
+          parentCategoryName: "Accesorii și consumabile",
+        },
+      ],
+    };
+    expect(buildAlgoliaRecord(accessory).is_accessory).toBe(true);
+  });
+});

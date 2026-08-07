@@ -48,6 +48,10 @@ const rawEnvironmentSchema = z
     DYLLU_MCP_RESOURCE: optionalString,
     DYLLU_MCP_ALLOWED_CLIENT_IDS: optionalString,
     DYLLU_MCP_BOOTSTRAP_USER_IDS: optionalString,
+    ALGOLIA_APP_ID: optionalString,
+    ALGOLIA_ADMIN_API_KEY: optionalString,
+    ALGOLIA_SEARCH_API_KEY: optionalString,
+    ALGOLIA_PRODUCT_INDEX_NAME: optionalString,
   })
   .passthrough();
 
@@ -98,6 +102,13 @@ export type S3Environment = {
   endpoint: string;
 };
 
+export type AlgoliaEnvironment = {
+  appId: string;
+  adminApiKey: string;
+  searchApiKey: string;
+  indexName: string;
+};
+
 export type BackendEnvironment = {
   isProduction: boolean;
   databaseUrl?: string;
@@ -109,6 +120,7 @@ export type BackendEnvironment = {
   jwtSecret: string;
   cookieSecret: string;
   s3?: S3Environment;
+  algolia?: AlgoliaEnvironment;
   resend?: {
     apiKey: string;
     fromEmail: string;
@@ -267,6 +279,20 @@ export function parseBackendEnvironment(
     }
   }
 
+  const ALGOLIA_KEYS = [
+    "ALGOLIA_APP_ID",
+    "ALGOLIA_ADMIN_API_KEY",
+    "ALGOLIA_SEARCH_API_KEY",
+    "ALGOLIA_PRODUCT_INDEX_NAME",
+  ] as const;
+  const hasAnyAlgoliaValue = ALGOLIA_KEYS.some((key) => Boolean(env[key]));
+  if (hasAnyAlgoliaValue) {
+    for (const key of ALGOLIA_KEYS) {
+      if (!env[key])
+        issues.push(`${key} is required when Algolia search is configured`);
+    }
+  }
+
   if (issues.length > 0) {
     throw new EnvironmentValidationError([...new Set(issues)]);
   }
@@ -302,6 +328,14 @@ export function parseBackendEnvironment(
     jwtSecret,
     cookieSecret,
     s3,
+    algolia: hasAnyAlgoliaValue
+      ? {
+          appId: env.ALGOLIA_APP_ID!,
+          adminApiKey: env.ALGOLIA_ADMIN_API_KEY!,
+          searchApiKey: env.ALGOLIA_SEARCH_API_KEY!,
+          indexName: env.ALGOLIA_PRODUCT_INDEX_NAME!,
+        }
+      : undefined,
     resend: hasAnyResendValue
       ? {
           apiKey: env.RESEND_API_KEY!,
