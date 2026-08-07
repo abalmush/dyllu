@@ -71,6 +71,7 @@ export const SheetContent = React.forwardRef<
         <SheetOverlay />
         <DialogPrimitive.Content
           ref={ref}
+          data-lenis-prevent
           onOpenAutoFocus={(e) => {
             lock();
             onOpenAutoFocus?.(e);

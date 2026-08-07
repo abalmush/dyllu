@@ -177,14 +177,14 @@ export function SearchCommand({
                   onSelect={() => go(`/products/${hit.handle}`, query.trim())}
                   className="!py-1.5"
                 >
-                  <span className="bg-muted relative aspect-[3/2] w-[40%] shrink-0 overflow-hidden rounded-md">
+                  <span className="bg-muted relative aspect-square size-14 shrink-0 overflow-hidden rounded-md">
                     {hit.thumbnail ? (
                       <Image
                         src={hit.thumbnail}
                         alt=""
                         fill
-                        sizes="200px"
-                        className="object-cover"
+                        sizes="56px"
+                        className="object-contain p-1"
                       />
                     ) : (
                       <span className="text-muted-foreground absolute inset-0 grid place-items-center">
@@ -192,7 +192,7 @@ export function SearchCommand({
                       </span>
                     )}
                   </span>
-                  <span className="flex w-[60%] flex-col gap-1">
+                  <span className="flex min-w-0 flex-1 flex-col gap-1">
                     <span>{hit.title}</span>
                     {hit.price !== null && (
                       <span className="flex items-center gap-2">

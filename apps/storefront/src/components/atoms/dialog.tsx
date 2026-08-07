@@ -41,6 +41,7 @@ export const DialogContent = React.forwardRef<
         <DialogOverlay />
         <DialogPrimitive.Content
           ref={ref}
+          data-lenis-prevent
           onOpenAutoFocus={(e) => {
             lock();
             onOpenAutoFocus?.(e);
