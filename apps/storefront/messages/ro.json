@@ -54,5 +54,17 @@
   },
   "Checkout": {
     "country": "Țară"
+  },
+  "AiAssistant": {
+    "title": "Asistent DYLLU",
+    "close": "Închide asistentul",
+    "open": "Deschide asistentul",
+    "emptyState": "Întreabă-mă despre produse, disponibilitate sau recomandări.",
+    "searching": "Caut produse…",
+    "error": "A apărut o eroare. Încearcă din nou.",
+    "placeholder": "Scrie un mesaj…",
+    "send": "Trimite",
+    "addToCart": "Adaugă {title} în coș",
+    "addToCartError": "Nu am reușit să adăugăm produsul în coș."
   }
 }

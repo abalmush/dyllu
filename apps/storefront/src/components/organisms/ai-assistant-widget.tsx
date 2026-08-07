@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { Bot, Check, Search, Send, ShoppingCart, X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -17,6 +18,7 @@ import { convertToLocale } from "@lib/util/money";
 const productHitSchema = z.object({
   objectID: z.string(),
   title: z.string(),
+  title_ru: z.string().nullable().optional(),
   handle: z.string(),
   thumbnail: z.string().nullable(),
   price: z.number().nullable(),
@@ -55,10 +57,13 @@ function TypingDots() {
 }
 
 function ProductHitCard({ hit }: { hit: ProductHit }) {
+  const t = useTranslations("AiAssistant");
+  const locale = useLocale();
   const { addItem } = useCart();
   const [status, setStatus] = React.useState<"idle" | "adding" | "added">(
     "idle"
   );
+  const title = locale === "ru" && hit.title_ru ? hit.title_ru : hit.title;
 
   const handleAddToCart = async () => {
     if (!hit.variant_id || status === "adding") return;
@@ -69,7 +74,7 @@ function ProductHitCard({ hit }: { hit: ProductHit }) {
         {
           variantId: hit.variant_id,
           productHandle: hit.handle,
-          title: hit.title,
+          title,
           variantTitle: hit.variant_title ?? undefined,
           thumbnail: hit.thumbnail ?? undefined,
           quantity: 1,
@@ -81,7 +86,7 @@ function ProductHitCard({ hit }: { hit: ProductHit }) {
       window.setTimeout(() => setStatus("idle"), 2500);
     } catch {
       setStatus("idle");
-      toast.error("Nu am reușit să adăugăm produsul în coș.");
+      toast.error(t("addToCartError"));
     }
   };
 
@@ -106,7 +111,7 @@ function ProductHitCard({ hit }: { hit: ProductHit }) {
         )}
       </Link>
       <Link href={`/products/${hit.handle}`} className="min-w-0 flex-1">
-        <p className="line-clamp-2 text-sm font-medium">{hit.title}</p>
+        <p className="line-clamp-2 text-sm font-medium">{title}</p>
         {hit.price !== null && (
           <p className="text-foreground text-sm font-semibold">
             {convertToLocale({ amount: hit.price, currency_code: "MDL" })}
@@ -115,7 +120,7 @@ function ProductHitCard({ hit }: { hit: ProductHit }) {
       </Link>
       <button
         type="button"
-        aria-label={`Adaugă ${hit.title} în coș`}
+        aria-label={t("addToCart", { title })}
         disabled={!hit.variant_id || status === "adding"}
         onClick={() => void handleAddToCart()}
         className="bg-foreground text-background hover:bg-foreground/90 grid size-8 shrink-0 place-items-center rounded-md transition-colors disabled:opacity-40"
@@ -131,6 +136,7 @@ function ProductHitCard({ hit }: { hit: ProductHit }) {
 }
 
 export function AiAssistantWidget() {
+  const t = useTranslations("AiAssistant");
   const [open, setOpen] = React.useState(false);
   const [input, setInput] = React.useState("");
   const listRef = React.useRef<HTMLDivElement>(null);
@@ -168,11 +174,11 @@ export function AiAssistantWidget() {
           <div className="border-border flex items-center justify-between border-b px-4 py-3">
             <span className="flex items-center gap-2 font-semibold tracking-tight">
               <Bot aria-hidden="true" className="size-4" />
-              Asistent DYLLU
+              {t("title")}
             </span>
             <button
               type="button"
-              aria-label="Închide asistentul"
+              aria-label={t("close")}
               onClick={() => setOpen(false)}
               className="text-muted-foreground hover:bg-muted hover:text-foreground grid size-8 place-items-center rounded-md transition-colors"
             >
@@ -186,9 +192,7 @@ export function AiAssistantWidget() {
             className="flex-1 space-y-3 overflow-y-auto p-4"
           >
             {messages.length === 0 && (
-              <p className="text-muted-foreground text-sm">
-                Întreabă-mă despre produse, disponibilitate sau recomandări.
-              </p>
+              <p className="text-muted-foreground text-sm">{t("emptyState")}</p>
             )}
             {messages.map((message) => {
               const hits = message.parts.flatMap(getProductHits);
@@ -230,7 +234,7 @@ export function AiAssistantWidget() {
                   {isSearchingProducts && (
                     <div className="bg-muted text-muted-foreground flex max-w-[85%] items-center gap-2 rounded-md px-3 py-2 text-sm">
                       <Search aria-hidden="true" className="size-3.5" />
-                      Caut produse…
+                      {t("searching")}
                       <TypingDots />
                     </div>
                   )}
@@ -250,9 +254,7 @@ export function AiAssistantWidget() {
               </div>
             )}
             {showError && (
-              <p className="text-destructive text-sm">
-                A apărut o eroare. Încearcă din nou.
-              </p>
+              <p className="text-destructive text-sm">{t("error")}</p>
             )}
           </div>
 
@@ -264,7 +266,7 @@ export function AiAssistantWidget() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Scrie un mesaj…"
+              placeholder={t("placeholder")}
               disabled={isBusy}
               className="border-border bg-background placeholder:text-muted-foreground flex-1 rounded-md border px-3 py-2 text-sm outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2"
             />
@@ -273,7 +275,7 @@ export function AiAssistantWidget() {
               variant="brand"
               size="icon"
               disabled={isBusy || !input.trim()}
-              aria-label="Trimite"
+              aria-label={t("send")}
               className="clip-corner-cut-sm rounded-none"
             >
               <Send aria-hidden="true" className="size-4" />
@@ -287,7 +289,7 @@ export function AiAssistantWidget() {
         size="icon"
         onClick={() => setOpen((v) => !v)}
         className="clip-corner-cut-sm clip-shadow-md rounded-none"
-        aria-label={open ? "Închide asistentul" : "Deschide asistentul"}
+        aria-label={open ? t("close") : t("open")}
         data-testid="ai-assistant-button"
       >
         {open ? <X aria-hidden="true" /> : <Bot aria-hidden="true" />}
