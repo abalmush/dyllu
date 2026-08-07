@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Link } from "@/i18n/navigation";
 import { Search, User } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@lib/utils";
 import { useShowcasePinned } from "@lib/stores/showcase-pinned";
@@ -20,6 +21,7 @@ export interface SiteHeaderProps {
 }
 
 export function SiteHeader({ categories }: SiteHeaderProps) {
+  const t = useTranslations("SiteHeader");
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
   const showcasePinned = useShowcasePinned((state) => state.pinnedCount > 0);
@@ -58,7 +60,7 @@ export function SiteHeader({ categories }: SiteHeaderProps) {
           <MobileNav categories={categories} />
           <Link
             href="/"
-            aria-label="Pagina principală DYLLU"
+            aria-label={t("homeLink")}
             className="text-background flex items-center"
           >
             <Logo className="small:h-8 h-7" />
@@ -79,13 +81,13 @@ export function SiteHeader({ categories }: SiteHeaderProps) {
               aria-hidden="true"
               className="text-background/75 size-4 shrink-0"
             />
-            <span className="flex-1 truncate">Caută scule, accesorii…</span>
+            <span className="flex-1 truncate">{t("searchPlaceholder")}</span>
             <kbd className="border-background/20 bg-background/5 text-2xs text-background/70 2xlarge:inline-flex hidden shrink-0 items-center gap-1 rounded border px-1.5 py-0.5 font-mono font-semibold">
               ⌘K
             </kbd>
           </button>
           <IconButton
-            label="Caută"
+            label={t("search")}
             variant="ghost"
             onClick={() => setSearchOpen(true)}
             className="text-background hover:bg-background/10 xlarge:hidden"
@@ -94,7 +96,7 @@ export function SiteHeader({ categories }: SiteHeaderProps) {
           </IconButton>
           <Link
             href="/account"
-            aria-label="Contul tău"
+            aria-label={t("account")}
             className="text-background hover:bg-background/10 hidden size-11 place-items-center rounded-full transition-colors min-[1120px]:grid"
           >
             <User aria-hidden="true" className="size-5" />

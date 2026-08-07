@@ -1,12 +1,15 @@
 import * as React from "react";
 import { Link } from "@/i18n/navigation";
 import { Clock, MapPin, Phone, Wrench } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { SITE_CONTACT } from "@lib/site-content";
 import { Container } from "@/components/atoms/container";
 import { LocaleSwitcher } from "@/components/molecules/locale-switcher";
 
-export function UtilityBar() {
+export async function UtilityBar() {
+  const t = await getTranslations("UtilityBar");
+
   return (
     <div className="border-border bg-surface-subtle text-muted-foreground medium:block hidden border-b">
       <Container>
@@ -24,20 +27,23 @@ export function UtilityBar() {
               {SITE_CONTACT.hoursShort}
             </span>
           </div>
-          <nav aria-label="Linkuri utile" className="flex items-center gap-6">
+          <nav
+            aria-label={t("usefulLinks")}
+            className="flex items-center gap-6"
+          >
             <Link
               href="/contact"
               className="hover:text-foreground inline-flex items-center gap-1.5 transition-colors"
             >
               <MapPin aria-hidden="true" className="size-4" />
-              Magazine DYLLU
+              {t("stores")}
             </Link>
             <Link
               href="/returnari"
               className="hover:text-foreground inline-flex items-center gap-1.5 transition-colors"
             >
               <Wrench aria-hidden="true" className="size-4" />
-              Service și piese de schimb
+              {t("service")}
             </Link>
             <LocaleSwitcher />
           </nav>

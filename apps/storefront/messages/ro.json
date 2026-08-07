@@ -20,5 +20,39 @@
     "browse": "Vezi toate produsele",
     "metaTitle": "Pagina nu a fost găsită",
     "metaDescription": "Pagina pe care încerci să o accesezi nu există."
+  },
+  "AnnouncementBar": {
+    "freeShipping": "Livrare gratuită în Chișinău pentru comenzi peste 1.000 MDL",
+    "onlineOrder": "Comandă online, confirmare rapidă și retur în 14 zile",
+    "support": "Suport și confirmări {hours} · {phone}",
+    "close": "Închide bara de anunțuri"
+  },
+  "UtilityBar": {
+    "usefulLinks": "Linkuri utile",
+    "stores": "Magazine DYLLU",
+    "service": "Service și piese de schimb"
+  },
+  "CartDrawer": {
+    "open": "Deschide coșul",
+    "title": "Coșul tău · {count} {count, plural, one {produs} other {produse}}",
+    "description": "Produsele adăugate în coș, subtotalul și acțiunile de finalizare a comenzii.",
+    "quantity": "Cantitate · {count}",
+    "remove": "Șterge produsul",
+    "subtotal": "Subtotal",
+    "subtotalNote": "fără livrare",
+    "viewCart": "Vezi coșul",
+    "checkout": "Finalizează",
+    "empty": "Coșul este gol",
+    "emptyHint": "Descoperă scule, echipamente și accesorii pentru orice proiect.",
+    "browse": "Explorează produsele"
+  },
+  "SiteHeader": {
+    "homeLink": "Pagina principală DYLLU",
+    "searchPlaceholder": "Caută scule, accesorii…",
+    "search": "Caută",
+    "account": "Contul tău"
+  },
+  "Checkout": {
+    "country": "Țară"
   }
 }

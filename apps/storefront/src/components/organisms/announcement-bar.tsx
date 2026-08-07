@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Truck, X, Phone, ShieldCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { SITE_CONTACT } from "@lib/site-content";
 import { cn } from "@lib/utils";
@@ -11,21 +12,6 @@ type Message = {
   text: string;
 };
 
-const DEFAULT_MESSAGES: Message[] = [
-  {
-    icon: <Truck className="size-3.5" />,
-    text: "Livrare gratuită în Chișinău pentru comenzi peste 1.000 MDL",
-  },
-  {
-    icon: <ShieldCheck className="size-3.5" />,
-    text: "Comandă online, confirmare rapidă și retur în 14 zile",
-  },
-  {
-    icon: <Phone className="size-3.5" />,
-    text: `Suport și confirmări ${SITE_CONTACT.hoursShort} · ${SITE_CONTACT.phoneDisplay}`,
-  },
-];
-
 const STORAGE_KEY = "dyllu_announcement_dismissed";
 
 export interface AnnouncementBarProps {
@@ -34,9 +20,21 @@ export interface AnnouncementBarProps {
 }
 
 export function AnnouncementBar({
-  messages = DEFAULT_MESSAGES,
+  messages: propMessages,
   className,
 }: AnnouncementBarProps) {
+  const t = useTranslations("AnnouncementBar");
+  const messages: Message[] = propMessages ?? [
+    { icon: <Truck className="size-3.5" />, text: t("freeShipping") },
+    { icon: <ShieldCheck className="size-3.5" />, text: t("onlineOrder") },
+    {
+      icon: <Phone className="size-3.5" />,
+      text: t("support", {
+        hours: SITE_CONTACT.hoursShort,
+        phone: SITE_CONTACT.phoneDisplay,
+      }),
+    },
+  ];
   const [dismissed, setDismissed] = React.useState(false);
   const [index, setIndex] = React.useState(0);
 
@@ -92,7 +90,7 @@ export function AnnouncementBar({
         <button
           type="button"
           onClick={handleDismiss}
-          aria-label="Închide bara de anunțuri"
+          aria-label={t("close")}
           className="text-secondary-foreground/70 hover:bg-background/10 hover:text-secondary-foreground rounded-full p-1 transition-colors"
         >
           <X className="size-3.5" />
