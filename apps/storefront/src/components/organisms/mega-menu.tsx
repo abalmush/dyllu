@@ -184,10 +184,25 @@ export function MegaMenu({
                   <NavigationMenuLink key={category.handle} asChild>
                     <Link
                       href={`/categories/${category.handle}`}
-                      className="group text-foreground hover:bg-muted/80 flex items-center justify-between gap-2 rounded-md px-2.5 py-2 text-sm leading-snug font-medium transition-colors"
+                      className="group hover:border-primary/40 hover:bg-primary/5 flex items-stretch justify-between gap-2 rounded-md border border-transparent transition-colors"
                     >
-                      <span>{getCategoryNavLabel(category)}</span>
-                      <ArrowRight className="text-muted-foreground group-hover:text-foreground size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                      {category.navThumbnailUrl ? (
+                        <span className="relative h-[52px] w-[72px] shrink-0 overflow-hidden rounded-l-md">
+                          <Image
+                            src={category.navThumbnailUrl}
+                            alt=""
+                            fill
+                            sizes="72px"
+                            className="object-contain"
+                          />
+                        </span>
+                      ) : null}
+                      <span className="text-foreground flex min-w-0 flex-1 items-center gap-1.5 px-2.5 py-1.5 text-sm leading-snug font-medium tracking-tight">
+                        <span className="min-w-0 flex-1">
+                          {getCategoryNavLabel(category)}
+                        </span>
+                        <ArrowRight className="text-muted-foreground group-hover:text-foreground size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                      </span>
                     </Link>
                   </NavigationMenuLink>
                 ))}
