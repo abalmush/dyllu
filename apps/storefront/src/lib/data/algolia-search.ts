@@ -20,6 +20,8 @@ export type AlgoliaProductHit = {
   price: number | null;
   original_price: number | null;
   on_sale: boolean;
+  variant_id: string | null;
+  variant_title: string | null;
 };
 
 export type AlgoliaSearchResponse = {
