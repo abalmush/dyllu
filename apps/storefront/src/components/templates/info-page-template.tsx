@@ -1,12 +1,16 @@
 import { Link } from "@/i18n/navigation";
 import { ArrowRight, Mail, Phone } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/atoms/button";
 import { Container } from "@/components/atoms/container";
 import { PageHero } from "@/components/molecules/page-hero";
 import { SITE_CONTACT, type InfoPageData } from "@lib/site-content";
 
-export function InfoPageTemplate({ page }: { page: InfoPageData }) {
+export async function InfoPageTemplate({ page }: { page: InfoPageData }) {
+  const t = await getTranslations("InfoPageTemplate");
+  const tContact = await getTranslations("SiteContact");
+
   return (
     <div className="bg-surface-subtle">
       <Container className="small:py-12 py-8">
@@ -59,14 +63,13 @@ export function InfoPageTemplate({ page }: { page: InfoPageData }) {
           <aside className="flex flex-col gap-6">
             <div className="clip-corner-cut-lg bg-card ring-border small:sticky small:top-28 p-6 ring-1">
               <span className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
-                Suport DYLLU
+                {t("supportEyebrow")}
               </span>
               <h2 className="font-display text-foreground mt-2 text-2xl font-bold tracking-tight">
-                Ai nevoie de ajutor?
+                {t("needHelpTitle")}
               </h2>
               <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
-                Echipa noastră te poate ajuta cu selecția produselor,
-                confirmarea comenzilor, service și întrebări despre livrare.
+                {t("needHelpBody")}
               </p>
 
               <div className="mt-6 space-y-4">
@@ -87,7 +90,7 @@ export function InfoPageTemplate({ page }: { page: InfoPageData }) {
               </div>
 
               <p className="text-muted-foreground mt-4 text-xs">
-                Program general: {SITE_CONTACT.hoursShort}
+                {t("hoursPrefix", { hours: tContact("hoursShort") })}
               </p>
 
               <Button
@@ -96,7 +99,7 @@ export function InfoPageTemplate({ page }: { page: InfoPageData }) {
                 className="clip-corner-cut-sm mt-6 w-full rounded-none"
               >
                 <Link href="/contact">
-                  Pagina de contact
+                  {t("contactCta")}
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>

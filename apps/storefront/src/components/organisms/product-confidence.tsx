@@ -1,9 +1,10 @@
 import * as React from "react";
 import { Check, Minus, Star } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { cn } from "@lib/utils";
 
-export function ConfidenceMeter({
+export async function ConfidenceMeter({
   name,
   rating,
   confidence,
@@ -16,6 +17,8 @@ export function ConfidenceMeter({
   verdict: string;
   reasons: string[];
 }) {
+  const t = await getTranslations("ProductConfidence");
+
   return (
     <div className="clip-corner-cut-lg bg-card ring-border small:p-8 mx-auto max-w-[520px] p-6 ring-1">
       <div className="flex items-start justify-between gap-4">
@@ -49,7 +52,7 @@ export function ConfidenceMeter({
 
       <div className="border-border mt-6 border-t pt-4">
         <span className="text-muted-foreground text-xs font-semibold tracking-[0.16em] uppercase">
-          De ce o recomandăm
+          {t("whyWeRecommend")}
         </span>
         <ul className="mt-4 space-y-2">
           {reasons.map((reason) => (
@@ -71,7 +74,7 @@ export type CompareRow = {
   better?: "current" | "alternative" | "same";
 };
 
-export function CompareInline({
+export async function CompareInline({
   currentName,
   alternativeName,
   rows,
@@ -80,10 +83,12 @@ export function CompareInline({
   alternativeName: string;
   rows: CompareRow[];
 }) {
+  const t = await getTranslations("ProductConfidence");
+
   return (
     <div className="clip-corner-cut-lg bg-card ring-border mx-auto max-w-[640px] overflow-hidden ring-1">
       <div className="border-border bg-surface-subtle text-muted-foreground grid grid-cols-[1.2fr_1fr_1fr] gap-2 border-b p-4 text-xs font-semibold tracking-[0.12em] uppercase">
-        <span>Comparație</span>
+        <span>{t("comparisonLabel")}</span>
         <span className="text-foreground">{currentName}</span>
         <span>{alternativeName}</span>
       </div>
@@ -129,13 +134,15 @@ const STATUS_STYLE: Record<CompatStatus, { dot: string; ring: string }> = {
   bad: { dot: "bg-destructive", ring: "ring-destructive/50" },
 };
 
-export function CompatibilityGraph({
+export async function CompatibilityGraph({
   root,
   nodes,
 }: {
   root: string;
   nodes: CompatNode[];
 }) {
+  const t = await getTranslations("ProductConfidence");
+
   return (
     <div className="clip-corner-cut-lg bg-card ring-border small:p-8 mx-auto max-w-[720px] p-6 ring-1">
       <div className="flex flex-col items-center">
@@ -168,14 +175,16 @@ export function CompatibilityGraph({
 
       <div className="border-border text-muted-foreground mt-6 flex flex-wrap justify-center gap-4 border-t pt-4 text-xs">
         <span className="flex items-center gap-1.5">
-          <span className="bg-success size-2.5 rounded-full" /> Compatibil
+          <span className="bg-success size-2.5 rounded-full" />{" "}
+          {t("legendCompatible")}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="bg-warning size-2.5 rounded-full" /> Funcționează,
-          dar nu ideal
+          <span className="bg-warning size-2.5 rounded-full" />{" "}
+          {t("legendWorksButNotIdeal")}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="bg-destructive size-2.5 rounded-full" /> Incompatibil
+          <span className="bg-destructive size-2.5 rounded-full" />{" "}
+          {t("legendIncompatible")}
         </span>
       </div>
     </div>

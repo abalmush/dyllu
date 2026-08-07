@@ -1,15 +1,25 @@
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 import { InfoPageTemplate } from "@/components/templates/info-page-template";
-import { INFO_PAGES } from "@lib/site-content";
+import type { InfoPageData, InfoPageSection } from "@lib/site-content";
 
-const page = INFO_PAGES.branduri;
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("BrandsPage");
+  return {
+    title: t("metaTitle"),
+    description: t("description"),
+  };
+}
 
-export const metadata: Metadata = {
-  title: "Branduri și ghiduri",
-  description: page.description,
-};
+export default async function BrandsPage() {
+  const t = await getTranslations("BrandsPage");
+  const page: InfoPageData = {
+    eyebrow: t("eyebrow"),
+    title: t("title"),
+    description: t("description"),
+    sections: t.raw("sections") as InfoPageSection[],
+  };
 
-export default function BrandsPage() {
   return <InfoPageTemplate page={page} />;
 }

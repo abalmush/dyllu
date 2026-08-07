@@ -1,4 +1,7 @@
+"use client";
+
 import { HttpTypes } from "@medusajs/types";
+import { useTranslations } from "next-intl";
 
 import { Breadcrumbs } from "@/components/molecules/breadcrumbs";
 import { buildProductBreadcrumbs } from "@modules/products/lib/product-presentation";
@@ -14,9 +17,12 @@ export default function ProductPageHeader({
   variant,
   className,
 }: Props) {
+  const t = useTranslations("Breadcrumbs");
   return (
     <header className={className}>
-      <Breadcrumbs items={buildProductBreadcrumbs(product, variant)} />
+      <Breadcrumbs
+        items={buildProductBreadcrumbs(product, variant, t("home"))}
+      />
     </header>
   );
 }

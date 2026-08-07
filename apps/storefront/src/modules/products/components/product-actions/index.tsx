@@ -3,6 +3,7 @@
 import * as React from "react";
 import { isEqual } from "lodash";
 import { ShoppingBag } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
 
 import { useCart } from "@lib/cart/cart-context";
@@ -59,6 +60,7 @@ export default function ProductActions({
   compatiblePowerAccessories = { batteries: [], chargers: [] },
   disabled,
 }: Props) {
+  const t = useTranslations("ProductActions.buyBox");
   const { addItems } = useCart();
   const [options, setOptions] = React.useState<
     Record<string, string | undefined>
@@ -113,7 +115,7 @@ export default function ProductActions({
   if ((product.variants?.length ?? 0) > 1) {
     badges.push(
       <Badge key="variants" variant="outline">
-        {product.variants?.length} variante
+        {t("variantsCount", { count: product.variants?.length ?? 0 })}
       </Badge>
     );
   }
@@ -240,15 +242,15 @@ export default function ProductActions({
     Number(Boolean(showPowerConfigurator && selectedBatteryId)) +
     Number(Boolean(showPowerConfigurator && selectedChargerId));
   const ctaLabel = !selectedVariant
-    ? "Selectează varianta"
+    ? t("selectVariant")
     : !inStock
-      ? "Stoc epuizat"
+      ? t("soldOut")
       : selectedAccessoryCount > 0
-        ? `Adaugă ${selectedAccessoryCount + 1} produse · ${formatMdl(
-            configuredTotal,
-            displayPrice?.currency_code
-          )}`
-        : "Adaugă în coș";
+        ? t("addWithAccessories", {
+            count: selectedAccessoryCount + 1,
+            price: formatMdl(configuredTotal, displayPrice?.currency_code),
+          })
+        : t("addToCart");
 
   const showFromPrefix = !selectedVariant;
   const isSale = displayPrice?.price_type === "sale";
@@ -286,7 +288,7 @@ export default function ProductActions({
           <div className="small:col-start-1 small:row-start-2 flex flex-wrap items-baseline gap-x-2 gap-y-2">
             {showFromPrefix && (
               <span className="text-muted-foreground text-sm font-medium">
-                de la
+                {t("fromPricePrefix")}
               </span>
             )}
             <span
@@ -321,7 +323,7 @@ export default function ProductActions({
                 inStock ? "bg-success" : "bg-destructive"
               )}
             />
-            {inStock ? "În stoc" : "Indisponibil"}
+            {inStock ? t("inStock") : t("outOfStock")}
           </span>
 
           {selectedVariant?.sku ? (
@@ -402,7 +404,7 @@ export default function ProductActions({
               >
                 {isActionable && <ShoppingBag className="size-4" />}
                 <span className="xsmall:hidden">
-                  {isActionable ? "Adaugă" : ctaLabel}
+                  {isActionable ? t("addShort") : ctaLabel}
                 </span>
                 <span className="xsmall:inline hidden">{ctaLabel}</span>
               </Button>

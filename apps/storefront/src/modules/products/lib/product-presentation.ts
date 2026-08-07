@@ -790,7 +790,8 @@ export function getProductCategoryLabel(
 
 export function buildProductBreadcrumbs(
   product: HttpTypes.StoreProduct,
-  variant?: HttpTypes.StoreProductVariant
+  variant: HttpTypes.StoreProductVariant | undefined,
+  homeLabel: string
 ): ProductBreadcrumb[] {
   const metadata = (product.metadata ?? {}) as ProductMetadata;
   const category = product.categories?.[0];
@@ -816,7 +817,7 @@ export function buildProductBreadcrumbs(
     : undefined;
 
   return [
-    { label: "Acasă", href: "/" },
+    { label: homeLabel, href: "/" },
     ...(breadcrumbCategory && categoryPath
       ? [{ label: breadcrumbCategory, href: categoryPath }]
       : []),

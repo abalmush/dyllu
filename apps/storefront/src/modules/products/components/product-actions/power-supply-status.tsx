@@ -1,4 +1,5 @@
 import { Battery, Plug, Zap } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
 
 import { Badge } from "@/components/molecules/badge";
@@ -17,13 +18,17 @@ function capacityLabel(value: string | undefined): string | undefined {
     .replace(/(?<=\d)Ah\b/i, " Ah");
 }
 
-function platformLabel(platform: string | undefined): string | undefined {
-  if (platform === "dyllu-20v") return "Platformă DYLLU P20S 20 V";
-  if (platform === "dyllu-12v") return "Platformă DYLLU S12 12 V";
+function platformLabel(
+  platform: string | undefined,
+  t: ReturnType<typeof useTranslations>
+): string | undefined {
+  if (platform === "dyllu-20v") return t("platformP20S");
+  if (platform === "dyllu-12v") return t("platformS12");
   return undefined;
 }
 
 export function PowerSupplyStatus({ product, variant }: Props) {
+  const t = useTranslations("ProductActions.powerSupplyStatus");
   const supply = getProductPowerSupply(product, variant);
   if (supply?.powerSource !== "cordless_battery") return null;
 
@@ -31,12 +36,12 @@ export function PowerSupplyStatus({ product, variant }: Props) {
     supply.batteryIncluded === true &&
     supply.batteryCount &&
     supply.batteryCount > 1
-      ? `${supply.batteryCount} acumulatori incluși`
+      ? t("batteriesIncludedCount", { count: supply.batteryCount })
       : supply.batteryIncluded === true
-        ? "Acumulator inclus"
+        ? t("batteryIncluded")
         : supply.batteryIncluded === false
-          ? "Fără acumulator"
-          : "Acumulator: informație de confirmat",
+          ? t("batteryNotIncluded")
+          : t("batteryUnknown"),
     supply.batteryIncluded === true
       ? capacityLabel(supply.batteryCapacity)
       : undefined,
@@ -46,16 +51,16 @@ export function PowerSupplyStatus({ product, variant }: Props) {
 
   const chargerLabel =
     supply.chargerIncluded === true
-      ? "Încărcător inclus"
+      ? t("chargerIncluded")
       : supply.chargerIncluded === false
-        ? "Fără încărcător"
-        : "Încărcător: informație de confirmat";
-  const label = platformLabel(supply.platform);
+        ? t("chargerNotIncluded")
+        : t("chargerUnknown");
+  const label = platformLabel(supply.platform, t);
 
   return (
     <div
       className="flex flex-wrap items-center justify-center gap-2 px-2"
-      aria-label="Conținut alimentare"
+      aria-label={t("ariaLabel")}
       data-testid="power-supply-badges"
     >
       <Badge variant={supply.batteryIncluded ? "lime" : "warning"} size="sm">

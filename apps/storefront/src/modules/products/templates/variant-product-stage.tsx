@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
 
 import { Container } from "@/components/atoms/container";
@@ -46,6 +47,7 @@ export default function VariantProductStage({
   onboarding,
   includedPieces = [],
 }: Props) {
+  const t = useTranslations("VariantProductStage");
   const [selectedVariantId, setSelectedVariantId] = useState(
     initialVariantId ?? product.variants?.[0]?.id
   );
@@ -82,7 +84,7 @@ export default function VariantProductStage({
           label:
             accessory?.title ??
             [
-              relationship.name ?? "Accesoriu inclus",
+              relationship.name ?? t("includedAccessoryFallback"),
               relationship.sku &&
               !relationship.name
                 ?.toLowerCase()
@@ -98,7 +100,7 @@ export default function VariantProductStage({
           sku: relationship.sku,
         };
       }),
-    [includedAccessoryRelationships, imageBySku]
+    [includedAccessoryRelationships, imageBySku, t]
   );
   const combinedIncludedPieces = useMemo(
     () => [...includedPieces, ...includedAccessoryPieces],
@@ -131,7 +133,7 @@ export default function VariantProductStage({
         <ProductPageHeader product={product} variant={selectedVariant} />
       </Container>
 
-      <PdpHeroShell label="Prezentare și cumpărare produs">
+      <PdpHeroShell label={t("stageLabel")}>
         <div
           className={cn(
             "content-container small:grid-cols-[minmax(0,1.08fr)_minmax(460px,0.92fr)] small:items-start small:gap-x-6 small:gap-y-0 grid gap-4"
@@ -175,7 +177,7 @@ export default function VariantProductStage({
       </PdpHeroShell>
 
       <section
-        aria-label="Avantajele comenzii"
+        aria-label={t("orderBenefitsLabel")}
         className="border-border bg-background border-y"
       >
         <Container className="small:py-6 py-5">

@@ -11,6 +11,7 @@ import {
 } from "@medusajs/types";
 import { Button, clx } from "@lib/ui-compat";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { StoreFreeShippingPrice } from "types/global";
 
@@ -153,6 +154,8 @@ function FreeShippingInline({
     remaining_percentage: number;
   };
 }) {
+  const t = useTranslations("FreeShippingNudge");
+
   return (
     <div className="rounded-lg border bg-neutral-100 p-2">
       <div className="space-y-1.5">
@@ -161,10 +164,10 @@ function FreeShippingInline({
             {price.target_reached ? (
               <div className="flex items-center gap-1.5">
                 <CheckCircleSolid className="inline-block text-green-500" />{" "}
-                Livrare gratuită activată!
+                {t("activated")}
               </div>
             ) : (
-              "Deblochează livrarea gratuită"
+              t("unlock")
             )}
           </div>
 
@@ -173,14 +176,15 @@ function FreeShippingInline({
               "invisible opacity-0": price.target_reached,
             })}
           >
-            Mai ai doar{" "}
-            <span className="text-neutral-950">
-              {convertToLocale({
+            {t.rich("remaining", {
+              value: convertToLocale({
                 amount: price.target_remaining,
                 currency_code: cart.currency_code,
-              })}
-            </span>{" "}
-            până la prag
+              }),
+              amount: (chunks) => (
+                <span className="text-neutral-950">{chunks}</span>
+              ),
+            })}
           </div>
         </div>
         <div className="flex justify-between gap-1">
@@ -207,6 +211,7 @@ function FreeShippingPopup({
   cart: StoreCart;
   price: StoreFreeShippingPrice;
 }) {
+  const t = useTranslations("FreeShippingNudge");
   const [isClosed, setIsClosed] = useState(false);
 
   return (
@@ -237,10 +242,10 @@ function FreeShippingPopup({
                 {price.target_reached ? (
                   <div className="flex items-center gap-1.5">
                     <CheckCircleSolid className="inline-block text-green-500" />{" "}
-                    Livrare gratuită activată!
+                    {t("activated")}
                   </div>
                 ) : (
-                  "Deblochează livrarea gratuită"
+                  t("unlock")
                 )}
               </div>
 
@@ -249,14 +254,15 @@ function FreeShippingPopup({
                   "invisible opacity-0": price.target_reached,
                 })}
               >
-                Mai ai doar{" "}
-                <span className="text-white">
-                  {convertToLocale({
+                {t.rich("remaining", {
+                  value: convertToLocale({
                     amount: price.target_remaining,
                     currency_code: cart.currency_code,
-                  })}
-                </span>{" "}
-                până la prag
+                  }),
+                  amount: (chunks) => (
+                    <span className="text-white">{chunks}</span>
+                  ),
+                })}
               </div>
             </div>
             <div className="flex justify-between gap-1">
@@ -279,14 +285,14 @@ function FreeShippingPopup({
             className="rounded-2xl border border-white bg-transparent px-4 py-2.5 text-sm shadow-none outline-hidden"
             href="/cart"
           >
-            Vezi coșul
+            {t("viewCart")}
           </LocalizedClientLink>
 
           <LocalizedClientLink
             className="grow rounded-2xl border border-white bg-white px-4 py-2.5 text-center text-sm text-neutral-950 shadow-none outline-hidden"
             href="/store"
           >
-            Vezi produsele
+            {t("viewProducts")}
           </LocalizedClientLink>
         </div>
       </div>

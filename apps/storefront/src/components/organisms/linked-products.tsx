@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { ArrowUpRight, Check, Link2, Plus, ShoppingCart } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { useCart } from "@lib/cart/cart-context";
 import { cn } from "@lib/utils";
@@ -32,13 +33,6 @@ export type LinkedProduct = {
   relation: LinkedRelation;
   compatibility?: string;
   inStock?: boolean;
-};
-
-const RELATION_LABEL: Record<LinkedRelation, string> = {
-  accessory: "Accesoriu",
-  "spare-part": "Piesă de schimb",
-  recommended: "Recomandat",
-  consumable: "Consumabil",
 };
 
 const RELATION_BADGE: Record<LinkedRelation, BadgeProps["variant"]> = {
@@ -97,6 +91,8 @@ function PriceLine({
 }
 
 function CompatibleLayout({ mainName, products, compatibilityNote }: Props) {
+  const t = useTranslations("LinkedProducts");
+  const tCommon = useTranslations("Common");
   const { addItem } = useCart();
   const [pendingId, setPendingId] = React.useState<string | null>(null);
   const [addedIds, setAddedIds] = React.useState<Record<string, boolean>>({});
@@ -136,14 +132,13 @@ function CompatibleLayout({ mainName, products, compatibilityNote }: Props) {
       <Container>
         <div className="mb-8 max-w-2xl">
           <span className="text-primary text-xs font-semibold tracking-[0.2em] uppercase">
-            Accesorii & piese compatibile
+            {t("compatibleEyebrow")}
           </span>
           <h2 className="font-display text-foreground small:text-3xl mt-2 text-2xl font-extrabold tracking-tight">
-            Se potrivește cu {mainName}
+            {t("compatibleHeading", { mainName })}
           </h2>
           <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
-            Produse separate, vândute individual, dar compatibile cu acest
-            model. Fiecare are propria pagină și poate fi cumpărat oricând.
+            {t("compatibleDescription")}
           </p>
         </div>
 
@@ -164,13 +159,13 @@ function CompatibleLayout({ mainName, products, compatibilityNote }: Props) {
                 <Link
                   href={`/products/${product.handle}`}
                   className="absolute inset-0"
-                  aria-label={`Vezi ${product.name}`}
+                  aria-label={t("viewProductAria", { name: product.name })}
                 >
                   <LinkedMedia src={product.image} alt={product.name} />
                 </Link>
                 <div className="absolute top-3 left-3">
                   <Badge variant={RELATION_BADGE[product.relation]}>
-                    {RELATION_LABEL[product.relation]}
+                    {t(`relation.${product.relation}`)}
                   </Badge>
                 </div>
               </div>
@@ -204,7 +199,9 @@ function CompatibleLayout({ mainName, products, compatibilityNote }: Props) {
                       : "text-success"
                   )}
                 >
-                  {product.inStock === false ? "Stoc epuizat" : "În stoc"}
+                  {product.inStock === false
+                    ? tCommon("soldOut")
+                    : t("inStock")}
                 </span>
 
                 <div className="flex items-center gap-2">
@@ -215,14 +212,14 @@ function CompatibleLayout({ mainName, products, compatibilityNote }: Props) {
                     className="clip-corner-cut-sm flex-1 rounded-none"
                   >
                     <Link href={`/products/${product.handle}`}>
-                      Vezi produsul
+                      {t("viewProduct")}
                       <ArrowUpRight className="size-4" />
                     </Link>
                   </Button>
                   <Button
                     type="button"
                     size="sm"
-                    aria-label={`Adaugă ${product.name} în coș`}
+                    aria-label={tCommon("addToCart", { title: product.name })}
                     disabled={
                       product.inStock === false ||
                       !product.variantId ||
@@ -248,6 +245,7 @@ function CompatibleLayout({ mainName, products, compatibilityNote }: Props) {
 }
 
 function BundleLayout({ mainName, mainImage, mainPrice, products }: Props) {
+  const t = useTranslations("LinkedProducts");
   const bundleTotal =
     (mainPrice ?? 0) + products.reduce((sum, p) => sum + p.price, 0);
 
@@ -255,7 +253,7 @@ function BundleLayout({ mainName, mainImage, mainPrice, products }: Props) {
     <section className="bg-background small:py-20 py-16">
       <Container>
         <h2 className="font-display text-foreground small:text-3xl mb-8 text-2xl font-extrabold tracking-tight">
-          Cumpărate frecvent împreună
+          {t("bundleHeading")}
         </h2>
 
         <div className="medium:grid-cols-[1.6fr_1fr] medium:items-center grid gap-8">
@@ -264,6 +262,7 @@ function BundleLayout({ mainName, mainImage, mainPrice, products }: Props) {
               image={mainImage}
               name={mainName}
               price={mainPrice}
+              mainProductLabel={t("mainProductBadge")}
               isMain
             />
             {products.map((product) => (
@@ -292,7 +291,7 @@ function BundleLayout({ mainName, mainImage, mainPrice, products }: Props) {
 
             <div className="border-border mt-6 flex items-baseline justify-between border-t pt-6">
               <span className="text-muted-foreground text-sm font-semibold tracking-[0.14em] uppercase">
-                Total set
+                {t("bundleTotal")}
               </span>
               <span className="font-display text-foreground text-2xl font-bold">
                 {formatPrice(bundleTotal)}
@@ -305,7 +304,7 @@ function BundleLayout({ mainName, mainImage, mainPrice, products }: Props) {
               className="clip-corner-cut-sm mt-6 w-full rounded-none"
             >
               <ShoppingCart className="size-4" />
-              Adaugă toate în coș
+              {t("addAllToCart")}
             </Button>
           </div>
         </div>
@@ -319,11 +318,13 @@ function BundleTile({
   name,
   price,
   isMain,
+  mainProductLabel,
 }: {
   image?: string;
   name: string;
   price?: number;
   isMain?: boolean;
+  mainProductLabel?: string;
 }) {
   return (
     <div
@@ -336,7 +337,7 @@ function BundleTile({
         {image && <LinkedMedia src={image} alt={name} />}
         {isMain && (
           <span className="absolute top-2 left-2">
-            <Badge variant="default">Acest produs</Badge>
+            <Badge variant="default">{mainProductLabel}</Badge>
           </span>
         )}
       </div>

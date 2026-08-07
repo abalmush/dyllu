@@ -5,7 +5,7 @@ import Image from "next/image";
 import { isEqual } from "lodash";
 import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
-import { useFormatter } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
 
 import { useCart } from "@lib/cart/cart-context";
@@ -27,6 +27,7 @@ const optionsAsKeymap = (
   }, {}) ?? {};
 
 export function PdpHero({ product, eyebrow }: Props) {
+  const t = useTranslations("PdpHero");
   const format = useFormatter();
   const formatPrice = (amount: number | null | undefined, code = "MDL") => {
     if (amount == null) return "—";
@@ -122,14 +123,14 @@ export function PdpHero({ product, eyebrow }: Props) {
 
   const ctaLabel =
     isMultiVariant && !selectedVariant
-      ? "Selectează varianta"
+      ? t("selectVariant")
       : justAdded
-        ? "Adăugat ✓"
-        : "Adaugă în coș";
+        ? t("added")
+        : t("addToCart");
 
   return (
     <section
-      aria-label="Prezentare produs"
+      aria-label={t("sectionLabel")}
       className="bg-foreground relative isolate -mt-px overflow-hidden"
     >
       {/* Red side rails — DYLLU brand frame */}
@@ -174,7 +175,7 @@ export function PdpHero({ product, eyebrow }: Props) {
               <button
                 type="button"
                 onClick={() => emblaApi?.scrollPrev()}
-                aria-label="Imaginea anterioară"
+                aria-label={t("previousImage")}
                 className="border-background/20 bg-background/80 text-foreground hover:bg-background small:left-6 absolute top-1/2 left-4 z-1 grid size-10 -translate-y-1/2 place-items-center rounded-full border backdrop-blur-sm transition-all hover:scale-105"
               >
                 <ChevronLeft className="size-5" />
@@ -182,7 +183,7 @@ export function PdpHero({ product, eyebrow }: Props) {
               <button
                 type="button"
                 onClick={() => emblaApi?.scrollNext()}
-                aria-label="Imaginea următoare"
+                aria-label={t("nextImage")}
                 className="border-background/20 bg-background/80 text-foreground hover:bg-background small:right-6 absolute top-1/2 right-4 z-1 grid size-10 -translate-y-1/2 place-items-center rounded-full border backdrop-blur-sm transition-all hover:scale-105"
               >
                 <ChevronRight className="size-5" />
@@ -193,7 +194,7 @@ export function PdpHero({ product, eyebrow }: Props) {
                     key={i}
                     type="button"
                     onClick={() => emblaApi?.scrollTo(i)}
-                    aria-label={`Imaginea ${i + 1}`}
+                    aria-label={t("imageIndicator", { index: i + 1 })}
                     className={cn(
                       "h-1.5 rounded-full transition-all",
                       i === selectedIndex
@@ -222,7 +223,7 @@ export function PdpHero({ product, eyebrow }: Props) {
               <div className="flex items-baseline gap-2 pt-1">
                 {showFromPrefix && (
                   <span className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
-                    de la
+                    {t("fromPrefix")}
                   </span>
                 )}
                 <span className="font-display text-foreground small:text-3xl text-2xl font-bold tracking-tight">
@@ -247,7 +248,7 @@ export function PdpHero({ product, eyebrow }: Props) {
                   <div
                     className="flex flex-wrap gap-1.5"
                     role="radiogroup"
-                    aria-label={primaryOption.title ?? "Variantă"}
+                    aria-label={primaryOption.title ?? t("variantFallback")}
                   >
                     {optionValues.slice(0, 12).map((v) => {
                       const selected = options[primaryOption.id ?? ""] === v;

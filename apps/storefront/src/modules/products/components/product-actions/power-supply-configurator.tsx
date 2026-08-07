@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { BatteryCharging, Check, Wrench } from "lucide-react";
-import { useFormatter } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import type { HttpTypes } from "@medusajs/types";
 
 import { cn } from "@lib/utils";
@@ -36,17 +36,26 @@ const batteryCapacityNumber = (product: HttpTypes.StoreProduct) => {
   return metadataNumber(product.title?.match(/\d+(?:[.,]\d+)?\s*Ah/i)?.[0]);
 };
 
-const batteryCapacity = (product: HttpTypes.StoreProduct) => {
+const batteryCapacity = (
+  product: HttpTypes.StoreProduct,
+  t: ReturnType<typeof useTranslations>
+) => {
   const capacity = batteryCapacityNumber(product);
   if (Number.isFinite(capacity)) return `${capacity} Ah`;
-  return product.title?.match(/\d+(?:[.,]\d+)?\s*Ah/i)?.[0] ?? "Acumulator";
+  return (
+    product.title?.match(/\d+(?:[.,]\d+)?\s*Ah/i)?.[0] ??
+    t("batteryFallbackLabel")
+  );
 };
 
-const batteryBenefit = (product: HttpTypes.StoreProduct) => {
+const batteryBenefit = (
+  product: HttpTypes.StoreProduct,
+  t: ReturnType<typeof useTranslations>
+) => {
   const capacity = batteryCapacityNumber(product);
-  if (capacity >= 5) return "Autonomie maximă";
-  if (capacity >= 4) return "Echilibru optim";
-  return "Compact și ușor";
+  if (capacity >= 5) return t("batteryBenefitMax");
+  if (capacity >= 4) return t("batteryBenefitBalanced");
+  return t("batteryBenefitCompact");
 };
 
 const isRapidCharger = (product: HttpTypes.StoreProduct) =>
@@ -155,6 +164,7 @@ function ChoiceCard({
   onSelect: () => void;
 }) {
   const format = useFormatter();
+  const t = useTranslations("ProductActions.powerSupply");
   const image = product.thumbnail ?? product.images?.[0]?.url;
   const price = productPrice(product);
 
@@ -186,7 +196,7 @@ function ChoiceCard({
           <span className="text-foreground text-sm font-bold">{label}</span>
           {recommended ? (
             <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-[10px] font-black uppercase">
-              Recomandat
+              {t("recommendedBadge")}
             </span>
           ) : null}
         </span>
@@ -204,7 +214,7 @@ function ChoiceCard({
           )}
         >
           {price == null
-            ? "Preț indisponibil"
+            ? t("priceUnavailable")
             : `+${format.number(price, { maximumFractionDigits: 0 })} MDL`}
         </span>
       </span>
@@ -232,6 +242,7 @@ export function PowerSupplyConfigurator({
   onChargerChange,
 }: Props) {
   const format = useFormatter();
+  const t = useTranslations("ProductActions.powerSupply");
   const [open, setOpen] = React.useState(false);
   const [chargerChoiceMade, setChargerChoiceMade] = React.useState(false);
   const hasOptions = batteries.length > 0;
@@ -289,10 +300,10 @@ export function PowerSupplyConfigurator({
             id="power-configurator-title"
             className="text-foreground text-sm font-bold"
           >
-            Sculă fără acumulator și încărcător
+            {t("heading")}
           </h2>
           <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-            Cumpără doar scula sau completeaz-o cu alimentare compatibilă.
+            {t("subheading")}
           </p>
         </div>
       </div>
@@ -301,8 +312,8 @@ export function PowerSupplyConfigurator({
         <SupplyModeCard
           selected={!open}
           icon={<Wrench className="size-5" />}
-          title="Doar scula"
-          description="Am deja un acumulator compatibil DYLLU P20S."
+          title={t("toolOnlyTitle")}
+          description={t("toolOnlyDescription")}
           onSelect={selectToolOnly}
           testId="power-mode-tool-only"
         />
@@ -310,13 +321,13 @@ export function PowerSupplyConfigurator({
           selected={open}
           accent
           icon={<BatteryCharging className="size-5" />}
-          title="Sculă + acumulator"
+          title={t("withBatteryTitle")}
           description={
             recommendedCharger
-              ? "Gata de utilizare, cu încărcător compatibil."
-              : "Completează scula cu un acumulator compatibil."
+              ? t("withBatteryReadyDescription")
+              : t("withBatteryNeedsDescription")
           }
-          badge="Recomandat"
+          badge={t("recommendedBadge")}
           price={
             recommendedPowerPrice == null
               ? undefined
@@ -334,7 +345,7 @@ export function PowerSupplyConfigurator({
               <span className="bg-foreground text-background grid size-5 place-items-center rounded-full text-[10px]">
                 1
               </span>
-              Alege acumulatorul
+              {t("stepChooseBattery")}
             </p>
             <div className="grid gap-2">
               {batteries.map((battery) => {
@@ -347,8 +358,8 @@ export function PowerSupplyConfigurator({
                     key={battery.id}
                     product={battery}
                     selected={selectedBatteryId === variantId}
-                    label={batteryCapacity(battery)}
-                    description={batteryBenefit(battery)}
+                    label={batteryCapacity(battery, t)}
+                    description={batteryBenefit(battery, t)}
                     recommended={capacity === 4}
                     onSelect={() => selectBattery(variantId)}
                   />
@@ -363,7 +374,7 @@ export function PowerSupplyConfigurator({
                 <span className="bg-foreground text-background grid size-5 place-items-center rounded-full text-[10px]">
                   2
                 </span>
-                Ai nevoie și de încărcător?
+                {t("stepNeedCharger")}
               </p>
               <div className="grid gap-2">
                 {chargers.map((charger) => {
@@ -377,10 +388,10 @@ export function PowerSupplyConfigurator({
                       selected={selectedChargerId === variantId}
                       label={
                         isRapidCharger(charger)
-                          ? "Încărcător rapid"
-                          : "Încărcător"
+                          ? t("rapidCharger")
+                          : t("charger")
                       }
-                      description="Compatibil cu acumulatorul selectat"
+                      description={t("chargerCompatibleDescription")}
                       recommended={isRapidCharger(charger)}
                       onSelect={() => {
                         onChargerChange(variantId);
@@ -403,7 +414,7 @@ export function PowerSupplyConfigurator({
                       : "border-border bg-background text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  Am deja un încărcător
+                  {t("alreadyHaveCharger")}
                 </button>
               </div>
             </div>

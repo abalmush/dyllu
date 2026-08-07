@@ -7,45 +7,48 @@ import {
   Truck,
   type LucideIcon,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/atoms/container";
 
 type TrustItem = { icon: LucideIcon; title: string; detail: string };
 
-const TRUST_ITEMS: TrustItem[] = [
-  {
-    icon: Truck,
-    title: "Livrare rapidă",
-    detail: "Gratuită peste 1.000 MDL în Chișinău · 24–48h",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Plată confirmată la procesare",
-    detail: "Echipa DYLLU validează metoda potrivită pentru comandă",
-  },
-  {
-    icon: BadgeCheck,
-    title: "Garanție 24 luni",
-    detail: "Produse originale DYLLU cu factură",
-  },
-  {
-    icon: RotateCcw,
-    title: "Retur în 14 zile",
-    detail: "Fără întrebări, dacă produsul e nefolosit",
-  },
-  {
-    icon: Headset,
-    title: "Suport tehnic",
-    detail: "Consultanță pentru alegere, livrare și service",
-  },
-];
+export async function DeliveryTrust() {
+  const t = await getTranslations("DeliveryTrust");
 
-export function DeliveryTrust() {
+  const trustItems: TrustItem[] = [
+    {
+      icon: Truck,
+      title: t("fastShipping.title"),
+      detail: t("fastShipping.detail"),
+    },
+    {
+      icon: ShieldCheck,
+      title: t("confirmedPayment.title"),
+      detail: t("confirmedPayment.detail"),
+    },
+    {
+      icon: BadgeCheck,
+      title: t("warranty.title"),
+      detail: t("warranty.detail"),
+    },
+    {
+      icon: RotateCcw,
+      title: t("returns.title"),
+      detail: t("returns.detail"),
+    },
+    {
+      icon: Headset,
+      title: t("support.title"),
+      detail: t("support.detail"),
+    },
+  ];
+
   return (
     <section className="bg-background small:py-16 py-12">
       <Container>
         <div className="small:grid-cols-2 medium:grid-cols-3 grid gap-4">
-          {TRUST_ITEMS.map((item) => (
+          {trustItems.map((item) => (
             <div
               key={item.title}
               className="clip-corner-cut-md bg-card ring-border flex items-start gap-4 p-4 ring-1"

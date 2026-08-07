@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 import { HttpTypes } from "@medusajs/types";
 
 import { Badge } from "@/components/atoms/badge";
@@ -35,6 +36,7 @@ export default async function ComboProductTemplate({
   images,
   selectedVariant,
 }: Props) {
+  const t = await getTranslations("ComboProductTemplate");
   const platform = getEffectivePlatform(product);
   const parsedItems = parseKitItems(
     getVariantDescription(product, selectedVariant)
@@ -61,7 +63,9 @@ export default async function ComboProductTemplate({
       }
     }
 
-    const compatibility = `Compatibil cu platforma ${prettifyPlatform(platform)}.`;
+    const compatibility = t("compatibleWithPlatform", {
+      platform: prettifyPlatform(platform),
+    });
     for (const battery of batteries) {
       const code = getPrimaryArticleCode(battery);
       if (code && includedCodes.has(code)) continue;
@@ -79,8 +83,8 @@ export default async function ComboProductTemplate({
 
   const setPieces = toSetPieces(parsedItems, imageByCode);
   const summary = platform.startsWith("dyllu-")
-    ? `Primești produsul și toate accesoriile afișate, compatibile cu sistemul de acumulatori ${prettifyPlatform(platform)}.`
-    : "Primești produsul și toate accesoriile afișate, gata de lucru.";
+    ? t("summaryWithPlatform", { platform: prettifyPlatform(platform) })
+    : t("summary");
 
   return (
     <>
@@ -95,7 +99,9 @@ export default async function ComboProductTemplate({
             <div className="flex flex-wrap items-center gap-2">
               <ProductTypeBadge type="combo" />
               {pieceCount > 0 && (
-                <Badge variant="secondary">{pieceCount} piese incluse</Badge>
+                <Badge variant="secondary">
+                  {t("piecesIncluded", { count: pieceCount })}
+                </Badge>
               )}
               {platform.startsWith("dyllu-") && (
                 <Badge variant="outline">{prettifyPlatform(platform)}</Badge>
@@ -110,7 +116,7 @@ export default async function ComboProductTemplate({
 
       {linkedProducts.length > 0 && (
         <LinkedProducts
-          mainName={product.title ?? "Acest produs"}
+          mainName={product.title ?? t("fallbackProductName")}
           mainImage={getVariantImage(product)}
           mainPrice={
             selectedVariant?.calculated_price?.calculated_amount ??
@@ -119,7 +125,9 @@ export default async function ComboProductTemplate({
           }
           products={linkedProducts}
           layout="compatible"
-          compatibilityNote={`Poți adăuga baterii sau încărcătoare de rezervă compatibile cu ${prettifyPlatform(platform)}.`}
+          compatibilityNote={t("compatibilityNote", {
+            platform: prettifyPlatform(platform),
+          })}
         />
       )}
 

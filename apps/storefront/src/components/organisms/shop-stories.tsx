@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight, Wrench } from "lucide-react";
 
@@ -6,37 +7,41 @@ import { Container } from "@/components/atoms/container";
 import { Eyebrow } from "@/components/molecules/eyebrow";
 import { type CategoryNode } from "@lib/data/categories";
 
-const STORIES = [
-  {
-    categoryHandle: "scule-electrice",
-    href: "/categories/scule-electrice",
-    eyebrow: "Atelier de lemn",
-    title: "Precizie de la prima tăiere",
-    description:
-      "Descoperă sculele electrice și accesoriile pentru debitare, ajustare și finisare.",
-    image: "/images/home/story-woodworking.webp",
-  },
-  {
-    href: "/c/service-auto",
-    eyebrow: "Service auto",
-    title: "Unelte pregătite pentru intervenții zilnice",
-    description:
-      "Explorează soluțiile DYLLU pentru întreținere, reparații și organizarea service-ului.",
-    image: "/images/home/story-auto-service.webp",
-  },
-] as const;
-
 const flattenCategories = (categories: CategoryNode[]): CategoryNode[] =>
   categories.flatMap((category) => [
     category,
     ...flattenCategories(category.children),
   ]);
 
-export function ShopStories({ categories }: { categories: CategoryNode[] }) {
+export async function ShopStories({
+  categories,
+}: {
+  categories: CategoryNode[];
+}) {
+  const t = await getTranslations("ShopStories");
+
+  const allStories = [
+    {
+      categoryHandle: "scule-electrice",
+      href: "/categories/scule-electrice",
+      eyebrow: t("woodworking.eyebrow"),
+      title: t("woodworking.title"),
+      description: t("woodworking.description"),
+      image: "/images/home/story-woodworking.webp",
+    },
+    {
+      href: "/c/service-auto",
+      eyebrow: t("autoService.eyebrow"),
+      title: t("autoService.title"),
+      description: t("autoService.description"),
+      image: "/images/home/story-auto-service.webp",
+    },
+  ] as const;
+
   const visibleHandles = new Set(
     flattenCategories(categories).map((category) => category.handle)
   );
-  const stories = STORIES.filter((story) =>
+  const stories = allStories.filter((story) =>
     "categoryHandle" in story ? visibleHandles.has(story.categoryHandle) : true
   );
 
@@ -47,13 +52,13 @@ export function ShopStories({ categories }: { categories: CategoryNode[] }) {
       <Container>
         <header className="mb-10 flex max-w-3xl flex-col gap-4">
           <Eyebrow icon={<Wrench className="size-3.5" />}>
-            Alege după lucrare
+            {t("eyebrow")}
           </Eyebrow>
           <h2 className="font-display text-display-sm text-background small:text-display-md font-extrabold tracking-tight">
-            Unelte pentru atelier, șantier și service.
+            {t("title")}
           </h2>
           <p className="text-background/65 small:text-base max-w-2xl text-sm leading-relaxed">
-            Pornește de la proiectul tău și găsește mai repede gama potrivită.
+            {t("description")}
           </p>
         </header>
 
@@ -86,7 +91,7 @@ export function ShopStories({ categories }: { categories: CategoryNode[] }) {
                   {story.description}
                 </span>
                 <span className="mt-2 inline-flex items-center gap-2 text-sm font-semibold">
-                  Vezi selecția
+                  {t("viewSelection")}
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                 </span>
               </span>

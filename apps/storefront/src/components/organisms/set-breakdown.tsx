@@ -1,6 +1,9 @@
+"use client";
+
 import * as React from "react";
 import Image from "next/image";
 import { BatteryFull, Briefcase, Plug } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@lib/utils";
 import { IMAGE_BG_NEUTRALIZE } from "@/components/organisms/pdp-hero-variants";
@@ -27,6 +30,7 @@ export function SetBreakdown({
   tone = "light",
   className,
 }: Props) {
+  const t = useTranslations("IncludedAccessorySummary");
   const visualPieces = pieces.filter((piece) => piece.image || piece.kind);
   const textPieces = pieces.filter((piece) => !piece.image && !piece.kind);
 
@@ -80,10 +84,10 @@ export function SetBreakdown({
             )}
           >
             <Briefcase className="size-5" />
-            Ce este inclus
+            {t("heading")}
           </span>
           <span className="clip-corner-cut-sm bg-foreground text-2xs text-background px-4 py-1.5 font-bold tracking-[0.14em] uppercase">
-            {pieceCount} {pieceCount === 1 ? "piesă" : "piese"}
+            {t("pieceCount", { count: pieceCount })}
           </span>
         </div>
 
@@ -168,7 +172,7 @@ export function SetBreakdown({
                     : "text-muted-foreground"
                 )}
               >
-                În cutie mai găsești
+                {t("alsoInBox")}
               </p>
               <ul className="mt-4 space-y-2">
                 {textPieces.map((piece, index) => (

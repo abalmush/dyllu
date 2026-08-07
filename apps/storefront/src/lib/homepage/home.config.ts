@@ -1,52 +1,55 @@
 import type { HomepageBlock, PromoCardData } from "@/lib/homepage/types";
 
-const HOMEPAGE_PROMOS: PromoCardData[] = [
+type TranslateHomepage = (key: string) => string;
+
+const getHomepagePromos = (t: TranslateHomepage): PromoCardData[] => [
   {
-    eyebrow: "Platforma DYLLU cu acumulator",
-    title: "Scule fără cablu, gata de lucru",
-    description:
-      "Descoperă toate sculele cu acumulator pentru atelier, șantier, grădină sau casă.",
-    ctaLabel: "Vezi sculele cu acumulator",
+    eyebrow: t("promos.acumulator.eyebrow"),
+    title: t("promos.acumulator.title"),
+    description: t("promos.acumulator.description"),
+    ctaLabel: t("promos.acumulator.ctaLabel"),
     href: "/collections/scule-cu-acumulator",
     variant: "image",
     imageUrl: "/images/home/hero-combo-kit.webp",
   },
   {
-    eyebrow: "Atelier de lemn",
-    title: "Taie, ajustează, finisează",
-    ctaLabel: "Vezi sculele",
+    eyebrow: t("promos.wood.eyebrow"),
+    title: t("promos.wood.title"),
+    ctaLabel: t("promos.wood.ctaLabel"),
     href: "/categories/scule-pentru-lemn",
     variant: "image",
     imageUrl: "/images/home/story-woodworking.webp",
   },
   {
-    eyebrow: "Prelucrarea metalului",
-    title: "Taie, șlefuiește, sudează",
-    ctaLabel: "Vezi sculele pentru metal",
+    eyebrow: t("promos.metal.eyebrow"),
+    title: t("promos.metal.title"),
+    ctaLabel: t("promos.metal.ctaLabel"),
     href: "/categories/scule-pentru-metal",
     variant: "image",
     imageUrl: "/images/home/story-auto-service.webp",
   },
 ];
 
-export const homeBlocks: HomepageBlock[] = [
-  { id: "hero", type: "promo-mosaic", promos: HOMEPAGE_PROMOS },
-  { id: "families", type: "tool-families" },
-  {
-    id: "bestsellers",
-    type: "product-rail",
-    source: {
-      kind: "collection",
-      collectionHandle: "scule-cu-acumulator",
-      limit: 6,
-      selection: "diverse-random",
+export function getHomeBlocks(t: TranslateHomepage): HomepageBlock[] {
+  return [
+    { id: "hero", type: "promo-mosaic", promos: getHomepagePromos(t) },
+    { id: "families", type: "tool-families" },
+    {
+      id: "bestsellers",
+      type: "product-rail",
+      source: {
+        kind: "collection",
+        collectionHandle: "scule-cu-acumulator",
+        limit: 6,
+        selection: "diverse-random",
+      },
+      eyebrow: t("bestsellers.eyebrow"),
+      title: t("bestsellers.title"),
+      viewAllHref: "/collections/scule-cu-acumulator",
+      viewAllLabel: t("bestsellers.viewAllLabel"),
     },
-    eyebrow: "Scule cu acumulator",
-    title: "Descoperă gama DYLLU",
-    viewAllHref: "/collections/scule-cu-acumulator",
-    viewAllLabel: "Vezi toate sculele",
-  },
-  { id: "trust", type: "trust-band" },
-  { id: "stories", type: "shop-stories" },
-  { id: "newsletter", type: "newsletter-band" },
-];
+    { id: "trust", type: "trust-band" },
+    { id: "stories", type: "shop-stories" },
+    { id: "newsletter", type: "newsletter-band" },
+  ];
+}

@@ -1,5 +1,6 @@
 import * as React from "react";
 import type { HttpTypes } from "@medusajs/types";
+import { getTranslations } from "next-intl/server";
 
 import { listProducts, listProductsWithSort } from "@lib/data/products";
 import { getCollectionByHandle } from "@lib/data/collections";
@@ -44,7 +45,7 @@ export function HomepageRenderer({
   );
 }
 
-function BlockSlot({
+async function BlockSlot({
   block,
   categories,
 }: {
@@ -76,15 +77,17 @@ function BlockSlot({
       );
     case "trust-band":
       return <TrustBand />;
-    case "anatomy-showcase":
+    case "anatomy-showcase": {
+      const t = await getTranslations("Homepage");
       return (
         <AnatomyShowcase
-          eyebrow="Anatomia DYLLU"
-          title="Ce găsești sub carcasă"
-          intro="Fiecare produs trece prin testele noastre. Iată componentele care contează — și de ce."
+          eyebrow={t("anatomy.eyebrow")}
+          title={t("anatomy.title")}
+          intro={t("anatomy.intro")}
           items={ANATOMY_ITEMS}
         />
       );
+    }
     case "guides-grid":
       return <GuidesGrid />;
     case "shop-stories":

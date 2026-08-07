@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Check } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { HttpTypes } from "@medusajs/types";
 
 import type { IncludedAccessoryImage } from "@lib/data/included-accessories";
@@ -31,11 +32,12 @@ function normalizeSku(sku: string) {
   return sku.trim().toLowerCase();
 }
 
-export function IncludedAccessorySummary({
+export async function IncludedAccessorySummary({
   product,
   variant,
   accessoryImages,
 }: Props) {
+  const t = await getTranslations("IncludedAccessorySummary");
   const imageBySku = new Map(
     accessoryImages.map((accessory) => [normalizeSku(accessory.sku), accessory])
   );
@@ -56,7 +58,9 @@ export function IncludedAccessorySummary({
           title:
             accessory?.title ??
             relationship.name ??
-            (kind === "battery" ? "Acumulator inclus" : "Încărcător inclus"),
+            (kind === "battery"
+              ? t("batteryFallbackTitle")
+              : t("chargerFallbackTitle")),
         },
       ];
     }
@@ -77,10 +81,10 @@ export function IncludedAccessorySummary({
           id="included-accessories-title"
           className="font-display text-background text-xl leading-tight font-bold"
         >
-          Ce este inclus
+          {t("heading")}
         </h2>
         <span className="bg-primary text-2xs text-primary-foreground shrink-0 rounded-full px-2.5 py-1 font-black">
-          {pieceCount} {pieceCount === 1 ? "piesă" : "piese"}
+          {t("pieceCount", { count: pieceCount })}
         </span>
       </div>
 
@@ -102,7 +106,7 @@ export function IncludedAccessorySummary({
               ) : (
                 <div className="grid h-full place-items-center px-2 text-center">
                   <p className="text-2xs text-background/60 font-semibold">
-                    Imagine indisponibilă
+                    {t("imageUnavailable")}
                   </p>
                 </div>
               )}
@@ -121,7 +125,9 @@ export function IncludedAccessorySummary({
 
             <div className="border-background/15 border-t px-3 py-2.5">
               <p className="text-2xs text-primary font-bold tracking-[0.14em] uppercase">
-                {item.kind === "battery" ? "Acumulator" : "Încărcător"}
+                {item.kind === "battery"
+                  ? t("batteryLabel")
+                  : t("chargerLabel")}
               </p>
               <h3
                 className="text-background mt-1 line-clamp-2 text-xs leading-snug font-semibold"

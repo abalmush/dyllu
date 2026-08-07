@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 import { HttpTypes } from "@medusajs/types";
 
 import { Badge } from "@/components/atoms/badge";
@@ -22,20 +23,20 @@ type Props = {
   selectedVariant?: HttpTypes.StoreProductVariant;
 };
 
-export default function SetProductTemplate({
+export default async function SetProductTemplate({
   product,
   region,
   images,
   selectedVariant,
 }: Props) {
+  const t = await getTranslations("SetProductTemplate");
   const parsedItems = parseKitItems(
     getVariantDescription(product, selectedVariant)
   );
   const pieceCount =
     getSetCount(product, parsedItems) || getPieceCount(parsedItems);
   const setPieces = toSetPieces(parsedItems);
-  const summary =
-    "Set complet organizat ca un singur SKU, cu accent pe piesele incluse și pregătit pentru utilizare imediată.";
+  const summary = t("summary");
 
   return (
     <>
@@ -50,7 +51,9 @@ export default function SetProductTemplate({
             <div className="flex flex-wrap items-center gap-2">
               <ProductTypeBadge type="set" count={pieceCount || undefined} />
               {pieceCount > 0 && (
-                <Badge variant="secondary">{pieceCount} piese în set</Badge>
+                <Badge variant="secondary">
+                  {t("piecesInSet", { count: pieceCount })}
+                </Badge>
               )}
             </div>
             <p className="text-muted-foreground small:text-base text-sm leading-relaxed">

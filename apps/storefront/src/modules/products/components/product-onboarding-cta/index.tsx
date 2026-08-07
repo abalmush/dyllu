@@ -1,5 +1,6 @@
 import { Button, Container, Text } from "@lib/ui-compat";
 import { cookies as nextCookies } from "next/headers";
+import { getTranslations } from "next-intl/server";
 
 async function ProductOnboardingCta() {
   if (process.env.NODE_ENV === "production") return null;
@@ -12,17 +13,17 @@ async function ProductOnboardingCta() {
     return null;
   }
 
+  const t = await getTranslations("ProductOnboardingCta");
+
   return (
-    <Container className="h-full w-full max-w-4xl bg-ui-bg-subtle p-8">
+    <Container className="bg-ui-bg-subtle h-full w-full max-w-4xl p-8">
       <div className="center flex flex-col gap-y-4">
-        <Text className="text-xl text-ui-fg-base">
-          Produsul demo a fost creat cu succes! 🎉
-        </Text>
+        <Text className="text-ui-fg-base text-xl">{t("successMessage")}</Text>
         <Text className="text-small-regular text-ui-fg-subtle">
-          Poți continua configurarea magazinului din panoul de administrare.
+          {t("continueMessage")}
         </Text>
         <a href="http://localhost:9000/backend/orders?onboarding_step=create_order_nextjs">
-          <Button className="w-full">Continuă configurarea în admin</Button>
+          <Button className="w-full">{t("continueCta")}</Button>
         </a>
       </div>
     </Container>

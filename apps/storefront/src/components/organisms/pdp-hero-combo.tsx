@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { Check, Package, PackageX, ShoppingCart } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@lib/utils";
 import { Button } from "@/components/atoms/button";
@@ -58,11 +59,12 @@ export function PdpHeroCombo({
   descriptionContent,
   includedContent,
 }: Props) {
+  const t = useTranslations("PdpHeroCombo");
   const heroSrc = product.thumbnail ?? product.images?.[0]?.url;
   const card = useInfoCardController(product);
 
   return (
-    <PdpHeroShell label="Prezentare produs și conținut inclus">
+    <PdpHeroShell label={t("sectionLabel")}>
       {layout === "tiles" && (
         <ComboTiles
           heroSrc={heroSrc}
@@ -132,6 +134,7 @@ type LayoutProps = {
 };
 
 function IncludedHeading({ label, count }: { label: string; count?: number }) {
+  const t = useTranslations("PdpHeroCombo");
   return (
     <div className="text-background mb-4 flex items-center gap-2">
       <Package className="size-4" />
@@ -140,7 +143,7 @@ function IncludedHeading({ label, count }: { label: string; count?: number }) {
       </span>
       {count != null && (
         <span className="bg-background/20 text-2xs rounded-full px-2 py-0.5 font-bold tracking-[0.12em]">
-          {count} piese
+          {t("piecesCount", { count })}
         </span>
       )}
     </div>
@@ -185,12 +188,16 @@ function ComboTiles({
   descriptionContent,
   includedContent,
 }: LayoutProps) {
+  const t = useTranslations("PdpHeroCombo");
   const units = expandUnits(items);
 
   return (
     <div className="medium:grid-cols-[1.05fr_minmax(0,0.95fr)] medium:items-center mx-auto grid max-w-[1280px] gap-12">
       <div className="space-y-4">
-        <IncludedHeading label="Ce este inclus" count={units.length + 1} />
+        <IncludedHeading
+          label={t("includedHeading")}
+          count={units.length + 1}
+        />
         <div className="medium:gap-4 grid aspect-5/4 w-full grid-cols-[3fr_1fr] gap-4">
           <div className="clip-corner-cut-lg clip-shadow-lg bg-background ring-foreground/10 relative overflow-hidden ring-1">
             <ProductMedia
@@ -200,7 +207,7 @@ function ComboTiles({
               padding="p-8"
             />
             <span className="bg-primary text-2xs text-primary-foreground absolute top-3 left-3 rounded-full px-2.5 py-1 font-bold tracking-[0.14em] uppercase">
-              Produs principal
+              {t("mainProduct")}
             </span>
           </div>
 
@@ -249,11 +256,10 @@ function ComboRow({
   descriptionContent,
   includedContent,
 }: LayoutProps) {
+  const t = useTranslations("PdpHeroCombo");
   const units = expandUnits(items);
   const includedBadge =
-    units.length > 0
-      ? `${units.length} ${units.length === 1 ? "articol inclus" : "articole incluse"}`
-      : undefined;
+    units.length > 0 ? t("itemsIncluded", { count: units.length }) : undefined;
 
   return (
     <div className="medium:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)] medium:items-start mx-auto grid max-w-[1280px] gap-6">
@@ -261,7 +267,7 @@ function ComboRow({
         <ProductStage
           heroSrc={heroSrc}
           product={product}
-          heading="Produs principal"
+          heading={t("mainProduct")}
           includedBadge={includedBadge}
           aspectClassName="aspect-5/4 medium:min-h-[420px]"
         />
@@ -291,10 +297,11 @@ function ComboGrid({
   descriptionContent,
   includedContent,
 }: LayoutProps) {
+  const t = useTranslations("PdpHeroCombo");
   const units = expandUnits(items);
   const includedBadge =
     units.length > 0
-      ? `${units.length} ${units.length === 1 ? "piesă inclusă" : "piese incluse"}`
+      ? t("piecesIncludedBadge", { count: units.length })
       : undefined;
 
   return (
@@ -303,7 +310,7 @@ function ComboGrid({
         <ProductStage
           heroSrc={heroSrc}
           product={product}
-          heading="Set gata de lucru"
+          heading={t("readyToUseSet")}
           includedBadge={includedBadge}
           aspectClassName="aspect-square medium:min-h-[440px]"
         />
@@ -376,13 +383,14 @@ function ComboAddon({
   afterTitleContent,
   descriptionContent,
 }: LayoutProps) {
+  const t = useTranslations("PdpHeroCombo");
   return (
     <div className="medium:grid-cols-[1.05fr_minmax(0,0.95fr)] medium:items-start mx-auto grid max-w-[1280px] gap-12">
       <div className="space-y-4">
         <div className="text-background flex items-center gap-2">
           <Check className="size-4" />
           <span className="text-xs font-semibold tracking-[0.2em] uppercase">
-            Produsul tău
+            {t("yourProduct")}
           </span>
         </div>
 
@@ -395,7 +403,7 @@ function ComboAddon({
           />
           <span className="bg-success text-2xs text-background absolute top-4 left-4 flex items-center gap-1.5 rounded-full px-4 py-1 font-bold tracking-[0.14em] uppercase">
             <Check className="size-3" />
-            Inclus
+            {t("included")}
           </span>
         </div>
 
@@ -409,11 +417,10 @@ function ComboAddon({
           <PackageX className="text-warning mt-0.5 size-5 shrink-0" />
           <div>
             <p className="text-foreground text-sm font-bold tracking-[0.12em] uppercase">
-              Nu sunt incluse în acest set
+              {t("notIncludedInSet")}
             </p>
             <p className="text-muted-foreground text-sm">
-              Ai nevoie de accesoriile de mai jos ca să folosești produsul.
-              Adaugă-le în coș dacă nu le ai deja.
+              {t("notIncludedInSetDescription")}
             </p>
           </div>
         </CutBorder>
@@ -431,7 +438,7 @@ function ComboAddon({
               <div className="relative aspect-square">
                 <ProductMedia src={item.image} alt={item.name} padding="p-4" />
                 <span className="bg-warning text-2xs text-warning-foreground absolute top-2 right-2 rounded-full px-2 py-0.5 font-bold tracking-widest uppercase">
-                  Nu e inclus
+                  {t("notIncludedShort")}
                 </span>
               </div>
               <div className="flex flex-1 flex-col gap-2 p-4">
@@ -454,7 +461,7 @@ function ComboAddon({
                   className="clip-corner-cut-sm w-full rounded-none"
                 >
                   <ShoppingCart className="size-4" />
-                  Adaugă în coș
+                  {t("addToCart")}
                 </Button>
               </div>
             </CutBorder>

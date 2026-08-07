@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Minus, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@lib/utils";
 
@@ -24,6 +25,7 @@ export function QuantityStepper({
   className,
   size = "md",
 }: QuantityStepperProps) {
+  const t = useTranslations("QuantityStepper");
   const dec = () => onChange?.(Math.max(min, value - 1));
   const inc = () => onChange?.(Math.min(max, value + 1));
   const sizeCls =
@@ -31,7 +33,7 @@ export function QuantityStepper({
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-md border border-border bg-background",
+        "border-border bg-background inline-flex items-center rounded-md border",
         sizeCls,
         disabled && "opacity-50",
         className
@@ -39,10 +41,10 @@ export function QuantityStepper({
     >
       <button
         type="button"
-        aria-label="Micșorează cantitatea"
+        aria-label={t("decrease")}
         onClick={dec}
         disabled={disabled || value <= min}
-        className="grid place-items-center text-foreground transition-colors hover:bg-muted disabled:opacity-40"
+        className="text-foreground hover:bg-muted grid place-items-center transition-colors disabled:opacity-40"
       >
         <Minus aria-hidden="true" className="size-4" />
       </button>
@@ -54,10 +56,10 @@ export function QuantityStepper({
       </span>
       <button
         type="button"
-        aria-label="Mărește cantitatea"
+        aria-label={t("increase")}
         onClick={inc}
         disabled={disabled || value >= max}
-        className="grid place-items-center text-foreground transition-colors hover:bg-muted disabled:opacity-40"
+        className="text-foreground hover:bg-muted grid place-items-center transition-colors disabled:opacity-40"
       >
         <Plus aria-hidden="true" className="size-4" />
       </button>

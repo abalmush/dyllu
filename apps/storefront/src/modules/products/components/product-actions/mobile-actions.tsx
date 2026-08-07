@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { ChevronUp, ShoppingBag } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
 
 import { cn } from "@lib/utils";
@@ -46,6 +47,7 @@ export default function MobileActions({
   show,
   optionsDisabled,
 }: Props) {
+  const t = useTranslations("ProductActions");
   const [open, setOpen] = React.useState(false);
 
   const { variantPrice, cheapestPrice } = getProductPrice({
@@ -85,7 +87,7 @@ export default function MobileActions({
                 data-testid="mobile-actions-button"
               >
                 <ChevronUp className="size-4" />
-                Opțiuni
+                {t("mobile.options")}
               </Button>
               <Button
                 variant="brand"
@@ -97,7 +99,7 @@ export default function MobileActions({
                 data-testid="mobile-cart-button"
               >
                 <ShoppingBag className="size-4" />
-                {!inStock ? "Stoc epuizat" : "Adaugă"}
+                {!inStock ? t("buyBox.soldOut") : t("buyBox.addShort")}
               </Button>
             </>
           ) : (
@@ -111,7 +113,7 @@ export default function MobileActions({
               data-testid="mobile-cart-button"
             >
               <ShoppingBag className="size-4" />
-              {!inStock ? "Stoc epuizat" : "Adaugă în coș"}
+              {!inStock ? t("buyBox.soldOut") : t("buyBox.addToCart")}
             </Button>
           )}
         </div>
@@ -120,7 +122,7 @@ export default function MobileActions({
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl">
           <SheetHeader>
-            <SheetTitle>Alege opțiuni</SheetTitle>
+            <SheetTitle>{t("mobile.chooseOptionsTitle")}</SheetTitle>
           </SheetHeader>
           <div className="mt-4 flex flex-col gap-6">
             {(product.options || []).map((option) =>
@@ -158,10 +160,10 @@ export default function MobileActions({
             >
               <ShoppingBag className="size-4" />
               {!variant
-                ? "Selectează varianta"
+                ? t("buyBox.selectVariant")
                 : !inStock
-                  ? "Stoc epuizat"
-                  : "Adaugă în coș"}
+                  ? t("buyBox.soldOut")
+                  : t("buyBox.addToCart")}
             </Button>
           </div>
         </SheetContent>

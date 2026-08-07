@@ -6,6 +6,7 @@ import { isEqual } from "lodash";
 import { ShoppingBag } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import AutoplayPlugin from "embla-carousel-autoplay";
+import { useTranslations } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
 
 import { useCart } from "@lib/cart/cart-context";
@@ -44,6 +45,7 @@ export const IMAGE_BG_NEUTRALIZE: React.CSSProperties = {
 };
 
 export function PdpHeroVariant({ product, eyebrow, variant }: Props) {
+  const t = useTranslations("PdpHero");
   const images = (product.images ?? []).filter((i) => i.url);
   const bgSrc = product.thumbnail ?? images[0]?.url;
 
@@ -51,7 +53,7 @@ export function PdpHeroVariant({ product, eyebrow, variant }: Props) {
 
   return (
     <section
-      aria-label={`Prezentare produs — variant ${variant}`}
+      aria-label={t("sectionLabelVariant", { variant })}
       className="relative isolate overflow-hidden"
     >
       <BackgroundLayer
@@ -162,6 +164,7 @@ function BackgroundLayer({
 }
 
 function SpotlightLayout({ images, product, eyebrow, card }: LayoutProps) {
+  const t = useTranslations("PdpHero");
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: images.length > 1,
     align: "center",
@@ -211,7 +214,7 @@ function SpotlightLayout({ images, product, eyebrow, card }: LayoutProps) {
                 key={i}
                 type="button"
                 onClick={() => emblaApi?.scrollTo(i)}
-                aria-label={`Imaginea ${i + 1}`}
+                aria-label={t("imageIndicator", { index: i + 1 })}
                 className={cn(
                   "h-1.5 rounded-full transition-all",
                   i === idx
@@ -260,6 +263,7 @@ function VariantTilesMarquee({
   eyebrow?: string;
   card: ReturnType<typeof useInfoCardController>;
 }) {
+  const t = useTranslations("PdpHero");
   const variants = product.variants ?? [];
 
   const tileFor = (
@@ -293,7 +297,7 @@ function VariantTilesMarquee({
                 type="button"
                 role="radio"
                 aria-checked={isSelected}
-                aria-label={`Selectează varianta ${label}`}
+                aria-label={t("selectVariantAria", { label })}
                 onClick={() => {
                   if (primaryOptionId) card.onSelectOption(variantValue);
                 }}
@@ -328,13 +332,13 @@ function VariantTilesMarquee({
                 {/* Top-right "selected" pill */}
                 {isSelected && (
                   <span className="bg-primary text-2xs text-primary-foreground absolute top-3 right-3 rounded-full px-2.5 py-1 font-bold tracking-[0.18em] uppercase">
-                    Selectat
+                    {t("selectedPill")}
                   </span>
                 )}
 
                 <div className="relative z-1 space-y-1">
                   <span className="text-2xs text-brand-800 font-semibold tracking-[0.18em] uppercase">
-                    {card.primaryOption?.title ?? "Variantă"}
+                    {card.primaryOption?.title ?? t("variantFallback")}
                   </span>
                   <h3 className="font-display text-background small:text-2xl text-xl leading-tight font-bold">
                     {variantValue}
@@ -498,6 +502,7 @@ export function InfoCard({
   afterTitleContent?: React.ReactNode;
   descriptionContent?: React.ReactNode;
 }) {
+  const t = useTranslations("PdpHero");
   const {
     selectedVariant,
     options,
@@ -517,10 +522,10 @@ export function InfoCard({
 
   const ctaLabel =
     isMultiVariant && !selectedVariant
-      ? "Selectează varianta"
+      ? t("selectVariant")
       : justAdded
-        ? "Adăugat ✓"
-        : "Adaugă în coș";
+        ? t("added")
+        : t("addToCart");
 
   return (
     <div
@@ -548,7 +553,7 @@ export function InfoCard({
           <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
             {showFromPrefix && (
               <span className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
-                de la
+                {t("fromPrefix")}
               </span>
             )}
             <span className="font-display text-display-lg text-foreground small:text-display-xl medium:text-display-xl leading-none font-extrabold tracking-tight">
@@ -569,7 +574,7 @@ export function InfoCard({
                 inStock ? "bg-success" : "bg-destructive"
               )}
             />
-            {inStock ? "În stoc · 24–48h" : "Indisponibil"}
+            {inStock ? t("inStockStatus") : t("outOfStockStatus")}
           </span>
         </div>
 
@@ -591,7 +596,7 @@ export function InfoCard({
               <div
                 className="flex flex-wrap gap-1.5"
                 role="radiogroup"
-                aria-label={primaryOption.title ?? "Variantă"}
+                aria-label={primaryOption.title ?? t("variantFallback")}
               >
                 {optionValues.slice(0, 12).map((v) => {
                   const selected = options[primaryOption.id ?? ""] === v;
@@ -625,7 +630,7 @@ export function InfoCard({
           <div className="small:grid-cols-[132px_minmax(0,1fr)] small:items-end grid gap-4">
             <div className="space-y-2">
               <span className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
-                Cantitate
+                {t("quantityLabel")}
               </span>
               <QuantityStepper
                 value={quantity}

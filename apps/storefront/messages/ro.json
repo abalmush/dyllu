@@ -145,7 +145,8 @@
   },
   "SiteContact": {
     "hoursShort": "L–S 08:00–18:00 · D 09:00–14:00",
-    "showroomSummary": "Rețea de magazine DYLLU în toată Moldova"
+    "showroomSummary": "Rețea de magazine DYLLU în toată Moldova",
+    "citiesSummary": "Chișinău, Bălți, Orhei, Edineț, Ungheni, Căușeni, Fălești și Cahul"
   },
   "SiteFooter": {
     "tagline": "DYLLU este partenerul tău pentru scule profesionale, echipamente de atelier și soluții de protecție în Republica Moldova.",
@@ -319,5 +320,574 @@
     "popularScrewdrivers": "Șurubelnițe",
     "popularMetalDiscs": "Discuri pe metal",
     "popularSocketWrenches": "Chei tubulare"
+  },
+  "Homepage": {
+    "promos": {
+      "acumulator": {
+        "eyebrow": "Platforma DYLLU cu acumulator",
+        "title": "Scule fără cablu, gata de lucru",
+        "description": "Descoperă toate sculele cu acumulator pentru atelier, șantier, grădină sau casă.",
+        "ctaLabel": "Vezi sculele cu acumulator"
+      },
+      "wood": {
+        "eyebrow": "Atelier de lemn",
+        "title": "Taie, ajustează, finisează",
+        "ctaLabel": "Vezi sculele"
+      },
+      "metal": {
+        "eyebrow": "Prelucrarea metalului",
+        "title": "Taie, șlefuiește, sudează",
+        "ctaLabel": "Vezi sculele pentru metal"
+      }
+    },
+    "bestsellers": {
+      "eyebrow": "Scule cu acumulator",
+      "title": "Descoperă gama DYLLU",
+      "viewAllLabel": "Vezi toate sculele"
+    },
+    "anatomy": {
+      "eyebrow": "Anatomia DYLLU",
+      "title": "Ce găsești sub carcasă",
+      "intro": "Fiecare produs trece prin testele noastre. Iată componentele care contează — și de ce."
+    }
+  },
+  "TrustBand": {
+    "freeShipping": {
+      "title": "Livrare gratuită",
+      "description": "În Chișinău pentru comenzi peste 1.000 MDL."
+    },
+    "returns": {
+      "title": "Retur în 14 zile",
+      "description": "Pentru produse neutilizate, complete și ambalate original."
+    },
+    "orderConfirmation": {
+      "title": "Confirmare comandă",
+      "description": "Detaliile de plată se stabilesc la procesare."
+    },
+    "support": {
+      "title": "Suport profesional",
+      "description": "Consultanți tehnici L–V, 9:00–18:00."
+    }
+  },
+  "ShopStories": {
+    "eyebrow": "Alege după lucrare",
+    "title": "Unelte pentru atelier, șantier și service.",
+    "description": "Pornește de la proiectul tău și găsește mai repede gama potrivită.",
+    "viewSelection": "Vezi selecția",
+    "woodworking": {
+      "eyebrow": "Atelier de lemn",
+      "title": "Precizie de la prima tăiere",
+      "description": "Descoperă sculele electrice și accesoriile pentru debitare, ajustare și finisare."
+    },
+    "autoService": {
+      "eyebrow": "Service auto",
+      "title": "Unelte pregătite pentru intervenții zilnice",
+      "description": "Explorează soluțiile DYLLU pentru întreținere, reparații și organizarea service-ului."
+    }
+  },
+  "ToolFamiliesStrip": {
+    "eyebrow": "Tot ce produce DYLLU",
+    "title": "Alege după tipul sculei."
+  },
+  "DeliveryTrust": {
+    "fastShipping": {
+      "title": "Livrare rapidă",
+      "detail": "Gratuită peste 1.000 MDL în Chișinău · 24–48h"
+    },
+    "confirmedPayment": {
+      "title": "Plată confirmată la procesare",
+      "detail": "Echipa DYLLU validează metoda potrivită pentru comandă"
+    },
+    "warranty": {
+      "title": "Garanție 24 luni",
+      "detail": "Produse originale DYLLU cu factură"
+    },
+    "returns": {
+      "title": "Retur în 14 zile",
+      "detail": "Fără întrebări, dacă produsul e nefolosit"
+    },
+    "support": {
+      "title": "Suport tehnic",
+      "detail": "Consultanță pentru alegere, livrare și service"
+    }
+  },
+  "FreeShippingNudge": {
+    "activated": "Livrare gratuită activată!",
+    "unlock": "Deblochează livrarea gratuită",
+    "remaining": "Mai ai doar <amount>{value}</amount> până la prag",
+    "viewCart": "Vezi coșul",
+    "viewProducts": "Vezi produsele"
+  },
+  "ComboProductTemplate": {
+    "compatibleWithPlatform": "Compatibil cu platforma {platform}.",
+    "piecesIncluded": "{count} piese incluse",
+    "summaryWithPlatform": "Primești produsul și toate accesoriile afișate, compatibile cu sistemul de acumulatori {platform}.",
+    "summary": "Primești produsul și toate accesoriile afișate, gata de lucru.",
+    "fallbackProductName": "Acest produs",
+    "compatibilityNote": "Poți adăuga baterii sau încărcătoare de rezervă compatibile cu {platform}."
+  },
+  "KitProductTemplate": {
+    "compatibleWithPlatform": "Compatibil cu platforma {platform}.",
+    "piecesIncluded": "{count} piese incluse",
+    "summaryWithPlatform": "Primești toate sculele și accesoriile afișate, compatibile cu sistemul de acumulatori {platform}.",
+    "summary": "Primești toate sculele și accesoriile afișate.",
+    "fallbackProductName": "Acest set",
+    "compatibilityNote": "Poți completa setul cu acumulatori și încărcătoare din același sistem {platform}."
+  },
+  "SetProductTemplate": {
+    "piecesInSet": "{count} piese în set",
+    "summary": "Set complet organizat ca un singur SKU, cu accent pe piesele incluse și pregătit pentru utilizare imediată."
+  },
+  "VariantProductStage": {
+    "stageLabel": "Prezentare și cumpărare produs",
+    "includedAccessoryFallback": "Accesoriu inclus",
+    "orderBenefitsLabel": "Avantajele comenzii"
+  },
+  "LinkedProducts": {
+    "relation": {
+      "accessory": "Accesoriu",
+      "spare-part": "Piesă de schimb",
+      "recommended": "Recomandat",
+      "consumable": "Consumabil"
+    },
+    "compatibleEyebrow": "Accesorii & piese compatibile",
+    "compatibleHeading": "Se potrivește cu {mainName}",
+    "compatibleDescription": "Produse separate, vândute individual, dar compatibile cu acest model. Fiecare are propria pagină și poate fi cumpărat oricând.",
+    "viewProductAria": "Vezi {name}",
+    "inStock": "În stoc",
+    "viewProduct": "Vezi produsul",
+    "bundleHeading": "Cumpărate frecvent împreună",
+    "mainProductBadge": "Acest produs",
+    "bundleTotal": "Total set",
+    "addAllToCart": "Adaugă toate în coș"
+  },
+  "PdpHero": {
+    "sectionLabel": "Prezentare produs",
+    "sectionLabelVariant": "Prezentare produs — variant {variant}",
+    "previousImage": "Imaginea anterioară",
+    "nextImage": "Imaginea următoare",
+    "imageIndicator": "Imaginea {index}",
+    "fromPrefix": "de la",
+    "variantFallback": "Variantă",
+    "selectVariant": "Selectează varianta",
+    "added": "Adăugat ✓",
+    "addToCart": "Adaugă în coș",
+    "selectVariantAria": "Selectează varianta {label}",
+    "selectedPill": "Selectat",
+    "quantityLabel": "Cantitate",
+    "inStockStatus": "În stoc · 24–48h",
+    "outOfStockStatus": "Indisponibil"
+  },
+  "Showrooms": {
+    "note1": "Magazin nou lângă Gara Centrală Auto",
+    "note2": "Magazin DYLLU",
+    "note3": "Ridicare, service și consultanță tehnică"
+  },
+  "InfoPageTemplate": {
+    "supportEyebrow": "Suport DYLLU",
+    "needHelpTitle": "Ai nevoie de ajutor?",
+    "needHelpBody": "Echipa noastră te poate ajuta cu selecția produselor, confirmarea comenzilor, service și întrebări despre livrare.",
+    "hoursPrefix": "Program general: {hours}",
+    "contactCta": "Pagina de contact"
+  },
+  "BrandsPage": {
+    "eyebrow": "Branduri și selecție",
+    "title": "Gama DYLLU",
+    "description": "Descoperă cum sunt structurate gamele noastre și ce platforme merită alese pentru atelier, șantier sau bricolaj acasă.",
+    "metaTitle": "Branduri și ghiduri",
+    "sections": [
+      {
+        "title": "DYLLU",
+        "paragraphs": [
+          "DYLLU reunește produse pentru lucru zilnic: scule electrice, scule manuale, consumabile, accesorii și echipamente pentru grădină sau atelier.",
+          "Selecția este construită în jurul produselor care oferă raport bun între preț, fiabilitate și compatibilitate între accesorii sau acumulatori."
+        ]
+      },
+      {
+        "title": "Cum alegi platforma potrivită",
+        "bullets": [
+          "Pentru utilizare frecventă, alege gamele pe acumulator cu aceeași platformă, ca să refolosești bateriile și încărcătoarele.",
+          "Pentru lucrări grele sau repetitive, alege scule cu motor fără perii și seturi complete.",
+          "Pentru lucrări ocazionale, un produs separat și accesoriile compatibile sunt de obicei alegerea cea mai practică."
+        ]
+      },
+      {
+        "title": "Seturi și produse separate",
+        "bullets": [
+          "Seturile includ mai multe produse compatibile și sunt gata de lucru.",
+          "Seturile pe acumulator folosesc același sistem de baterii și încărcătoare.",
+          "Produsele separate sunt potrivite când completezi un sistem existent sau adaugi accesorii dedicate."
+        ]
+      },
+      {
+        "title": "Ai nevoie de recomandare?",
+        "paragraphs": [
+          "Dacă încă nu e clar ce se potrivește proiectului tău, echipa DYLLU te poate ajuta să alegi între variante, platforme și accesorii compatibile."
+        ],
+        "note": "Folosește pagina de contact pentru recomandări comerciale, service sau verificarea stocului."
+      }
+    ]
+  },
+  "ShippingPage": {
+    "eyebrow": "Livrare și confirmare",
+    "title": "Cum procesăm comenzile DYLLU",
+    "description": "Livrăm în toată Moldova și confirmăm fiecare comandă înainte de expediere, ca să ai claritate asupra stocului, plății și termenului estimat.",
+    "metaTitle": "Livrare și plată",
+    "sections": [
+      {
+        "title": "Acoperire și timp de procesare",
+        "paragraphs": [
+          "Comenzile se procesează în zilele lucrătoare, iar echipa DYLLU te contactează pentru confirmarea detaliilor esențiale înainte de expediere.",
+          "În Chișinău și suburbii, livrarea este de regulă mai rapidă. Pentru alte localități, termenul exact se confirmă după verificarea stocului și a rutei."
+        ]
+      },
+      {
+        "title": "Costuri de livrare",
+        "bullets": [
+          "Pentru comenzile peste 1.000 MDL în Chișinău se aplică pragul de livrare gratuită afișat pe site.",
+          "Pentru alte localități sau servicii speciale, costul final de livrare este confirmat înainte de expediere.",
+          "La finalizarea comenzii vezi opțiunile disponibile, iar costul se actualizează în total."
+        ]
+      },
+      {
+        "title": "Plată și confirmare",
+        "paragraphs": [
+          "Comanda se plasează online, iar modalitatea finală de plată se confirmă împreună cu echipa DYLLU.",
+          "Pentru comenzi pe firmă putem pregăti factura și detaliile necesare."
+        ]
+      },
+      {
+        "title": "Ridicare și suport",
+        "bullets": [
+          "Pentru anumite produse poate fi disponibilă și ridicarea din magazin.",
+          "Dacă ai nevoie de o livrare urgentă sau de coordonare pentru proiect, contactează-ne înainte sau imediat după plasarea comenzii."
+        ]
+      }
+    ]
+  },
+  "ReturnsPage": {
+    "eyebrow": "Retur și garanție",
+    "title": "Retururi simple, service clar",
+    "description": "Vrem să știi din start cum se tratează retururile, schimburile și solicitările de service pentru produsele DYLLU.",
+    "metaTitle": "Returnări și garanție",
+    "sections": [
+      {
+        "title": "Retur în 14 zile",
+        "paragraphs": [
+          "Poți solicita retur pentru produsele neutilizate, complete și în ambalajul lor original, în termen de 14 zile de la recepție.",
+          "Pentru aprobarea rapidă, păstrează documentele comenzii și contactează-ne cu numărul comenzii."
+        ]
+      },
+      {
+        "title": "Produse care necesită verificare",
+        "bullets": [
+          "Consumabilele desigilate sau produsele folosite pot necesita validare suplimentară înainte de aprobarea returului.",
+          "Seturile și produsele cu mai multe piese trebuie returnate complet.",
+          "Dacă produsul a fost livrat cu defect sau incomplet, anunță-ne imediat pentru prioritate la soluționare."
+        ]
+      },
+      {
+        "title": "Garanție și service",
+        "paragraphs": [
+          "Pentru produsele eligibile, garanția se aplică pe baza documentelor de achiziție și a verificării tehnice făcute de echipa noastră.",
+          "Service-ul și piesele de schimb se coordonează prin echipa DYLLU, iar timpul de soluționare depinde de tipul produsului și disponibilitatea componentelor."
+        ]
+      },
+      {
+        "title": "Cum inițiezi solicitarea",
+        "bullets": [
+          "Trimite numărul comenzii și o descriere scurtă a situației.",
+          "Adaugă poze sau video dacă e vorba de defect, lipsă de piese sau deteriorare la transport.",
+          "Noi revenim cu pașii pentru retur, schimb sau service."
+        ]
+      }
+    ]
+  },
+  "TermsPage": {
+    "eyebrow": "Termeni și condiții",
+    "title": "Condițiile de utilizare ale magazinului online DYLLU",
+    "description": "Această pagină rezumă modul în care funcționează comenzile, informațiile comerciale și utilizarea generală a site-ului.",
+    "metaTitle": "Termeni și condiții",
+    "sections": [
+      {
+        "title": "Plasarea comenzii",
+        "paragraphs": [
+          "Prin plasarea unei comenzi pe site, transmiți o solicitare de cumpărare pentru produsele selectate și accepți procesul de confirmare realizat de echipa DYLLU.",
+          "Confirmarea finală a comenzii depinde de validarea stocului, a datelor de livrare și a modului de plată agreat."
+        ]
+      },
+      {
+        "title": "Prețuri, stocuri și informații despre produse",
+        "bullets": [
+          "Depunem eforturi să păstrăm informațiile despre produse, prețuri și stocuri cât mai exacte.",
+          "În caz de eroare evidentă de afișare sau indisponibilitate, te contactăm înainte de procesarea finală a comenzii.",
+          "Imaginile și descrierile au rol informativ; pot exista diferențe minore între loturi sau accesorii incluse."
+        ]
+      },
+      {
+        "title": "Livrare, retur și garanție",
+        "paragraphs": [
+          "Condițiile de livrare, retur și garanție sunt descrise în paginile dedicate și confirmate la procesarea comenzii.",
+          "Pentru comenzi pe firmă sau cerințe speciale pot exista condiții comerciale suplimentare, comunicate separat."
+        ]
+      },
+      {
+        "title": "Utilizarea site-ului",
+        "bullets": [
+          "Nu este permisă utilizarea abuzivă a formularelor, a conturilor sau a conținutului publicat pe site.",
+          "Conținutul vizual și textual DYLLU poate fi folosit doar cu acordul nostru sau în limitele legii aplicabile."
+        ]
+      },
+      {
+        "title": "Contact",
+        "paragraphs": [
+          "Pentru orice clarificare comercială, juridică sau de suport, te rugăm să folosești datele publicate pe pagina de contact."
+        ]
+      }
+    ]
+  },
+  "PrivacyPage": {
+    "eyebrow": "Confidențialitate",
+    "title": "Cum folosim și protejăm datele tale",
+    "description": "Colectăm doar datele necesare pentru funcționarea contului, procesarea comenzilor și comunicarea legată de serviciile DYLLU.",
+    "metaTitle": "Politica de confidențialitate",
+    "sections": [
+      {
+        "title": "Ce date colectăm",
+        "bullets": [
+          "Date de identificare și contact: nume, email, telefon, adresă de livrare sau facturare.",
+          "Date despre comenzi, produse vizualizate și acțiuni necesare funcționării coșului și finalizării comenzii.",
+          "Date tehnice de bază necesare pentru securitate, performanță și diagnosticare."
+        ]
+      },
+      {
+        "title": "Cum folosim datele",
+        "bullets": [
+          "Pentru creare cont, autentificare și administrarea profilului tău.",
+          "Pentru procesarea comenzilor, confirmarea livrării, suport și service.",
+          "Pentru îmbunătățirea experienței în magazinul online și pentru comunicările solicitate de tine."
+        ]
+      },
+      {
+        "title": "Partajare și securitate",
+        "paragraphs": [
+          "Datele sunt folosite intern și pot fi partajate doar cu partenerii necesari pentru operarea serviciului, cum ar fi livrarea, infrastructura tehnică sau emiterea documentelor fiscale.",
+          "Aplicăm măsuri rezonabile de securitate pentru a proteja datele împotriva accesului neautorizat, pierderii sau modificării."
+        ]
+      },
+      {
+        "title": "Drepturile tale",
+        "bullets": [
+          "Poți solicita actualizarea sau corectarea datelor din cont.",
+          "Poți cere detalii despre datele asociate comenzilor tale și despre modul în care sunt folosite.",
+          "Pentru solicitări de ștergere, opoziție sau clarificări, contactează echipa DYLLU."
+        ]
+      },
+      {
+        "title": "Contact pentru date personale",
+        "paragraphs": [
+          "Dacă ai întrebări despre confidențialitate sau despre modul în care sunt prelucrate datele tale, folosește datele de pe pagina de contact."
+        ]
+      }
+    ]
+  },
+  "ContactPage": {
+    "metaTitle": "Contact",
+    "metaDescription": "Date de contact, magazine și canale rapide pentru suportul DYLLU în Moldova.",
+    "heroEyebrow": "Contact DYLLU",
+    "heroTitle": "Suntem aproape de proiectul tău",
+    "heroLede": "Folosește datele de mai jos pentru comenzi, service, verificarea stocului sau coordonarea unei livrări.",
+    "phoneLabel": "Telefon",
+    "emailLabel": "Email",
+    "hoursLabel": "Program",
+    "citiesLabel": "Rețea magazine",
+    "channelsEyebrow": "Canale directe",
+    "channelsTitle": "Alege cel mai rapid mod de a ne contacta",
+    "channelsDescription": "Pentru solicitări comerciale, suport tehnic și confirmarea comenzilor.",
+    "storesEyebrow": "Magazine DYLLU",
+    "storesTitle": "Puncte principale în Chișinău",
+    "storesDescription": "Pentru vizitare, ridicare și discuții despre produse sau service.",
+    "networkEyebrow": "Rețea națională",
+    "networkTitle": "Suntem prezenți și în alte orașe",
+    "networkDescription": "Extindem constant rețeaua DYLLU, iar informațiile de stoc și transfer între magazine se confirmă prin echipa comercială.",
+    "networkNote": "Pentru confirmarea unui punct de lucru, verificarea stocului sau coordonarea unei ridicări, contactează-ne telefonic sau pe email.",
+    "nextStepEyebrow": "Următorul pas",
+    "nextStepTitle": "Ai nevoie de ofertă sau consultanță?",
+    "nextStepDescription": "Spune-ne de ce ai nevoie și îți recomandăm produsul, setul sau accesoriile potrivite.",
+    "emailCta": "Scrie-ne pe email",
+    "phoneCta": "Sună acum",
+    "catalogCta": "Vezi catalogul"
+  },
+  "ProductActions": {
+    "buyBox": {
+      "inStock": "În stoc",
+      "outOfStock": "Indisponibil",
+      "selectVariant": "Selectează varianta",
+      "soldOut": "Stoc epuizat",
+      "addToCart": "Adaugă în coș",
+      "addShort": "Adaugă",
+      "addWithAccessories": "Adaugă {count} {count, plural, one {produs} other {produse}} · {price}",
+      "fromPricePrefix": "de la",
+      "variantsCount": "{count} variante"
+    },
+    "mobile": {
+      "options": "Opțiuni",
+      "chooseOptionsTitle": "Alege opțiuni"
+    },
+    "configuration": {
+      "ariaFallback": "Configurație",
+      "withBatteryDescription": "Gata de utilizare — include acumulatorul și încărcătorul.",
+      "withoutBatteryDescription": "Doar aparatul. Compatibil cu acumulatoarele DYLLU 20V (vândute separat)."
+    },
+    "powerSupply": {
+      "recommendedBadge": "Recomandat",
+      "priceUnavailable": "Preț indisponibil",
+      "heading": "Sculă fără acumulator și încărcător",
+      "subheading": "Cumpără doar scula sau completeaz-o cu alimentare compatibilă.",
+      "toolOnlyTitle": "Doar scula",
+      "toolOnlyDescription": "Am deja un acumulator compatibil DYLLU P20S.",
+      "withBatteryTitle": "Sculă + acumulator",
+      "withBatteryReadyDescription": "Gata de utilizare, cu încărcător compatibil.",
+      "withBatteryNeedsDescription": "Completează scula cu un acumulator compatibil.",
+      "stepChooseBattery": "Alege acumulatorul",
+      "stepNeedCharger": "Ai nevoie și de încărcător?",
+      "rapidCharger": "Încărcător rapid",
+      "charger": "Încărcător",
+      "chargerCompatibleDescription": "Compatibil cu acumulatorul selectat",
+      "alreadyHaveCharger": "Am deja un încărcător",
+      "batteryBenefitMax": "Autonomie maximă",
+      "batteryBenefitBalanced": "Echilibru optim",
+      "batteryBenefitCompact": "Compact și ușor",
+      "batteryFallbackLabel": "Acumulator"
+    },
+    "powerSupplyStatus": {
+      "batteriesIncludedCount": "{count} acumulatori incluși",
+      "batteryIncluded": "Acumulator inclus",
+      "batteryNotIncluded": "Fără acumulator",
+      "batteryUnknown": "Acumulator: informație de confirmat",
+      "chargerIncluded": "Încărcător inclus",
+      "chargerNotIncluded": "Fără încărcător",
+      "chargerUnknown": "Încărcător: informație de confirmat",
+      "platformP20S": "Platformă DYLLU P20S 20 V",
+      "platformS12": "Platformă DYLLU S12 12 V",
+      "ariaLabel": "Conținut alimentare"
+    }
+  },
+  "ProductPrice": {
+    "fromPricePrefix": "de la"
+  },
+  "ProductTabs": {
+    "srHeading": "Detalii produs",
+    "specLabelMaterial": "Material",
+    "specLabelOrigin": "Țară origine",
+    "specLabelType": "Tip",
+    "specLabelWeight": "Greutate",
+    "specLabelDimensions": "Dimensiuni",
+    "specsTab": "Specificații",
+    "descriptionTab": "Descriere",
+    "shippingTab": "Livrare",
+    "returnsTab": "Retur și garanție",
+    "shippingText": "Livrare în 24–48h în Chișinău, 2–4 zile lucrătoare în restul țării. Livrarea costă 100 MDL și este gratuită de la 1.000 MDL în orașul Chișinău, respectiv de la 2.000 MDL în restul țării. Ridicare din magazin disponibilă în aceeași zi.",
+    "returnsText": "Poți solicita returul în 14 zile pentru produsele neutilizate, complete și în ambalajul original. Garanția se aplică produselor eligibile pe baza documentelor de achiziție și a verificării tehnice."
+  },
+  "RelatedProducts": {
+    "eyebrow": "Selecție DYLLU",
+    "title": "Produse înrudite",
+    "description": "Au mai cumpărat-o profesioniștii care lucrează cu această sculă."
+  },
+  "Thumbnail": {
+    "alt": "Thumbnail"
+  },
+  "ProductGallery": {
+    "imageNumber": "Imaginea {number}",
+    "thumbnailNumber": "Miniatura {number}",
+    "zoomImage": "Mărește imaginea",
+    "productImage": "Imagine produs",
+    "zoomGalleryDescription": "Galerie cu imagini mărite ale produsului.",
+    "zoomGalleryAriaLabel": "Galerie imagini produs",
+    "imageOf": "Imagine {number} / {total}",
+    "productImageNumber": "Imagine produs {number}",
+    "previousImage": "Imaginea precedentă",
+    "nextImage": "Imaginea următoare"
+  },
+  "IncludedAccessorySummary": {
+    "heading": "Ce este inclus",
+    "pieceCount": "{count, plural, one {# piesă} other {# piese}}",
+    "imageUnavailable": "Imagine indisponibilă",
+    "batteryFallbackTitle": "Acumulator inclus",
+    "chargerFallbackTitle": "Încărcător inclus",
+    "batteryLabel": "Acumulator",
+    "chargerLabel": "Încărcător",
+    "alsoInBox": "În cutie mai găsești"
+  },
+  "CompatibleAccessories": {
+    "eyebrow": "Completează-ți trusa",
+    "headingChooseBattery": "Alege alimentarea compatibilă",
+    "headingAddCharger": "Adaugă încărcătorul compatibil",
+    "descriptionBatteryAndCharger": "Alege un acumulator și un încărcător din platforma {platform}.",
+    "descriptionBatteryOnly": "Alege un acumulator din platforma {platform}.",
+    "descriptionChargerOnly": "Acumulatorul este inclus; adaugă un încărcător compatibil {platform}.",
+    "batterySectionLabel": "Acumulator",
+    "chargerSectionLabel": "Încărcător",
+    "added": "Adăugat",
+    "addBattery": "Adaugă acumulator",
+    "addCharger": "Adaugă încărcător"
+  },
+  "ProductOnboardingCta": {
+    "successMessage": "Produsul demo a fost creat cu succes! 🎉",
+    "continueMessage": "Poți continua configurarea magazinului din panoul de administrare.",
+    "continueCta": "Continuă configurarea în admin"
+  },
+  "ProductConfidence": {
+    "whyWeRecommend": "De ce o recomandăm",
+    "comparisonLabel": "Comparație",
+    "legendCompatible": "Compatibil",
+    "legendWorksButNotIdeal": "Funcționează, dar nu ideal",
+    "legendIncompatible": "Incompatibil"
+  },
+  "ProductTypeBadge": {
+    "single": "Produs separat",
+    "set": "Set",
+    "kit": "Set complet",
+    "combo": "Set cu acumulatori",
+    "needsBattery": "Acumulator neinclus",
+    "setWithCount": "{label} · {count} piese"
+  },
+  "QuantityStepper": {
+    "decrease": "Micșorează cantitatea",
+    "increase": "Mărește cantitatea"
+  },
+  "PdpHeroCombo": {
+    "sectionLabel": "Prezentare produs și conținut inclus",
+    "includedHeading": "Ce este inclus",
+    "piecesCount": "{count, plural, other {# piese}}",
+    "mainProduct": "Produs principal",
+    "itemsIncluded": "{count, plural, one {# articol inclus} other {# articole incluse}}",
+    "readyToUseSet": "Set gata de lucru",
+    "piecesIncludedBadge": "{count, plural, one {# piesă inclusă} other {# piese incluse}}",
+    "yourProduct": "Produsul tău",
+    "included": "Inclus",
+    "notIncludedInSet": "Nu sunt incluse în acest set",
+    "notIncludedInSetDescription": "Ai nevoie de accesoriile de mai jos ca să folosești produsul. Adaugă-le în coș dacă nu le ai deja.",
+    "notIncludedShort": "Nu e inclus",
+    "addToCart": "Adaugă în coș"
+  },
+  "PurchaseTrustGrid": {
+    "fastShipping": {
+      "title": "Livrare rapidă",
+      "detail": "Gratuită peste 1.000 MDL în Chișinău"
+    },
+    "confirmedPayment": {
+      "title": "Plată confirmată",
+      "detail": "Metoda se validează la procesarea comenzii"
+    },
+    "warranty": {
+      "title": "Garanție DYLLU",
+      "detail": "24 luni pentru produsele eligibile"
+    },
+    "returns": {
+      "title": "Retur simplu",
+      "detail": "14 zile pentru produsele nefolosite"
+    }
   }
 }

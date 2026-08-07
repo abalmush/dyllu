@@ -6,6 +6,7 @@ import {
   Package,
   type LucideIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Badge, type BadgeProps } from "@/components/atoms/badge";
 
@@ -13,14 +14,14 @@ export type ProductType = "single" | "set" | "kit" | "combo" | "needs-battery";
 
 const TYPE_CONFIG: Record<
   ProductType,
-  { label: string; icon: LucideIcon; variant: BadgeProps["variant"] }
+  { labelKey: string; icon: LucideIcon; variant: BadgeProps["variant"] }
 > = {
-  single: { label: "Produs separat", icon: Package, variant: "outline" },
-  set: { label: "Set", icon: Layers, variant: "secondary" },
-  kit: { label: "Set complet", icon: Boxes, variant: "soft" },
-  combo: { label: "Set cu acumulatori", icon: Boxes, variant: "soft" },
+  single: { labelKey: "single", icon: Package, variant: "outline" },
+  set: { labelKey: "set", icon: Layers, variant: "secondary" },
+  kit: { labelKey: "kit", icon: Boxes, variant: "soft" },
+  combo: { labelKey: "combo", icon: Boxes, variant: "soft" },
   "needs-battery": {
-    label: "Acumulator neinclus",
+    labelKey: "needsBattery",
     icon: BatteryCharging,
     variant: "warning",
   },
@@ -35,9 +36,13 @@ export function ProductTypeBadge({
   count?: number;
   className?: string;
 }) {
-  const { label, icon: Icon, variant } = TYPE_CONFIG[type];
+  const t = useTranslations("ProductTypeBadge");
+  const { labelKey, icon: Icon, variant } = TYPE_CONFIG[type];
+  const label = t(labelKey);
   const text =
-    type === "set" && count != null ? `${label} · ${count} piese` : label;
+    type === "set" && count != null
+      ? t("setWithCount", { label, count })
+      : label;
 
   return (
     <Badge variant={variant} className={className}>

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
 
 import { cn } from "@lib/utils";
@@ -25,6 +26,8 @@ type Props = {
 };
 
 export default function ImageGallery({ images }: Props) {
+  const t = useTranslations("ProductGallery");
+  const tCommon = useTranslations("Common");
   const [active, setActive] = React.useState(0);
   const [zoomOpen, setZoomOpen] = React.useState(false);
   const [zoomApi, setZoomApi] = React.useState<CarouselApi>();
@@ -65,7 +68,7 @@ export default function ImageGallery({ images }: Props) {
               key={img.id}
               type="button"
               onClick={() => setActive(i)}
-              aria-label={`Imaginea ${i + 1}`}
+              aria-label={t("imageNumber", { number: i + 1 })}
               className={cn(
                 "bg-background/10 small:w-full relative aspect-square w-20 shrink-0 overflow-hidden rounded-xl border-2 backdrop-blur-xs transition-[border-color,box-shadow,opacity,transform]",
                 active === i
@@ -76,7 +79,7 @@ export default function ImageGallery({ images }: Props) {
               {img.url && (
                 <Image
                   src={img.url}
-                  alt={`Miniatura ${i + 1}`}
+                  alt={t("thumbnailNumber", { number: i + 1 })}
                   fill
                   sizes="88px"
                   className="object-contain p-1.5"
@@ -96,12 +99,12 @@ export default function ImageGallery({ images }: Props) {
           onClick={() => current && setZoomOpen(true)}
           data-tmp-id="pdp-gallery-main-image"
           className="group xsmall:h-[440px] small:h-[560px] medium:h-[600px] large:h-[640px] relative block h-[360px] w-full"
-          aria-label="Mărește imaginea"
+          aria-label={t("zoomImage")}
         >
           {current?.url ? (
             <Image
               src={current.url}
-              alt="Imagine produs"
+              alt={t("productImage")}
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 820px"
@@ -109,7 +112,7 @@ export default function ImageGallery({ images }: Props) {
             />
           ) : (
             <div className="text-background/70 absolute inset-0 grid place-items-center">
-              Fără imagine
+              {tCommon("noImage")}
             </div>
           )}
           {hasThumbnails && (
@@ -124,17 +127,17 @@ export default function ImageGallery({ images }: Props) {
         <DialogContent className="bg-background grid h-[92vh] max-w-[1080px] grid-rows-[auto_1fr_auto] gap-4 overflow-hidden p-0 sm:rounded-2xl">
           <DialogTitle className="text-muted-foreground px-6 pt-6 text-sm font-semibold">
             {hasThumbnails
-              ? `Imagine ${active + 1} / ${safeImages.length}`
-              : "Imagine produs"}
+              ? t("imageOf", { number: active + 1, total: safeImages.length })
+              : t("productImage")}
           </DialogTitle>
           <DialogDescription className="sr-only">
-            Galerie cu imagini mărite ale produsului.
+            {t("zoomGalleryDescription")}
           </DialogDescription>
           <Carousel
             setApi={setZoomApi}
             opts={{ startIndex: active }}
             className="min-h-0"
-            aria-label="Galerie imagini produs"
+            aria-label={t("zoomGalleryAriaLabel")}
           >
             <CarouselContent className="ml-0">
               {safeImages.map((img, i) => (
@@ -145,7 +148,7 @@ export default function ImageGallery({ images }: Props) {
                   {img.url && (
                     <Image
                       src={img.url}
-                      alt={`Imagine produs ${i + 1}`}
+                      alt={t("productImageNumber", { number: i + 1 })}
                       fill
                       sizes="100vw"
                       className="object-contain p-8"
@@ -157,11 +160,11 @@ export default function ImageGallery({ images }: Props) {
             {hasThumbnails && (
               <>
                 <CarouselPrevious
-                  aria-label="Imaginea precedentă"
+                  aria-label={t("previousImage")}
                   className="left-4 z-10"
                 />
                 <CarouselNext
-                  aria-label="Imaginea următoare"
+                  aria-label={t("nextImage")}
                   className="right-4 z-10"
                 />
               </>
@@ -183,12 +186,12 @@ export default function ImageGallery({ images }: Props) {
                       ? "border-foreground"
                       : "border-transparent opacity-70 hover:opacity-100"
                   )}
-                  aria-label={`Imaginea ${i + 1}`}
+                  aria-label={t("imageNumber", { number: i + 1 })}
                 >
                   {img.url && (
                     <Image
                       src={img.url}
-                      alt={`Miniatura ${i + 1}`}
+                      alt={t("thumbnailNumber", { number: i + 1 })}
                       fill
                       sizes="64px"
                       className="object-contain p-1"

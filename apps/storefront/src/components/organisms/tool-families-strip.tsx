@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 
 import { Container } from "@/components/atoms/container";
@@ -11,7 +12,7 @@ const getRepresentativeImage = (category: CategoryNode): string | undefined =>
     .map(getRepresentativeImage)
     .find((image): image is string => Boolean(image));
 
-export function ToolFamiliesStrip({
+export async function ToolFamiliesStrip({
   categories = [],
 }: {
   categories?: CategoryNode[];
@@ -19,13 +20,15 @@ export function ToolFamiliesStrip({
   const families = categories.slice(0, 6);
   if (families.length === 0) return null;
 
+  const t = await getTranslations("ToolFamiliesStrip");
+
   return (
     <section className="border-border bg-background small:py-16 border-y py-12">
       <Container>
         <header className="mb-8 flex flex-col items-start gap-4">
-          <Eyebrow>Tot ce produce DYLLU</Eyebrow>
+          <Eyebrow>{t("eyebrow")}</Eyebrow>
           <h2 className="font-display text-foreground small:text-3xl text-2xl font-bold tracking-tight">
-            Alege după tipul sculei.
+            {t("title")}
           </h2>
         </header>
         <ul className="small:grid-cols-6 small:gap-4 grid grid-cols-2 gap-3">

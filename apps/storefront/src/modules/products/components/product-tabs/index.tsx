@@ -1,5 +1,8 @@
+"use client";
+
 import { HttpTypes } from "@medusajs/types";
 import { FileText, Hammer, Truck, Undo2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import {
   Accordion,
@@ -18,6 +21,7 @@ type Props = {
 };
 
 export default function ProductTabs({ product, variant }: Props) {
+  const t = useTranslations("ProductTabs");
   // Prefer the catalog's structured specs (published into metadata.specs); fall
   // back to Medusa's native attribute fields when absent.
   const metadataSpecs = getVariantSpecifications(product, variant);
@@ -26,15 +30,18 @@ export default function ProductTabs({ product, variant }: Props) {
     metadataSpecs.length > 0
       ? metadataSpecs
       : [
-          { label: "Material", value: product.material || "—" },
-          { label: "Țară origine", value: product.origin_country || "—" },
-          { label: "Tip", value: product.type?.value || "—" },
+          { label: t("specLabelMaterial"), value: product.material || "—" },
           {
-            label: "Greutate",
+            label: t("specLabelOrigin"),
+            value: product.origin_country || "—",
+          },
+          { label: t("specLabelType"), value: product.type?.value || "—" },
+          {
+            label: t("specLabelWeight"),
             value: product.weight ? `${product.weight} g` : "—",
           },
           {
-            label: "Dimensiuni",
+            label: t("specLabelDimensions"),
             value:
               product.length && product.width && product.height
                 ? `${product.length}L × ${product.width}W × ${product.height}H`
@@ -45,14 +52,14 @@ export default function ProductTabs({ product, variant }: Props) {
   return (
     <section aria-labelledby="product-details-heading">
       <h2 id="product-details-heading" className="sr-only">
-        Detalii produs
+        {t("srHeading")}
       </h2>
       <Accordion type="multiple" defaultValue={["specs"]} className="w-full">
         <AccordionItem value="specs">
           <AccordionTrigger className="text-base font-semibold">
             <span className="flex items-center gap-2">
               <Hammer aria-hidden="true" className="text-brand-800 size-5" />{" "}
-              Specificații
+              {t("specsTab")}
             </span>
           </AccordionTrigger>
           <AccordionContent>
@@ -80,7 +87,7 @@ export default function ProductTabs({ product, variant }: Props) {
                   aria-hidden="true"
                   className="text-brand-800 size-5"
                 />{" "}
-                Descriere
+                {t("descriptionTab")}
               </span>
             </AccordionTrigger>
             <AccordionContent>
@@ -98,15 +105,12 @@ export default function ProductTabs({ product, variant }: Props) {
           <AccordionTrigger className="text-base font-semibold">
             <span className="flex items-center gap-2">
               <Truck aria-hidden="true" className="text-brand-800 size-5" />{" "}
-              Livrare
+              {t("shippingTab")}
             </span>
           </AccordionTrigger>
           <AccordionContent>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Livrare în 24–48h în Chișinău, 2–4 zile lucrătoare în restul
-              țării. Livrarea costă 100 MDL și este gratuită de la 1.000 MDL în
-              orașul Chișinău, respectiv de la 2.000 MDL în restul țării.
-              Ridicare din magazin disponibilă în aceeași zi.
+              {t("shippingText")}
             </p>
           </AccordionContent>
         </AccordionItem>
@@ -114,15 +118,12 @@ export default function ProductTabs({ product, variant }: Props) {
           <AccordionTrigger className="text-base font-semibold">
             <span className="flex items-center gap-2">
               <Undo2 aria-hidden="true" className="text-brand-800 size-5" />{" "}
-              Retur și garanție
+              {t("returnsTab")}
             </span>
           </AccordionTrigger>
           <AccordionContent>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Poți solicita returul în 14 zile pentru produsele neutilizate,
-              complete și în ambalajul original. Garanția se aplică produselor
-              eligibile pe baza documentelor de achiziție și a verificării
-              tehnice.
+              {t("returnsText")}
             </p>
           </AccordionContent>
         </AccordionItem>

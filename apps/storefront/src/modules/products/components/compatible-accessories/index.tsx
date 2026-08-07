@@ -1,6 +1,7 @@
 import * as React from "react";
 import { HttpTypes } from "@medusajs/types";
 import { BatteryFull, Plug } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { getCompatibleAccessories } from "@lib/data/compatible-accessories";
 import { Container } from "@/components/atoms/container";
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export async function CompatibleAccessories({ product, variant }: Props) {
+  const t = await getTranslations("CompatibleAccessories");
   const supply = getProductPowerSupply(product, variant);
   const requiresBattery = supply?.batteryIncluded === false;
   const requiresCharger = supply?.chargerIncluded === false;
@@ -38,16 +40,24 @@ export async function CompatibleAccessories({ product, variant }: Props) {
     >
       <Container>
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 text-center">
-          <Eyebrow variant="primary">Completează-ți trusa</Eyebrow>
+          <Eyebrow variant="primary">{t("eyebrow")}</Eyebrow>
           <h2 className="font-display text-display-sm text-foreground small:text-display-md font-extrabold tracking-tight">
             {requiresBattery
-              ? "Alege alimentarea compatibilă"
-              : "Adaugă încărcătorul compatibil"}
+              ? t("headingChooseBattery")
+              : t("headingAddCharger")}
           </h2>
           <p className="text-muted-foreground small:text-base max-w-xl text-sm">
             {requiresBattery
-              ? `Alege un acumulator${chargers.length ? " și un încărcător" : ""} din platforma ${prettifyPlatform(platform)}.`
-              : `Acumulatorul este inclus; adaugă un încărcător compatibil ${prettifyPlatform(platform)}.`}
+              ? chargers.length
+                ? t("descriptionBatteryAndCharger", {
+                    platform: prettifyPlatform(platform),
+                  })
+                : t("descriptionBatteryOnly", {
+                    platform: prettifyPlatform(platform),
+                  })
+              : t("descriptionChargerOnly", {
+                  platform: prettifyPlatform(platform),
+                })}
           </p>
         </div>
 
@@ -56,7 +66,7 @@ export async function CompatibleAccessories({ product, variant }: Props) {
             <div className="space-y-4">
               <div className="text-foreground flex items-center gap-2 text-sm font-semibold tracking-[0.18em] uppercase">
                 <BatteryFull className="size-4" />
-                Acumulator
+                {t("batterySectionLabel")}
               </div>
               <div className="space-y-4">
                 {batteries.map((p) => (
@@ -69,7 +79,7 @@ export async function CompatibleAccessories({ product, variant }: Props) {
             <div className="space-y-4">
               <div className="text-foreground flex items-center gap-2 text-sm font-semibold tracking-[0.18em] uppercase">
                 <Plug className="size-4" />
-                Încărcător
+                {t("chargerSectionLabel")}
               </div>
               <div className="space-y-4">
                 {chargers.map((p) => (

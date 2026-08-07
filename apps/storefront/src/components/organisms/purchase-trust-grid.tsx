@@ -1,3 +1,5 @@
+"use client";
+
 import {
   BadgeCheck,
   RotateCcw,
@@ -5,35 +7,36 @@ import {
   Truck,
   type LucideIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@lib/utils";
 
 type TrustItem = {
   icon: LucideIcon;
-  title: string;
-  detail: string;
+  titleKey: string;
+  detailKey: string;
 };
 
 const TRUST_ITEMS: TrustItem[] = [
   {
     icon: Truck,
-    title: "Livrare rapidă",
-    detail: "Gratuită peste 1.000 MDL în Chișinău",
+    titleKey: "fastShipping.title",
+    detailKey: "fastShipping.detail",
   },
   {
     icon: ShieldCheck,
-    title: "Plată confirmată",
-    detail: "Metoda se validează la procesarea comenzii",
+    titleKey: "confirmedPayment.title",
+    detailKey: "confirmedPayment.detail",
   },
   {
     icon: BadgeCheck,
-    title: "Garanție DYLLU",
-    detail: "24 luni pentru produsele eligibile",
+    titleKey: "warranty.title",
+    detailKey: "warranty.detail",
   },
   {
     icon: RotateCcw,
-    title: "Retur simplu",
-    detail: "14 zile pentru produsele nefolosite",
+    titleKey: "returns.title",
+    detailKey: "returns.detail",
   },
 ];
 
@@ -44,6 +47,7 @@ export function PurchaseTrustGrid({
   className?: string;
   layout?: "grid" | "band";
 }) {
+  const t = useTranslations("PurchaseTrustGrid");
   return (
     <div
       className={cn(
@@ -55,7 +59,7 @@ export function PurchaseTrustGrid({
     >
       {TRUST_ITEMS.map((item) => (
         <div
-          key={item.title}
+          key={item.titleKey}
           className={cn(
             "flex min-w-0 items-center gap-3",
             layout === "band"
@@ -82,10 +86,10 @@ export function PurchaseTrustGrid({
           </span>
           <div className="min-w-0 space-y-1">
             <p className="text-foreground text-sm leading-none font-semibold">
-              {item.title}
+              {t(item.titleKey)}
             </p>
             <p className="text-muted-foreground text-xs leading-relaxed">
-              {item.detail}
+              {t(item.detailKey)}
             </p>
           </div>
         </div>

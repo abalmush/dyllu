@@ -3,7 +3,7 @@
 import { HttpTypes } from "@medusajs/types";
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import { BatteryFull, Check, Zap } from "lucide-react";
-import { useFormatter } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 
 import { cn } from "@lib/utils";
 import { getPricesForVariant } from "@lib/util/get-product-price";
@@ -32,6 +32,7 @@ export default function ConfigurationSelect({
   "data-testid": dataTestId,
 }: Props) {
   const format = useFormatter();
+  const t = useTranslations("ProductActions.configuration");
   const values = Array.from(
     new Set(
       [
@@ -71,7 +72,7 @@ export default function ConfigurationSelect({
       <RadioGroupPrimitive.Root
         className="flex flex-col gap-2.5"
         data-testid={dataTestId}
-        aria-label={option.title ?? "Configurație"}
+        aria-label={option.title ?? t("ariaFallback")}
         value={current ?? ""}
         onValueChange={(value) => updateOption(option.id, value)}
         disabled={disabled}
@@ -123,8 +124,8 @@ export default function ConfigurationSelect({
                 </span>
                 <span className="text-muted-foreground text-xs leading-relaxed">
                   {withBattery
-                    ? "Gata de utilizare — include acumulatorul și încărcătorul."
-                    : "Doar aparatul. Compatibil cu acumulatoarele DYLLU 20V (vândute separat)."}
+                    ? t("withBatteryDescription")
+                    : t("withoutBatteryDescription")}
                 </span>
               </span>
 

@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { Check, Plus } from "lucide-react";
-import { useFormatter } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
 
 import { useCart } from "@lib/cart/cart-context";
@@ -18,6 +18,7 @@ type Props = {
 
 export function AccessoryCard({ product, kind }: Props) {
   const format = useFormatter();
+  const t = useTranslations("CompatibleAccessories");
   const { addItem } = useCart();
   const variants = product.variants ?? [];
   const hasMultiple = variants.length > 1;
@@ -117,12 +118,12 @@ export function AccessoryCard({ product, kind }: Props) {
           >
             {added ? (
               <>
-                <Check className="size-4" /> Adăugat
+                <Check className="size-4" /> {t("added")}
               </>
             ) : (
               <>
                 <Plus className="size-4" />{" "}
-                {kind === "battery" ? "Adaugă acumulator" : "Adaugă încărcător"}
+                {kind === "battery" ? t("addBattery") : t("addCharger")}
               </>
             )}
           </Button>

@@ -1,15 +1,25 @@
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 import { InfoPageTemplate } from "@/components/templates/info-page-template";
-import { INFO_PAGES } from "@lib/site-content";
+import type { InfoPageData, InfoPageSection } from "@lib/site-content";
 
-const page = INFO_PAGES.livrare;
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("ShippingPage");
+  return {
+    title: t("metaTitle"),
+    description: t("description"),
+  };
+}
 
-export const metadata: Metadata = {
-  title: "Livrare și plată",
-  description: page.description,
-};
+export default async function DeliveryPage() {
+  const t = await getTranslations("ShippingPage");
+  const page: InfoPageData = {
+    eyebrow: t("eyebrow"),
+    title: t("title"),
+    description: t("description"),
+    sections: t.raw("sections") as InfoPageSection[],
+  };
 
-export default function DeliveryPage() {
   return <InfoPageTemplate page={page} />;
 }

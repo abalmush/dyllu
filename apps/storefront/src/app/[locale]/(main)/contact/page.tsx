@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/atoms/button";
 import { Container } from "@/components/atoms/container";
@@ -8,11 +9,13 @@ import { PageHero } from "@/components/molecules/page-hero";
 import { SectionHeading } from "@/components/molecules/section-heading";
 import { SHOWROOMS, SITE_CONTACT } from "@lib/site-content";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description:
-    "Date de contact, magazine și canale rapide pentru suportul DYLLU în Moldova.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("ContactPage");
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  };
+}
 
 const NETWORK_CITIES = [
   "Bălți",
@@ -24,26 +27,30 @@ const NETWORK_CITIES = [
   "Cahul",
 ];
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const t = await getTranslations("ContactPage");
+  const tContact = await getTranslations("SiteContact");
+  const tShowrooms = await getTranslations("Showrooms");
+
   return (
     <div className="bg-surface-subtle">
       <Container className="small:py-12 py-8">
         <PageHero
-          eyebrow={{ label: "Contact DYLLU" }}
-          title="Suntem aproape de proiectul tău"
-          lede="Folosește datele de mai jos pentru comenzi, service, verificarea stocului sau coordonarea unei livrări."
+          eyebrow={{ label: t("heroEyebrow") }}
+          title={t("heroTitle")}
+          lede={t("heroLede")}
           stats={[
-            { label: "Telefon", value: SITE_CONTACT.phoneDisplay },
-            { label: "Email", value: SITE_CONTACT.email },
-            { label: "Program", value: SITE_CONTACT.hoursShort },
+            { label: t("phoneLabel"), value: SITE_CONTACT.phoneDisplay },
+            { label: t("emailLabel"), value: SITE_CONTACT.email },
+            { label: t("hoursLabel"), value: tContact("hoursShort") },
           ]}
         />
 
         <section className="mt-8">
           <SectionHeading
-            eyebrow="Canale directe"
-            title="Alege cel mai rapid mod de a ne contacta"
-            description="Pentru solicitări comerciale, suport tehnic și confirmarea comenzilor."
+            eyebrow={t("channelsEyebrow")}
+            title={t("channelsTitle")}
+            description={t("channelsDescription")}
           />
 
           <div className="medium:grid-cols-2 xlarge:grid-cols-4 mt-6 grid gap-4">
@@ -53,7 +60,7 @@ export default function ContactPage() {
             >
               <Phone className="text-primary size-5" />
               <p className="text-muted-foreground mt-4 text-xs font-semibold tracking-[0.18em] uppercase">
-                Telefon
+                {t("phoneLabel")}
               </p>
               <p className="font-display text-foreground mt-2 text-2xl font-bold tracking-tight">
                 {SITE_CONTACT.phoneDisplay}
@@ -66,7 +73,7 @@ export default function ContactPage() {
             >
               <Mail className="text-primary size-5" />
               <p className="text-muted-foreground mt-4 text-xs font-semibold tracking-[0.18em] uppercase">
-                Email
+                {t("emailLabel")}
               </p>
               <p className="text-foreground mt-2 text-sm font-semibold">
                 {SITE_CONTACT.email}
@@ -76,20 +83,20 @@ export default function ContactPage() {
             <div className="clip-corner-cut-lg bg-card ring-border p-6 ring-1">
               <MapPin className="text-primary size-5" />
               <p className="text-muted-foreground mt-4 text-xs font-semibold tracking-[0.18em] uppercase">
-                Rețea magazine
+                {t("citiesLabel")}
               </p>
               <p className="text-foreground mt-2 text-sm font-semibold">
-                {SITE_CONTACT.citiesSummary}
+                {tContact("citiesSummary")}
               </p>
             </div>
 
             <div className="clip-corner-cut-lg bg-card ring-border p-6 ring-1">
               <Phone className="text-primary size-5" />
               <p className="text-muted-foreground mt-4 text-xs font-semibold tracking-[0.18em] uppercase">
-                Program
+                {t("hoursLabel")}
               </p>
               <p className="text-foreground mt-2 text-sm font-semibold">
-                {SITE_CONTACT.hoursShort}
+                {tContact("hoursShort")}
               </p>
             </div>
           </div>
@@ -97,13 +104,13 @@ export default function ContactPage() {
 
         <section className="mt-12">
           <SectionHeading
-            eyebrow="Magazine DYLLU"
-            title="Puncte principale în Chișinău"
-            description="Pentru vizitare, ridicare și discuții despre produse sau service."
+            eyebrow={t("storesEyebrow")}
+            title={t("storesTitle")}
+            description={t("storesDescription")}
           />
 
           <div className="medium:grid-cols-3 mt-6 grid gap-4">
-            {SHOWROOMS.map((showroom) => (
+            {SHOWROOMS.map((showroom, index) => (
               <article
                 key={`${showroom.city}-${showroom.address}`}
                 className="clip-corner-cut-lg bg-card ring-border p-6 ring-1"
@@ -116,10 +123,10 @@ export default function ContactPage() {
                   {showroom.address}
                 </h2>
                 <p className="text-muted-foreground mt-4 text-sm">
-                  {showroom.note}
+                  {tShowrooms(`note${index + 1}`)}
                 </p>
                 <p className="text-foreground mt-4 text-sm font-medium">
-                  {showroom.schedule}
+                  {tContact("hoursShort")}
                 </p>
                 <p className="text-muted-foreground mt-1 text-sm">
                   {showroom.phone}
@@ -131,9 +138,9 @@ export default function ContactPage() {
 
         <section className="mt-12">
           <SectionHeading
-            eyebrow="Rețea națională"
-            title="Suntem prezenți și în alte orașe"
-            description="Extindem constant rețeaua DYLLU, iar informațiile de stoc și transfer între magazine se confirmă prin echipa comercială."
+            eyebrow={t("networkEyebrow")}
+            title={t("networkTitle")}
+            description={t("networkDescription")}
           />
 
           <div className="clip-corner-cut-lg bg-card ring-border mt-6 p-6 ring-1">
@@ -148,8 +155,7 @@ export default function ContactPage() {
               ))}
             </div>
             <p className="text-muted-foreground mt-4 text-sm">
-              Pentru confirmarea unui punct de lucru, verificarea stocului sau
-              coordonarea unei ridicări, contactează-ne telefonic sau pe email.
+              {t("networkNote")}
             </p>
           </div>
         </section>
@@ -157,9 +163,9 @@ export default function ContactPage() {
         <section className="mt-12">
           <div className="clip-corner-cut-lg bg-card ring-border small:p-8 p-6 ring-1">
             <SectionHeading
-              eyebrow="Următorul pas"
-              title="Ai nevoie de ofertă sau consultanță?"
-              description="Spune-ne de ce ai nevoie și îți recomandăm produsul, setul sau accesoriile potrivite."
+              eyebrow={t("nextStepEyebrow")}
+              title={t("nextStepTitle")}
+              description={t("nextStepDescription")}
             />
             <div className="mt-6 flex flex-wrap gap-4">
               <Button
@@ -167,13 +173,13 @@ export default function ContactPage() {
                 size="lg"
                 className="clip-corner-cut-sm rounded-none"
               >
-                <a href={SITE_CONTACT.emailHref}>Scrie-ne pe email</a>
+                <a href={SITE_CONTACT.emailHref}>{t("emailCta")}</a>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <a href={SITE_CONTACT.phoneHref}>Sună acum</a>
+                <a href={SITE_CONTACT.phoneHref}>{t("phoneCta")}</a>
               </Button>
               <Button asChild size="lg" variant="ghost">
-                <Link href="/store">Vezi catalogul</Link>
+                <Link href="/store">{t("catalogCta")}</Link>
               </Button>
             </div>
           </div>
