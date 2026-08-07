@@ -9,7 +9,6 @@ import { Bot, Check, Search, Send, ShoppingCart, X } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { cn } from "@lib/utils";
 import { Button } from "@/components/atoms/button";
 import { useCart } from "@lib/cart/cart-context";
 import { convertToLocale } from "@lib/util/money";
@@ -28,9 +27,10 @@ const productHitSchema = z.object({
 
 const toolOutputSchema = z.object({ hits: z.array(productHitSchema) });
 
+type MessagePart = UIMessage["parts"][number];
 type ProductHit = z.infer<typeof productHitSchema>;
 
-function getProductHits(part: UIMessage["parts"][number]): ProductHit[] {
+function getProductHits(part: MessagePart): ProductHit[] {
   if (!part.type.startsWith("tool-")) return [];
   const state = "state" in part ? part.state : undefined;
   if (state !== "output-available") return [];
@@ -38,6 +38,12 @@ function getProductHits(part: UIMessage["parts"][number]): ProductHit[] {
     "output" in part ? part.output : undefined
   );
   return parsed.success ? parsed.data.hits : [];
+}
+
+function isToolInProgress(part: MessagePart): boolean {
+  if (!part.type.startsWith("tool-")) return false;
+  const state = "state" in part ? part.state : undefined;
+  return state !== "output-available" && state !== "output-error";
 }
 
 function TypingDots() {
@@ -86,48 +92,108 @@ function ProductHitCard({ hit }: { hit: ProductHit }) {
   };
 
   return (
-    <div className="border-border bg-background flex items-center gap-2 rounded-md border p-2">
+    <div className="border-border bg-background flex w-32 shrink-0 snap-start flex-col rounded-md border p-2">
       <Link
         href={`/products/${hit.handle}`}
-        className="bg-muted relative size-12 shrink-0 overflow-hidden rounded-md"
+        className="bg-muted relative mb-2 aspect-square w-full overflow-hidden rounded-md"
       >
         {hit.thumbnail ? (
           <Image
             src={hit.thumbnail}
             alt=""
             fill
-            sizes="48px"
+            sizes="128px"
             className="object-contain p-1"
           />
         ) : (
           <span className="text-muted-foreground absolute inset-0 grid place-items-center">
-            <Search className="size-4" />
+            <Search className="size-5" />
           </span>
         )}
       </Link>
       <Link href={`/products/${hit.handle}`} className="min-w-0 flex-1">
-        <p className="line-clamp-2 text-sm font-medium">{hit.title}</p>
-        {hit.price !== null && (
-          <p className="text-foreground text-sm font-semibold">
-            {convertToLocale({ amount: hit.price, currency_code: "MDL" })}
-          </p>
-        )}
+        <p className="line-clamp-2 text-xs leading-snug font-medium">
+          {hit.title}
+        </p>
       </Link>
+      {hit.price !== null && (
+        <p className="text-foreground mt-1 text-sm font-semibold">
+          {convertToLocale({ amount: hit.price, currency_code: "MDL" })}
+        </p>
+      )}
       <button
         type="button"
         aria-label={`Adaugă ${hit.title} în coș`}
         disabled={!hit.variant_id || status === "adding"}
         onClick={() => void handleAddToCart()}
-        className="bg-foreground text-background hover:bg-foreground/90 grid size-8 shrink-0 place-items-center rounded-md transition-colors disabled:opacity-40"
+        className="bg-foreground text-background hover:bg-foreground/90 mt-2 flex h-8 items-center justify-center gap-1 rounded-md text-xs font-medium transition-colors disabled:opacity-40"
       >
         {status === "added" ? (
-          <Check aria-hidden="true" className="size-3.5" />
+          <>
+            <Check aria-hidden="true" className="size-3.5" />
+            Adăugat
+          </>
         ) : (
-          <ShoppingCart aria-hidden="true" className="size-3.5" />
+          <>
+            <ShoppingCart aria-hidden="true" className="size-3.5" />
+            În coș
+          </>
         )}
       </button>
     </div>
   );
+}
+
+function ProductCarousel({ hits }: { hits: ProductHit[] }) {
+  return (
+    <div
+      data-lenis-prevent
+      className="-mx-1 flex snap-x gap-2 overflow-x-auto overscroll-x-contain px-1 pb-1"
+    >
+      {hits.map((hit) => (
+        <ProductHitCard key={hit.objectID} hit={hit} />
+      ))}
+    </div>
+  );
+}
+
+function AssistantMessage({ message }: { message: UIMessage }) {
+  const blocks = message.parts
+    .map((part, index) => {
+      const key = `${message.id}-${index}`;
+      if (part.type === "text") {
+        if (!part.text.trim()) return null;
+        return (
+          <div
+            key={key}
+            className="bg-muted text-foreground max-w-[90%] rounded-md px-3 py-2 text-sm"
+          >
+            <span className="whitespace-pre-wrap">{part.text}</span>
+          </div>
+        );
+      }
+      const hits = getProductHits(part);
+      if (hits.length > 0) {
+        return <ProductCarousel key={key} hits={hits} />;
+      }
+      if (isToolInProgress(part)) {
+        return (
+          <div
+            key={key}
+            className="bg-muted text-muted-foreground flex max-w-[85%] items-center gap-2 rounded-md px-3 py-2 text-sm"
+          >
+            <Search aria-hidden="true" className="size-3.5" />
+            Caut produse…
+            <TypingDots />
+          </div>
+        );
+      }
+      return null;
+    })
+    .filter(Boolean);
+
+  if (blocks.length === 0) return null;
+  return <div className="space-y-2">{blocks}</div>;
 }
 
 export function AiAssistantWidget() {
@@ -146,7 +212,9 @@ export function AiAssistantWidget() {
     (lastMessage.parts.some(
       (part) => part.type === "text" && part.text.trim().length > 0
     ) ||
-      lastMessage.parts.some((part) => getProductHits(part).length > 0));
+      lastMessage.parts.some(
+        (part) => getProductHits(part).length > 0 || isToolInProgress(part)
+      ));
   const showError = Boolean(error) && !lastMessageHasContent;
 
   React.useEffect(() => {
@@ -190,60 +258,22 @@ export function AiAssistantWidget() {
                 Întreabă-mă despre produse, disponibilitate sau recomandări.
               </p>
             )}
-            {messages.map((message) => {
-              const hits = message.parts.flatMap(getProductHits);
-              const text = message.parts
-                .filter((part) => part.type === "text")
-                .map((part) => part.text)
-                .join("");
-              const isSearchingProducts = message.parts.some(
-                (part) =>
-                  part.type.startsWith("tool-") &&
-                  "state" in part &&
-                  part.state !== "output-available" &&
-                  part.state !== "output-error"
-              );
-
-              if (
-                !text &&
-                hits.length === 0 &&
-                !isSearchingProducts &&
-                message.role === "assistant"
-              ) {
-                return null;
-              }
-
-              return (
-                <div key={message.id} className="space-y-2">
-                  {text && (
-                    <div
-                      className={cn(
-                        "max-w-[85%] rounded-md px-3 py-2 text-sm",
-                        message.role === "user"
-                          ? "bg-foreground text-background ml-auto"
-                          : "bg-muted text-foreground"
-                      )}
-                    >
-                      <span className="whitespace-pre-wrap">{text}</span>
-                    </div>
-                  )}
-                  {isSearchingProducts && (
-                    <div className="bg-muted text-muted-foreground flex max-w-[85%] items-center gap-2 rounded-md px-3 py-2 text-sm">
-                      <Search aria-hidden="true" className="size-3.5" />
-                      Caut produse…
-                      <TypingDots />
-                    </div>
-                  )}
-                  {hits.length > 0 && (
-                    <div className="space-y-2">
-                      {hits.map((hit) => (
-                        <ProductHitCard key={hit.objectID} hit={hit} />
-                      ))}
-                    </div>
-                  )}
+            {messages.map((message) =>
+              message.role === "user" ? (
+                <div key={message.id} className="flex">
+                  <div className="bg-foreground text-background ml-auto max-w-[85%] rounded-md px-3 py-2 text-sm">
+                    <span className="whitespace-pre-wrap">
+                      {message.parts
+                        .filter((part) => part.type === "text")
+                        .map((part) => part.text)
+                        .join("")}
+                    </span>
+                  </div>
                 </div>
-              );
-            })}
+              ) : (
+                <AssistantMessage key={message.id} message={message} />
+              )
+            )}
             {isBusy && !lastMessageHasContent && (
               <div className="bg-muted text-muted-foreground flex max-w-[85%] items-center rounded-md px-3 py-2 text-sm">
                 <TypingDots />
