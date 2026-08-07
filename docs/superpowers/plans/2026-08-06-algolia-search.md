@@ -874,6 +874,7 @@ import {
   Modules,
   QueryContext,
 } from "@medusajs/framework/utils";
+import { z } from "@medusajs/framework/zod";
 
 import { ALGOLIA_MODULE } from "../modules/algolia";
 import type AlgoliaModuleService from "../modules/algolia/service";
@@ -902,15 +903,82 @@ const PRODUCT_FIELDS = [
   "variants.updated_at",
   "variants.calculated_price.calculated_amount",
   "variants.calculated_price.original_amount",
-  "variants.prices.updated_at",
+  "variants.price_set.prices.updated_at",
 ];
+```
 
+**Correction found during implementation (a real, silent correctness bug, not a style
+issue):** `query.graph()`'s TypeScript return type doesn't structurally match what this job
+needs — `calculated_price` and `prices` aren't declared on the base `ProductVariant` DTO type
+at all (both are only added dynamically at query time based on the `fields` string array and
+module links, which the TS types can't see), and `categories`/`created_at` come back as wider
+types than expected (`Maybe<ProductCategory>[]`, and `created_at` as a `Date` object at
+runtime despite `string | Date` in the type). Casting past this with `any` is banned in this
+codebase. The fix — and the correct, established pattern already used by
+`packages/medusa-plugin-one-c/src/infrastructure/medusa-adapters.ts` in this same repo — is to
+**runtime-validate and type the query result with a zod schema**, not trust the DTO type:
+
+```ts
+const indexableProductSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  handle: z.string(),
+  thumbnail: z.string().nullable(),
+  status: z.string(),
+  created_at: z.coerce.date(),
+  updated_at: z.coerce.date(),
+  deleted_at: z.coerce.date().nullable(),
+  metadata: z.record(z.string(), z.unknown()).nullable(),
+  tags: z.array(z.object({ value: z.string() })).optional(),
+  categories: z
+    .array(z.object({ id: z.string(), name: z.string() }))
+    .optional(),
+  variants: z
+    .array(
+      z.object({
+        sku: z.string().nullable(),
+        title: z.string(),
+        updated_at: z.coerce.date(),
+        calculated_price: z
+          .object({
+            calculated_amount: z.number(),
+            original_amount: z.number(),
+          })
+          .nullable()
+          .optional(),
+        price_set: z
+          .object({
+            prices: z
+              .array(z.object({ updated_at: z.coerce.date() }))
+              .optional(),
+          })
+          .nullable()
+          .optional(),
+      })
+    )
+    .optional(),
+});
+
+type IndexableProduct = z.infer<typeof indexableProductSchema>;
+```
+
+**Also a genuine bug, not just a typing gap:** the field path `"variants.prices.updated_at"`
+is invalid — `ProductVariant` has no direct `prices` relation. Prices live under
+`variants.price_set.prices` (confirmed against the working, already-shipped 1C reader above,
+and empirically verified against real local data — `price_set.prices[].updated_at` returns
+real timestamps; the original path would have silently returned nothing). Since price changes
+are the single most common real-world trigger for this feature (per the design spec — "changes
+for 1c will be mainly price"), the original field path would have made **price-only changes
+silently never trigger a reindex at all**, defeating the core purpose of the diff. This is why
+`PRODUCT_FIELDS` above already uses the corrected `variants.price_set.prices.updated_at` path.
+
+```ts
 export default async function algoliaReindexJob(container: MedusaContainer) {
   let algoliaModule: AlgoliaModuleService;
   try {
     algoliaModule = container.resolve(ALGOLIA_MODULE);
   } catch {
-    // Algolia isn't configured (no ALGOLIA_* env vars) — module was never registered.
     return;
   }
 
@@ -918,11 +986,11 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
   const logger = container.resolve("logger");
   const regionModuleService = container.resolve(Modules.REGION);
 
-  // calculated_price is a computed field — it resolves to null with no pricing
-  // context. DYLLU is single-region (spec: "Single region/currency (MDL)
-  // assumed"), so the first region stands in for "the" region, same as the
-  // store API would resolve from a request's region_id in the multi-region case.
-  const [region] = await regionModuleService.listRegions({}, { take: 1 });
+  // calculated_price needs pricing context or it resolves to null; DYLLU is single-region, so first region == the region.
+  const [region] = await regionModuleService.listRegions(
+    {},
+    { take: 1, order: { created_at: "ASC" } }
+  );
   if (!region) {
     logger.warn("[algolia-reindex] no region configured, skipping");
     return;
@@ -931,10 +999,9 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
   const lastSyncedAt = (await algoliaModule.getLastSyncedAt()) ?? new Date(0);
   const runStartedAt = new Date();
 
-  const { data: products } = await query.graph({
+  const { data } = await query.graph({
     entity: "product",
     fields: PRODUCT_FIELDS,
-    filters: { status: ["published"] },
     context: {
       variants: {
         calculated_price: QueryContext({
@@ -945,16 +1012,19 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
     },
     withDeleted: true,
   });
+  const products = z.array(indexableProductSchema).parse(data);
 
-  const reindexInputs: (ReindexInput & { raw: (typeof products)[number] })[] =
+  const reindexInputs: (ReindexInput & { raw: IndexableProduct })[] =
     products.map((product) => ({
       id: product.id,
-      updatedAt: new Date(product.updated_at),
-      deletedAt: product.deleted_at ? new Date(product.deleted_at) : null,
+      updatedAt: product.updated_at,
+      deletedAt:
+        product.deleted_at ??
+        (product.status !== "published" ? product.updated_at : null),
       variants: (product.variants ?? []).map((variant) => ({
-        updatedAt: new Date(variant.updated_at),
-        prices: (variant.prices ?? []).map((price) => ({
-          updatedAt: new Date(price.updated_at),
+        updatedAt: variant.updated_at,
+        prices: (variant.price_set?.prices ?? []).map((price) => ({
+          updatedAt: price.updated_at,
         })),
       })),
       raw: product,
@@ -975,7 +1045,7 @@ export default async function algoliaReindexJob(container: MedusaContainer) {
       handle: raw.handle,
       thumbnail: raw.thumbnail,
       status: raw.status,
-      created_at: raw.created_at,
+      created_at: raw.created_at.toISOString(),
       metadata: raw.metadata,
       tags: raw.tags ?? [],
       categories: raw.categories ?? [],
