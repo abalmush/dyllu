@@ -127,6 +127,23 @@ jobs:
         working-directory: apps/storefront
         run: pnpm exec opennextjs-cloudflare build
 
+      - name: Sync AI assistant secrets to the Worker
+        working-directory: apps/storefront
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
+          ALGOLIA_AGENT_ID: ${{ secrets.ALGOLIA_AGENT_ID }}
+          ALGOLIA_SEARCH_API_KEY: ${{ secrets.ALGOLIA_SEARCH_API_KEY }}
+        run: |
+          if [ -z "$ALGOLIA_APP_ID" ] || [ -z "$ALGOLIA_AGENT_ID" ] || [ -z "$ALGOLIA_SEARCH_API_KEY" ]; then
+            echo "Algolia secrets not set; skipping AI assistant secret sync."
+            exit 0
+          fi
+          printf '%s' "$ALGOLIA_APP_ID" | pnpm exec wrangler secret put ALGOLIA_APP_ID
+          printf '%s' "$ALGOLIA_AGENT_ID" | pnpm exec wrangler secret put ALGOLIA_AGENT_ID
+          printf '%s' "$ALGOLIA_SEARCH_API_KEY" | pnpm exec wrangler secret put ALGOLIA_SEARCH_API_KEY
+
       - name: Deploy to production
         working-directory: apps/storefront
         env:
