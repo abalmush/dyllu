@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ShieldCheck, Tag } from "lucide-react";
 
 import { Button } from "@/components/atoms/button";

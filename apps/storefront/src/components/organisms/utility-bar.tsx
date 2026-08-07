@@ -1,5 +1,5 @@
 import * as React from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Clock, MapPin, Phone, Wrench } from "lucide-react";
 
 import { SITE_CONTACT } from "@lib/site-content";

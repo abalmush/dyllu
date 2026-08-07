@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ArrowRight, Wrench } from "lucide-react";
 
 import { Container } from "@/components/atoms/container";
@@ -37,9 +37,7 @@ export function ShopStories({ categories }: { categories: CategoryNode[] }) {
     flattenCategories(categories).map((category) => category.handle)
   );
   const stories = STORIES.filter((story) =>
-    "categoryHandle" in story
-      ? visibleHandles.has(story.categoryHandle)
-      : true
+    "categoryHandle" in story ? visibleHandles.has(story.categoryHandle) : true
   );
 
   if (stories.length === 0) return null;

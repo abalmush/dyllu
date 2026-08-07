@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { Filter } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 
 import { cn } from "@lib/utils";
 import { type CategoryNode } from "@lib/data/categories";

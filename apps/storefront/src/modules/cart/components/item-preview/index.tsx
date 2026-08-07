@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { HttpTypes } from "@medusajs/types";
 
 import { IMAGE_BG_NEUTRALIZE } from "@/components/organisms/pdp-hero-variants";

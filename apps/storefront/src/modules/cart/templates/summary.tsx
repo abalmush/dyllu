@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ArrowRight, Lock, Package } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 

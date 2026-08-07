@@ -8,7 +8,8 @@ import CheckoutSubmission from "@modules/checkout/components/checkout-submission
 import CheckoutForm from "@modules/checkout/templates/checkout-form";
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary";
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 
 export const metadata: Metadata = {
   title: "Finalizare comandă",
@@ -21,7 +22,8 @@ export default async function Checkout() {
   ]);
 
   if (!cart?.items?.length) {
-    redirect("/cart");
+    redirect({ href: "/cart", locale: await getLocale() });
+    return;
   }
 
   return (

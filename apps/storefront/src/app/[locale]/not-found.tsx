@@ -1,6 +1,6 @@
 import { ArrowRight, Home, Search } from "lucide-react";
 import { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/atoms/button";

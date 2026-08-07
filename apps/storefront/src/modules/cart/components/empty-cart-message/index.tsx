@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ArrowRight, ShoppingBag } from "lucide-react";
 
 import { Button } from "@/components/atoms/button";

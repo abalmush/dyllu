@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Check, ShoppingCart, Star } from "lucide-react";
 
 import { useCart } from "@lib/cart/cart-context";

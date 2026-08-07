@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Check, Trash2 } from "lucide-react";
 
 import { IMAGE_BG_NEUTRALIZE } from "@/components/organisms/pdp-hero-variants";

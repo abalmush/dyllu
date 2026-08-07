@@ -4,7 +4,8 @@ import { sdk } from "@lib/config";
 import medusaError from "@lib/util/medusa-error";
 import { HttpTypes } from "@medusajs/types";
 import { refresh, updateTag } from "next/cache";
-import { redirect } from "next/navigation";
+import { getLocale as getUiLocale } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 import type { CartView } from "@lib/cart/cart-view";
 import { toCartView } from "@lib/cart/cart-view.mapper";
 import {
@@ -673,7 +674,10 @@ export async function placeOrder(
     return { error: errorMessage(error) };
   }
 
-  redirect(`/order/${orderId}/confirmed`);
+  return redirect({
+    href: `/order/${orderId}/confirmed`,
+    locale: await getUiLocale(),
+  });
 }
 
 export async function listCartOptions() {

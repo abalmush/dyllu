@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ChevronDown, ShieldCheck } from "lucide-react";
 
 import { Logo } from "@/components/atoms/logo";
