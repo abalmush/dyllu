@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Loader2, Trash2 } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@lib/utils";
 import { useCart } from "@lib/cart/cart-context";
@@ -27,6 +28,7 @@ export default function CartItemRow({
   type = "full",
   currencyCode,
 }: Props) {
+  const t = useTranslations("Cart");
   const router = useRouter();
   const { updateItem, removeItem } = useCart();
   const [updating, setUpdating] = React.useState(false);
@@ -119,7 +121,7 @@ export default function CartItemRow({
             className="text-muted-foreground text-xs"
             data-testid="product-variant"
           >
-            Variantă: {item.variant.title}
+            {t("variantLabel", { variant: item.variant.title })}
           </p>
         )}
         {!isPreview && (
@@ -143,12 +145,12 @@ export default function CartItemRow({
               ) : (
                 <Trash2 className="size-3.5" />
               )}
-              Șterge
+              {t("remove")}
             </button>
             {updating && !removing && (
               <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
                 <Loader2 className="size-3 animate-spin" />
-                actualizez
+                {t("updating")}
               </span>
             )}
           </div>

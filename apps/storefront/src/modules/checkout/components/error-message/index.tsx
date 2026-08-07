@@ -13,7 +13,7 @@ const ErrorMessage = ({
     <div
       role="alert"
       aria-live="polite"
-      className="pt-2 text-sm font-medium text-destructive"
+      className="text-destructive pt-2 text-sm font-medium"
       data-testid={dataTestid}
     >
       <span>{error}</span>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   ArrowDownAZ,
   ArrowDownUp,
@@ -20,16 +21,6 @@ import {
 
 export type SortOptions = "price_asc" | "price_desc" | "created_at";
 
-const SORT_OPTIONS: {
-  value: SortOptions;
-  label: string;
-  icon: typeof Sparkles;
-}[] = [
-  { value: "created_at", label: "Cele mai noi", icon: Sparkles },
-  { value: "price_asc", label: "Preț crescător", icon: ArrowDownAZ },
-  { value: "price_desc", label: "Preț descrescător", icon: ArrowUpAZ },
-];
-
 type Props = {
   sortBy: SortOptions;
   setQueryParams: (name: string, value: SortOptions) => void;
@@ -41,6 +32,16 @@ export default function SortProducts({
   setQueryParams,
   "data-testid": dataTestId,
 }: Props) {
+  const t = useTranslations("SortProducts");
+  const SORT_OPTIONS: {
+    value: SortOptions;
+    label: string;
+    icon: typeof Sparkles;
+  }[] = [
+    { value: "created_at", label: t("newest"), icon: Sparkles },
+    { value: "price_asc", label: t("priceAsc"), icon: ArrowDownAZ },
+    { value: "price_desc", label: t("priceDesc"), icon: ArrowUpAZ },
+  ];
   const active =
     SORT_OPTIONS.find((o) => o.value === sortBy) ?? SORT_OPTIONS[0];
 
@@ -54,12 +55,12 @@ export default function SortProducts({
           data-testid={dataTestId}
         >
           <ArrowDownUp aria-hidden="true" className="size-5" />
-          <span className="hidden xsmall:inline">Sortează:</span>
+          <span className="xsmall:inline hidden">{t("sortLabel")}</span>
           <span className="font-semibold">{active.label}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Ordinea produselor</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("order")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {SORT_OPTIONS.map((opt) => {
           const Icon = opt.icon;
@@ -71,11 +72,11 @@ export default function SortProducts({
             >
               <Icon
                 aria-hidden="true"
-                className="size-5 text-muted-foreground"
+                className="text-muted-foreground size-5"
               />
               <span className="flex-1">{opt.label}</span>
               {selected && (
-                <Check aria-hidden="true" className="size-5 text-brand-800" />
+                <Check aria-hidden="true" className="text-brand-800 size-5" />
               )}
             </DropdownMenuItem>
           );

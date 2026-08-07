@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight } from "lucide-react";
 
@@ -77,6 +78,7 @@ export function MegaMenu({
   categories,
   includeSaleLink = true,
 }: MegaMenuProps) {
+  const t = useTranslations("MegaMenu");
   const navigationCategories = getPrimaryCategoriesForNavigation(categories);
   const allCategories = orderCategoriesForNavigation(categories);
   const itemClassName = cn(
@@ -120,7 +122,7 @@ export function MegaMenu({
                         <div className="border-border/70 flex items-end justify-between gap-4 border-b pb-4">
                           <div className="space-y-1">
                             <span className="text-2xs text-muted-foreground font-semibold tracking-[0.18em] uppercase">
-                              Explorează categoria
+                              {t("exploreCategory")}
                             </span>
                             <div className="font-display text-foreground text-xl font-bold tracking-tight">
                               {displayName}
@@ -130,7 +132,7 @@ export function MegaMenu({
                             href={`/categories/${category.handle}`}
                             className="text-foreground hover:text-primary inline-flex items-center gap-1.5 text-sm font-semibold transition-colors"
                           >
-                            Vezi tot
+                            {t("viewAll")}
                             <ArrowRight className="size-4" />
                           </Link>
                         </div>
@@ -158,24 +160,24 @@ export function MegaMenu({
         })}
         <NavigationMenuItem>
           <NavigationMenuTrigger className={itemClassName}>
-            Toate categoriile
+            {t("allCategories")}
           </NavigationMenuTrigger>
           <NavigationMenuContent>
             <div className="border-border/80 bg-background w-[min(900px,calc(100vw-96px))] overflow-hidden rounded-[22px] border p-6 shadow-[0_26px_80px_rgba(0,0,0,0.18)]">
               <div className="border-border/70 flex items-end justify-between gap-4 border-b pb-4">
                 <div className="space-y-1">
                   <span className="text-2xs text-muted-foreground font-semibold tracking-[0.18em] uppercase">
-                    Catalog DYLLU
+                    {t("catalogLabel")}
                   </span>
                   <div className="font-display text-foreground text-xl font-bold tracking-tight">
-                    Toate categoriile
+                    {t("allCategories")}
                   </div>
                 </div>
                 <Link
                   href="/store"
                   className="text-foreground hover:text-primary inline-flex items-center gap-1.5 text-sm font-semibold transition-colors"
                 >
-                  Toate produsele
+                  {t("allProducts")}
                   <ArrowRight className="size-4" />
                 </Link>
               </div>
@@ -205,7 +207,7 @@ export function MegaMenu({
                   "text-red-300 hover:text-red-200 focus:text-red-200"
                 )}
               >
-                Reduceri
+                {t("sale")}
               </Link>
             </NavigationMenuLink>
           </NavigationMenuItem>

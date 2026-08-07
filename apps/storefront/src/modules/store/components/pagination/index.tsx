@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
@@ -18,6 +19,7 @@ export function Pagination({
   totalPages,
   "data-testid": dataTestid,
 }: Props) {
+  const t = useTranslations("Pagination");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -47,7 +49,7 @@ export function Pagination({
 
   return (
     <nav
-      aria-label="Paginare"
+      aria-label={t("nav")}
       className="flex w-full items-center justify-center gap-1.5"
       data-testid={dataTestid}
     >
@@ -57,7 +59,7 @@ export function Pagination({
         className="rounded-full"
         onClick={() => goTo(Math.max(1, page - 1))}
         disabled={page <= 1}
-        aria-label="Pagina anterioară"
+        aria-label={t("previous")}
       >
         <ChevronLeft aria-hidden="true" className="size-5" />
       </Button>
@@ -97,7 +99,7 @@ export function Pagination({
         className="rounded-full"
         onClick={() => goTo(Math.min(totalPages, page + 1))}
         disabled={page >= totalPages}
-        aria-label="Pagina următoare"
+        aria-label={t("next")}
       >
         <ChevronRight aria-hidden="true" className="size-5" />
       </Button>

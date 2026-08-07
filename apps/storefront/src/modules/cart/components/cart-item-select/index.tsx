@@ -1,6 +1,7 @@
 "use client";
 
 import { IconBadge, clx } from "@lib/ui-compat";
+import { useTranslations } from "next-intl";
 import {
   SelectHTMLAttributes,
   forwardRef,
@@ -17,7 +18,9 @@ type NativeSelectProps = {
 } & Omit<SelectHTMLAttributes<HTMLSelectElement>, "size">;
 
 const CartItemSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
-  ({ placeholder = "Selectează…", className, children, ...props }, ref) => {
+  ({ placeholder, className, children, ...props }, ref) => {
+    const t = useTranslations("Cart");
+    const resolvedPlaceholder = placeholder ?? t("quantitySelectPlaceholder");
     const innerRef = useRef<HTMLSelectElement>(null);
     const [isPlaceholder, setIsPlaceholder] = useState(false);
 
@@ -49,12 +52,12 @@ const CartItemSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
         >
           <select
             ref={innerRef}
-            aria-label={props["aria-label"] ?? "Cantitate"}
+            aria-label={props["aria-label"] ?? t("quantityLabel")}
             {...props}
             className="h-16 w-16 appearance-none items-center justify-center border-none bg-transparent px-4 outline-hidden transition-colors duration-150 focus:border-gray-700"
           >
             <option disabled value="">
-              {placeholder}
+              {resolvedPlaceholder}
             </option>
             {children}
           </select>

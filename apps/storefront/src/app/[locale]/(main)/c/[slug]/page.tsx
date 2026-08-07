@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 import { Sparkles } from "lucide-react";
 
 import { getPromoBySlug } from "@lib/promos";
@@ -27,11 +28,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound();
   }
 
+  const t = await getTranslations("Store");
+
   return buildSocialMetadata({
     title: promo.title,
-    description: promo.subtitle ?? `Descoperă selecția DYLLU: ${promo.title}.`,
+    description:
+      promo.subtitle ?? t("promoDescriptionFallback", { title: promo.title }),
     path: `/c/${slug}`,
-    imageAlt: `${promo.title} — selecție DYLLU`,
+    imageAlt: t("promoImageAlt", { title: promo.title }),
   });
 }
 
@@ -44,16 +48,18 @@ export default async function PromoPage(props: Props) {
     notFound();
   }
 
-  const [tag, categories] = await Promise.all([
+  const [tag, categories, t, tBreadcrumbs] = await Promise.all([
     getProductTagByValue(promo.tag).catch(() => undefined),
     getCategoryTree(),
+    getTranslations("Store"),
+    getTranslations("Breadcrumbs"),
   ]);
   const pageNumber = page ? parseInt(page) : 1;
   const sort = sortBy || "created_at";
 
   const crumbs = [
-    { label: "Acasă", href: "/" },
-    { label: "Magazin", href: "/store" },
+    { label: tBreadcrumbs("home"), href: "/" },
+    { label: tBreadcrumbs("store"), href: "/store" },
     { label: promo.title },
   ];
 
@@ -76,11 +82,10 @@ export default async function PromoPage(props: Props) {
           </div>
           <div className="space-y-1">
             <h2 className="font-display text-xl font-semibold">
-              Selecția „{promo.title}” se pregătește
+              {t("promoPreparingTitle", { title: promo.title })}
             </h2>
             <p className="text-muted-foreground max-w-md text-sm">
-              Adăugăm în curând produse marcate pentru această colecție. Revino
-              curând sau explorează întreaga gamă.
+              {t("promoPreparingDescription")}
             </p>
           </div>
         </div>

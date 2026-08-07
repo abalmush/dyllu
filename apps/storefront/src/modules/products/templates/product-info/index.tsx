@@ -1,5 +1,6 @@
 import { Star } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
+import { getTranslations } from "next-intl/server";
 
 import { Breadcrumbs } from "@/components/molecules/breadcrumbs";
 
@@ -7,11 +8,12 @@ type Props = {
   product: HttpTypes.StoreProduct;
 };
 
-export default function ProductInfo({ product }: Props) {
+export default async function ProductInfo({ product }: Props) {
+  const t = await getTranslations("ProductInfo");
   const collection = product.collection;
   const category = product.categories?.[0];
   const crumbs = [
-    { label: "Acasă", href: "/" },
+    { label: t("home"), href: "/" },
     ...(category
       ? [{ label: category.name, href: `/categories/${category.handle}` }]
       : []),
@@ -52,7 +54,10 @@ export default function ProductInfo({ product }: Props) {
         </div>
         <span>
           <span className="text-foreground font-semibold">4.8</span>
-          <span className="text-muted-foreground"> · 124 recenzii</span>
+          <span className="text-muted-foreground">
+            {" "}
+            · {t("reviewCount", { count: 124 })}
+          </span>
         </span>
       </div>
       {product.description && (

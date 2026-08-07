@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { Check, ShoppingCart, Star } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { useCart } from "@lib/cart/cart-context";
 import { Badge } from "@/components/atoms/badge";
@@ -39,6 +40,7 @@ export function PlpProductCard({
   product: PlpProduct;
   imagePriority?: boolean;
 }) {
+  const t = useTranslations("Common");
   const { addItem } = useCart();
   const [isAdding, setIsAdding] = React.useState(false);
   const [justAdded, setJustAdded] = React.useState(false);
@@ -90,7 +92,7 @@ export function PlpProductCard({
             />
           ) : (
             <div className="text-muted-foreground absolute inset-0 grid place-items-center text-xs">
-              Fără imagine
+              {t("noImage")}
             </div>
           )}
         </Link>
@@ -113,7 +115,7 @@ export function PlpProductCard({
         {soldOut && (
           <div className="bg-background/60 absolute inset-0 grid place-items-center">
             <span className="clip-corner-cut-xs bg-foreground text-background px-4 py-1 text-xs font-bold tracking-[0.14em] uppercase">
-              Stoc epuizat
+              {t("soldOut")}
             </span>
           </div>
         )}
@@ -149,7 +151,7 @@ export function PlpProductCard({
           <PriceBlock price={product.price} size="md" />
           <button
             type="button"
-            aria-label={`Adaugă ${product.title} în coș`}
+            aria-label={t("addToCart", { title: product.title })}
             disabled={soldOut || !product.variantId || isAdding}
             onClick={handleAdd}
             className="clip-corner-cut-xs bg-foreground text-background hover:bg-foreground/90 grid size-11 shrink-0 place-items-center transition-colors disabled:opacity-55"

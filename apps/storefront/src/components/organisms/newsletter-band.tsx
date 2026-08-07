@@ -1,11 +1,14 @@
 import * as React from "react";
 import { Mail } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/atoms/container";
 import { Eyebrow } from "@/components/molecules/eyebrow";
 import { NewsletterForm } from "@/components/molecules/newsletter-form";
+import { Link } from "@/i18n/navigation";
 
-export function NewsletterBand() {
+export async function NewsletterBand() {
+  const t = await getTranslations("NewsletterBand");
   return (
     <section className="small:py-24 py-16">
       <Container>
@@ -18,29 +21,32 @@ export function NewsletterBand() {
           <div className="small:grid-cols-2 relative grid items-center gap-12">
             <div className="space-y-4">
               <Eyebrow icon={<Mail className="size-3.5" />}>
-                Noutăți DYLLU
+                {t("eyebrow")}
               </Eyebrow>
               <h2 className="font-display text-display-sm small:text-display-md font-extrabold tracking-tight">
-                Promoții, sfaturi tehnice și
-                <span className="text-primary"> stocuri limitate</span> înainte
-                de toți.
+                {t.rich("title", {
+                  highlight: (chunks) => (
+                    <span className="text-primary">{chunks}</span>
+                  ),
+                })}
               </h2>
               <p className="text-secondary-foreground/70 small:text-base text-sm">
-                Lasă-ne adresa și deschidem un email precompletat pentru
-                confirmarea abonării.
+                {t("body")}
               </p>
             </div>
             <div className="flex flex-col gap-4">
               <NewsletterForm invert />
               <p className="text-secondary-foreground/60 text-xs">
-                Prin abonare ești de acord cu{" "}
-                <a
-                  href="/confidentialitate"
-                  className="hover:text-secondary-foreground underline underline-offset-4"
-                >
-                  politica de confidențialitate
-                </a>
-                .
+                {t.rich("consent", {
+                  privacyLink: (chunks) => (
+                    <Link
+                      href="/confidentialitate"
+                      className="hover:text-secondary-foreground underline underline-offset-4"
+                    >
+                      {chunks}
+                    </Link>
+                  ),
+                })}
               </p>
             </div>
           </div>

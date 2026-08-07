@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { HttpTypes } from "@medusajs/types";
 
 import PlpShell from "@modules/store/components/plp-shell";
@@ -15,12 +16,13 @@ type Props = {
   categories: CategoryNode[];
 };
 
-export default function CategoryTemplate({
+export default async function CategoryTemplate({
   category,
   sortBy,
   page,
   categories,
 }: Props) {
+  const t = await getTranslations("Breadcrumbs");
   const pageNumber = page ? parseInt(page) : 1;
   const sort = sortBy || "created_at";
 
@@ -36,7 +38,7 @@ export default function CategoryTemplate({
   collectParents(category);
 
   const crumbs = [
-    { label: "Acasă", href: "/" },
+    { label: t("home"), href: "/" },
     ...parents.map((p) => ({ label: p.name, href: `/categories/${p.handle}` })),
     { label: category.name },
   ];

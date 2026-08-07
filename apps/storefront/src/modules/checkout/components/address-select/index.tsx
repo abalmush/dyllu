@@ -2,6 +2,7 @@ import { Listbox, Transition } from "@headlessui/react";
 import { ChevronUpDown } from "@medusajs/icons";
 import { clx } from "@lib/ui-compat";
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 import Radio from "@modules/common/components/radio";
 import compareAddresses from "@lib/util/compare-addresses";
@@ -24,6 +25,7 @@ const AddressSelect = ({
   addressInput,
   onSelect,
 }: AddressSelectProps) => {
+  const t = useTranslations("Checkout.addressSelect");
   const handleSelect = (id: string) => {
     const savedAddress = addresses.find((a) => a.id === id);
     if (savedAddress) {
@@ -45,9 +47,7 @@ const AddressSelect = ({
           {({ open }) => (
             <>
               <span className="block truncate pr-4">
-                {selectedAddress
-                  ? selectedAddress.address_1
-                  : "Alege o adresă salvată"}
+                {selectedAddress ? selectedAddress.address_1 : t("placeholder")}
               </span>
               <ChevronUpDown
                 className={clx(

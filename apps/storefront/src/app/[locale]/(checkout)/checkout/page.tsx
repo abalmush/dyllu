@@ -8,12 +8,15 @@ import CheckoutSubmission from "@modules/checkout/components/checkout-submission
 import CheckoutForm from "@modules/checkout/templates/checkout-form";
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary";
 import { Metadata } from "next";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 
-export const metadata: Metadata = {
-  title: "Finalizare comandă",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Checkout.page");
+  return {
+    title: t("title"),
+  };
+}
 
 export default async function Checkout() {
   const [cart, customer] = await Promise.all([
@@ -26,24 +29,25 @@ export default async function Checkout() {
     return;
   }
 
+  const t = await getTranslations("Checkout.page");
+
   return (
     <div className="bg-surface-subtle">
       <Container className="small:py-12 py-8">
         <div className="mb-8 flex flex-col gap-4">
           <Breadcrumbs
             items={[
-              { label: "Acasă", href: "/" },
-              { label: "Coșul meu", href: "/cart" },
-              { label: "Finalizare comandă" },
+              { label: t("breadcrumbHome"), href: "/" },
+              { label: t("breadcrumbCart"), href: "/cart" },
+              { label: t("breadcrumbCurrent") },
             ]}
           />
-          <Eyebrow>Checkout simplu</Eyebrow>
+          <Eyebrow>{t("eyebrow")}</Eyebrow>
           <h1 className="font-display text-display-sm text-foreground small:text-display-md font-extrabold tracking-tight text-balance">
-            Finalizează comanda
+            {t("heading")}
           </h1>
           <p className="text-muted-foreground max-w-2xl text-sm">
-            Completează datele de livrare și plasează comanda. Livrarea standard
-            și plata la livrare se aplică automat.
+            {t("description")}
           </p>
         </div>
 

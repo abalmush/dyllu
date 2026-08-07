@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Filter } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 
 import { cn } from "@lib/utils";
 import { type CategoryNode } from "@lib/data/categories";
@@ -45,6 +46,7 @@ export default function PlpShell({
   categories,
   children,
 }: Props) {
+  const t = useTranslations("PlpShell");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -90,7 +92,7 @@ export default function PlpShell({
             <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
               <SheetTrigger asChild>
                 <Button variant="outline" className="small:hidden rounded-full">
-                  <Filter className="size-4" /> Filtre
+                  <Filter className="size-4" /> {t("filters")}
                 </Button>
               </SheetTrigger>
               <SheetContent
@@ -98,7 +100,7 @@ export default function PlpShell({
                 className="flex w-full max-w-sm flex-col gap-4 p-0"
               >
                 <SheetHeader className="border-border border-b px-6 py-6">
-                  <SheetTitle>Filtre</SheetTitle>
+                  <SheetTitle>{t("filters")}</SheetTitle>
                 </SheetHeader>
                 <div className="flex-1 overflow-y-auto p-6">
                   <RefinementList
@@ -115,7 +117,7 @@ export default function PlpShell({
         {childrenLinks && childrenLinks.length > 0 && (
           <div className="-mx-1 mt-4 flex flex-wrap gap-1.5">
             {childrenLinks.map((c) => (
-              <a
+              <Link
                 key={c.handle}
                 href={`/categories/${c.handle}`}
                 className={cn(
@@ -123,7 +125,7 @@ export default function PlpShell({
                 )}
               >
                 {c.name}
-              </a>
+              </Link>
             ))}
           </div>
         )}

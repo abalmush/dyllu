@@ -1,18 +1,20 @@
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { HttpTypes } from "@medusajs/types";
+import { getTranslations } from "next-intl/server";
 
 import { IMAGE_BG_NEUTRALIZE } from "@/components/organisms/pdp-hero-variants";
 import { cn } from "@lib/utils";
 import { convertToLocale } from "@lib/util/money";
 
-export default function CartItemPreview({
+export default async function CartItemPreview({
   item,
   currencyCode,
 }: {
   item: HttpTypes.StoreCartLineItem;
   currencyCode: string;
 }) {
+  const t = await getTranslations("Cart");
   const total = item.total ?? 0;
   const original = item.original_total ?? total;
   const onSale = total < original;
@@ -51,7 +53,7 @@ export default function CartItemPreview({
             className="text-muted-foreground text-xs"
             data-testid="product-variant"
           >
-            Variantă: {item.variant.title}
+            {t("variantLabel", { variant: item.variant.title })}
           </p>
         ) : null}
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { AlertCircle } from "lucide-react";
 
 import { Button } from "@/components/atoms/button";
@@ -25,6 +26,8 @@ export default function InfiniteProductsGrid({
   totalCount,
   request,
 }: Props) {
+  const t = useTranslations("Store");
+  const tErrors = useTranslations("Errors");
   const [products, setProducts] = React.useState(initialProducts);
   const [nextPage, setNextPage] = React.useState(initialNextPage);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -79,7 +82,7 @@ export default function InfiniteProductsGrid({
         return;
       }
 
-      setError("Nu am reușit să încărcăm următoarele produse.");
+      setError(t("loadMoreError"));
     } finally {
       if (abortControllerRef.current === controller) {
         abortControllerRef.current = null;
@@ -88,7 +91,7 @@ export default function InfiniteProductsGrid({
       loadingRef.current = false;
       setIsLoading(false);
     }
-  }, [nextPage, request]);
+  }, [nextPage, request, t]);
 
   React.useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -149,7 +152,7 @@ export default function InfiniteProductsGrid({
               </div>
               <div className="space-y-1">
                 <p className="text-foreground font-semibold tracking-tight">
-                  Încărcarea s-a întrerupt
+                  {t("loadingInterrupted")}
                 </p>
                 <p className="text-muted-foreground text-sm">{error}</p>
               </div>
@@ -158,7 +161,7 @@ export default function InfiniteProductsGrid({
                 variant="outline"
                 onClick={() => void loadMore()}
               >
-                Încearcă din nou
+                {tErrors("retry")}
               </Button>
             </div>
           </div>
@@ -166,7 +169,7 @@ export default function InfiniteProductsGrid({
 
         {!nextPage && !isLoading && products.length > 0 && (
           <p className="text-muted-foreground text-center text-sm">
-            Ai ajuns la finalul selecției. {totalCount} produse disponibile.
+            {t("endOfResults", { count: totalCount })}
           </p>
         )}
       </div>

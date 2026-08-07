@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Link } from "@/i18n/navigation";
 import { Mail, MapPin, Phone, ShieldCheck, Truck, Wallet } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { type CategoryNode } from "@lib/data/categories";
 import { SITE_CONTACT } from "@lib/site-content";
@@ -16,31 +17,34 @@ function PaymentBadge({ children }: { children: React.ReactNode }) {
   );
 }
 
-const SHOP_LINKS = [
-  { label: "Toate produsele", href: "/store" },
-  { label: "Reduceri active", href: "/store?on_sale=true" },
-  { label: "Noutăți", href: "/store?sortBy=created_at" },
-  { label: "Branduri și ghiduri", href: "/branduri" },
-];
-
-const SUPPORT_LINKS = [
-  { label: "Contact", href: "/contact" },
-  { label: "Livrare și plată", href: "/livrare" },
-  { label: "Returnări și garanție", href: "/returnari" },
-  { label: "Termeni și condiții", href: "/termeni" },
-  { label: "Politica de confidențialitate", href: "/confidentialitate" },
-];
-
-export function SiteFooter({ categories }: { categories: CategoryNode[] }) {
+export async function SiteFooter({
+  categories,
+}: {
+  categories: CategoryNode[];
+}) {
+  const t = await getTranslations("SiteFooter");
+  const tContact = await getTranslations("SiteContact");
   const topCategories = categories.slice(0, 6);
+  const shopLinks = [
+    { label: t("shopLinks.allProducts"), href: "/store" },
+    { label: t("shopLinks.activeDeals"), href: "/store?on_sale=true" },
+    { label: t("shopLinks.newArrivals"), href: "/store?sortBy=created_at" },
+    { label: t("shopLinks.brandsAndGuides"), href: "/branduri" },
+  ];
+  const supportLinks = [
+    { label: t("supportLinks.contact"), href: "/contact" },
+    { label: t("supportLinks.shippingAndPayment"), href: "/livrare" },
+    { label: t("supportLinks.returnsAndWarranty"), href: "/returnari" },
+    { label: t("supportLinks.termsAndConditions"), href: "/termeni" },
+    { label: t("supportLinks.privacyPolicy"), href: "/confidentialitate" },
+  ];
   return (
     <footer className="bg-secondary text-secondary-foreground">
       <div className="content-container small:grid-cols-12 small:gap-12 grid gap-12 py-16">
         <div className="small:col-span-4 space-y-6">
           <Logo className="text-secondary-foreground h-8" />
           <p className="text-secondary-foreground/70 max-w-sm text-sm">
-            DYLLU este partenerul tău pentru scule profesionale, echipamente de
-            atelier și soluții de protecție în Republica Moldova.
+            {t("tagline")}
           </p>
           <div className="space-y-4 text-sm">
             <a
@@ -59,7 +63,7 @@ export function SiteFooter({ categories }: { categories: CategoryNode[] }) {
             </a>
             <div className="text-secondary-foreground/85 flex items-start gap-4">
               <MapPin className="text-primary mt-0.5 size-4" />
-              <span>{SITE_CONTACT.showroomSummary}</span>
+              <span>{tContact("showroomSummary")}</span>
             </div>
           </div>
         </div>
@@ -67,7 +71,7 @@ export function SiteFooter({ categories }: { categories: CategoryNode[] }) {
         <div className="small:col-span-5 small:grid-cols-3 grid grid-cols-2 gap-8">
           <div>
             <h2 className="text-secondary-foreground/75 text-sm font-semibold tracking-wide">
-              Categorii
+              {t("categories")}
             </h2>
             <ul className="mt-4 space-y-2 text-sm">
               {topCategories.map((c) => (
@@ -85,10 +89,10 @@ export function SiteFooter({ categories }: { categories: CategoryNode[] }) {
           </div>
           <div>
             <h2 className="text-secondary-foreground/75 text-sm font-semibold tracking-wide">
-              Magazin
+              {t("shop")}
             </h2>
             <ul className="mt-4 space-y-2 text-sm">
-              {SHOP_LINKS.map((l) => (
+              {shopLinks.map((l) => (
                 <li key={l.href}>
                   <Link
                     href={l.href}
@@ -102,10 +106,10 @@ export function SiteFooter({ categories }: { categories: CategoryNode[] }) {
           </div>
           <div>
             <h2 className="text-secondary-foreground/75 text-sm font-semibold tracking-wide">
-              Suport
+              {t("support")}
             </h2>
             <ul className="mt-4 space-y-2 text-sm">
-              {SUPPORT_LINKS.map((l) => (
+              {supportLinks.map((l) => (
                 <li key={l.href}>
                   <Link
                     href={l.href}
@@ -121,15 +125,14 @@ export function SiteFooter({ categories }: { categories: CategoryNode[] }) {
 
         <div className="small:col-span-3 space-y-4">
           <h2 className="text-secondary-foreground/75 text-sm font-semibold tracking-wide">
-            Noutăți DYLLU
+            {t("newsletter.title")}
           </h2>
           <p className="text-secondary-foreground/70 text-sm">
-            Promoții săptămânale, ghiduri de utilizare și produse noi direct în
-            email.
+            {t("newsletter.body")}
           </p>
           <NewsletterForm invert />
           <p className="text-secondary-foreground/60 text-xs">
-            Pentru solicitări comerciale și suport, scrie-ne la{" "}
+            {t("newsletter.contactPrefix")}{" "}
             <a
               href={SITE_CONTACT.emailHref}
               className="hover:text-secondary-foreground underline underline-offset-4"
@@ -145,12 +148,18 @@ export function SiteFooter({ categories }: { categories: CategoryNode[] }) {
 
       <div className="content-container small:flex-row small:justify-between flex flex-col items-center gap-4 py-6">
         <span className="text-secondary-foreground/60 text-xs font-semibold tracking-[0.18em] uppercase">
-          Comenzi și confirmare
+          {t("orderConfirmation.heading")}
         </span>
         <div className="flex flex-wrap items-center gap-2">
-          <PaymentBadge>Confirmare telefonică</PaymentBadge>
-          <PaymentBadge>Detalii de plată la procesare</PaymentBadge>
-          <PaymentBadge>Facturare pentru firme</PaymentBadge>
+          <PaymentBadge>
+            {t("orderConfirmation.phoneConfirmation")}
+          </PaymentBadge>
+          <PaymentBadge>
+            {t("orderConfirmation.paymentAtProcessing")}
+          </PaymentBadge>
+          <PaymentBadge>
+            {t("orderConfirmation.businessInvoicing")}
+          </PaymentBadge>
         </div>
       </div>
 
@@ -158,17 +167,16 @@ export function SiteFooter({ categories }: { categories: CategoryNode[] }) {
 
       <div className="content-container text-secondary-foreground/60 small:flex-row flex flex-col items-center justify-between gap-4 py-6 text-xs">
         <div className="flex flex-wrap items-center gap-4">
-          <span>
-            © {new Date().getFullYear()} DYLLU. Toate drepturile rezervate.
-          </span>
+          <span>{t("copyright", { year: new Date().getFullYear() })}</span>
         </div>
         <div className="flex flex-wrap items-center gap-6">
           <span className="inline-flex items-center gap-2">
-            <ShieldCheck className="text-primary size-4" /> Date validate la
-            confirmarea comenzii
+            <ShieldCheck className="text-primary size-4" />{" "}
+            {t("trustBadges.validatedData")}
           </span>
           <span className="inline-flex items-center gap-2">
-            <Truck className="text-primary size-4" /> Livrare în toată Moldova
+            <Truck className="text-primary size-4" />{" "}
+            {t("trustBadges.nationwideShipping")}
           </span>
           <span className="inline-flex items-center gap-2">
             <Wallet className="text-primary size-4" /> MDL · EUR · USD

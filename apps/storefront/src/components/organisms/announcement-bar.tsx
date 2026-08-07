@@ -24,13 +24,14 @@ export function AnnouncementBar({
   className,
 }: AnnouncementBarProps) {
   const t = useTranslations("AnnouncementBar");
+  const tContact = useTranslations("SiteContact");
   const messages: Message[] = propMessages ?? [
     { icon: <Truck className="size-3.5" />, text: t("freeShipping") },
     { icon: <ShieldCheck className="size-3.5" />, text: t("onlineOrder") },
     {
       icon: <Phone className="size-3.5" />,
       text: t("support", {
-        hours: SITE_CONTACT.hoursShort,
+        hours: tContact("hoursShort"),
         phone: SITE_CONTACT.phoneDisplay,
       }),
     },

@@ -1,6 +1,9 @@
 {
   "Common": {
-    "skipToContent": "Перейти к содержимому"
+    "skipToContent": "Перейти к содержимому",
+    "addToCart": "Добавить {title} в корзину",
+    "noImage": "Без изображения",
+    "soldOut": "Нет в наличии"
   },
   "LocaleSwitcher": {
     "label": "Язык"
@@ -53,7 +56,76 @@
     "account": "Ваш аккаунт"
   },
   "Checkout": {
-    "country": "Страна"
+    "country": "Страна",
+    "page": {
+      "title": "Оформление заказа",
+      "breadcrumbHome": "Главная",
+      "breadcrumbCart": "Моя корзина",
+      "breadcrumbCurrent": "Оформление заказа",
+      "eyebrow": "Простое оформление",
+      "heading": "Оформите заказ",
+      "description": "Заполните данные для доставки и оформите заказ. Стандартная доставка и оплата при получении применяются автоматически."
+    },
+    "addresses": {
+      "sectionEyebrow": "Контакты и адрес",
+      "heading": "Данные для доставки",
+      "description": "Заполните данные клиента и адрес, куда должен прийти заказ.",
+      "billingHeading": "Платёжные данные"
+    },
+    "addressSelect": {
+      "placeholder": "Выберите сохранённый адрес"
+    },
+    "shipping": {
+      "savedAddressGreeting": "Здравствуйте{name}. Вы можете начать с одного из сохранённых адресов.",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "address1": "Адрес",
+      "address2": "Квартира, подъезд, этаж",
+      "company": "Компания",
+      "postalCode": "Почтовый индекс",
+      "city": "Город / населённый пункт",
+      "cityHelp": "Для доставки в город Кишинёв можно указать Кишинёв или сектор. Пригороды муниципия считаются доставкой по стране.",
+      "province": "Район / область",
+      "sameAsBilling": "Платёжный адрес совпадает с адресом доставки",
+      "email": "Email",
+      "emailValidationTitle": "Введите корректный адрес электронной почты.",
+      "phone": "Телефон"
+    },
+    "billing": {
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "address1": "Адрес",
+      "address2": "Квартира, подъезд, этаж",
+      "company": "Компания",
+      "postalCode": "Почтовый индекс",
+      "city": "Город",
+      "province": "Район / область",
+      "phone": "Телефон"
+    },
+    "submission": {
+      "termsText": "Оформляя заказ, вы принимаете <terms>условия продажи</terms>, <returns>политику возврата</returns> и <privacy>политику конфиденциальности</privacy>.",
+      "submitLabel": "Оформить заказ",
+      "submitLoadingLabel": "Оформляем заказ…",
+      "footnoteAmountDue": "Стандартная доставка и оплата при получении применяются автоматически.",
+      "footnoteNoAmountDue": "Стандартная доставка применяется автоматически. Сумма товаров полностью покрыта."
+    },
+    "summary": {
+      "eyebrow": "Заказ DYLLU",
+      "heading": "Ваш заказ",
+      "description": "Проверьте товары и примените промокод перед оформлением.",
+      "itemsLabel": "Товары в заказе",
+      "itemCount": "{count} {count, plural, one {товар} few {товара} other {товаров}}",
+      "amountDueNote": "Оплата производится при доставке, после подтверждения заказа",
+      "amountPaidNote": "Сумма заказа полностью покрыта",
+      "shippingNote": "Стандартная доставка и её стоимость применяются автоматически после проверки адреса"
+    },
+    "discount": {
+      "hasCode": "Есть промокод?",
+      "placeholder": "Введите код",
+      "apply": "Применить",
+      "invalidCode": "Неверный код",
+      "removeAria": "Удалить промокод"
+    }
   },
   "AiAssistant": {
     "title": "Ассистент DYLLU",
@@ -66,5 +138,186 @@
     "send": "Отправить",
     "addToCart": "Добавить {title} в корзину",
     "addToCartError": "Не удалось добавить товар в корзину."
+  },
+  "ProductInfo": {
+    "home": "Главная",
+    "reviewCount": "{count, plural, one {# отзыв} few {# отзыва} many {# отзывов} other {# отзывов}}"
+  },
+  "SiteContact": {
+    "hoursShort": "Пн–Сб 08:00–18:00 · Вс 09:00–14:00",
+    "showroomSummary": "Сеть магазинов DYLLU по всей Молдове"
+  },
+  "SiteFooter": {
+    "tagline": "DYLLU — ваш партнёр по профессиональным инструментам, оборудованию для мастерской и средствам защиты в Республике Молдова.",
+    "categories": "Категории",
+    "shop": "Магазин",
+    "support": "Поддержка",
+    "shopLinks": {
+      "allProducts": "Все товары",
+      "activeDeals": "Активные скидки",
+      "newArrivals": "Новинки",
+      "brandsAndGuides": "Бренды и гиды"
+    },
+    "supportLinks": {
+      "contact": "Контакты",
+      "shippingAndPayment": "Доставка и оплата",
+      "returnsAndWarranty": "Возврат и гарантия",
+      "termsAndConditions": "Условия использования",
+      "privacyPolicy": "Политика конфиденциальности"
+    },
+    "newsletter": {
+      "title": "Новости DYLLU",
+      "body": "Еженедельные акции, руководства по использованию и новые товары прямо на почту.",
+      "contactPrefix": "По коммерческим вопросам и поддержке пишите нам на"
+    },
+    "orderConfirmation": {
+      "heading": "Заказы и подтверждение",
+      "phoneConfirmation": "Подтверждение по телефону",
+      "paymentAtProcessing": "Детали оплаты при обработке",
+      "businessInvoicing": "Выставление счетов для компаний"
+    },
+    "copyright": "© {year} DYLLU. Все права защищены.",
+    "trustBadges": {
+      "validatedData": "Данные проверяются при подтверждении заказа",
+      "nationwideShipping": "Доставка по всей Молдове"
+    }
+  },
+  "NewsletterForm": {
+    "invalidEmail": "Введите корректный адрес электронной почты, например nume@domeniu.md.",
+    "unavailable": "Подписка временно недоступна.",
+    "subscribeSuccess": "Проверьте почту и подтвердите подписку на новости DYLLU.",
+    "emailLabel": "Адрес электронной почты",
+    "emailPlaceholder": "nume@domeniu.md…",
+    "submit": "Подписаться",
+    "disclaimer": "Вы получите письмо для подтверждения подписки. Отписаться можно в любой момент."
+  },
+  "NewsletterBand": {
+    "eyebrow": "Новости DYLLU",
+    "title": "Акции, полезные советы и <highlight>ограниченные партии товара</highlight> раньше всех.",
+    "body": "Оставьте адрес, и мы откроем письмо с предзаполненной формой подтверждения подписки.",
+    "consent": "Подписываясь, вы соглашаетесь с <privacyLink>политикой конфиденциальности</privacyLink>."
+  },
+  "Cart": {
+    "metaTitle": "Корзина",
+    "metaDescription": "Просмотрите товары в корзине и подготовьтесь к оформлению заказа.",
+    "notFoundMetaTitle": "404",
+    "notFoundMetaDescription": "Корзина не найдена.",
+    "notFoundTitle": "Корзина не найдена",
+    "notFoundBody": "Корзина, к которой вы пытаетесь получить доступ, не существует. Очистите файлы cookie и попробуйте снова.",
+    "notFoundHome": "Вернуться на главную страницу",
+    "breadcrumbHome": "Главная",
+    "breadcrumbCart": "Моя корзина",
+    "eyebrow": "Заказ DYLLU",
+    "title": "Ваша корзина",
+    "subtitle": "Проверьте товары, добавьте полезные аксессуары и переходите к оформлению заказа.",
+    "itemsHeading": "Ваши товары",
+    "itemCount": "{count, plural, one {товар} few {товара} other {товаров}}",
+    "summaryEyebrow": "Быстрое оформление",
+    "summaryTitle": "Сводка заказа",
+    "checkout": "Оформить заказ",
+    "assuranceConfirmed": "Заказ подтверждается командой DYLLU перед обработкой",
+    "assuranceDelivery": "Доставка по всей Молдове · 24–48ч в Кишинэу",
+    "quantitySelectPlaceholder": "Выберите…",
+    "quantityLabel": "Количество",
+    "variantLabel": "Вариант: {variant}",
+    "remove": "Удалить",
+    "updating": "обновляю",
+    "emptyTitle": "Ваша корзина пуста.",
+    "emptyBody": "Откройте для себя ручные, электрические инструменты и профессиональное защитное оборудование. Мы подготовили подборки для любой мастерской.",
+    "emptyBrowse": "Смотреть товары",
+    "emptyHandTools": "Ручные инструменты",
+    "emptyRecommendedTitle": "Рекомендации для вас",
+    "emptyRecommendedSubtitle": "Наша подборка популярных товаров на этой неделе.",
+    "emptyRecommendedViewAll": "Смотреть все товары →",
+    "signInTitle": "У вас уже есть аккаунт DYLLU?",
+    "signInBody": "Войдите для более быстрой доставки и истории заказов.",
+    "signInCta": "Войти"
+  },
+  "MegaMenu": {
+    "exploreCategory": "Просмотреть категорию",
+    "viewAll": "Смотреть всё",
+    "allCategories": "Все категории",
+    "catalogLabel": "Каталог DYLLU",
+    "allProducts": "Все товары",
+    "sale": "Скидки"
+  },
+  "PlpToolbar": {
+    "resultsLabel": "товаров",
+    "sortLabel": "Сортировка",
+    "sortRelevance": "Актуальность",
+    "sortPriceAsc": "Цена по возрастанию",
+    "sortPriceDesc": "Цена по убыванию",
+    "sortNewest": "Сначала новые"
+  },
+  "Pagination": {
+    "nav": "Навигация по страницам",
+    "previous": "Предыдущая страница",
+    "next": "Следующая страница"
+  },
+  "PlpShell": {
+    "filters": "Фильтры"
+  },
+  "RefinementList": {
+    "sort": "Сортировка",
+    "categories": "Категории",
+    "allProducts": "Все товары",
+    "availability": "Наличие",
+    "inStock": "В наличии",
+    "onSale": "Со скидкой",
+    "moreFiltersSoon": "Дополнительные фильтры появятся в ближайшее время."
+  },
+  "SortProducts": {
+    "newest": "Сначала новые",
+    "priceAsc": "Цена по возрастанию",
+    "priceDesc": "Цена по убыванию",
+    "sortLabel": "Сортировка:",
+    "order": "Порядок товаров"
+  },
+  "Breadcrumbs": {
+    "home": "Главная",
+    "store": "Магазин"
+  },
+  "Store": {
+    "loadMoreError": "Не удалось загрузить следующие товары.",
+    "loadingInterrupted": "Загрузка прервана",
+    "endOfResults": "Вы дошли до конца подборки. {count, plural, one {# товар доступен} few {# товара доступно} other {# товаров доступно}}.",
+    "searchResultsTitle": "Результаты по запросу «{query}»",
+    "saleTitle": "Активные скидки",
+    "allProductsTitle": "Все товары",
+    "searchResultsDescription": "Товары DYLLU, соответствующие вашему запросу, готовые к доставке или быстрому подтверждению.",
+    "saleDescription": "Смотрите товары и предложения, доступные сейчас в интернет-магазине DYLLU.",
+    "allProductsDescription": "Изучите полный ассортимент инструментов, аксессуаров и оборудования DYLLU.",
+    "emptySearchTitle": "Мы не нашли товаров по запросу «{query}»",
+    "emptySaleTitle": "Сейчас нет активных скидок",
+    "emptyCategoryTitle": "В этой категории пока нет товаров",
+    "emptySearchDescription": "Попробуйте другой запрос, посмотрите похожую категорию или обратитесь за помощью к команде DYLLU.",
+    "emptySaleDescription": "Акции обновляются постоянно. Загляните позже или посмотрите весь ассортимент, доступный сейчас.",
+    "emptyCategoryDescription": "Наличие товаров постоянно обновляется. А пока изучите остальной ассортимент или свяжитесь с нами для индивидуального расчёта.",
+    "viewAllProducts": "Смотреть все товары",
+    "requestQuote": "Запросить предложение",
+    "promoDescriptionFallback": "Откройте для себя подборку DYLLU: {title}.",
+    "promoImageAlt": "{title} — подборка DYLLU",
+    "promoPreparingTitle": "Подборка «{title}» готовится",
+    "promoPreparingDescription": "Скоро мы добавим товары, отмеченные для этой подборки. Загляните позже или изучите весь ассортимент."
+  },
+  "SearchCommand": {
+    "title": "Поиск DYLLU",
+    "description": "Найдите товары, категории или быстро перейдите на страницу.",
+    "placeholder": "Найти свёрла, молотки, аксессуары…",
+    "noResults": "Нет результатов. Нажмите Enter, чтобы искать «{query}».",
+    "productsHeading": "Товары",
+    "recentHeading": "Недавние запросы",
+    "quickAccessHeading": "Быстрый доступ",
+    "popularHeading": "Популярное",
+    "categoriesHeading": "Категории",
+    "quickLinkNewProducts": "Новинки",
+    "quickLinkActiveDeals": "Активные скидки",
+    "quickLinkAllCategories": "Все категории",
+    "popularSdsBits": "Свёрла SDS+",
+    "popularProtectiveGloves": "Защитные перчатки",
+    "popularRotaryHammer": "Перфоратор",
+    "popularScrewdrivers": "Отвёртки",
+    "popularMetalDiscs": "Диски по металлу",
+    "popularSocketWrenches": "Торцевые ключи"
   }
 }

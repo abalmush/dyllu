@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { ArrowRight, ShoppingBag } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/atoms/button";
 import { PlpProductCard } from "@/components/organisms/plp-product-card";
@@ -8,6 +9,7 @@ import { getRegion } from "@lib/data/regions";
 import { toPlpProduct } from "@modules/store/lib/to-plp-product";
 
 const EmptyCartMessage = async () => {
+  const t = await getTranslations("Cart");
   const region = await getRegion();
   const recommended = region
     ? await listProducts({
@@ -23,21 +25,20 @@ const EmptyCartMessage = async () => {
           <ShoppingBag aria-hidden="true" className="size-5" />
         </span>
         <h1 className="font-display text-display-sm text-foreground sm:text-display-md font-extrabold tracking-tight">
-          Coșul tău este gol.
+          {t("emptyTitle")}
         </h1>
         <p className="text-muted-foreground max-w-md text-sm sm:text-base">
-          Descoperă scule manuale, electrice și echipamente de protecție
-          profesionale. Am pregătit selecții pentru orice atelier.
+          {t("emptyBody")}
         </p>
         <div className="flex flex-wrap gap-4">
           <Button asChild size="lg" className="rounded-full">
             <Link href="/store">
-              Explorează produsele
+              {t("emptyBrowse")}
               <ArrowRight aria-hidden="true" className="size-5" />
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="rounded-full">
-            <Link href="/categories/scule-de-mana">Scule de mână</Link>
+            <Link href="/categories/scule-de-mana">{t("emptyHandTools")}</Link>
           </Button>
         </div>
       </div>
@@ -47,17 +48,17 @@ const EmptyCartMessage = async () => {
           <div className="flex items-end justify-between gap-4">
             <div>
               <h2 className="font-display small:text-2xl text-xl font-semibold tracking-tight">
-                Recomandări pentru tine
+                {t("emptyRecommendedTitle")}
               </h2>
               <p className="text-muted-foreground text-sm">
-                Selecția noastră de produse populare săptămâna aceasta.
+                {t("emptyRecommendedSubtitle")}
               </p>
             </div>
             <Link
               href="/store"
               className="text-brand-800 small:inline hidden text-base font-semibold hover:underline"
             >
-              Vezi toate produsele →
+              {t("emptyRecommendedViewAll")}
             </Link>
           </div>
           <ul className="small:grid-cols-3 medium:grid-cols-4 grid grid-cols-2 gap-4">

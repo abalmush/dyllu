@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { PackageSearch } from "lucide-react";
 
@@ -44,16 +45,17 @@ export default async function PaginatedProducts({
     await getProductFeedPage(request);
 
   if (products.length === 0) {
+    const t = await getTranslations("Store");
     const emptyTitle = query
-      ? `Nu am găsit produse pentru „${query}”`
+      ? t("emptySearchTitle", { query })
       : onSale
-        ? "Nu există reduceri active în acest moment"
-        : "Categoria încă nu are produse";
+        ? t("emptySaleTitle")
+        : t("emptyCategoryTitle");
     const emptyDescription = query
-      ? "Încearcă alt termen de căutare, verifică o categorie apropiată sau cere ajutorul echipei DYLLU."
+      ? t("emptySearchDescription")
       : onSale
-        ? "Promoțiile se actualizează constant. Revino curând sau vezi gama completă disponibilă acum."
-        : "Stocul se actualizează constant. Între timp, descoperă restul gamei sau contactează-ne pentru o cotație personalizată.";
+        ? t("emptySaleDescription")
+        : t("emptyCategoryDescription");
 
     return (
       <div className="border-border bg-muted/30 flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed px-6 py-16 text-center">
@@ -68,10 +70,10 @@ export default async function PaginatedProducts({
         </div>
         <div className="mt-2 flex flex-wrap items-center justify-center gap-4">
           <Button asChild>
-            <Link href="/store">Vezi toate produsele</Link>
+            <Link href="/store">{t("viewAllProducts")}</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link href="/contact">Cere o ofertă</Link>
+            <Link href="/contact">{t("requestQuote")}</Link>
           </Button>
         </div>
       </div>

@@ -9,6 +9,7 @@ import { LocaleSwitcher } from "@/components/molecules/locale-switcher";
 
 export async function UtilityBar() {
   const t = await getTranslations("UtilityBar");
+  const tContact = await getTranslations("SiteContact");
 
   return (
     <div className="border-border bg-surface-subtle text-muted-foreground medium:block hidden border-b">
@@ -24,7 +25,7 @@ export async function UtilityBar() {
             </a>
             <span className="text-muted-foreground inline-flex items-center gap-1.5">
               <Clock aria-hidden="true" className="size-4" />
-              {SITE_CONTACT.hoursShort}
+              {tContact("hoursShort")}
             </span>
           </div>
           <nav

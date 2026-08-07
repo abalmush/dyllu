@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import {
   ArrowRight,
@@ -28,21 +28,6 @@ import { useCart } from "@lib/cart/cart-context";
 import { type CategoryNode } from "@lib/data/categories";
 import { convertToLocale } from "@lib/util/money";
 import { toMedusaLocale } from "@/i18n/medusa-locale";
-
-const QUICK_LINKS = [
-  { label: "Produse noi", icon: Sparkles, href: "/store?sortBy=created_at" },
-  { label: "Reduceri active", icon: Tag, href: "/store?on_sale=true" },
-  { label: "Toate categoriile", icon: Layers, href: "/store" },
-];
-
-const POPULAR = [
-  "Burghie SDS+",
-  "Mănuși de protecție",
-  "Ciocan rotopercutor",
-  "Șurubelnițe",
-  "Discuri pe metal",
-  "Chei tubulare",
-];
 
 const RECENT_KEY = "dyllu_recent_search";
 
@@ -70,8 +55,36 @@ export function SearchCommand({
   categories,
 }: SearchCommandProps) {
   const router = useRouter();
-  const medusaLocale = toMedusaLocale(useLocale());
+  const locale = useLocale();
+  const medusaLocale = toMedusaLocale(locale);
+  const t = useTranslations("Common");
+  const tSearch = useTranslations("SearchCommand");
   const { addItem } = useCart();
+  const quickLinks = [
+    {
+      label: tSearch("quickLinkNewProducts"),
+      icon: Sparkles,
+      href: "/store?sortBy=created_at",
+    },
+    {
+      label: tSearch("quickLinkActiveDeals"),
+      icon: Tag,
+      href: "/store?on_sale=true",
+    },
+    {
+      label: tSearch("quickLinkAllCategories"),
+      icon: Layers,
+      href: "/store",
+    },
+  ];
+  const popularTerms = [
+    tSearch("popularSdsBits"),
+    tSearch("popularProtectiveGloves"),
+    tSearch("popularRotaryHammer"),
+    tSearch("popularScrewdrivers"),
+    tSearch("popularMetalDiscs"),
+    tSearch("popularSocketWrenches"),
+  ];
   const [query, setQuery] = React.useState("");
   const [recent, setRecent] = React.useState<string[]>([]);
   const [liveHits, setLiveHits] = React.useState<LiveHit[]>([]);
@@ -158,22 +171,20 @@ export function SearchCommand({
     <CommandDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Căutare DYLLU"
-      description="Caută produse, categorii sau accesează rapid o pagină."
+      title={tSearch("title")}
+      description={tSearch("description")}
     >
       <CommandInput
-        placeholder="Caută burghie, ciocane, accesorii…"
+        placeholder={tSearch("placeholder")}
         value={query}
         onValueChange={setQuery}
         onKeyDown={handleSubmit}
       />
       <CommandList>
-        <CommandEmpty>
-          Niciun rezultat. Apasă Enter ca să cauți „{query}”.
-        </CommandEmpty>
+        <CommandEmpty>{tSearch("noResults", { query })}</CommandEmpty>
         {liveHits.length > 0 && (
           <>
-            <CommandGroup heading="Produse">
+            <CommandGroup heading={tSearch("productsHeading")}>
               {liveHits.map((hit) => (
                 <CommandItem
                   key={hit.objectID}
@@ -219,7 +230,7 @@ export function SearchCommand({
                   </span>
                   <button
                     type="button"
-                    aria-label={`Adaugă ${hit.title} în coș`}
+                    aria-label={t("addToCart", { title: hit.title })}
                     disabled={!hit.variant_id || addingId === hit.objectID}
                     onPointerDown={(e) => e.stopPropagation()}
                     onClick={(e) => {
@@ -242,7 +253,7 @@ export function SearchCommand({
         )}
         {recent.length > 0 && (
           <>
-            <CommandGroup heading="Căutări recente">
+            <CommandGroup heading={tSearch("recentHeading")}>
               {recent.map((term) => (
                 <CommandItem
                   key={term}
@@ -260,8 +271,8 @@ export function SearchCommand({
             <CommandSeparator />
           </>
         )}
-        <CommandGroup heading="Acces rapid">
-          {QUICK_LINKS.map((link) => {
+        <CommandGroup heading={tSearch("quickAccessHeading")}>
+          {quickLinks.map((link) => {
             const Icon = link.icon;
             return (
               <CommandItem
@@ -276,8 +287,8 @@ export function SearchCommand({
           })}
         </CommandGroup>
         <CommandSeparator />
-        <CommandGroup heading="Populare">
-          {POPULAR.map((term) => (
+        <CommandGroup heading={tSearch("popularHeading")}>
+          {popularTerms.map((term) => (
             <CommandItem
               key={term}
               value={term}
@@ -289,7 +300,7 @@ export function SearchCommand({
           ))}
         </CommandGroup>
         <CommandSeparator />
-        <CommandGroup heading="Categorii">
+        <CommandGroup heading={tSearch("categoriesHeading")}>
           {categories.map((c) => (
             <CommandItem
               key={c.handle}

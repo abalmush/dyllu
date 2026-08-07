@@ -1,27 +1,28 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 
-const SORT_OPTIONS = [
-  { value: "relevance", label: "Relevanță" },
-  { value: "price-asc", label: "Preț crescător" },
-  { value: "price-desc", label: "Preț descrescător" },
-  { value: "newest", label: "Cele mai noi" },
-] as const;
-
 export function PlpToolbar({ resultCount }: { resultCount: number }) {
+  const t = useTranslations("PlpToolbar");
+  const SORT_OPTIONS = [
+    { value: "relevance", label: t("sortRelevance") },
+    { value: "price-asc", label: t("sortPriceAsc") },
+    { value: "price-desc", label: t("sortPriceDesc") },
+    { value: "newest", label: t("sortNewest") },
+  ] as const;
   const [sort, setSort] = React.useState<string>("relevance");
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
       <p className="text-muted-foreground text-sm">
         <span className="text-foreground font-semibold">{resultCount}</span>{" "}
-        produse
+        {t("resultsLabel")}
       </p>
 
       <label className="flex items-center gap-2 text-sm">
-        <span className="text-muted-foreground">Sortează</span>
+        <span className="text-muted-foreground">{t("sortLabel")}</span>
         <span className="clip-corner-cut-xs border-border bg-card relative inline-flex items-center border">
           <select
             name="sort"

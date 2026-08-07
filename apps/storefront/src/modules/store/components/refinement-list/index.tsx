@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { ChevronRight, Layers, Tag } from "lucide-react";
@@ -35,6 +36,7 @@ export default function RefinementList({
   categories,
   "data-testid": dataTestId,
 }: Props) {
+  const t = useTranslations("RefinementList");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -60,7 +62,7 @@ export default function RefinementList({
       {!hideSort && (
         <div className="small:hidden flex items-center justify-between gap-4">
           <span className="text-foreground text-sm font-semibold tracking-tight">
-            Sortează
+            {t("sort")}
           </span>
           <SortProducts
             sortBy={sortBy}
@@ -76,7 +78,7 @@ export default function RefinementList({
           <AccordionTrigger className="text-sm font-semibold">
             <span className="flex items-center gap-2">
               <Layers aria-hidden="true" className="text-brand-800 size-5" />{" "}
-              Categorii
+              {t("categories")}
             </span>
           </AccordionTrigger>
           <AccordionContent>
@@ -89,7 +91,7 @@ export default function RefinementList({
                     !activeCategoryHandle && "bg-muted text-foreground"
                   )}
                 >
-                  Toate produsele
+                  {t("allProducts")}
                   <ChevronRight className="text-muted-foreground size-3.5" />
                 </Link>
               </li>
@@ -119,7 +121,7 @@ export default function RefinementList({
           <AccordionTrigger className="text-sm font-semibold">
             <span className="flex items-center gap-2">
               <Tag aria-hidden="true" className="text-brand-800 size-5" />{" "}
-              Disponibilitate
+              {t("availability")}
             </span>
           </AccordionTrigger>
           <AccordionContent>
@@ -127,17 +129,17 @@ export default function RefinementList({
               <label className="flex min-h-11 cursor-pointer items-center gap-4">
                 <Checkbox id="filter-stock" />
                 <Label htmlFor="filter-stock" className="cursor-pointer">
-                  În stoc
+                  {t("inStock")}
                 </Label>
               </label>
               <label className="flex min-h-11 cursor-pointer items-center gap-4">
                 <Checkbox id="filter-sale" />
                 <Label htmlFor="filter-sale" className="cursor-pointer">
-                  Cu reducere
+                  {t("onSale")}
                 </Label>
               </label>
               <p className="text-muted-foreground text-xs">
-                Filtre suplimentare disponibile în curând.
+                {t("moreFiltersSoon")}
               </p>
             </div>
           </AccordionContent>

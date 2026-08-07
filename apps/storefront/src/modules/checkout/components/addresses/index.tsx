@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import compareAddresses from "@lib/util/compare-addresses";
 import { HttpTypes } from "@medusajs/types";
 import { Heading, Text, useToggleState } from "@lib/ui-compat";
@@ -13,6 +14,7 @@ const Addresses = ({
   cart: HttpTypes.StoreCart | null;
   customer: HttpTypes.StoreCustomer | null;
 }) => {
+  const t = useTranslations("Checkout.addresses");
   const { state: sameAsBilling, toggle: toggleSameAsBilling } = useToggleState(
     cart?.shipping_address && cart?.billing_address
       ? compareAddresses(cart?.shipping_address, cart?.billing_address)
@@ -24,17 +26,16 @@ const Addresses = ({
       <div className="mb-6 flex flex-row items-center justify-between gap-4">
         <div className="space-y-2">
           <Text className="text-muted-foreground text-xs font-semibold tracking-[0.16em] uppercase">
-            Contact și adresă
+            {t("sectionEyebrow")}
           </Text>
           <Heading
             level="h2"
             className="font-display text-foreground flex flex-row items-baseline gap-x-2 text-xl font-bold tracking-tight"
           >
-            Date pentru livrare
+            {t("heading")}
           </Heading>
           <Text className="text-muted-foreground text-sm">
-            Completează datele clientului și adresa unde trebuie să ajungă
-            comanda.
+            {t("description")}
           </Text>
         </div>
       </div>
@@ -53,7 +54,7 @@ const Addresses = ({
               level="h2"
               className="font-display text-foreground pb-2 text-lg font-bold tracking-tight"
             >
-              Date de facturare
+              {t("billingHeading")}
             </Heading>
 
             <BillingAddress cart={cart} />

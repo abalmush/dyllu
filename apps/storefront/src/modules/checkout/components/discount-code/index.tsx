@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Tag, X } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
+import { useTranslations } from "next-intl";
 
 import { applyPromotions } from "@lib/data/cart";
 import { convertToLocale } from "@lib/util/money";
@@ -18,6 +19,7 @@ type Props = {
 };
 
 export default function DiscountCode({ cart }: Props) {
+  const t = useTranslations("Checkout.discount");
   const [isOpen, setIsOpen] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
   const { promotions = [] } = cart;
@@ -43,7 +45,7 @@ export default function DiscountCode({ cart }: Props) {
     try {
       await applyPromotions(codes);
     } catch (e) {
-      setErrorMessage(e instanceof Error ? e.message : "Cod invalid");
+      setErrorMessage(e instanceof Error ? e.message : t("invalidCode"));
     }
     if (input) input.value = "";
   };
@@ -57,7 +59,7 @@ export default function DiscountCode({ cart }: Props) {
         className="text-foreground hover:text-primary inline-flex items-center gap-2 self-start text-xs font-semibold tracking-[0.16em] uppercase transition-colors"
       >
         <Tag className="text-primary size-4" />
-        Ai un cod promoțional?
+        {t("hasCode")}
       </button>
 
       {isOpen && (
@@ -70,7 +72,7 @@ export default function DiscountCode({ cart }: Props) {
               id="promotion-input"
               name="code"
               type="text"
-              placeholder="Introdu codul"
+              placeholder={t("placeholder")}
               data-testid="discount-input"
               className="clip-corner-cut-sm border-border bg-background h-11 flex-1 rounded-none"
             />
@@ -79,7 +81,7 @@ export default function DiscountCode({ cart }: Props) {
               data-testid="discount-apply-button"
               className="rounded-md"
             >
-              Aplică
+              {t("apply")}
             </SubmitButton>
           </div>
           <ErrorMessage
@@ -119,7 +121,7 @@ export default function DiscountCode({ cart }: Props) {
                     type="button"
                     onClick={() => p.code && removePromotionCode(p.code)}
                     data-testid="remove-discount-button"
-                    aria-label="Șterge codul promoțional"
+                    aria-label={t("removeAria")}
                     className="text-success/70 hover:text-success transition-colors"
                   >
                     <X className="size-4" />

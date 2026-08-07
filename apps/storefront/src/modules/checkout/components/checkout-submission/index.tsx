@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/navigation";
 import { PackageCheck } from "lucide-react";
 import { useActionState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/atoms/button";
 import { placeOrder, type CheckoutActionState } from "@lib/data/cart";
@@ -19,6 +20,7 @@ export default function CheckoutSubmission({
   summary: ReactNode;
   hasAmountDue: boolean;
 }) {
+  const t = useTranslations("Checkout.submission");
   const [state, formAction, isPending] = useActionState(
     placeOrder,
     INITIAL_STATE
@@ -30,28 +32,32 @@ export default function CheckoutSubmission({
         <div className="small:col-start-1 small:row-start-1">{details}</div>
         <section className="clip-corner-cut-lg clip-shadow-md bg-card ring-border small:col-start-1 small:row-start-2 row-start-3 p-6 ring-1">
           <p className="text-muted-foreground mb-4 text-xs leading-relaxed">
-            Prin plasarea comenzii accepți{" "}
-            <Link
-              href="/termeni"
-              className="text-foreground focus-visible:ring-ring underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-hidden"
-            >
-              termenii de vânzare
-            </Link>
-            ,{" "}
-            <Link
-              href="/returnari"
-              className="text-foreground focus-visible:ring-ring underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-hidden"
-            >
-              politica de retur
-            </Link>{" "}
-            și{" "}
-            <Link
-              href="/confidentialitate"
-              className="text-foreground focus-visible:ring-ring underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-hidden"
-            >
-              politica de confidențialitate
-            </Link>
-            .
+            {t.rich("termsText", {
+              terms: (chunks) => (
+                <Link
+                  href="/termeni"
+                  className="text-foreground focus-visible:ring-ring underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-hidden"
+                >
+                  {chunks}
+                </Link>
+              ),
+              returns: (chunks) => (
+                <Link
+                  href="/returnari"
+                  className="text-foreground focus-visible:ring-ring underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-hidden"
+                >
+                  {chunks}
+                </Link>
+              ),
+              privacy: (chunks) => (
+                <Link
+                  href="/confidentialitate"
+                  className="text-foreground focus-visible:ring-ring underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-hidden"
+                >
+                  {chunks}
+                </Link>
+              ),
+            })}
           </p>
           <Button
             type="submit"
@@ -61,13 +67,11 @@ export default function CheckoutSubmission({
             data-testid="submit-order-button"
           >
             <PackageCheck aria-hidden="true" className="size-5" />
-            {isPending ? "Plasăm comanda…" : "Plasează comanda"}
+            {isPending ? t("submitLoadingLabel") : t("submitLabel")}
           </Button>
           <ErrorMessage error={state.error} data-testid="order-error-message" />
           <p className="text-muted-foreground mt-3 text-center text-xs leading-relaxed">
-            {hasAmountDue
-              ? "Livrarea standard și plata la livrare se aplică automat."
-              : "Livrarea standard se aplică automat. Totalul produselor este acoperit integral."}
+            {hasAmountDue ? t("footnoteAmountDue") : t("footnoteNoAmountDue")}
           </p>
         </section>
       </form>

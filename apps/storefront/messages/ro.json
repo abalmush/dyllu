@@ -1,6 +1,9 @@
 {
   "Common": {
-    "skipToContent": "Sari la conținut"
+    "skipToContent": "Sari la conținut",
+    "addToCart": "Adaugă {title} în coș",
+    "noImage": "Fără imagine",
+    "soldOut": "Stoc epuizat"
   },
   "LocaleSwitcher": {
     "label": "Limbă"
@@ -53,7 +56,76 @@
     "account": "Contul tău"
   },
   "Checkout": {
-    "country": "Țară"
+    "country": "Țară",
+    "page": {
+      "title": "Finalizare comandă",
+      "breadcrumbHome": "Acasă",
+      "breadcrumbCart": "Coșul meu",
+      "breadcrumbCurrent": "Finalizare comandă",
+      "eyebrow": "Checkout simplu",
+      "heading": "Finalizează comanda",
+      "description": "Completează datele de livrare și plasează comanda. Livrarea standard și plata la livrare se aplică automat."
+    },
+    "addresses": {
+      "sectionEyebrow": "Contact și adresă",
+      "heading": "Date pentru livrare",
+      "description": "Completează datele clientului și adresa unde trebuie să ajungă comanda.",
+      "billingHeading": "Date de facturare"
+    },
+    "addressSelect": {
+      "placeholder": "Alege o adresă salvată"
+    },
+    "shipping": {
+      "savedAddressGreeting": "Salut{name}. Poți porni de la una dintre adresele salvate.",
+      "firstName": "Prenume",
+      "lastName": "Nume",
+      "address1": "Adresă",
+      "address2": "Apartament, scară, etaj",
+      "company": "Companie",
+      "postalCode": "Cod poștal",
+      "city": "Oraș / Localitate",
+      "cityHelp": "Pentru livrare în orașul Chișinău poți indica Chișinău sau sectorul. Suburbiile municipiului sunt considerate livrare în țară.",
+      "province": "Raion / Provincie",
+      "sameAsBilling": "Adresa de facturare este aceeași cu adresa de livrare",
+      "email": "Email",
+      "emailValidationTitle": "Introdu o adresă de email validă.",
+      "phone": "Telefon"
+    },
+    "billing": {
+      "firstName": "Prenume",
+      "lastName": "Nume",
+      "address1": "Adresă",
+      "address2": "Apartament, scară, etaj",
+      "company": "Companie",
+      "postalCode": "Cod poștal",
+      "city": "Oraș",
+      "province": "Raion / Provincie",
+      "phone": "Telefon"
+    },
+    "submission": {
+      "termsText": "Prin plasarea comenzii accepți <terms>termenii de vânzare</terms>, <returns>politica de retur</returns> și <privacy>politica de confidențialitate</privacy>.",
+      "submitLabel": "Plasează comanda",
+      "submitLoadingLabel": "Plasăm comanda…",
+      "footnoteAmountDue": "Livrarea standard și plata la livrare se aplică automat.",
+      "footnoteNoAmountDue": "Livrarea standard se aplică automat. Totalul produselor este acoperit integral."
+    },
+    "summary": {
+      "eyebrow": "Comandă DYLLU",
+      "heading": "Comanda ta",
+      "description": "Verifică produsele și aplică un cod promoțional înainte de plasare.",
+      "itemsLabel": "Produse în comandă",
+      "itemCount": "{count} {count, plural, one {produs} other {produse}}",
+      "amountDueNote": "Plata se face la livrare, după confirmarea comenzii",
+      "amountPaidNote": "Totalul comenzii este acoperit integral",
+      "shippingNote": "Livrarea standard și costul ei se aplică automat după validarea adresei"
+    },
+    "discount": {
+      "hasCode": "Ai un cod promoțional?",
+      "placeholder": "Introdu codul",
+      "apply": "Aplică",
+      "invalidCode": "Cod invalid",
+      "removeAria": "Șterge codul promoțional"
+    }
   },
   "AiAssistant": {
     "title": "Asistent DYLLU",
@@ -66,5 +138,186 @@
     "send": "Trimite",
     "addToCart": "Adaugă {title} în coș",
     "addToCartError": "Nu am reușit să adăugăm produsul în coș."
+  },
+  "ProductInfo": {
+    "home": "Acasă",
+    "reviewCount": "{count, plural, one {# recenzie} few {# recenzii} other {# recenzii}}"
+  },
+  "SiteContact": {
+    "hoursShort": "L–S 08:00–18:00 · D 09:00–14:00",
+    "showroomSummary": "Rețea de magazine DYLLU în toată Moldova"
+  },
+  "SiteFooter": {
+    "tagline": "DYLLU este partenerul tău pentru scule profesionale, echipamente de atelier și soluții de protecție în Republica Moldova.",
+    "categories": "Categorii",
+    "shop": "Magazin",
+    "support": "Suport",
+    "shopLinks": {
+      "allProducts": "Toate produsele",
+      "activeDeals": "Reduceri active",
+      "newArrivals": "Noutăți",
+      "brandsAndGuides": "Branduri și ghiduri"
+    },
+    "supportLinks": {
+      "contact": "Contact",
+      "shippingAndPayment": "Livrare și plată",
+      "returnsAndWarranty": "Returnări și garanție",
+      "termsAndConditions": "Termeni și condiții",
+      "privacyPolicy": "Politica de confidențialitate"
+    },
+    "newsletter": {
+      "title": "Noutăți DYLLU",
+      "body": "Promoții săptămânale, ghiduri de utilizare și produse noi direct în email.",
+      "contactPrefix": "Pentru solicitări comerciale și suport, scrie-ne la"
+    },
+    "orderConfirmation": {
+      "heading": "Comenzi și confirmare",
+      "phoneConfirmation": "Confirmare telefonică",
+      "paymentAtProcessing": "Detalii de plată la procesare",
+      "businessInvoicing": "Facturare pentru firme"
+    },
+    "copyright": "© {year} DYLLU. Toate drepturile rezervate.",
+    "trustBadges": {
+      "validatedData": "Date validate la confirmarea comenzii",
+      "nationwideShipping": "Livrare în toată Moldova"
+    }
+  },
+  "NewsletterForm": {
+    "invalidEmail": "Introdu o adresă de email validă, de exemplu nume@domeniu.md.",
+    "unavailable": "Abonarea nu este disponibilă momentan.",
+    "subscribeSuccess": "Verifică emailul și confirmă abonarea la noutățile DYLLU.",
+    "emailLabel": "Adresa de email",
+    "emailPlaceholder": "nume@domeniu.md…",
+    "submit": "Solicită abonarea",
+    "disclaimer": "Vei primi un email pentru confirmarea abonării. Te poți dezabona oricând."
+  },
+  "NewsletterBand": {
+    "eyebrow": "Noutăți DYLLU",
+    "title": "Promoții, sfaturi tehnice și <highlight>stocuri limitate</highlight> înainte de toți.",
+    "body": "Lasă-ne adresa și deschidem un email precompletat pentru confirmarea abonării.",
+    "consent": "Prin abonare ești de acord cu <privacyLink>politica de confidențialitate</privacyLink>."
+  },
+  "Cart": {
+    "metaTitle": "Coș",
+    "metaDescription": "Revizuiește produsele din coș și pregătește finalizarea comenzii.",
+    "notFoundMetaTitle": "404",
+    "notFoundMetaDescription": "Coșul nu a putut fi găsit.",
+    "notFoundTitle": "Coșul nu a fost găsit",
+    "notFoundBody": "Coșul pe care ai încercat să îl accesezi nu există. Șterge cookie-urile și încearcă din nou.",
+    "notFoundHome": "Înapoi la pagina principală",
+    "breadcrumbHome": "Acasă",
+    "breadcrumbCart": "Coșul meu",
+    "eyebrow": "Comandă DYLLU",
+    "title": "Coșul tău",
+    "subtitle": "Verifică produsele, adaugă accesoriile utile și mergi mai departe către finalizarea comenzii.",
+    "itemsHeading": "Produsele tale",
+    "itemCount": "{count, plural, one {produs} other {produse}}",
+    "summaryEyebrow": "Finalizare rapidă",
+    "summaryTitle": "Sumar comandă",
+    "checkout": "Finalizează comanda",
+    "assuranceConfirmed": "Comanda este confirmată de echipa DYLLU înainte de procesare",
+    "assuranceDelivery": "Livrare în toată Moldova · 24–48h în Chișinău",
+    "quantitySelectPlaceholder": "Selectează…",
+    "quantityLabel": "Cantitate",
+    "variantLabel": "Variantă: {variant}",
+    "remove": "Șterge",
+    "updating": "actualizez",
+    "emptyTitle": "Coșul tău este gol.",
+    "emptyBody": "Descoperă scule manuale, electrice și echipamente de protecție profesionale. Am pregătit selecții pentru orice atelier.",
+    "emptyBrowse": "Explorează produsele",
+    "emptyHandTools": "Scule de mână",
+    "emptyRecommendedTitle": "Recomandări pentru tine",
+    "emptyRecommendedSubtitle": "Selecția noastră de produse populare săptămâna aceasta.",
+    "emptyRecommendedViewAll": "Vezi toate produsele →",
+    "signInTitle": "Ai deja un cont DYLLU?",
+    "signInBody": "Conectează-te pentru livrare mai rapidă și istoricul comenzilor.",
+    "signInCta": "Autentificare"
+  },
+  "MegaMenu": {
+    "exploreCategory": "Explorează categoria",
+    "viewAll": "Vezi tot",
+    "allCategories": "Toate categoriile",
+    "catalogLabel": "Catalog DYLLU",
+    "allProducts": "Toate produsele",
+    "sale": "Reduceri"
+  },
+  "PlpToolbar": {
+    "resultsLabel": "produse",
+    "sortLabel": "Sortează",
+    "sortRelevance": "Relevanță",
+    "sortPriceAsc": "Preț crescător",
+    "sortPriceDesc": "Preț descrescător",
+    "sortNewest": "Cele mai noi"
+  },
+  "Pagination": {
+    "nav": "Paginare",
+    "previous": "Pagina anterioară",
+    "next": "Pagina următoare"
+  },
+  "PlpShell": {
+    "filters": "Filtre"
+  },
+  "RefinementList": {
+    "sort": "Sortează",
+    "categories": "Categorii",
+    "allProducts": "Toate produsele",
+    "availability": "Disponibilitate",
+    "inStock": "În stoc",
+    "onSale": "Cu reducere",
+    "moreFiltersSoon": "Filtre suplimentare disponibile în curând."
+  },
+  "SortProducts": {
+    "newest": "Cele mai noi",
+    "priceAsc": "Preț crescător",
+    "priceDesc": "Preț descrescător",
+    "sortLabel": "Sortează:",
+    "order": "Ordinea produselor"
+  },
+  "Breadcrumbs": {
+    "home": "Acasă",
+    "store": "Magazin"
+  },
+  "Store": {
+    "loadMoreError": "Nu am reușit să încărcăm următoarele produse.",
+    "loadingInterrupted": "Încărcarea s-a întrerupt",
+    "endOfResults": "Ai ajuns la finalul selecției. {count, plural, one {# produs disponibil} other {# produse disponibile}}.",
+    "searchResultsTitle": "Rezultate pentru „{query}”",
+    "saleTitle": "Reduceri active",
+    "allProductsTitle": "Toate produsele",
+    "searchResultsDescription": "Produse DYLLU relevante pentru căutarea ta, pregătite pentru livrare sau confirmare rapidă.",
+    "saleDescription": "Vezi produsele și ofertele disponibile acum în magazinul online DYLLU.",
+    "allProductsDescription": "Explorează gama completă de scule, accesorii și echipamente DYLLU.",
+    "emptySearchTitle": "Nu am găsit produse pentru „{query}”",
+    "emptySaleTitle": "Nu există reduceri active în acest moment",
+    "emptyCategoryTitle": "Categoria încă nu are produse",
+    "emptySearchDescription": "Încearcă alt termen de căutare, verifică o categorie apropiată sau cere ajutorul echipei DYLLU.",
+    "emptySaleDescription": "Promoțiile se actualizează constant. Revino curând sau vezi gama completă disponibilă acum.",
+    "emptyCategoryDescription": "Stocul se actualizează constant. Între timp, descoperă restul gamei sau contactează-ne pentru o cotație personalizată.",
+    "viewAllProducts": "Vezi toate produsele",
+    "requestQuote": "Cere o ofertă",
+    "promoDescriptionFallback": "Descoperă selecția DYLLU: {title}.",
+    "promoImageAlt": "{title} — selecție DYLLU",
+    "promoPreparingTitle": "Selecția „{title}” se pregătește",
+    "promoPreparingDescription": "Adăugăm în curând produse marcate pentru această colecție. Revino curând sau explorează întreaga gamă."
+  },
+  "SearchCommand": {
+    "title": "Căutare DYLLU",
+    "description": "Caută produse, categorii sau accesează rapid o pagină.",
+    "placeholder": "Caută burghie, ciocane, accesorii…",
+    "noResults": "Niciun rezultat. Apasă Enter ca să cauți „{query}”.",
+    "productsHeading": "Produse",
+    "recentHeading": "Căutări recente",
+    "quickAccessHeading": "Acces rapid",
+    "popularHeading": "Populare",
+    "categoriesHeading": "Categorii",
+    "quickLinkNewProducts": "Produse noi",
+    "quickLinkActiveDeals": "Reduceri active",
+    "quickLinkAllCategories": "Toate categoriile",
+    "popularSdsBits": "Burghie SDS+",
+    "popularProtectiveGloves": "Mănuși de protecție",
+    "popularRotaryHammer": "Ciocan rotopercutor",
+    "popularScrewdrivers": "Șurubelnițe",
+    "popularMetalDiscs": "Discuri pe metal",
+    "popularSocketWrenches": "Chei tubulare"
   }
 }

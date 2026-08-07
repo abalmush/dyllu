@@ -4,6 +4,7 @@ import { MD_POSTAL_CODE_PATTERN, MD_POSTAL_CODE_TITLE } from "@lib/constants";
 import Checkbox from "@modules/common/components/checkbox";
 import Input from "@modules/common/components/input";
 import React, { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import AddressSelect from "../address-select";
 import CountrySelect from "../country-select";
 
@@ -18,6 +19,7 @@ const ShippingAddress = ({
   checked: boolean;
   onChange: () => void;
 }) => {
+  const t = useTranslations("Checkout.shipping");
   const [formData, setFormData] = useState<Record<string, string>>({
     "shipping_address.first_name": cart?.shipping_address?.first_name || "",
     "shipping_address.last_name": cart?.shipping_address?.last_name || "",
@@ -87,7 +89,9 @@ const ShippingAddress = ({
       {customer && (addressesInRegion?.length || 0) > 0 && (
         <Container className="clip-corner-cut-md bg-surface-subtle/60 ring-border mb-6 flex flex-col gap-y-4 p-6 ring-1">
           <p className="text-muted-foreground text-sm">
-            {`Salut${customer.first_name ? `, ${customer.first_name}` : ""}. Poți porni de la una dintre adresele salvate.`}
+            {t("savedAddressGreeting", {
+              name: customer.first_name ? `, ${customer.first_name}` : "",
+            })}
           </p>
           <AddressSelect
             addresses={addressesInRegion ?? []}
@@ -109,7 +113,7 @@ const ShippingAddress = ({
       )}
       <div className="small:grid-cols-2 grid grid-cols-1 gap-4">
         <Input
-          label="Prenume"
+          label={t("firstName")}
           name="shipping_address.first_name"
           autoComplete="given-name"
           value={formData["shipping_address.first_name"]}
@@ -118,7 +122,7 @@ const ShippingAddress = ({
           data-testid="shipping-first-name-input"
         />
         <Input
-          label="Nume"
+          label={t("lastName")}
           name="shipping_address.last_name"
           autoComplete="family-name"
           value={formData["shipping_address.last_name"]}
@@ -127,7 +131,7 @@ const ShippingAddress = ({
           data-testid="shipping-last-name-input"
         />
         <Input
-          label="Adresă"
+          label={t("address1")}
           name="shipping_address.address_1"
           autoComplete="address-line1"
           value={formData["shipping_address.address_1"]}
@@ -136,7 +140,7 @@ const ShippingAddress = ({
           data-testid="shipping-address-input"
         />
         <Input
-          label="Apartament, scară, etaj"
+          label={t("address2")}
           name="shipping_address.address_2"
           autoComplete="address-line2"
           value={formData["shipping_address.address_2"]}
@@ -144,7 +148,7 @@ const ShippingAddress = ({
           data-testid="shipping-address-2-input"
         />
         <Input
-          label="Companie"
+          label={t("company")}
           name="shipping_address.company"
           value={formData["shipping_address.company"]}
           onChange={handleChange}
@@ -152,7 +156,7 @@ const ShippingAddress = ({
           data-testid="shipping-company-input"
         />
         <Input
-          label="Cod poștal"
+          label={t("postalCode")}
           name="shipping_address.postal_code"
           autoComplete="postal-code"
           value={formData["shipping_address.postal_code"]}
@@ -164,7 +168,7 @@ const ShippingAddress = ({
         />
         <div className="flex flex-col gap-2">
           <Input
-            label="Oraș / Localitate"
+            label={t("city")}
             name="shipping_address.city"
             autoComplete="address-level2"
             value={formData["shipping_address.city"]}
@@ -186,8 +190,7 @@ const ShippingAddress = ({
             id="shipping-city-help"
             className="text-muted-foreground text-xs leading-relaxed"
           >
-            Pentru livrare în orașul Chișinău poți indica Chișinău sau sectorul.
-            Suburbiile municipiului sunt considerate livrare în țară.
+            {t("cityHelp")}
           </p>
         </div>
         <CountrySelect
@@ -200,7 +203,7 @@ const ShippingAddress = ({
           data-testid="shipping-country-select"
         />
         <Input
-          label="Raion / Provincie"
+          label={t("province")}
           name="shipping_address.province"
           autoComplete="address-level1"
           value={formData["shipping_address.province"]}
@@ -210,7 +213,7 @@ const ShippingAddress = ({
       </div>
       <div className="my-8">
         <Checkbox
-          label="Adresa de facturare este aceeași cu adresa de livrare"
+          label={t("sameAsBilling")}
           name="same_as_billing"
           checked={checked}
           onChange={onChange}
@@ -219,10 +222,10 @@ const ShippingAddress = ({
       </div>
       <div className="small:grid-cols-2 mb-4 grid grid-cols-1 gap-4">
         <Input
-          label="Email"
+          label={t("email")}
           name="email"
           type="email"
-          title="Introdu o adresă de email validă."
+          title={t("emailValidationTitle")}
           autoComplete="email"
           spellCheck={false}
           value={formData.email}
@@ -231,7 +234,7 @@ const ShippingAddress = ({
           data-testid="shipping-email-input"
         />
         <Input
-          label="Telefon"
+          label={t("phone")}
           name="shipping_address.phone"
           type="tel"
           autoComplete="tel"

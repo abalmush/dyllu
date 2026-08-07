@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 
 import PlpShell from "@modules/store/components/plp-shell";
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid";
@@ -15,34 +16,39 @@ type Props = {
   categories: CategoryNode[];
 };
 
-export default function StoreTemplate({
+export default async function StoreTemplate({
   sortBy,
   page,
   query,
   onSale,
   categories,
 }: Props) {
+  const t = await getTranslations("Store");
+  const tBreadcrumbs = await getTranslations("Breadcrumbs");
   const pageNumber = page ? parseInt(page) : 1;
   const sort = sortBy || "created_at";
   const trimmedQuery = query?.trim();
 
   const title = trimmedQuery
-    ? `Rezultate pentru „${trimmedQuery}”`
+    ? t("searchResultsTitle", { query: trimmedQuery })
     : onSale
-      ? "Reduceri active"
-      : "Toate produsele";
+      ? t("saleTitle")
+      : t("allProductsTitle");
 
   const description = trimmedQuery
-    ? "Produse DYLLU relevante pentru căutarea ta, pregătite pentru livrare sau confirmare rapidă."
+    ? t("searchResultsDescription")
     : onSale
-      ? "Vezi produsele și ofertele disponibile acum în magazinul online DYLLU."
-      : "Explorează gama completă de scule, accesorii și echipamente DYLLU.";
+      ? t("saleDescription")
+      : t("allProductsDescription");
 
   return (
     <PlpShell
       title={title}
       description={description}
-      crumbs={[{ label: "Acasă", href: "/" }, { label: "Magazin" }]}
+      crumbs={[
+        { label: tBreadcrumbs("home"), href: "/" },
+        { label: tBreadcrumbs("store") },
+      ]}
       sortBy={sort}
       categories={categories}
     >

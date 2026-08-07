@@ -1,4 +1,5 @@
 import { HttpTypes } from "@medusajs/types";
+import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/atoms/container";
 import { Breadcrumbs } from "@/components/molecules/breadcrumbs";
@@ -13,7 +14,9 @@ type Props = {
   customer: HttpTypes.StoreCustomer | null;
 };
 
-export default function CartTemplate({ cart, customer }: Props) {
+export default async function CartTemplate({ cart, customer }: Props) {
+  const t = await getTranslations("Cart");
+
   return (
     <div
       className={cart?.items?.length ? "bg-surface-subtle" : undefined}
@@ -24,15 +27,17 @@ export default function CartTemplate({ cart, customer }: Props) {
           <>
             <div className="mb-8 flex flex-col gap-4">
               <Breadcrumbs
-                items={[{ label: "Acasă", href: "/" }, { label: "Coșul meu" }]}
+                items={[
+                  { label: t("breadcrumbHome"), href: "/" },
+                  { label: t("breadcrumbCart") },
+                ]}
               />
-              <Eyebrow>Comandă DYLLU</Eyebrow>
+              <Eyebrow>{t("eyebrow")}</Eyebrow>
               <h1 className="font-display text-display-sm text-foreground small:text-display-md font-extrabold tracking-tight">
-                Coșul tău
+                {t("title")}
               </h1>
               <p className="text-muted-foreground max-w-2xl text-sm">
-                Verifică produsele, adaugă accesoriile utile și mergi mai
-                departe către finalizarea comenzii.
+                {t("subtitle")}
               </p>
             </div>
             <div className="small:grid-cols-[minmax(0,1fr)_minmax(0,360px)] small:gap-12 grid gap-8">

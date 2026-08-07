@@ -1,4 +1,5 @@
 import { HttpTypes } from "@medusajs/types";
+import { getTranslations } from "next-intl/server";
 
 import repeat from "@lib/util/repeat";
 import Item from "@modules/cart/components/item";
@@ -8,16 +9,19 @@ type Props = {
   cart?: HttpTypes.StoreCart;
 };
 
-export default function ItemsTemplate({ cart }: Props) {
+export default async function ItemsTemplate({ cart }: Props) {
+  const t = await getTranslations("Cart");
   const items = cart?.items;
+  const itemCount = items?.length ?? 0;
+
   return (
     <section className="clip-corner-cut-lg clip-shadow-md bg-card ring-border small:p-4 p-4 ring-1">
       <header className="border-border flex flex-wrap items-baseline justify-between gap-4 border-b px-4 pt-4 pb-4">
         <h2 className="font-display text-foreground text-xl font-bold tracking-tight">
-          Produsele tale
+          {t("itemsHeading")}
         </h2>
         <span className="clip-corner-cut-xs bg-surface-subtle text-muted-foreground px-4 py-1 text-xs font-semibold tracking-[0.16em] uppercase">
-          {items?.length ?? 0} {items?.length === 1 ? "produs" : "produse"}
+          {itemCount} {t("itemCount", { count: itemCount })}
         </span>
       </header>
       <ul className="px-4">
