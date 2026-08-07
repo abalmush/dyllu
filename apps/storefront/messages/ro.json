@@ -4,5 +4,21 @@
   },
   "LocaleSwitcher": {
     "label": "Limbă"
+  },
+  "Errors": {
+    "eyebrow": "Eroare temporară",
+    "title": "Pagina nu a putut fi încărcată",
+    "body": "Te rugăm să încerci din nou. Dacă problema persistă, revino peste câteva minute.",
+    "retry": "Încearcă din nou"
+  },
+  "NotFound": {
+    "badge": "Eroare 404",
+    "title": "Pagina nu a fost",
+    "titleHighlight": "găsită.",
+    "body": "Linkul pe care l-ai accesat nu există sau a fost mutat. Întoarce-te la pagina principală sau caută produsul direct.",
+    "home": "Înapoi acasă",
+    "browse": "Vezi toate produsele",
+    "metaTitle": "Pagina nu a fost găsită",
+    "metaDescription": "Pagina pe care încerci să o accesezi nu există."
   }
 }
