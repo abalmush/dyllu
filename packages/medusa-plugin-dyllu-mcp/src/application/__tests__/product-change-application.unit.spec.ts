@@ -11,6 +11,7 @@ import {
   UserDirectory,
   CapabilityStore,
   InventoryDirectory,
+  OneCSyncDirectory,
 } from "../ports";
 import { ProductChangeApplication } from "../product-change-application";
 import { MerchandisingApplication } from "../merchandising-application";
@@ -196,9 +197,14 @@ class TestProducts implements ProductCatalog {
   readonly lists: Array<{ limit: number; offset: number }> = [];
   countCalls = 0;
   private currentPrice = priceTarget;
+  private readonly additionalTargets: ProductPriceTarget[] = [];
 
   changeCurrentPrice(price: ProductPriceTarget) {
     this.currentPrice = price;
+  }
+
+  addPriceTarget(price: ProductPriceTarget) {
+    this.additionalTargets.push(price);
   }
 
   async findById(productId: string) {
@@ -215,12 +221,14 @@ class TestProducts implements ProductCatalog {
   async findVariantPrice(
     input: Parameters<ProductCatalog["findVariantPrice"]>[0]
   ) {
-    return input.productId === this.currentPrice.productId &&
-      input.variantId === this.currentPrice.variantId &&
-      input.priceId === this.currentPrice.priceId &&
-      input.currencyCode === this.currentPrice.currencyCode
-      ? this.currentPrice
-      : null;
+    const target = [this.currentPrice, ...this.additionalTargets].find(
+      (candidate) =>
+        input.productId === candidate.productId &&
+        input.variantId === candidate.variantId &&
+        input.priceId === candidate.priceId &&
+        input.currencyCode === candidate.currencyCode
+    );
+    return target ?? null;
   }
 
   async search(input: { query: string; limit: number }) {
@@ -306,6 +314,26 @@ class TestSales implements SaleDirectory {
 
   async findOverlappingActiveSales() {
     return this.overlaps;
+  }
+}
+
+class TestOneCSync implements OneCSyncDirectory {
+  constructor(private readonly salesResult: unknown) {}
+
+  async getLatest() {
+    return null;
+  }
+
+  async listComparisons() {
+    return { run_id: null, items: [], count: 0, limit: 20, offset: 0 };
+  }
+
+  async listSales() {
+    return this.salesResult;
+  }
+
+  async receive() {
+    throw new Error("receive should not be called from listOneCSales");
   }
 }
 
@@ -720,6 +748,67 @@ describe("ProductChangeApplication", () => {
       )
     ).rejects.toMatchObject({ code: "invalid_sale_price" });
     expect(operationGovernance.proposals).toEqual([]);
+  });
+
+  it("flags a 1C sale item whose price is not below the DYLLU Website's current base price", async () => {
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["one_c_sync.read"]),
+      products: new TestProducts(),
+      orders: new TestOrders(),
+      sales: new TestSales([saleTarget]),
+      oneCSync: new TestOneCSync({
+        run_id: "onecrun_test",
+        items: [
+          {
+            sku: saleTarget.sku,
+            dyllu_variant_id: saleTarget.variantId,
+            regular_price_mdl: 5799,
+            sale_price_mdl: saleTarget.normalAmount,
+            starts_at: null,
+            ends_at: null,
+            mapping_status: "matched",
+          },
+          {
+            sku: "DTHS0000",
+            dyllu_variant_id: null,
+            regular_price_mdl: 999,
+            sale_price_mdl: 899,
+            starts_at: null,
+            ends_at: null,
+            mapping_status: "missing_dyllu",
+          },
+        ],
+        count: 2,
+        limit: 20,
+        offset: 0,
+      }),
+      operationGovernance: new TestOperationGovernance(),
+      governance: new TestGovernance(),
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.listOneCSales(
+        { actorId: actor.id, requestId: "req_one_c_sales" },
+        { limit: 20, offset: 0 }
+      )
+    ).resolves.toMatchObject({
+      items: [
+        {
+          sku: saleTarget.sku,
+          dyllu_base_price_mdl: saleTarget.normalAmount,
+          sale_valid: false,
+        },
+        {
+          sku: "DTHS0000",
+          dyllu_base_price_mdl: null,
+          sale_valid: null,
+        },
+      ],
+    });
   });
 
   it("rejects a sale that overlaps another active sale", async () => {
@@ -1702,6 +1791,106 @@ describe("ProductChangeApplication", () => {
       }),
     ]);
     expect(governance.proposals).toEqual(result.proposals);
+  });
+
+  it("creates an atomic batch of independent MDL price proposals", async () => {
+    const products = new TestProducts();
+    const secondTarget: ProductPriceTarget = {
+      productId: "prod_saw",
+      productTitle: "Ferăstrău",
+      variantId: "variant_saw",
+      variantTitle: "Standard",
+      sku: "DTHS0002",
+      priceId: "price_saw",
+      amount: 999,
+      currencyCode: "mdl",
+      updatedAt: new Date("2026-07-29T09:00:00.000Z"),
+    };
+    products.addPriceTarget(secondTarget);
+    const governance = new TestGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["product_price.update"]),
+      products,
+      orders: new TestOrders(),
+      governance,
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    const result = await application.proposePriceBatch(
+      { actorId: actor.id, requestId: "req_price_batch" },
+      {
+        items: [
+          {
+            productId: priceTarget.productId,
+            variantId: priceTarget.variantId,
+            priceId: priceTarget.priceId,
+            currencyCode: "mdl",
+            proposedAmount: 5799,
+          },
+          {
+            productId: secondTarget.productId,
+            variantId: secondTarget.variantId,
+            priceId: secondTarget.priceId,
+            currencyCode: "mdl",
+            proposedAmount: 1099,
+          },
+        ],
+        reason: "Correct base prices before creating a sale",
+      }
+    );
+
+    expect(result.proposals).toEqual([
+      expect.objectContaining({
+        id: "proposal_1",
+        variantId: priceTarget.variantId,
+        beforeValue: String(priceTarget.amount),
+        proposedValue: "5799",
+      }),
+      expect.objectContaining({
+        id: "proposal_2",
+        variantId: secondTarget.variantId,
+        beforeValue: String(secondTarget.amount),
+        proposedValue: "1099",
+      }),
+    ]);
+    expect(governance.proposals).toEqual(result.proposals);
+  });
+
+  it("rejects a price batch where the proposed amount matches the current price", async () => {
+    const products = new TestProducts();
+    const governance = new TestGovernance();
+    const application = new ProductChangeApplication({
+      users: new TestUsers(),
+      capabilities: new TestCapabilities(["product_price.update"]),
+      products,
+      orders: new TestOrders(),
+      governance,
+      executor: new TestExecutor(),
+      clock: new TestClock(),
+      ids: new TestIds(),
+    });
+
+    await expect(
+      application.proposePriceBatch(
+        { actorId: actor.id, requestId: "req_price_batch_unchanged" },
+        {
+          items: [
+            {
+              productId: priceTarget.productId,
+              variantId: priceTarget.variantId,
+              priceId: priceTarget.priceId,
+              currencyCode: "mdl",
+              proposedAmount: priceTarget.amount,
+            },
+          ],
+          reason: "Attempt a no-op price correction",
+        }
+      )
+    ).rejects.toMatchObject({ code: "unchanged_price" });
+    expect(governance.proposals).toEqual([]);
   });
 
   it("creates an MDL price proposal without changing the current price", async () => {

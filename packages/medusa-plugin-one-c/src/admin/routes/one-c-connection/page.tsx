@@ -19,6 +19,8 @@ import { useMemo, useState } from "react";
 
 type MappingStatus = "matched" | "missing_medusa" | "ambiguous" | "excluded";
 
+type ApplyStatus = "not_applied" | "applied" | "flagged" | "failed";
+
 type SyncCounts = {
   total: number;
   matched: number;
@@ -48,6 +50,7 @@ type SyncItem = {
   name: string;
   mapping_status: MappingStatus;
   preparation_status: string;
+  apply_status: ApplyStatus;
   medusa_product_title: string | null;
   regular_price_mdl: number | null;
   sale_price_mdl: number | null;
@@ -108,6 +111,19 @@ function StatusBadge({ status }: { status: MappingStatus }) {
     ambiguous: "red",
     excluded: "grey",
   }[status] as "green" | "orange" | "red" | "grey";
+  return <Badge color={color}>{label}</Badge>;
+}
+
+function ApplyStatusBadge({ status }: { status: ApplyStatus }) {
+  if (status === "not_applied") return null;
+  const label = {
+    applied: "Applied",
+    flagged: "Needs review",
+    failed: "Failed",
+  }[status];
+  const color = { applied: "green", flagged: "orange", failed: "red" }[
+    status
+  ] as "green" | "orange" | "red";
   return <Badge color={color}>{label}</Badge>;
 }
 
@@ -376,6 +392,50 @@ const OneCConnectionPage = () => {
       await queryClient.invalidateQueries({ queryKey: ["one-c-sync"] });
     },
   });
+  const applyAll = useMutation({
+    mutationFn: () =>
+      requestJson<{
+        applied_count: number;
+        flagged_count: number;
+        failed_count: number;
+      }>(`/admin/one-c-sync/runs/${latestRun!.id}/apply`, { method: "POST" }),
+    onSuccess: (result) => {
+      toast.success(
+        `${result.applied_count} applied, ${result.flagged_count} flagged for review, ${result.failed_count} failed`
+      );
+    },
+    onError: (error) =>
+      toast.error("Could not apply 1C updates", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      }),
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["one-c-sync"] });
+    },
+  });
+  const applyItem = useMutation({
+    mutationFn: (itemId: string) =>
+      requestJson<{ outcome: string }>(
+        `/admin/one-c-sync/runs/${latestRun!.id}/items/${itemId}/apply`,
+        { method: "POST" }
+      ),
+    onSuccess: (result) => {
+      const outcomeLabel = {
+        applied: "applied",
+        flagged: "flagged for review",
+        failed: "failed",
+        no_change: "already in sync",
+      }[result.outcome as "applied" | "flagged" | "failed" | "no_change"];
+      toast.success(`Item ${outcomeLabel ?? result.outcome}`);
+    },
+    onError: (error) =>
+      toast.error("Could not apply this item", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      }),
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["one-c-sync"] });
+    },
+  });
+  const anyApplyInFlight = applyAll.isPending || applyItem.isPending;
 
   const download = async (format: "csv" | "json") => {
     if (!latestRun) return;
@@ -488,8 +548,17 @@ const OneCConnectionPage = () => {
                 </Button>
                 <Button
                   variant="secondary"
-                  disabled
-                  title="Locked while 1C uses plain HTTP"
+                  isLoading={applyAll.isPending}
+                  disabled={anyApplyInFlight}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Apply all reviewed price, sale price, and stock updates for this run's matched products? This writes directly to the live catalog."
+                      )
+                    ) {
+                      applyAll.mutate();
+                    }
+                  }}
                 >
                   Apply all reviewed prices
                 </Button>
@@ -527,6 +596,7 @@ const OneCConnectionPage = () => {
                     <Table.HeaderCell>Brand ID</Table.HeaderCell>
                     <Table.HeaderCell>Medusa base</Table.HeaderCell>
                     <Table.HeaderCell>1C base</Table.HeaderCell>
+                    <Table.HeaderCell>Medusa sale</Table.HeaderCell>
                     <Table.HeaderCell>1C sale</Table.HeaderCell>
                     <Table.HeaderCell>Balance</Table.HeaderCell>
                     <Table.HeaderCell>1C state</Table.HeaderCell>
@@ -575,6 +645,15 @@ const OneCConnectionPage = () => {
                           : "—"}
                       </Table.Cell>
                       <Table.Cell>{item.regular_price_mdl ?? "—"}</Table.Cell>
+                      <Table.Cell>
+                        {item.mapping_status === "matched"
+                          ? (item.differences.fields?.find(
+                              (field) => field.field === "sale_price_mdl"
+                            )?.before ??
+                            item.sale_price_mdl ??
+                            "—")
+                          : "—"}
+                      </Table.Cell>
                       <Table.Cell>
                         {item.sale_price_mdl ?? "—"}
                         {item.sale_starts_at || item.sale_ends_at ? (
@@ -646,13 +725,30 @@ const OneCConnectionPage = () => {
                         )}
                       </Table.Cell>
                       <Table.Cell>
-                        <Button
-                          variant="secondary"
-                          size="small"
-                          onClick={() => setSelectedItem(item)}
-                        >
-                          View 1C data
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="secondary"
+                            size="small"
+                            onClick={() => setSelectedItem(item)}
+                          >
+                            View 1C data
+                          </Button>
+                          {item.mapping_status === "matched" ? (
+                            <Button
+                              variant="secondary"
+                              size="small"
+                              isLoading={
+                                applyItem.isPending &&
+                                applyItem.variables === item.id
+                              }
+                              disabled={anyApplyInFlight}
+                              onClick={() => applyItem.mutate(item.id)}
+                            >
+                              Apply
+                            </Button>
+                          ) : null}
+                          <ApplyStatusBadge status={item.apply_status} />
+                        </div>
                       </Table.Cell>
                     </Table.Row>
                   ))}

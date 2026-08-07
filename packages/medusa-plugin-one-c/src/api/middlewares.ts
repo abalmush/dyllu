@@ -42,6 +42,30 @@ function limitManualReceive(
   return next();
 }
 
+const applyRateLimiter = new ManualReceiveRateLimiter(3, 60_000, 10_000);
+
+function limitApply(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  const authContext = "auth_context" in req ? req.auth_context : null;
+  const actorId =
+    authContext && typeof authContext === "object"
+      ? Reflect.get(authContext, "actor_id")
+      : null;
+  if (typeof actorId !== "string") {
+    res.status(401).json({ error: "authentication_required" });
+    return;
+  }
+  if (!applyRateLimiter.consume(actorId, Date.now())) {
+    res.setHeader("Retry-After", "60");
+    res.status(429).json({ error: "apply_rate_limited" });
+    return;
+  }
+  return next();
+}
+
 function privateHeaders(
   _req: MedusaRequest,
   res: MedusaResponse,
@@ -80,6 +104,20 @@ export default defineMiddlewares({
       bodyParser: false,
       policies: [{ resource: "product", operation: PolicyOperation.read }],
       middlewares: [privateHeaders, userAuthentication],
+    },
+    {
+      matcher: "/admin/one-c-sync/runs/:id/apply",
+      methods: ["POST"],
+      bodyParser: false,
+      policies: [{ resource: "product", operation: PolicyOperation.update }],
+      middlewares: [privateHeaders, userAuthentication, limitApply],
+    },
+    {
+      matcher: "/admin/one-c-sync/runs/:id/items/:item_id/apply",
+      methods: ["POST"],
+      bodyParser: false,
+      policies: [{ resource: "product", operation: PolicyOperation.update }],
+      middlewares: [privateHeaders, userAuthentication, limitApply],
     },
   ],
 });

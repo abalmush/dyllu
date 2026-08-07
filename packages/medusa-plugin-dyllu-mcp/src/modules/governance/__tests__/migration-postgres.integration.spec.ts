@@ -2,7 +2,7 @@ import { Client } from "pg";
 
 import { Migration20260729193201 } from "../migrations/Migration20260729193201";
 import { Migration20260802130000 } from "../migrations/Migration20260802130000";
-import { Migration20260805120000 } from "../migrations/Migration20260805120000";
+import { Migration20260805120001 } from "../migrations/Migration20260805120001";
 import { Migration20260805143000 } from "../migrations/Migration20260805143000";
 import { Migration20260805160000 } from "../migrations/Migration20260805160000";
 
@@ -36,7 +36,7 @@ describe("DYLLU MCP governance migrations", () => {
         ('grant_existing', 'user_existing', 'product.read', 'user_admin');
     `);
 
-    const operationMigration = new Migration20260805120000(
+    const operationMigration = new Migration20260805120001(
       undefined!,
       undefined!
     );

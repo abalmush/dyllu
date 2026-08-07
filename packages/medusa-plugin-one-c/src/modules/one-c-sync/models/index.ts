@@ -1,3 +1,4 @@
+export { OneCAppliedChange } from "./applied-change";
 export { OneCFeedSnapshot } from "./feed-snapshot";
 export { OneCProductMapping } from "./product-mapping";
 export { OneCSyncEvent } from "./sync-event";

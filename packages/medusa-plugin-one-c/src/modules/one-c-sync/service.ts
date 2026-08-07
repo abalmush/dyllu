@@ -1,6 +1,7 @@
 import { MedusaService } from "@medusajs/framework/utils";
 
 import {
+  OneCAppliedChange,
   OneCFeedSnapshot,
   OneCProductMapping,
   OneCSyncEvent,
@@ -9,6 +10,7 @@ import {
 } from "./models";
 
 class OneCSyncModuleService extends MedusaService({
+  OneCAppliedChange,
   OneCFeedSnapshot,
   OneCProductMapping,
   OneCSyncEvent,

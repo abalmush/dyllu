@@ -1,8 +1,12 @@
 import { MedusaContainer } from "@medusajs/framework/types";
 import { Modules } from "@medusajs/framework/utils";
 
-import { getRun, listItems, listRuns } from "./api/read-model";
-import { OneCSyncAccess, OneCSyncReadInput } from "./contracts";
+import { getRun, listItems, listRuns, listSaleItems } from "./api/read-model";
+import {
+  OneCSyncAccess,
+  OneCSyncReadInput,
+  OneCSyncSalesReadInput,
+} from "./contracts";
 import { createOneCSyncApplication } from "./infrastructure/create-application";
 import { ONE_C_SYNC_MODULE } from "./modules/one-c-sync";
 import OneCSyncModuleService from "./modules/one-c-sync/service";
@@ -63,12 +67,45 @@ export function createOneCSyncAccess(
         })),
       };
     },
+    async listSales(input: OneCSyncSalesReadInput) {
+      const runId = input.runId ?? (await latestRunId(service));
+      if (!runId) {
+        return {
+          run_id: null,
+          items: [],
+          count: 0,
+          limit: input.limit,
+          offset: input.offset,
+        };
+      }
+      const result = await listSaleItems(service, {
+        runId,
+        limit: input.limit,
+        offset: input.offset,
+      });
+      return {
+        run_id: runId,
+        ...result,
+        items: result.items.map((item) => ({
+          sku: item.sku,
+          dyllu_variant_id: item.medusa_variant_id,
+          regular_price_mdl: item.regular_price_mdl,
+          sale_price_mdl: item.sale_price_mdl,
+          starts_at: item.sale_starts_at,
+          ends_at: item.sale_ends_at,
+          mapping_status:
+            item.mapping_status === "missing_medusa"
+              ? "missing_dyllu"
+              : item.mapping_status,
+        })),
+      };
+    },
     async receive(input) {
       const locking = container.resolve(Modules.LOCKING);
       return locking.execute(
         "dyllu-one-c:receive",
-        () =>
-          createOneCSyncApplication(container).receive({
+        async () =>
+          (await createOneCSyncApplication(container)).receive({
             actorId: input.actorId,
             requestId: input.requestId,
             trigger: "mcp",

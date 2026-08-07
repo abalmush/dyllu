@@ -30,6 +30,7 @@ export type ApplicationErrorCode =
   | "invalid_description"
   | "invalid_description_batch"
   | "invalid_price"
+  | "invalid_price_batch"
   | "invalid_revision_price"
   | "invalid_reason"
   | "invalid_audit_limit"

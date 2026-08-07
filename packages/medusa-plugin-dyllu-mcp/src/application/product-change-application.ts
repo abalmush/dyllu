@@ -42,6 +42,7 @@ import { createProductDescriptionHash } from "../domain/product-description-hash
 import { createCatalogChangeHash } from "../domain/catalog-change-hash";
 import { createOperationHash } from "../domain/operation-hash";
 import { saleOperationValueSchema } from "./sale-operation-schema";
+import { oneCSalesResultSchema } from "./one-c-sales-schema";
 import { createCatalogQualityReport } from "./catalog-quality";
 import { createInventoryExceptionReport } from "./inventory-exceptions";
 import {
@@ -83,6 +84,17 @@ export type ProposePriceInput = {
   priceId: string;
   currencyCode: string;
   proposedAmount: number;
+  reason: string;
+};
+
+export type ProposePriceBatchInput = {
+  items: Array<{
+    productId: string;
+    variantId: string;
+    priceId: string;
+    currencyCode: string;
+    proposedAmount: number;
+  }>;
   reason: string;
 };
 
@@ -388,6 +400,49 @@ export class ProductChangeApplication {
       input.runId ?? "latest"
     );
     return this.requireOneCSync().listComparisons(input);
+  }
+
+  async listOneCSales(
+    context: RequestContext,
+    input: { runId?: string; limit: number; offset: number }
+  ) {
+    await this.requireCapability(
+      context,
+      "one_c_sync.read",
+      input.runId ?? "latest"
+    );
+    const result = oneCSalesResultSchema.parse(
+      await this.requireOneCSync().listSales(input)
+    );
+    const variantIds = result.items
+      .map((item) => item.dyllu_variant_id)
+      .filter((variantId): variantId is string => variantId !== null);
+    const targets =
+      variantIds.length > 0
+        ? await this.requireSaleDirectory().findVariantTargets(
+            variantIds,
+            "mdl"
+          )
+        : [];
+    const dylluBasePriceByVariant = new Map(
+      targets.map((target) => [target.variantId, target.normalAmount])
+    );
+    return {
+      ...result,
+      items: result.items.map((item) => {
+        const dylluBasePriceMdl = item.dyllu_variant_id
+          ? dylluBasePriceByVariant.get(item.dyllu_variant_id) ?? null
+          : null;
+        return {
+          ...item,
+          dyllu_base_price_mdl: dylluBasePriceMdl,
+          sale_valid:
+            item.sale_price_mdl !== null && dylluBasePriceMdl !== null
+              ? item.sale_price_mdl < dylluBasePriceMdl
+              : null,
+        };
+      }),
+    };
   }
 
   async getMappedOneCProduct(context: RequestContext, sku: string) {
@@ -1612,6 +1667,105 @@ export class ProductChangeApplication {
       requestId: context.requestId,
     });
     return proposal;
+  }
+
+  async proposePriceBatch(
+    context: RequestContext,
+    input: ProposePriceBatchInput
+  ) {
+    await this.requireCapability(
+      context,
+      "product_price.update",
+      "catalog-prices"
+    );
+    this.validateReason(input.reason);
+    if (input.items.length < 1 || input.items.length > 100) {
+      throw new ApplicationError(
+        "invalid_price_batch",
+        "A price batch must contain 1 to 100 DYLLU variant prices"
+      );
+    }
+    const priceKeys = input.items.map(
+      (item) => `${item.variantId.trim()}:${item.priceId.trim()}`
+    );
+    if (
+      priceKeys.some((key) => key === ":") ||
+      new Set(priceKeys).size !== priceKeys.length
+    ) {
+      throw new ApplicationError(
+        "invalid_price_batch",
+        "Each DYLLU variant price must be present once in a price batch"
+      );
+    }
+    const createdAt = this.dependencies.clock.now();
+    const proposals: ProductPriceProposal[] = [];
+    for (const item of input.items) {
+      const currencyCode = item.currencyCode.trim().toLowerCase();
+      if (
+        currencyCode !== "mdl" ||
+        !Number.isSafeInteger(item.proposedAmount) ||
+        item.proposedAmount < 1 ||
+        item.proposedAmount > 100_000_000
+      ) {
+        throw new ApplicationError(
+          "invalid_price",
+          `Price must be a positive whole MDL amount for variant ${item.variantId}`
+        );
+      }
+      const target = await this.dependencies.products.findVariantPrice({
+        productId: item.productId,
+        variantId: item.variantId,
+        priceId: item.priceId,
+        currencyCode,
+      });
+      if (!target) {
+        throw new ApplicationError(
+          "price_not_found",
+          `The selected DYLLU variant price was not found for variant ${item.variantId}`
+        );
+      }
+      if (target.amount === item.proposedAmount) {
+        throw new ApplicationError(
+          "unchanged_price",
+          `The proposed price is identical to the current price for variant ${item.variantId}`
+        );
+      }
+      const beforeValue = String(target.amount);
+      const proposedValue = String(item.proposedAmount);
+      proposals.push({
+        id: this.dependencies.ids.next("proposal"),
+        kind: "price_update",
+        status: "pending",
+        actorId: context.actorId,
+        productId: target.productId,
+        productTitle: target.productTitle,
+        variantId: target.variantId,
+        priceId: target.priceId,
+        currencyCode: target.currencyCode,
+        beforeValue,
+        proposedValue,
+        targetUpdatedAt: target.updatedAt,
+        contentHash: createCatalogChangeHash({
+          kind: "price_update",
+          productId: target.productId,
+          variantId: target.variantId,
+          priceId: target.priceId,
+          currencyCode: target.currencyCode,
+          targetUpdatedAt: target.updatedAt,
+          beforeValue,
+          proposedValue,
+        }),
+        reason: input.reason,
+        sourceRevisionId: null,
+        createdAt,
+        expiresAt: new Date(createdAt.getTime() + PROPOSAL_TTL_MS),
+      });
+    }
+    await this.dependencies.governance.createProposals({
+      proposals,
+      requestId: context.requestId,
+    });
+    return { proposals };
   }
 
   async publishDescription(

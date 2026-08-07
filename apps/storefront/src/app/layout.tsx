@@ -10,6 +10,7 @@ import {
 } from "@/lib/seo/metadata";
 import { SmoothScrollProvider } from "@/components/atoms/smooth-scroll-provider";
 import { Toaster } from "@/components/atoms/sonner";
+import { ScrollToTopButton } from "@/components/molecules/scroll-to-top-button";
 
 import "styles/globals.css";
 
@@ -79,6 +80,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           <div className="relative">{props.children}</div>
         </SmoothScrollProvider>
         <Toaster richColors closeButton position="top-right" />
+        <ScrollToTopButton />
       </body>
     </html>
   );

@@ -77,6 +77,43 @@ describe("DYLLU MCP server", () => {
     }
   });
 
+  it("reads stored 1C sale prices without receiving fresh data", async () => {
+    const application = {
+      listOneCSales: jest.fn().mockResolvedValue({ items: [], count: 0 }),
+      receiveOneCCatalog: jest.fn(),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_one_c_sales" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      await client.callTool({
+        name: "list_one_c_sales",
+        arguments: { limit: 20, offset: 0 },
+      });
+
+      expect(application.listOneCSales).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_one_c_sales" },
+        { limit: 20, offset: 0 }
+      );
+      expect(application.receiveOneCCatalog).not.toHaveBeenCalled();
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it("receives fresh 1C data only through the explicit receive tool", async () => {
     const application = {
       receiveOneCCatalog: jest.fn().mockResolvedValue({
@@ -272,6 +309,80 @@ describe("DYLLU MCP server", () => {
             },
           ],
           reason: "Correct incomplete descriptions",
+        }
+      );
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
+  it("creates independent DYLLU price proposals in one batch", async () => {
+    const application = {
+      proposePriceBatch: jest.fn().mockResolvedValue({
+        proposals: [{ id: "proposal_1" }, { id: "proposal_2" }],
+      }),
+    } as unknown as ProductChangeApplication;
+    const server = createDylluMcpServer(
+      application,
+      () => ({ actorId: "user_test", requestId: "request_price_batch" }),
+      { error: jest.fn() }
+    );
+    const client = new Client(
+      { name: "dyllu-mcp-test", version: "1.0.0" },
+      { capabilities: {} }
+    );
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    try {
+      const result = await client.callTool({
+        name: "propose_product_price_batch",
+        arguments: {
+          items: [
+            {
+              product_id: "prod_one",
+              variant_id: "variant_one",
+              price_id: "price_one",
+              currency_code: "mdl",
+              proposed_amount: 5799,
+            },
+            {
+              product_id: "prod_two",
+              variant_id: "variant_two",
+              price_id: "price_two",
+              currency_code: "mdl",
+              proposed_amount: 999,
+            },
+          ],
+          reason: "Correct base prices before creating a sale",
+        },
+      });
+
+      expect(result.isError).not.toBe(true);
+      expect(application.proposePriceBatch).toHaveBeenCalledWith(
+        { actorId: "user_test", requestId: "request_price_batch" },
+        {
+          items: [
+            {
+              productId: "prod_one",
+              variantId: "variant_one",
+              priceId: "price_one",
+              currencyCode: "mdl",
+              proposedAmount: 5799,
+            },
+            {
+              productId: "prod_two",
+              variantId: "variant_two",
+              priceId: "price_two",
+              currencyCode: "mdl",
+              proposedAmount: 999,
+            },
+          ],
+          reason: "Correct base prices before creating a sale",
         }
       );
     } finally {

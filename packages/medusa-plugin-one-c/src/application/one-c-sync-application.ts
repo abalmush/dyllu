@@ -6,6 +6,7 @@ import { normalizePromoFeed } from "../domain/normalize-promo-feed";
 import {
   Clock,
   IdGenerator,
+  MedusaCatalogApplyReader,
   MedusaCatalogReader,
   OneCFeeds,
   OneCSyncStore,
@@ -21,6 +22,7 @@ export type ReceiveSyncInput = {
 type OneCSyncApplicationDependencies = {
   feeds: OneCFeeds;
   catalog: MedusaCatalogReader;
+  applyReader: Pick<MedusaCatalogApplyReader, "ensureSalePriceList">;
   store: OneCSyncStore;
   ids: IdGenerator;
   clock: Clock;
@@ -42,9 +44,11 @@ export class OneCSyncApplication {
     });
 
     try {
+      const salePriceListId =
+        await this.dependencies.applyReader.ensureSalePriceList();
       const [feed, variants, mappings] = await Promise.all([
         this.dependencies.feeds.fetchCatalog(),
-        this.dependencies.catalog.listVariants(),
+        this.dependencies.catalog.listVariants(salePriceListId),
         this.dependencies.store.listMappings(),
       ]);
       await this.dependencies.store.createSnapshots(

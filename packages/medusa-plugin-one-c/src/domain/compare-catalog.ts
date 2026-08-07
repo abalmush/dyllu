@@ -16,6 +16,8 @@ export type MedusaCatalogVariant = {
     amount: number;
     updatedAt: Date;
   }>;
+  // TODO(Task 7): medusa-adapters.ts MedusaOneCCatalogReader.listVariants must populate this; tsc fails there until it does.
+  salePriceListEntry: { id: string; amount: number } | null;
 };
 
 export type CatalogComparison = {
@@ -28,7 +30,12 @@ export type CatalogComparison = {
   medusaProductTitle: string | null;
   suggestedMedusaSku: string | null;
   differences: Array<{
-    field: "name" | "description" | "regular_price_mdl" | "status";
+    field:
+      | "name"
+      | "description"
+      | "regular_price_mdl"
+      | "sale_price_mdl"
+      | "status";
     before: string | number | boolean | null;
     proposed: string | number | boolean | null;
   }>;
@@ -147,6 +154,15 @@ export function compareCatalog(
         field: "regular_price_mdl",
         before: mdlPrice?.amount ?? null,
         proposed: product.regularPriceMdl,
+      });
+    }
+    const currentSaleAmount = match.salePriceListEntry?.amount ?? null;
+    const proposedSaleAmount = product.salePriceMdl ?? null;
+    if (proposedSaleAmount !== currentSaleAmount) {
+      differences.push({
+        field: "sale_price_mdl",
+        before: currentSaleAmount,
+        proposed: proposedSaleAmount,
       });
     }
     return {

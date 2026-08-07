@@ -128,6 +128,7 @@ describe("compareCatalog", () => {
               updatedAt: now,
             },
           ],
+          salePriceListEntry: null,
         },
       ]
     );
@@ -182,6 +183,7 @@ describe("compareCatalog", () => {
         prices: [
           { id: "price_1", currencyCode: "mdl", amount: 30, updatedAt: now },
         ],
+        salePriceListEntry: null,
       },
     ];
 
@@ -231,6 +233,7 @@ describe("compareCatalog", () => {
         prices: [
           { id: "price_2", currencyCode: "mdl", amount: 50, updatedAt: now },
         ],
+        salePriceListEntry: null,
       },
     ];
 
@@ -241,5 +244,115 @@ describe("compareCatalog", () => {
         suggestedMedusaSku: "DTPB1952",
       }),
     ]);
+  });
+
+  it("diffs the sale price against Medusa's current sale-list entry", () => {
+    const product = {
+      externalId: "SALE-1",
+      sku: "SALE-1",
+      name: "On sale",
+      description: "",
+      regularPriceMdl: 799,
+      salePriceMdl: 649,
+      balance: 1,
+      brandExternalId: null,
+      categoryExternalIds: [],
+      hidden: false,
+      deleted: false,
+      source: { id: "SALE-1" },
+    };
+    const variant = {
+      productId: "prod_1",
+      productTitle: "On sale",
+      productDescription: "",
+      productStatus: "published",
+      productUpdatedAt: new Date(),
+      variantId: "variant_1",
+      variantTitle: "On sale",
+      variantUpdatedAt: new Date(),
+      sku: "SALE-1",
+      prices: [{ id: "price_1", currencyCode: "mdl", amount: 799, updatedAt: new Date() }],
+      salePriceListEntry: { id: "saleprice_1", amount: 699 },
+    };
+
+    const [comparison] = compareCatalog([product], [variant]);
+
+    expect(comparison?.differences).toEqual(
+      expect.arrayContaining([
+        { field: "sale_price_mdl", before: 699, proposed: 649 },
+      ])
+    );
+  });
+
+  it("does not diff sale price when both sides agree", () => {
+    const product = {
+      externalId: "SALE-2",
+      sku: "SALE-2",
+      name: "Steady sale",
+      description: "",
+      regularPriceMdl: 799,
+      salePriceMdl: 649,
+      balance: 1,
+      brandExternalId: null,
+      categoryExternalIds: [],
+      hidden: false,
+      deleted: false,
+      source: { id: "SALE-2" },
+    };
+    const variant = {
+      productId: "prod_2",
+      productTitle: "Steady sale",
+      productDescription: "",
+      productStatus: "published",
+      productUpdatedAt: new Date(),
+      variantId: "variant_2",
+      variantTitle: "Steady sale",
+      variantUpdatedAt: new Date(),
+      sku: "SALE-2",
+      prices: [{ id: "price_2", currencyCode: "mdl", amount: 799, updatedAt: new Date() }],
+      salePriceListEntry: { id: "saleprice_2", amount: 649 },
+    };
+
+    const [comparison] = compareCatalog([product], [variant]);
+
+    expect(
+      comparison?.differences.some((diff) => diff.field === "sale_price_mdl")
+    ).toBe(false);
+  });
+
+  it("does not diff sale price when neither side has one", () => {
+    const product = {
+      externalId: "SALE-3",
+      sku: "SALE-3",
+      name: "No sale",
+      description: "",
+      regularPriceMdl: 799,
+      salePriceMdl: null,
+      balance: 1,
+      brandExternalId: null,
+      categoryExternalIds: [],
+      hidden: false,
+      deleted: false,
+      source: { id: "SALE-3" },
+    };
+    const variant = {
+      productId: "prod_3",
+      productTitle: "No sale",
+      productDescription: "",
+      productStatus: "published",
+      productUpdatedAt: new Date(),
+      variantId: "variant_3",
+      variantTitle: "No sale",
+      variantUpdatedAt: new Date(),
+      sku: "SALE-3",
+      prices: [{ id: "price_3", currencyCode: "mdl", amount: 799, updatedAt: new Date() }],
+      salePriceListEntry: null,
+    };
+
+    const [comparison] = compareCatalog([product], [variant]);
+
+    expect(
+      comparison?.differences.some((diff) => diff.field === "sale_price_mdl")
+    ).toBe(false);
   });
 });
