@@ -1,5 +1,8 @@
 import { HttpTypes } from "@medusajs/types";
 
+import type { AlgoliaProductHit } from "@lib/data/algolia-search";
+import { getPercentageDiff } from "@lib/util/get-percentage-diff";
+import { convertToLocale } from "@lib/util/money";
 import {
   getPricesForVariant,
   getProductPrice,
@@ -55,4 +58,39 @@ export function toPlpProducts(product: HttpTypes.StoreProduct) {
   return (
     product.variants?.map((variant) => toPlpProduct(product, variant)) ?? []
   );
+}
+
+export function toPlpProductFromHit(hit: AlgoliaProductHit) {
+  const price =
+    hit.price !== null && hit.original_price !== null
+      ? {
+          calculated_price_number: hit.price,
+          calculated_price: convertToLocale({
+            amount: hit.price,
+            currency_code: "MDL",
+          }),
+          original_price_number: hit.original_price,
+          original_price: convertToLocale({
+            amount: hit.original_price,
+            currency_code: "MDL",
+          }),
+          currency_code: "MDL",
+          price_type: hit.on_sale ? ("sale" as const) : ("default" as const),
+          percentage_diff: getPercentageDiff(hit.original_price, hit.price),
+        }
+      : null;
+
+  return {
+    id: hit.objectID,
+    href: `/products/${hit.handle}`,
+    productHandle: hit.handle,
+    title: hit.title,
+    thumbnail: hit.thumbnail ?? undefined,
+    category: undefined,
+    price,
+    productType: "single" as const,
+    setCount: undefined,
+    variantId: undefined,
+    inStock: true,
+  };
 }

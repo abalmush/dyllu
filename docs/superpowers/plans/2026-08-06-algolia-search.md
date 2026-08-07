@@ -1496,26 +1496,40 @@ export function toPlpProductFromHit(hit: AlgoliaProductHit) {
             amount: hit.original_price,
             currency_code: "MDL",
           }),
+          currency_code: "MDL",
           price_type: hit.on_sale ? ("sale" as const) : ("default" as const),
           percentage_diff: getPercentageDiff(hit.original_price, hit.price),
         }
-      : undefined;
+      : null;
 
   return {
     id: hit.objectID,
     href: `/products/${hit.handle}`,
     productHandle: hit.handle,
     title: hit.title,
-    thumbnail: hit.thumbnail,
+    thumbnail: hit.thumbnail ?? undefined,
     category: undefined,
     price,
-    productType: undefined,
+    productType: "single" as const,
     setCount: undefined,
     variantId: undefined,
     inStock: true,
   };
 }
 ```
+
+**Corrections found by actually typechecking against `ProductFeedItem`
+(`ReturnType<typeof toPlpProduct>`, the real target type)** — the plan's original guesses for
+several "no equivalent on an Algolia hit" fields didn't structurally match:
+
+- `thumbnail: string | undefined`, not `| null` — normalize with `?? undefined`.
+- `price: {...} | null`, not `| undefined` — the "no price" fallback is `null`; also needs a
+  `currency_code` field (present on every real `toPlpProduct` price object via
+  `getPricesForVariant`) — added `currency_code: "MDL"`, matching the single-region assumption.
+- `productType: ProductType` (a closed union, not optional) — `undefined` doesn't satisfy it.
+  `"single"` is the correct default: `PlpProductCard` only renders a type badge when
+  `productType && productType !== "single"`, so `"single"` is the same as "no badge," matching
+  intent for a hit with no set/kit/combo data.
 
 - [ ] **Step 3: Replace `fetchFullScanPage` with an Algolia-backed implementation**
 
@@ -1558,6 +1572,19 @@ Remove the now-unused `sortProductFeedItems` function and the `listProductsWithS
 `apps/storefront/src/app/(main)/categories/[...category]/page.tsx`, which passes
 `productCategory.id` through unchanged) — matching the Algolia record's `category_ids`
 facet (Task 5) means this passes straight through with no field-name translation needed.
+
+**Critical routing bug found and fixed:** `usesBoundedFetch(request)` — the function that
+decides between the cheap bounded Postgres path and the (now Algolia-backed) full-scan
+path — only checked `sortBy === "created_at" && !onSale`. It did **not** check `request.query`.
+That means a plain search (default sort, no on-sale filter) would have gone through the old
+bounded Postgres path and never touched Algolia at all — search would have silently kept using
+the old substring matching. Fixed by adding `&& !request.query`:
+
+```ts
+function usesBoundedFetch(request: NormalizedProductFeedRequest): boolean {
+  return request.sortBy === "created_at" && !request.onSale && !request.query;
+}
+```
 
 - [ ] **Step 4: Typecheck**
 
