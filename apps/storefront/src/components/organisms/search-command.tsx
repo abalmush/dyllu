@@ -141,20 +141,22 @@ export function SearchCommand({
                   value={hit.title}
                   onSelect={() => go(`/products/${hit.handle}`, query.trim())}
                 >
-                  {hit.thumbnail ? (
-                    <Image
-                      src={hit.thumbnail}
-                      alt=""
-                      width={64}
-                      height={64}
-                      className="bg-muted size-16 shrink-0 rounded-md object-contain"
-                    />
-                  ) : (
-                    <span className="bg-muted flex size-16 shrink-0 items-center justify-center rounded-md">
-                      <Search className="text-muted-foreground size-6" />
-                    </span>
-                  )}
-                  <span className="flex-1">{hit.title}</span>
+                  <span className="bg-muted relative aspect-square w-[40%] shrink-0 overflow-hidden rounded-md">
+                    {hit.thumbnail ? (
+                      <Image
+                        src={hit.thumbnail}
+                        alt=""
+                        fill
+                        sizes="200px"
+                        className="object-contain p-2"
+                      />
+                    ) : (
+                      <span className="text-muted-foreground absolute inset-0 grid place-items-center">
+                        <Search className="size-6" />
+                      </span>
+                    )}
+                  </span>
+                  <span className="w-[60%]">{hit.title}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
