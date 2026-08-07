@@ -1074,6 +1074,7 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { ALGOLIA_MODULE } from "../../../../modules/algolia";
 import type AlgoliaModuleService from "../../../../modules/algolia/service";
 import type { ProductSearchBody } from "../../../_shared/contracts";
+import { logRouteError } from "../../../_shared/logging";
 
 export async function POST(
   req: MedusaRequest<ProductSearchBody>,
@@ -1091,11 +1092,17 @@ export async function POST(
     const result = await algoliaModule.search(req.validatedBody);
     res.status(200).json(result);
   } catch (error) {
-    req.scope.resolve("logger").error("[store/products/search] failed", error);
+    logRouteError(req, "store_products_search_failed", error);
     res.status(502).json({ hits: [], nbHits: 0, page: 0, nbPages: 0 });
   }
 }
 ```
+
+**Convention correction found during implementation:** this codebase has an existing
+`logRouteError(req, event, error)` helper (`apps/backend/src/api/_shared/logging.ts`) used by
+every other route for structured error logging (JSON with `request_id`/`actor_id`/normalized
+error) — the raw `req.scope.resolve("logger").error(...)` shown in earlier drafts of this plan
+was inconsistent with that. Use `logRouteError` here (and in Task 9's admin route too).
 
 - [ ] **Step 3: Register the route in middlewares**
 
@@ -1149,6 +1156,7 @@ Reuses the job's logic by importing and calling it directly (same diff-based beh
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 
 import algoliaReindexJob from "../../../../jobs/algolia-reindex";
+import { logRouteError } from "../../../_shared/logging";
 
 export async function POST(
   req: MedusaRequest,
@@ -1158,7 +1166,7 @@ export async function POST(
     await algoliaReindexJob(req.scope);
     res.status(200).json({ success: true });
   } catch (error) {
-    req.scope.resolve("logger").error("[admin/algolia/sync] failed", error);
+    logRouteError(req, "admin_algolia_sync_failed", error);
     res.status(500).json({ success: false });
   }
 }
