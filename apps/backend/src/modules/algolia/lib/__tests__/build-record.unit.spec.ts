@@ -161,4 +161,36 @@ describe("buildAlgoliaRecord", () => {
     };
     expect(buildAlgoliaRecord(accessory).is_accessory).toBe(true);
   });
+
+  it("includes title_ru/description_ru when they differ from the Romanian text", () => {
+    const translated: ProductForIndexing = {
+      ...product,
+      titleRu: "Ударный дрель Ingco",
+      descriptionRu: "Мощная дрель Ingco",
+      categories: [
+        {
+          id: "pcat_1",
+          name: "Scule electrice",
+          nameRu: "Электроинструмент",
+          parentCategoryName: null,
+        },
+      ],
+    };
+    const record = buildAlgoliaRecord(translated);
+    expect(record.title_ru).toBe("Ударный дрель DYLLU");
+    expect(record.description_ru).toBe("Мощная дрель DYLLU");
+    expect(record.category_names_ru).toEqual(["Электроинструмент"]);
+  });
+
+  it("omits _ru fields when the ru-locale fetch returned the same untranslated Romanian text", () => {
+    const untranslated: ProductForIndexing = {
+      ...product,
+      titleRu: product.title,
+      descriptionRu: product.description,
+    };
+    const record = buildAlgoliaRecord(untranslated);
+    expect(record.title_ru).toBeUndefined();
+    expect(record.description_ru).toBeUndefined();
+    expect(record.category_names_ru).toBeUndefined();
+  });
 });

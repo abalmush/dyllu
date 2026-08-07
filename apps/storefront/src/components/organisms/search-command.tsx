@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import {
   ArrowRight,
   Check,
@@ -26,6 +27,7 @@ import {
 import { useCart } from "@lib/cart/cart-context";
 import { type CategoryNode } from "@lib/data/categories";
 import { convertToLocale } from "@lib/util/money";
+import { toMedusaLocale } from "@/i18n/medusa-locale";
 
 const QUICK_LINKS = [
   { label: "Produse noi", icon: Sparkles, href: "/store?sortBy=created_at" },
@@ -68,6 +70,7 @@ export function SearchCommand({
   categories,
 }: SearchCommandProps) {
   const router = useRouter();
+  const medusaLocale = toMedusaLocale(useLocale());
   const { addItem } = useCart();
   const [query, setQuery] = React.useState("");
   const [recent, setRecent] = React.useState<string[]>([]);
@@ -83,9 +86,10 @@ export function SearchCommand({
     }
     const controller = new AbortController();
     const timeout = setTimeout(() => {
-      fetch(`/api/search?q=${encodeURIComponent(trimmed)}`, {
-        signal: controller.signal,
-      })
+      fetch(
+        `/api/search?q=${encodeURIComponent(trimmed)}&locale=${encodeURIComponent(medusaLocale)}`,
+        { signal: controller.signal }
+      )
         .then((res) => res.json())
         .then((data: { hits: LiveHit[] }) => setLiveHits(data.hits))
         .catch(() => {});
@@ -94,7 +98,7 @@ export function SearchCommand({
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [query]);
+  }, [query, medusaLocale]);
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;

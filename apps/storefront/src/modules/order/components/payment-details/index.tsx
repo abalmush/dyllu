@@ -1,4 +1,5 @@
 import { Container, Text } from "@lib/ui-compat";
+import { getFormatter } from "next-intl/server";
 
 import { paymentInfoMap } from "@lib/constants";
 import { convertToLocale } from "@lib/util/money";
@@ -9,7 +10,8 @@ type PaymentDetailsProps = {
   order: HttpTypes.StoreOrder;
 };
 
-const PaymentDetails = ({ order }: PaymentDetailsProps) => {
+const PaymentDetails = async ({ order }: PaymentDetailsProps) => {
+  const format = await getFormatter();
   const payment = order.payment_collections?.[0].payments?.[0];
 
   if (!payment) {
@@ -48,7 +50,10 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
               currency_code: order.currency_code,
             })}{" "}
             achitat la{" "}
-            {new Date(payment.created_at ?? "").toLocaleString("ro-MD")}
+            {format.dateTime(new Date(payment.created_at ?? ""), {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}
           </Text>
         </div>
       </div>

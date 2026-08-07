@@ -1,7 +1,8 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 
 import { cn } from "@lib/utils";
 import { Button } from "@/components/atoms/button";
@@ -65,7 +66,7 @@ export function Pagination({
           return (
             <span
               key={`ellipsis-${i}`}
-              className="grid size-11 place-items-center text-muted-foreground"
+              className="text-muted-foreground grid size-11 place-items-center"
             >
               <MoreHorizontal aria-hidden="true" className="size-5" />
             </span>

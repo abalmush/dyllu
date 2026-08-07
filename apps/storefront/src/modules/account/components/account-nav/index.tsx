@@ -2,7 +2,7 @@
 
 import { clx } from "@lib/ui-compat";
 import { ArrowRightOnRectangle } from "@medusajs/icons";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 
 import ChevronDown from "@modules/common/icons/chevron-down";
 import User from "@modules/common/icons/user";
@@ -106,7 +106,7 @@ const AccountNav = ({
           </>
         )}
       </div>
-      <div className="hidden small:block" data-testid="account-nav">
+      <div className="small:block hidden" data-testid="account-nav">
         <div>
           <div className="pb-4">
             <h3 className="text-base-semi">Cont</h3>
@@ -184,7 +184,7 @@ const AccountNavLink = ({
     <LocalizedClientLink
       href={href}
       className={clx("text-ui-fg-subtle hover:text-ui-fg-base", {
-        "font-semibold text-ui-fg-base": active,
+        "text-ui-fg-base font-semibold": active,
       })}
       data-testid={dataTestId}
     >

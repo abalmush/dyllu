@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 
 const SHOW_DELAY_MS = 120;
 const FINISH_DELAY_MS = 180;

@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ShoppingBag, Trash2, ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@lib/utils";
 import { convertToLocale } from "@lib/util/money";
@@ -26,6 +27,7 @@ type Props = {
 };
 
 export function CartDrawer({ trigger }: Props) {
+  const t = useTranslations("CartDrawer");
   const { cart, isOpen, openCart, closeCart, removeItem } = useCart();
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
   const totalItems = cart?.totalQuantity ?? 0;
@@ -48,7 +50,7 @@ export function CartDrawer({ trigger }: Props) {
     >
       <SheetTrigger asChild>
         {trigger ?? (
-          <IconButton label="Deschide coșul" variant="outline" size="md">
+          <IconButton label={t("open")} variant="outline" size="md">
             <div className="relative">
               <ShoppingBag className="size-5" />
               {totalItems > 0 && (
@@ -64,11 +66,10 @@ export function CartDrawer({ trigger }: Props) {
         <SheetHeader className="border-border border-b px-6 py-6">
           <SheetTitle className="flex items-center gap-2 text-base">
             <ShoppingBag className="text-primary size-4" />
-            Coșul tău · {totalItems} {totalItems === 1 ? "produs" : "produse"}
+            {t("title", { count: totalItems })}
           </SheetTitle>
           <SheetDescription className="sr-only">
-            Produsele adăugate în coș, subtotalul și acțiunile de finalizare a
-            comenzii.
+            {t("description")}
           </SheetDescription>
         </SheetHeader>
 
@@ -120,7 +121,7 @@ export function CartDrawer({ trigger }: Props) {
                             data-testid="cart-item-quantity"
                             data-value={item.quantity}
                           >
-                            Cantitate · {item.quantity}
+                            {t("quantity", { count: item.quantity })}
                           </span>
                           <div className="flex items-center gap-4">
                             <span className="text-foreground text-sm font-semibold">
@@ -133,7 +134,7 @@ export function CartDrawer({ trigger }: Props) {
                               type="button"
                               onClick={() => handleDelete(item.id)}
                               disabled={deletingId === item.id}
-                              aria-label="Șterge produsul"
+                              aria-label={t("remove")}
                               data-testid="cart-item-remove-button"
                               className="text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
                             >
@@ -149,7 +150,8 @@ export function CartDrawer({ trigger }: Props) {
             <div className="border-border bg-surface-subtle border-t px-6 py-6">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">
-                  Subtotal <span className="text-xs">(fără livrare)</span>
+                  {t("subtotal")}{" "}
+                  <span className="text-xs">({t("subtotalNote")})</span>
                 </span>
                 <span
                   className="text-foreground text-base font-bold tracking-tight"
@@ -171,7 +173,7 @@ export function CartDrawer({ trigger }: Props) {
                   className={cn("flex-1")}
                 >
                   <Link href="/cart" onClick={closeCart}>
-                    Vezi coșul
+                    {t("viewCart")}
                   </Link>
                 </Button>
                 <Button
@@ -181,7 +183,7 @@ export function CartDrawer({ trigger }: Props) {
                   data-testid="go-to-cart-button"
                 >
                   <Link href="/checkout" onClick={closeCart}>
-                    Finalizează
+                    {t("checkout")}
                     <ArrowRight className="size-4" />
                   </Link>
                 </Button>
@@ -194,14 +196,14 @@ export function CartDrawer({ trigger }: Props) {
               <ShoppingBag className="size-7" />
             </div>
             <div>
-              <p className="text-foreground font-semibold">Coșul este gol</p>
+              <p className="text-foreground font-semibold">{t("empty")}</p>
               <p className="text-muted-foreground mt-1 text-sm">
-                Descoperă scule, echipamente și accesorii pentru orice proiect.
+                {t("emptyHint")}
               </p>
             </div>
             <Button asChild size="lg">
               <Link href="/store" onClick={closeCart}>
-                Explorează produsele
+                {t("browse")}
                 <ArrowRight className="size-4" />
               </Link>
             </Button>

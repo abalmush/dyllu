@@ -1,0 +1,70 @@
+{
+  "Common": {
+    "skipToContent": "Sari la conținut"
+  },
+  "LocaleSwitcher": {
+    "label": "Limbă"
+  },
+  "Errors": {
+    "eyebrow": "Eroare temporară",
+    "title": "Pagina nu a putut fi încărcată",
+    "body": "Te rugăm să încerci din nou. Dacă problema persistă, revino peste câteva minute.",
+    "retry": "Încearcă din nou"
+  },
+  "NotFound": {
+    "badge": "Eroare 404",
+    "title": "Pagina nu a fost",
+    "titleHighlight": "găsită.",
+    "body": "Linkul pe care l-ai accesat nu există sau a fost mutat. Întoarce-te la pagina principală sau caută produsul direct.",
+    "home": "Înapoi acasă",
+    "browse": "Vezi toate produsele",
+    "metaTitle": "Pagina nu a fost găsită",
+    "metaDescription": "Pagina pe care încerci să o accesezi nu există."
+  },
+  "AnnouncementBar": {
+    "freeShipping": "Livrare gratuită în Chișinău pentru comenzi peste 1.000 MDL",
+    "onlineOrder": "Comandă online, confirmare rapidă și retur în 14 zile",
+    "support": "Suport și confirmări {hours} · {phone}",
+    "close": "Închide bara de anunțuri"
+  },
+  "UtilityBar": {
+    "usefulLinks": "Linkuri utile",
+    "stores": "Magazine DYLLU",
+    "service": "Service și piese de schimb"
+  },
+  "CartDrawer": {
+    "open": "Deschide coșul",
+    "title": "Coșul tău · {count} {count, plural, one {produs} other {produse}}",
+    "description": "Produsele adăugate în coș, subtotalul și acțiunile de finalizare a comenzii.",
+    "quantity": "Cantitate · {count}",
+    "remove": "Șterge produsul",
+    "subtotal": "Subtotal",
+    "subtotalNote": "fără livrare",
+    "viewCart": "Vezi coșul",
+    "checkout": "Finalizează",
+    "empty": "Coșul este gol",
+    "emptyHint": "Descoperă scule, echipamente și accesorii pentru orice proiect.",
+    "browse": "Explorează produsele"
+  },
+  "SiteHeader": {
+    "homeLink": "Pagina principală DYLLU",
+    "searchPlaceholder": "Caută scule, accesorii…",
+    "search": "Caută",
+    "account": "Contul tău"
+  },
+  "Checkout": {
+    "country": "Țară"
+  },
+  "AiAssistant": {
+    "title": "Asistent DYLLU",
+    "close": "Închide asistentul",
+    "open": "Deschide asistentul",
+    "emptyState": "Întreabă-mă despre produse, disponibilitate sau recomandări.",
+    "searching": "Caut produse…",
+    "error": "A apărut o eroare. Încearcă din nou.",
+    "placeholder": "Scrie un mesaj…",
+    "send": "Trimite",
+    "addToCart": "Adaugă {title} în coș",
+    "addToCartError": "Nu am reușit să adăugăm produsul în coș."
+  }
+}

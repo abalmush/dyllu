@@ -1,4 +1,5 @@
 import { Container } from "@lib/ui-compat";
+import { getFormatter } from "next-intl/server";
 
 import ChevronDown from "@modules/common/icons/chevron-down";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
@@ -10,16 +11,11 @@ type OverviewProps = {
   orders: HttpTypes.StoreOrder[] | null;
 };
 
-const orderDateFormatter = new Intl.DateTimeFormat("ro-MD", {
-  day: "2-digit",
-  month: "long",
-  year: "numeric",
-});
-
-const Overview = ({ customer, orders }: OverviewProps) => {
+const Overview = async ({ customer, orders }: OverviewProps) => {
+  const format = await getFormatter();
   return (
     <div data-testid="overview-page-wrapper">
-      <div className="hidden small:block">
+      <div className="small:block hidden">
         <div className="text-xl-semi mb-4 flex items-center justify-between">
           <span data-testid="welcome-message" data-value={customer?.first_name}>
             Salut, {customer?.first_name}
@@ -48,7 +44,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                   >
                     {getProfileCompletion(customer)}%
                   </span>
-                  <span className="text-base-regular uppercase text-ui-fg-subtle">
+                  <span className="text-base-regular text-ui-fg-subtle uppercase">
                     Completat
                   </span>
                 </div>
@@ -64,7 +60,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                   >
                     {customer?.addresses?.length || 0}
                   </span>
-                  <span className="text-base-regular uppercase text-ui-fg-subtle">
+                  <span className="text-base-regular text-ui-fg-subtle uppercase">
                     Salvate
                   </span>
                 </div>
@@ -101,9 +97,11 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                               </span>
                               <span className="font-semibold">Total</span>
                               <span data-testid="order-created-date">
-                                {orderDateFormatter.format(
-                                  new Date(order.created_at)
-                                )}
+                                {format.dateTime(new Date(order.created_at), {
+                                  day: "2-digit",
+                                  month: "long",
+                                  year: "numeric",
+                                })}
                               </span>
                               <span
                                 data-testid="order-id"

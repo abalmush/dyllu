@@ -1,10 +1,12 @@
 import "server-only";
 
 import { cache } from "react";
+import { getLocale } from "next-intl/server";
 import { sdk } from "@lib/config";
 import { getCacheOptions } from "@lib/data/cookies";
 import { listNavigationProducts } from "@lib/data/navigation-products";
 import { HttpTypes } from "@medusajs/types";
+import { toMedusaLocale } from "@/i18n/medusa-locale";
 
 const CATEGORY_TREE_REVALIDATE_SECONDS = 300;
 
@@ -96,6 +98,7 @@ const toVisibleNode = (
 
 export const getCategoryTree = cache(async (): Promise<CategoryNode[]> => {
   const categoryCacheOptions = await getCacheOptions("categories");
+  const locale = toMedusaLocale(await getLocale());
 
   const [{ product_categories }, products] = await Promise.all([
     sdk.client.fetch<{
@@ -107,8 +110,8 @@ export const getCategoryTree = cache(async (): Promise<CategoryNode[]> => {
         parent_category_id: "null",
         include_descendants_tree: true,
         limit: 200,
+        locale,
       },
-      headers: { "x-medusa-locale": "ro" },
       cache: "force-cache",
       next: {
         ...categoryCacheOptions,

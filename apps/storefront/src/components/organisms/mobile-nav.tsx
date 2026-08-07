@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ChevronDown, Menu, Phone, User } from "lucide-react";
 
 import { SITE_CONTACT } from "@lib/site-content";

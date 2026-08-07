@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { BatteryCharging, Check, Wrench } from "lucide-react";
+import { useFormatter } from "next-intl";
 import type { HttpTypes } from "@medusajs/types";
 
 import { cn } from "@lib/utils";
@@ -15,10 +16,6 @@ type Props = {
   onBatteryChange: (variantId?: string) => void;
   onChargerChange: (variantId?: string) => void;
 };
-
-const priceFormatter = new Intl.NumberFormat("ro-MD", {
-  maximumFractionDigits: 0,
-});
 
 const firstVariant = (product: HttpTypes.StoreProduct) => product.variants?.[0];
 
@@ -157,6 +154,7 @@ function ChoiceCard({
   recommended?: boolean;
   onSelect: () => void;
 }) {
+  const format = useFormatter();
   const image = product.thumbnail ?? product.images?.[0]?.url;
   const price = productPrice(product);
 
@@ -207,7 +205,7 @@ function ChoiceCard({
         >
           {price == null
             ? "Preț indisponibil"
-            : `+${priceFormatter.format(price)} MDL`}
+            : `+${format.number(price, { maximumFractionDigits: 0 })} MDL`}
         </span>
       </span>
       <span
@@ -233,6 +231,7 @@ export function PowerSupplyConfigurator({
   onBatteryChange,
   onChargerChange,
 }: Props) {
+  const format = useFormatter();
   const [open, setOpen] = React.useState(false);
   const [chargerChoiceMade, setChargerChoiceMade] = React.useState(false);
   const hasOptions = batteries.length > 0;
@@ -321,7 +320,7 @@ export function PowerSupplyConfigurator({
           price={
             recommendedPowerPrice == null
               ? undefined
-              : `+${priceFormatter.format(recommendedPowerPrice)} MDL`
+              : `+${format.number(recommendedPowerPrice, { maximumFractionDigits: 0 })} MDL`
           }
           onSelect={selectRecommendedPower}
           testId="power-mode-with-battery"

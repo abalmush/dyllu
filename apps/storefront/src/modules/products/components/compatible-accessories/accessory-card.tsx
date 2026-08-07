@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Check, Plus } from "lucide-react";
+import { useFormatter } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
 
 import { useCart } from "@lib/cart/cart-context";
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function AccessoryCard({ product, kind }: Props) {
+  const format = useFormatter();
   const { addItem } = useCart();
   const variants = product.variants ?? [];
   const hasMultiple = variants.length > 1;
@@ -103,9 +105,7 @@ export function AccessoryCard({ product, kind }: Props) {
 
         <div className="mt-auto flex items-center justify-between gap-4">
           <span className="font-display text-foreground text-lg font-bold tracking-tight">
-            {price != null
-              ? `${Number(price).toLocaleString("ro-MD")} MDL`
-              : "—"}
+            {price != null ? `${format.number(Number(price))} MDL` : "—"}
           </span>
           <Button
             type="button"

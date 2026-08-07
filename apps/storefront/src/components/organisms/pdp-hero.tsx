@@ -5,6 +5,7 @@ import Image from "next/image";
 import { isEqual } from "lodash";
 import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
+import { useFormatter } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
 
 import { useCart } from "@lib/cart/cart-context";
@@ -25,14 +26,12 @@ const optionsAsKeymap = (
     return acc;
   }, {}) ?? {};
 
-const currencyFormatter = new Intl.NumberFormat("ro-MD");
-
-function formatPrice(amount: number | null | undefined, code = "MDL") {
-  if (amount == null) return "—";
-  return `${currencyFormatter.format(Math.round(amount))} ${code}`;
-}
-
 export function PdpHero({ product, eyebrow }: Props) {
+  const format = useFormatter();
+  const formatPrice = (amount: number | null | undefined, code = "MDL") => {
+    if (amount == null) return "—";
+    return `${format.number(Math.round(amount))} ${code}`;
+  };
   const { addItem } = useCart();
   const images = (product.images ?? []).filter((i) => i.url);
   const hasMultipleImages = images.length > 1;

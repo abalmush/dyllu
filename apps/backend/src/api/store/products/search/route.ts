@@ -20,7 +20,10 @@ export async function POST(
   }
 
   try {
-    const result = await algoliaModule.search(req.validatedBody);
+    const result = await algoliaModule.search({
+      ...req.validatedBody,
+      locale: req.locale,
+    });
     res.status(200).json(result);
   } catch (error) {
     logRouteError(req, "store.products_search.failed", error);

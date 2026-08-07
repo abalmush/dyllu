@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { Loader2, Trash2 } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 

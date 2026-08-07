@@ -27,9 +27,12 @@ export default async function algoliaConfigureIndex({
       searchableAttributes: [
         "title",
         "description",
+        "title_ru",
+        "description_ru",
         "skus",
         "variant_titles",
         "category_names",
+        "category_names_ru",
         "metadata",
       ],
       attributesForFaceting,

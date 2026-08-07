@@ -4,7 +4,8 @@ import { sdk } from "@lib/config";
 import medusaError from "@lib/util/medusa-error";
 import { HttpTypes } from "@medusajs/types";
 import { revalidateTag as nextRevalidateTag } from "next/cache";
-import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 import {
   getAuthHeaders,
   getCacheTag,
@@ -211,7 +212,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
     return "Contul nu a putut fi creat. Verifică datele și încearcă din nou.";
   }
 
-  redirect("/account");
+  redirect({ href: "/account", locale: await getLocale() });
 }
 
 export async function login(_currentState: unknown, formData: FormData) {
@@ -300,7 +301,10 @@ export async function completePasswordReset(
     return "Linkul este invalid sau a expirat. Solicită un link nou.";
   }
 
-  redirect(`/account?reset=success&email=${encodeURIComponent(email)}`);
+  redirect({
+    href: `/account?reset=success&email=${encodeURIComponent(email)}`,
+    locale: await getLocale(),
+  });
 }
 
 export async function signout() {
@@ -314,7 +318,7 @@ export async function signout() {
 
   await revalidateCustomerScope("carts");
 
-  redirect("/account");
+  redirect({ href: "/account", locale: await getLocale() });
 }
 
 export async function transferCart() {

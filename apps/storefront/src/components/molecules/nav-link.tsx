@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 
 import { cn } from "@lib/utils";
 
-export interface NavLinkProps
-  extends Omit<React.ComponentProps<typeof Link>, "className"> {
+export interface NavLinkProps extends Omit<
+  React.ComponentProps<typeof Link>,
+  "className"
+> {
   className?: string;
   activeClassName?: string;
   exact?: boolean;
@@ -30,7 +31,7 @@ export function NavLink({
     <Link
       href={href}
       className={cn(
-        "text-sm font-medium tracking-tight text-muted-foreground transition-colors hover:text-foreground",
+        "text-muted-foreground hover:text-foreground text-sm font-medium tracking-tight transition-colors",
         isActive && activeClassName,
         className
       )}

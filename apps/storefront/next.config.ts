@@ -1,5 +1,6 @@
 import path from "node:path";
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 import checkEnvVariables from "./check-env-variables.js";
 
 checkEnvVariables();
@@ -49,7 +50,9 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
+export default withNextIntl(nextConfig);
 
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 if (process.env.OPEN_NEXT_DEV === "1") {
