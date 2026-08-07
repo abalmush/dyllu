@@ -1345,16 +1345,27 @@ git commit -m "DYLLU-000 Add manual Algolia sync admin page"
 
 Idempotent — safe to re-run. Configures searchable/faceting attributes on the base index and creates the three sort replicas.
 
+**Correction found during implementation:** every other script in `src/scripts/` (e.g.
+`configure-shipping.ts`) is `medusa exec`-shaped — `export default async function
+name({ container }: ExecArgs)` — not a standalone script with its own `main()`. Follow that
+established convention here too, for the same reason it matters for jobs (Task 7): `medusa
+exec` invokes the default export as `({ container, args })`, so a bare top-level `main()` call
+would just run twice (once from Node loading the module, once — incorrectly — expected by
+`medusa exec`) or not integrate with the CLI's env/logging setup at all.
+
 ```ts
+import { ExecArgs } from "@medusajs/framework/types";
 import { algoliasearch } from "algoliasearch";
 
 import { parseBackendEnvironment } from "../config/environment";
 
-async function main() {
+export default async function algoliaConfigureIndex({ container }: ExecArgs) {
+  const logger = container.resolve("logger");
   const environment = parseBackendEnvironment(process.env);
   if (!environment.algolia) {
-    console.error("Algolia is not configured — set ALGOLIA_* env vars first.");
-    process.exit(1);
+    logger.error("Algolia is not configured — set ALGOLIA_* env vars first.");
+    process.exitCode = 1;
+    return;
   }
 
   const { appId, adminApiKey, indexName } = environment.algolia;
@@ -1393,20 +1404,14 @@ async function main() {
     indexSettings: { customRanking: ["desc(created_at)"] },
   });
 
-  console.log(`Configured index "${indexName}" and its 3 replicas.`);
+  logger.info(`Configured index "${indexName}" and its 3 replicas.`);
 }
-
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
 ```
 
 - [ ] **Step 2: Run it once against the dev index**
 
-Run: `pnpm --filter @dyllu/backend exec tsx src/scripts/algolia-configure-index.ts`
-(If `tsx` isn't available, check how other one-off scripts in `src/scripts/` are invoked — e.g. `pnpm --dir apps/backend exec medusa exec ./src/scripts/algolia-configure-index.ts` per the pattern in `docs/catalog-source.md`, and use that instead.)
-Expected: `Configured index "dyllu_products_dev" and its 3 replicas.` — confirm the 3 replica indices now show up in the Algolia dashboard.
+Run: `pnpm --filter @dyllu/backend exec medusa exec ./src/scripts/algolia-configure-index.ts`
+Expected: log line `Configured index "dyllu_products_dev" and its 3 replicas.` — confirm the 3 replica indices now show up in the Algolia dashboard. Verified locally (placeholder credentials): the script correctly reaches the real `setSettings` network call and fails there — same expected failure point as every other Algolia-touching task in this plan without real credentials.
 
 - [ ] **Step 3: Commit**
 
