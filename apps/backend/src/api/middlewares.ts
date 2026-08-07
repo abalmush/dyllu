@@ -17,6 +17,7 @@ import {
   CompatibleAccessoriesQuerySchema,
   NewsletterConfirmationQuerySchema,
   NewsletterSubscriptionSchema,
+  ProductSearchBodySchema,
 } from "./_shared/contracts";
 
 const adminAuthentication = authenticate("user", [
@@ -102,6 +103,12 @@ const middlewareConfig: MiddlewaresConfig = {
       methods: ["POST"],
       bodyParser: { sizeLimit: "4kb" },
       middlewares: [validateAndTransformBody(NewsletterSubscriptionSchema)],
+    },
+    {
+      matcher: "/store/products/search",
+      methods: ["POST"],
+      bodyParser: { sizeLimit: "4kb" },
+      middlewares: [validateAndTransformBody(ProductSearchBodySchema)],
     },
     {
       matcher: "/newsletter/confirm",
