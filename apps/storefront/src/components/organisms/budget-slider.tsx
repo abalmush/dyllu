@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Sparkles, TrendingUp } from "lucide-react";
+import { useFormatter } from "next-intl";
 
 export function BudgetSlider({
   minBudget,
@@ -18,7 +19,7 @@ export function BudgetSlider({
     minBudget + ((maxBudget - minBudget) * value) / 100
   );
   const performance = Math.round(80 + (value / 100) * 40);
-  const fmt = new Intl.NumberFormat("ro-MD");
+  const format = useFormatter();
 
   return (
     <div className="clip-corner-cut-lg bg-card ring-border small:p-8 mx-auto max-w-[560px] p-6 ring-1">
@@ -32,7 +33,7 @@ export function BudgetSlider({
       <div className="mt-4 flex items-end justify-between">
         <div>
           <p className="font-display text-foreground text-4xl font-extrabold">
-            {fmt.format(budget)} {currency}
+            {format.number(budget)} {currency}
           </p>
           <p className="text-muted-foreground text-sm">Buget curent</p>
         </div>

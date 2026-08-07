@@ -1,5 +1,6 @@
 import { Button } from "@lib/ui-compat";
 import { useMemo } from "react";
+import { useFormatter } from "next-intl";
 
 import Thumbnail from "@modules/products/components/thumbnail";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
@@ -10,13 +11,8 @@ type OrderCardProps = {
   order: HttpTypes.StoreOrder;
 };
 
-const orderDateFormatter = new Intl.DateTimeFormat("ro-MD", {
-  day: "2-digit",
-  month: "long",
-  year: "numeric",
-});
-
 const OrderCard = ({ order }: OrderCardProps) => {
+  const format = useFormatter();
   const numberOfLines = useMemo(() => {
     return (
       order.items?.reduce((acc, item) => {
@@ -34,9 +30,13 @@ const OrderCard = ({ order }: OrderCardProps) => {
       <div className="text-large-semi mb-1 uppercase">
         #<span data-testid="order-display-id">{order.display_id}</span>
       </div>
-      <div className="text-small-regular flex items-center divide-x divide-gray-200 text-ui-fg-base">
+      <div className="text-small-regular text-ui-fg-base flex items-center divide-x divide-gray-200">
         <span className="pr-2" data-testid="order-created-at">
-          {orderDateFormatter.format(new Date(order.created_at))}
+          {format.dateTime(new Date(order.created_at), {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          })}
         </span>
         <span className="px-2" data-testid="order-amount">
           {convertToLocale({
@@ -48,7 +48,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
           numberOfLines === 1 ? "produs" : "produse"
         }`}</span>
       </div>
-      <div className="my-4 grid grid-cols-2 gap-4 small:grid-cols-4">
+      <div className="small:grid-cols-4 my-4 grid grid-cols-2 gap-4">
         {order.items?.slice(0, 3).map((i) => {
           return (
             <div
@@ -57,9 +57,9 @@ const OrderCard = ({ order }: OrderCardProps) => {
               data-testid="order-item"
             >
               <Thumbnail thumbnail={i.thumbnail} images={[]} size="full" />
-              <div className="text-small-regular flex items-center text-ui-fg-base">
+              <div className="text-small-regular text-ui-fg-base flex items-center">
                 <span
-                  className="font-semibold text-ui-fg-base"
+                  className="text-ui-fg-base font-semibold"
                   data-testid="item-title"
                 >
                   {i.title}

@@ -3,6 +3,7 @@
 import { HttpTypes } from "@medusajs/types";
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import { BatteryFull, Check, Zap } from "lucide-react";
+import { useFormatter } from "next-intl";
 
 import { cn } from "@lib/utils";
 import { getPricesForVariant } from "@lib/util/get-product-price";
@@ -30,6 +31,7 @@ export default function ConfigurationSelect({
   disabled,
   "data-testid": dataTestId,
 }: Props) {
+  const format = useFormatter();
   const values = Array.from(
     new Set(
       [
@@ -134,7 +136,7 @@ export default function ConfigurationSelect({
                 )}
                 {delta != null && delta > 0 && (
                   <span className="text-2xs text-muted-foreground font-semibold tracking-widest uppercase">
-                    +{delta.toLocaleString("ro-MD")} MDL
+                    +{format.number(delta)} MDL
                   </span>
                 )}
               </span>
