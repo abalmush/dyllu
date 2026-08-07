@@ -46,9 +46,9 @@ jobs:
       NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || 'pk_ci_validation_placeholder' }}
       REVALIDATE_SECRET: ${{ secrets.MEDUSA_REVALIDATE_SECRET || 'ci-only-revalidation-secret-32-chars' }}
       ORDER_ACCESS_SECRET: ${{ secrets.ORDER_ACCESS_SECRET || 'ci-only-order-access-secret-32-chars' }}
-      NEXT_PUBLIC_ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
-      NEXT_PUBLIC_ALGOLIA_AGENT_ID: ${{ secrets.ALGOLIA_AGENT_ID }}
-      NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY: ${{ secrets.ALGOLIA_SEARCH_API_KEY }}
+      ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
+      ALGOLIA_AGENT_ID: ${{ secrets.ALGOLIA_AGENT_ID }}
+      ALGOLIA_SEARCH_API_KEY: ${{ secrets.ALGOLIA_SEARCH_API_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -104,9 +104,9 @@ jobs:
       NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
       REVALIDATE_SECRET: ${{ secrets.MEDUSA_REVALIDATE_SECRET }}
       ORDER_ACCESS_SECRET: ${{ secrets.ORDER_ACCESS_SECRET || secrets.MEDUSA_REVALIDATE_SECRET }}
-      NEXT_PUBLIC_ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
-      NEXT_PUBLIC_ALGOLIA_AGENT_ID: ${{ secrets.ALGOLIA_AGENT_ID }}
-      NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY: ${{ secrets.ALGOLIA_SEARCH_API_KEY }}
+      ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
+      ALGOLIA_AGENT_ID: ${{ secrets.ALGOLIA_AGENT_ID }}
+      ALGOLIA_SEARCH_API_KEY: ${{ secrets.ALGOLIA_SEARCH_API_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

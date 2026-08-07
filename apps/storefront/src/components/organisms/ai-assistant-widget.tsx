@@ -8,32 +8,13 @@ import { Bot, Send, X } from "lucide-react";
 import { cn } from "@lib/utils";
 import { Button } from "@/components/atoms/button";
 
-const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
-const ALGOLIA_AGENT_ID = process.env.NEXT_PUBLIC_ALGOLIA_AGENT_ID;
-const ALGOLIA_SEARCH_API_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY;
-
-const isConfigured = Boolean(
-  ALGOLIA_APP_ID && ALGOLIA_AGENT_ID && ALGOLIA_SEARCH_API_KEY
-);
-
 export function AiAssistantWidget() {
-  if (!isConfigured) return null;
-  return <AiAssistantWidgetInner />;
-}
-
-function AiAssistantWidgetInner() {
   const [open, setOpen] = React.useState(false);
   const [input, setInput] = React.useState("");
   const listRef = React.useRef<HTMLDivElement>(null);
 
   const { messages, sendMessage, status, error } = useChat({
-    transport: new DefaultChatTransport({
-      api: `https://${ALGOLIA_APP_ID!.toLowerCase()}.algolia.net/agent-studio/1/agents/${ALGOLIA_AGENT_ID}/completions?compatibilityMode=ai-sdk-5`,
-      headers: {
-        "x-algolia-application-id": ALGOLIA_APP_ID!,
-        "x-algolia-api-key": ALGOLIA_SEARCH_API_KEY!,
-      },
-    }),
+    transport: new DefaultChatTransport({ api: "/api/assistant" }),
   });
 
   const isBusy = status === "submitted" || status === "streaming";
