@@ -4,6 +4,7 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
+import useLockHtmlScroll from "@lib/hooks/use-lock-html-scroll";
 import { cn } from "@lib/utils";
 
 export const Dialog = DialogPrimitive.Root;
@@ -29,25 +30,28 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 export const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <DialogPrimitive.Content
-      ref={ref}
-      className={cn(
-        "border-border bg-background undefined-state-open:animate-in undefined-state-closed:animate-out undefined-state-closed:fade-out-0 undefined-state-open:fade-in-0 undefined-state-closed:zoom-out-95 undefined-state-open:zoom-in-95 fixed top-1/2 left-1/2 z-50 grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-6 overflow-y-auto overscroll-contain border p-6 shadow-xl duration-200 sm:rounded-lg",
-        className
-      )}
-      {...props}
-    >
-      {children}
-      <DialogPrimitive.Close className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring absolute top-2 right-2 grid size-11 place-items-center rounded-md transition-[background-color,color,opacity] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none">
-        <X aria-hidden="true" className="size-5" />
-        <span className="sr-only">Închide</span>
-      </DialogPrimitive.Close>
-    </DialogPrimitive.Content>
-  </DialogPortal>
-));
+>(({ className, children, ...props }, ref) => {
+  useLockHtmlScroll();
+  return (
+    <DialogPortal>
+      <DialogOverlay />
+      <DialogPrimitive.Content
+        ref={ref}
+        className={cn(
+          "border-border bg-background undefined-state-open:animate-in undefined-state-closed:animate-out undefined-state-closed:fade-out-0 undefined-state-open:fade-in-0 undefined-state-closed:zoom-out-95 undefined-state-open:zoom-in-95 fixed top-1/2 left-1/2 z-50 grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-6 overflow-y-auto overscroll-contain border p-6 shadow-xl duration-200 sm:rounded-lg",
+          className
+        )}
+        {...props}
+      >
+        {children}
+        <DialogPrimitive.Close className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring absolute top-2 right-2 grid size-11 place-items-center rounded-md transition-[background-color,color,opacity] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none">
+          <X aria-hidden="true" className="size-5" />
+          <span className="sr-only">Închide</span>
+        </DialogPrimitive.Close>
+      </DialogPrimitive.Content>
+    </DialogPortal>
+  );
+});
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 export const DialogHeader = ({

@@ -106,14 +106,6 @@ export function SearchCommand({
     }
   }, [open]);
 
-  React.useEffect(() => {
-    // Radix locks scroll on <body>, but this page scrolls via <html>, so wheel input reaches the page instead of the dialog's list.
-    document.documentElement.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.documentElement.style.overflow = "";
-    };
-  }, [open]);
-
   const persistRecent = (term: string) => {
     if (!term.trim()) return;
     const next = [term, ...recent.filter((r) => r !== term)].slice(0, 5);
