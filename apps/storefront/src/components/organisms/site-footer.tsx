@@ -20,7 +20,7 @@ const SHOP_LINKS = [
   { label: "Toate produsele", href: "/store" },
   { label: "Reduceri active", href: "/store?on_sale=true" },
   { label: "Noutăți", href: "/store?sortBy=created_at" },
-  { label: "Branduri și ghiduri", href: "/branduri" },
+  { label: "Ghid DYLLU", href: "/branduri" },
 ];
 
 const SUPPORT_LINKS = [
@@ -38,10 +38,15 @@ export function SiteFooter({ categories }: { categories: CategoryNode[] }) {
       <div className="content-container small:grid-cols-12 small:gap-12 grid gap-12 py-16">
         <div className="small:col-span-4 space-y-6">
           <Logo className="text-secondary-foreground h-8" />
-          <p className="text-secondary-foreground/70 max-w-sm text-sm">
-            DYLLU este partenerul tău pentru scule profesionale, echipamente de
-            atelier și soluții de protecție în Republica Moldova.
-          </p>
+          <div className="max-w-sm space-y-2">
+            <p className="text-secondary-foreground text-base font-semibold">
+              Descoperă-ți talentul cu DYLLU!
+            </p>
+            <p className="text-secondary-foreground/70 text-sm">
+              Scule profesionale, echipamente de atelier și soluții de protecție
+              în Republica Moldova.
+            </p>
+          </div>
           <div className="space-y-4 text-sm">
             <a
               href={SITE_CONTACT.phoneHref}
@@ -85,7 +90,7 @@ export function SiteFooter({ categories }: { categories: CategoryNode[] }) {
           </div>
           <div>
             <h2 className="text-secondary-foreground/75 text-sm font-semibold tracking-wide">
-              Magazin
+              Produse
             </h2>
             <ul className="mt-4 space-y-2 text-sm">
               {SHOP_LINKS.map((l) => (
