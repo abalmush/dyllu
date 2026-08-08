@@ -6,7 +6,7 @@ import { INFO_PAGES } from "@lib/site-content";
 const page = INFO_PAGES.branduri;
 
 export const metadata: Metadata = {
-  title: "Branduri și ghiduri",
+  title: "Ghid DYLLU",
   description: page.description,
 };
 

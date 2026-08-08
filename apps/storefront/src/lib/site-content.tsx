@@ -52,7 +52,7 @@ export const INFO_PAGES: Record<
   InfoPageData
 > = {
   branduri: {
-    eyebrow: "Branduri și selecție",
+    eyebrow: "Ghid și selecție",
     title: "Gama DYLLU",
     description:
       "Descoperă cum sunt structurate gamele noastre și ce platforme merită alese pentru atelier, șantier sau bricolaj acasă.",
