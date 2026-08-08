@@ -91,6 +91,7 @@ export function toPlpProductFromHit(hit: AlgoliaProductHit) {
     category: undefined,
     price,
     productType: "single" as const,
+    powerSource: undefined,
     setCount: undefined,
     variantId: undefined,
     inStock: true,
