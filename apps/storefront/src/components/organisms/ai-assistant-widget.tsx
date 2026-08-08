@@ -158,6 +158,10 @@ function ProductCarousel({ hits }: { hits: ProductHit[] }) {
 }
 
 function AssistantMessage({ message }: { message: UIMessage }) {
+  // The agent often runs several near-duplicate searches (synonyms/translations
+  // of the same term), so dedupe products across the whole message to avoid the
+  // same item appearing in multiple carousels.
+  const seen = new Set<string>();
   const blocks = message.parts
     .map((part, index) => {
       const key = `${message.id}-${index}`;
@@ -172,7 +176,11 @@ function AssistantMessage({ message }: { message: UIMessage }) {
           </div>
         );
       }
-      const hits = getProductHits(part);
+      const hits = getProductHits(part).filter((hit) => {
+        if (seen.has(hit.objectID)) return false;
+        seen.add(hit.objectID);
+        return true;
+      });
       if (hits.length > 0) {
         return <ProductCarousel key={key} hits={hits} />;
       }
