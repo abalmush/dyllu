@@ -12,9 +12,10 @@ import {
   type PriceShape,
 } from "@/components/molecules/price-block";
 import {
-  ProductTypeBadge,
-  type ProductType,
-} from "@/components/organisms/product-type-badge";
+  PowerSourceBadge,
+  type PowerSourceKind,
+} from "@/components/organisms/power-source-badge";
+import { type ProductType } from "@/components/organisms/product-type-badge";
 
 export type PlpProduct = {
   id: string;
@@ -25,6 +26,7 @@ export type PlpProduct = {
   category?: string;
   price: PriceShape | null;
   productType?: ProductType;
+  powerSource?: PowerSourceKind;
   setCount?: number;
   variantId?: string;
   inStock?: boolean;
@@ -95,12 +97,9 @@ export function PlpProductCard({
           )}
         </Link>
 
-        {product.productType && product.productType !== "single" && (
+        {product.powerSource && (
           <div className="absolute top-3 left-3">
-            <ProductTypeBadge
-              type={product.productType}
-              count={product.setCount}
-            />
+            <PowerSourceBadge kind={product.powerSource} />
           </div>
         )}
 

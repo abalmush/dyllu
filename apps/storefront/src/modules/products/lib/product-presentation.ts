@@ -3,6 +3,7 @@ import { HttpTypes } from "@medusajs/types";
 import { normalizeCatalogBrand } from "@lib/util/catalog-brand";
 
 import type { ComboItem } from "@/components/organisms/pdp-hero-combo";
+import type { PowerSourceKind } from "@/components/organisms/power-source-badge";
 import type { ProductType } from "@/components/organisms/product-type-badge";
 import type {
   LinkedProduct,
@@ -284,6 +285,35 @@ function compatiblePowerAccessories(
   });
 }
 
+function resolvePowerSource(
+  product: HttpTypes.StoreProduct,
+  variant: HttpTypes.StoreProductVariant | undefined
+): string | undefined {
+  const rawPowerSource = metadataValue(product, variant, "power_source");
+  if (typeof rawPowerSource === "string" && rawPowerSource.trim()) {
+    return rawPowerSource.trim().toLowerCase();
+  }
+
+  return metadataBoolean(metadataValue(product, variant, "requires_battery"))
+    ? "cordless_battery"
+    : undefined;
+}
+
+const POWER_SOURCE_KINDS: Record<string, PowerSourceKind> = {
+  cordless_battery: "cordless",
+  corded: "corded",
+  petrol: "petrol",
+  pneumatic: "pneumatic",
+};
+
+export function getPowerSourceKind(
+  product: HttpTypes.StoreProduct,
+  variant?: HttpTypes.StoreProductVariant
+): PowerSourceKind | undefined {
+  const powerSource = resolvePowerSource(product, variant);
+  return powerSource ? POWER_SOURCE_KINDS[powerSource] : undefined;
+}
+
 export function getProductPowerSupply(
   product: HttpTypes.StoreProduct,
   variant?: HttpTypes.StoreProductVariant
@@ -291,13 +321,7 @@ export function getProductPowerSupply(
   const requiresBattery = metadataBoolean(
     metadataValue(product, variant, "requires_battery")
   );
-  const rawPowerSource = metadataValue(product, variant, "power_source");
-  const powerSource =
-    typeof rawPowerSource === "string" && rawPowerSource.trim()
-      ? rawPowerSource.trim().toLowerCase()
-      : requiresBattery
-        ? "cordless_battery"
-        : undefined;
+  const powerSource = resolvePowerSource(product, variant);
 
   if (!powerSource) return undefined;
 
