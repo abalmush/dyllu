@@ -8,6 +8,7 @@ import {
   getProductPrice,
 } from "@lib/util/get-product-price";
 import {
+  getPowerSourceKind,
   getProductCategoryLabel,
   getProductUiType,
   getSetCount,
@@ -42,6 +43,7 @@ export function toPlpProduct(
       ? getPricesForVariant(selectedVariant)
       : cheapestPrice,
     productType: getProductUiType(product, selectedVariant),
+    powerSource: getPowerSourceKind(product, selectedVariant),
     setCount: setCount > 0 ? setCount : undefined,
     variantId: selectedVariant?.id,
     inStock: selectedVariant
@@ -89,6 +91,7 @@ export function toPlpProductFromHit(hit: AlgoliaProductHit) {
     category: undefined,
     price,
     productType: "single" as const,
+    powerSource: undefined,
     setCount: undefined,
     variantId: undefined,
     inStock: true,

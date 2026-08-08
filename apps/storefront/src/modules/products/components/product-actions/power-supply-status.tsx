@@ -2,7 +2,11 @@ import { Battery, Plug, Zap } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 
 import { Badge } from "@/components/molecules/badge";
-import { getProductPowerSupply } from "@modules/products/lib/product-presentation";
+import { PowerSourceBadge } from "@/components/organisms/power-source-badge";
+import {
+  getPowerSourceKind,
+  getProductPowerSupply,
+} from "@modules/products/lib/product-presentation";
 
 type Props = {
   product: HttpTypes.StoreProduct;
@@ -23,9 +27,25 @@ function platformLabel(platform: string | undefined): string | undefined {
   return undefined;
 }
 
+function NonBatteryPowerSource({ product, variant }: Props) {
+  const kind = getPowerSourceKind(product, variant);
+  if (!kind) return null;
+
+  return (
+    <div
+      className="flex flex-wrap items-center justify-center gap-2 px-2"
+      aria-label="Alimentare"
+    >
+      <PowerSourceBadge kind={kind} />
+    </div>
+  );
+}
+
 export function PowerSupplyStatus({ product, variant }: Props) {
   const supply = getProductPowerSupply(product, variant);
-  if (supply?.powerSource !== "cordless_battery") return null;
+  if (supply?.powerSource !== "cordless_battery") {
+    return <NonBatteryPowerSource product={product} variant={variant} />;
+  }
 
   const batteryDetails = [
     supply.batteryIncluded === true &&
