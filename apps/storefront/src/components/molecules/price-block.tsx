@@ -43,7 +43,7 @@ export const PriceBlock = React.forwardRef<HTMLDivElement, PriceBlockProps>(
         )}
         <span
           className={cn(
-            "text-foreground font-semibold tracking-tight",
+            "text-foreground font-semibold tracking-tight whitespace-nowrap",
             sizeMap[size],
             isSale && "text-destructive"
           )}
@@ -52,7 +52,7 @@ export const PriceBlock = React.forwardRef<HTMLDivElement, PriceBlockProps>(
           {price.calculated_price}
         </span>
         {isSale && price.original_price && (
-          <span className="text-muted-foreground text-sm line-through">
+          <span className="text-muted-foreground text-sm line-through whitespace-nowrap">
             {price.original_price}
           </span>
         )}
